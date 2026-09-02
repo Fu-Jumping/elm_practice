@@ -1,0 +1,190 @@
+<!DOCTYPE html><html class="light" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>校园外卖商家后台 - 分类管理</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=PingFang+SC:wght@100..900&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#ffb59e",
+                        "inverse-surface": "#2d3137",
+                        "tertiary-fixed-dim": "#6add8d",
+                        "secondary-fixed-dim": "#ffba4b",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#181c22",
+                        "error-container": "#ffdad6",
+                        "background": "#f8f9ff",
+                        "on-surface": "#181c22",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#e4beb3",
+                        "inverse-primary": "#ffb59e",
+                        "on-secondary-fixed": "#291800",
+                        "surface-container": "#ebeef6",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#003316",
+                        "surface-bright": "#f8f9ff",
+                        "tertiary-fixed": "#86faa7",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#6a4600",
+                        "surface-tint": "#ae3200",
+                        "inverse-on-surface": "#eef1f9",
+                        "primary-container": "#ff5a1f",
+                        "secondary-container": "#fdaf1e",
+                        "on-primary-fixed": "#3a0b00",
+                        "secondary-fixed": "#ffddb1",
+                        "on-tertiary-fixed-variant": "#005228",
+                        "on-secondary-fixed-variant": "#624000",
+                        "tertiary-container": "#2da65d",
+                        "surface": "#f8f9ff",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#dfe2eb",
+                        "on-primary-fixed-variant": "#852400",
+                        "tertiary": "#006d37",
+                        "on-tertiary-fixed": "#00210c",
+                        "primary": "#ae3200",
+                        "on-surface-variant": "#5b4038",
+                        "surface-container-highest": "#dfe2eb",
+                        "on-primary-container": "#541400",
+                        "primary-fixed": "#ffdbd0",
+                        "on-error": "#ffffff",
+                        "secondary": "#815600",
+                        "outline": "#8f7067",
+                        "surface-container-high": "#e5e8f0",
+                        "surface-container-low": "#f1f3fc",
+                        "surface-dim": "#d7dae2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "item-gap": "8px",
+                        "module-gap": "12px",
+                        "page-margin": "16px",
+                        "card-padding": "12px"
+                    },
+                    "fontFamily": {
+                        "page-title": ["PingFang SC"],
+                        "caption-muted": ["PingFang SC"],
+                        "currency-display": ["PingFang SC"],
+                        "label-table": ["PingFang SC"],
+                        "section-title": ["PingFang SC"],
+                        "body-main": ["PingFang SC"],
+                        "card-title": ["PingFang SC"]
+                    },
+                    "fontSize": {
+                        "page-title": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "caption-muted": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "currency-display": ["15px", { "lineHeight": "22px", "fontWeight": "700" }],
+                        "label-table": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "section-title": ["18px", { "lineHeight": "26px", "fontWeight": "700" }],
+                        "body-main": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+                        "card-title": ["15px", { "lineHeight": "22px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background min-h-screen text-on-background font-body-main text-body-main">
+<!-- SideNavBar -->
+<aside class="bg-surface dark:bg-inverse-surface fixed left-0 top-0 h-full w-[220px] border-r border-outline-variant dark:border-outline flex flex-col h-full py-4 z-20">
+<div class="px-6 mb-8">
+<h1 class="font-page-title text-page-title text-primary dark:text-primary-fixed">校园外卖商家后台</h1>
+<p class="font-caption-muted text-caption-muted text-on-surface-variant mt-1">店铺管理端</p>
+</div>
+<nav class="flex-1 flex flex-col gap-2 px-3">
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="">订单</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="">商品</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-primary dark:text-primary-fixed bg-secondary-container dark:bg-on-secondary-fixed-variant font-bold border-r-4 border-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+<span class="">分类</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="">店铺设置</span>
+</a>
+</nav>
+<div class="mt-auto px-3 border-t border-outline-variant dark:border-outline pt-4">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container transition-colors duration-200 text-sm" href="#">
+<span class="material-symbols-outlined text-base" data-icon="dashboard">dashboard</span>
+<span class="">概览 (二期)</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container transition-colors duration-200 text-sm" href="#">
+<span class="material-symbols-outlined text-base" data-icon="notifications">notifications</span>
+<span class="">消息 (二期)</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container transition-colors duration-200 text-sm" href="#">
+<span class="material-symbols-outlined text-base" data-icon="analytics">analytics</span>
+<span class="">统计 (二期)</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-inverse-surface fixed top-0 right-0 h-[56px] left-[220px] border-b border-outline-variant dark:border-outline flex justify-between items-center px-6 z-10">
+<div class="font-section-title text-section-title text-on-surface dark:text-inverse-on-surface">
+            校园外卖商家后台
+        </div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary-container"></span>
+<span class="font-body-main text-body-main text-on-surface">营业中</span>
+</div>
+<div class="h-4 w-px bg-outline-variant"></div>
+<span class="font-body-main text-body-main text-on-surface">账号名</span>
+<button class="text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed cursor-pointer transition-opacity active:opacity-80">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-[220px] mt-[56px] p-page-margin min-h-[calc(100vh-56px)] flex">
+<!-- Empty State Container -->
+<div class="bg-surface-container-lowest border border-surface-container-highest rounded-lg flex-1 flex flex-col items-center justify-center p-8">
+<div class="mb-6 flex items-center justify-center">
+  <svg width="184" height="152" viewBox="0 0 184 152" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" fill-rule="evenodd">
+      <g transform="translate(24 31.67)">
+        <ellipse fill="#f5f5f5" cx="67.797" cy="106.89" rx="67.797" ry="12.668"></ellipse>
+        <path d="M122.034 69.674L98.109 40.229c-1.148-1.386-2.826-2.188-4.593-2.188H44.714c-1.761 0-3.44.802-4.593 2.188L16.188 69.674c-.456.551-.703 1.239-.703 1.947v50.095c0 3.323 2.635 6.024 5.886 6.024h100.72c3.251 0 5.886-2.701 5.886-6.024V71.621c0-.708-.247-1.396-.703-1.947z" fill="#f5f5f7"></path>
+        <path d="M122.034 69.674L98.109 40.229c-1.148-1.386-2.826-2.188-4.593-2.188H44.714c-1.761 0-3.44.802-4.593 2.188L16.188 69.674c-.456.551-.703 1.239-.703 1.947v50.095c0 3.323 2.635 6.024 5.886 6.024h100.72c3.251 0 5.886-2.701 5.886-6.024V71.621c0-.708-.247-1.396-.703-1.947z" stroke="#d9d9d9" stroke-width="1.1"></path>
+        <path d="M41.142 9.573c-.256-1.135-1.243-1.944-2.39-1.944H18.4c-1.147 0-2.134.809-2.39 1.944L10.352 34.434h36.448L41.142 9.573z" fill="#fafafa"></path>
+        <path d="M10.352 34.434h36.448L41.142 9.573c-.256-1.135-1.243-1.944-2.39-1.944H18.4c-1.147 0-2.134.809-2.39 1.944L10.352 34.434z" stroke="#d9d9d9" stroke-width="1.1"></path>
+        <path d="M11.421 34.434h34.31L40.636 10.267c-.114-.505-.553-.865-1.062-.865H18.655c-.509 0-.948.36-1.062.865L11.421 34.434z" fill="#efefef"></path>
+        <path d="M121.7 121.44H16.528c-3.25 0-5.887-2.7-5.887-6.024V71.62c0-.708.247-1.395.702-1.946l23.925-29.445c1.147-1.386 2.825-2.188 4.593-2.188h48.802c1.76 0 3.44.802 4.593 2.188l23.925 29.445c.455.551.702 1.238.702 1.946v43.796c0 3.323-2.636 6.024-5.886 6.024z" fill="#fff"></path>
+        <path d="M121.7 121.44H16.528c-3.25 0-5.887-2.7-5.887-6.024V71.62c0-.708.247-1.395.702-1.946l23.925-29.445c1.147-1.386 2.825-2.188 4.593-2.188h48.802c1.76 0 3.44.802 4.593 2.188l23.925 29.445c.455.551.702 1.238.702 1.946v43.796c0 3.323-2.636 6.024-5.886 6.024z" stroke="#d9d9d9" stroke-width="1.1"></path>
+        <path d="M16.528 71.149h105.172" stroke="#d9d9d9" stroke-width="1.1"></path>
+        <path d="M44.714 38.041l-23.925 29.445M93.516 38.041l23.925 29.445" stroke="#d9d9d9" stroke-width="1.1"></path>
+      </g>
+    </g>
+  </svg>
+</div>
+<h2 class="font-section-title text-section-title text-on-surface mb-2">暂无分类</h2>
+<p class="font-body-main text-sm text-on-surface-variant mb-8 text-center max-w-md">
+                您还没有创建任何商品分类。创建分类可以帮助顾客更快速地找到他们想要的商品。
+            </p>
+<button class="bg-primary-container text-on-primary font-card-title text-card-title px-6 py-3 rounded flex items-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined">add</span>
+                新增分类
+            </button>
+</div>
+</main>
+
+
+</body></html>

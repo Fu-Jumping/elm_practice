@@ -1,0 +1,140 @@
+* {
+  box-sizing: border-box;
+}
+
+.semiTransparentOverl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9ff;
+  width: 1280px;
+  height: 1025px;
+  background-image: linear-gradient(#00000066, #00000066),
+    url(../../../shared-assets/商家端-桌面后台/90-组件与状态/01-放弃未保存修改确认弹窗/mtib2ll6-m05j9oo.png);
+  background-position: -301px 0px;
+  background-size: 146.95% 100%;
+  background-repeat: no-repeat;
+
+  .confirmationDialog {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    flex-shrink: 0;
+    align-items: flex-start;
+    margin-right: 430px;
+    margin-left: 430px;
+    border-radius: 12px;
+    box-shadow: 0px 12px 32px 0px #00000014;
+    background: #ffffff;
+    overflow: hidden;
+
+    .dialogHeader {
+      display: flex;
+      flex-shrink: 0;
+      align-items: flex-start;
+      align-self: stretch;
+      column-gap: 16px;
+      padding: 20px 24px;
+
+      .warningIcon {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px;
+        background: #fff1eb;
+        width: 40px;
+        height: 40px;
+
+        .container {
+          flex-shrink: 0;
+          width: 22px;
+          height: 19px;
+        }
+      }
+
+      .container2 {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        align-items: flex-start;
+        padding-top: 4px;
+        row-gap: 8px;
+
+        .text {
+          flex-shrink: 0;
+          align-self: stretch;
+          line-height: 26px;
+          letter-spacing: 0;
+          color: #181c22;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 18px;
+          font-weight: 500;
+        }
+
+        .text2 {
+          flex-shrink: 0;
+          align-self: stretch;
+          width: 316px;
+          line-height: 22px;
+          letter-spacing: 0;
+          color: #5b4038;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 15px;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .dialogActionsBottomR {
+      display: flex;
+      flex-shrink: 0;
+      align-items: flex-start;
+      align-self: stretch;
+      justify-content: flex-end;
+      column-gap: 8px;
+      padding: 24px 24px 16px;
+
+      .secondaryButtonLeft {
+        display: inline-flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e5e5e5;
+        background: #ffffff;
+        padding: 7px 15px;
+
+        .text3 {
+          flex-shrink: 0;
+          line-height: 18px;
+          letter-spacing: 0;
+          color: #1f2329;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+        }
+      }
+
+      .primaryButtonRight {
+        display: inline-flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        background: #ff5a1f;
+        padding: 9px 16px 10px;
+
+        .text4 {
+          flex-shrink: 0;
+          line-height: 18px;
+          letter-spacing: 0;
+          color: #ffffff;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}

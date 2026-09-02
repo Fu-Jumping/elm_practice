@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>订单管理 - 校园外卖商家后台</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed-dim": "#6add8d",
+                      "surface-bright": "#f8f9ff",
+                      "outline": "#8f7067",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary-container": "#fdaf1e",
+                      "surface-container-low": "#f1f3fc",
+                      "surface-tint": "#ae3200",
+                      "surface-container-high": "#e5e8f0",
+                      "on-surface-variant": "#5b4038",
+                      "background": "#f8f9ff",
+                      "tertiary": "#006d37",
+                      "on-tertiary-fixed": "#00210c",
+                      "on-secondary-fixed": "#291800",
+                      "primary-fixed-dim": "#ffb59e",
+                      "surface-container-highest": "#dfe2eb",
+                      "on-primary-fixed-variant": "#852400",
+                      "surface-dim": "#d7dae2",
+                      "on-tertiary-fixed-variant": "#005228",
+                      "primary-container": "#ff5a1f",
+                      "primary-fixed": "#ffdbd0",
+                      "on-secondary-fixed-variant": "#624000",
+                      "error-container": "#ffdad6",
+                      "secondary-fixed-dim": "#ffba4b",
+                      "on-surface": "#181c22",
+                      "inverse-surface": "#2d3137",
+                      "outline-variant": "#e4beb3",
+                      "tertiary-fixed": "#86faa7",
+                      "on-secondary-container": "#6a4600",
+                      "on-error": "#ffffff",
+                      "primary": "#ae3200",
+                      "on-primary-fixed": "#3a0b00",
+                      "tertiary-container": "#2da65d",
+                      "secondary-fixed": "#ffddb1",
+                      "on-tertiary-container": "#003316",
+                      "on-primary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "surface": "#f8f9ff",
+                      "inverse-primary": "#ffb59e",
+                      "on-primary-container": "#541400",
+                      "secondary": "#815600",
+                      "on-secondary": "#ffffff",
+                      "on-background": "#181c22",
+                      "surface-container": "#ebeef6",
+                      "on-tertiary": "#ffffff",
+                      "inverse-on-surface": "#eef1f9",
+                      "surface-variant": "#dfe2eb",
+                      "on-error-container": "#93000a",
+                      
+                      // Semantic status colors not strictly in config but requested in prompt
+                      "status-pending": "#ff5a1f",
+                      "status-cooking": "#fdaf1e", 
+                      "status-delivering": "#2da65d",
+                      "status-completed": "#9ca3af"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "module-gap": "12px",
+                      "card-padding": "12px",
+                      "base": "4px",
+                      "item-gap": "8px",
+                      "page-margin": "16px"
+              },
+              "fontFamily": {
+                      "label-table": [
+                              "PingFang SC"
+                      ],
+                      "caption-muted": [
+                              "PingFang SC"
+                      ],
+                      "card-title": [
+                              "PingFang SC"
+                      ],
+                      "currency-display": [
+                              "PingFang SC"
+                      ],
+                      "section-title": [
+                              "PingFang SC"
+                      ],
+                      "body-main": [
+                              "PingFang SC"
+                      ],
+                      "page-title": [
+                              "PingFang SC"
+                      ]
+              },
+              "fontSize": {
+                      "label-table": [
+                              "13px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "caption-muted": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "card-title": [
+                              "15px",
+                              {
+                                      "lineHeight": "22px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "currency-display": [
+                              "15px",
+                              {
+                                      "lineHeight": "22px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "section-title": [
+                              "18px",
+                              {
+                                      "lineHeight": "26px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-main": [
+                              "15px",
+                              {
+                                      "lineHeight": "22px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "page-title": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+            },
+          }
+        }
+    </script>
+<style>
+        body { background-color: #f7f7f7; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+        /* Light orange hover */
+        .hover-row:hover { background-color: #fff1eb; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-main antialiased min-h-screen">
+<!-- TopNavBar -->
+<nav class="fixed top-0 right-0 h-[56px] left-[220px] bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline flex justify-between items-center px-6 z-10 no-shadows">
+<div class="flex items-center gap-2">
+<span class="font-section-title text-section-title text-on-surface dark:text-inverse-on-surface">校园外卖商家后台</span>
+</div>
+<div class="flex items-center gap-item-gap">
+<div class="flex items-center bg-tertiary-container text-on-tertiary px-3 py-1 rounded-full text-caption-muted">
+<span class="w-2 h-2 rounded-full bg-white mr-1.5"></span>
+                营业中
+            </div>
+<span class="text-body-main font-body-main text-on-surface-variant ml-2">账号名</span>
+<button class="p-2 hover:text-primary dark:hover:text-primary-fixed cursor-pointer transition-opacity active:opacity-80 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+</button>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-[220px] bg-surface dark:bg-inverse-surface border-r border-outline-variant dark:border-outline flex flex-col h-full py-4 z-20 no-shadows">
+<div class="px-6 pb-6 flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-primary-container flex items-center justify-center text-on-primary font-bold">ML</div>
+<div>
+<h1 class="font-page-title text-page-title text-primary dark:text-primary-fixed text-lg leading-tight">校园外卖商家后台</h1>
+<p class="text-caption-muted text-on-surface-variant">店铺管理端</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto px-3">
+<nav class="space-y-1">
+<!-- 订单 (Active) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-primary dark:text-primary-fixed bg-secondary-container dark:bg-on-secondary-fixed-variant font-bold border-r-4 border-primary transition-colors duration-200 hover:bg-surface-container dark:hover:bg-surface-container-highest" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="font-body-main text-body-main">订单</span>
+</a>
+<!-- 商品 (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-surface-variant dark:text-surface-variant transition-colors duration-200 hover:bg-surface-container dark:hover:bg-surface-container-highest" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-body-main text-body-main">商品</span>
+</a>
+<!-- 分类 (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-surface-variant dark:text-surface-variant transition-colors duration-200 hover:bg-surface-container dark:hover:bg-surface-container-highest" href="#">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+<span class="font-body-main text-body-main">分类</span>
+</a>
+<!-- 店铺设置 (Inactive) -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-surface-variant dark:text-surface-variant transition-colors duration-200 hover:bg-surface-container dark:hover:bg-surface-container-highest" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-main text-body-main">店铺设置</span>
+</a>
+</nav>
+</div>
+<div class="px-3 pt-4 border-t border-outline-variant mt-auto space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-DEFAULT text-on-surface-variant text-caption-muted hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="dashboard">dashboard</span>
+                概览 (二期)
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-DEFAULT text-on-surface-variant text-caption-muted hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="notifications">notifications</span>
+                消息 (二期)
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-DEFAULT text-on-surface-variant text-caption-muted hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="analytics">analytics</span>
+                统计 (二期)
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-[220px] mt-[56px] p-page-margin">
+<!-- Header -->
+<header class="mb-module-gap">
+<h1 class="font-page-title text-page-title text-on-surface">订单管理</h1>
+<p class="font-body-main text-body-main text-on-surface-variant mt-1">处理顾客订单，接单后按状态推进</p>
+</header>
+<!-- Status Tabs -->
+<div class="flex gap-6 border-b border-surface-container-high mb-module-gap">
+<button class="pb-2 px-1 text-primary border-b-2 border-primary font-bold text-body-main">全部</button>
+<button class="pb-2 px-1 text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 text-body-main">
+                待接单
+                <span class="bg-error text-on-error text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">3</span>
+</button>
+<button class="pb-2 px-1 text-on-surface-variant hover:text-primary transition-colors text-body-main">制作中</button>
+<button class="pb-2 px-1 text-on-surface-variant hover:text-primary transition-colors text-body-main">配送中</button>
+<button class="pb-2 px-1 text-on-surface-variant hover:text-primary transition-colors text-body-main">已完成</button>
+</div>
+<!-- Data Table Card -->
+<div class="bg-surface-container-lowest rounded-lg border border-surface-container-high overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-[#f3f3f3] font-label-table text-label-table text-[#6b7280]">
+<tr>
+<th class="py-2 px-4 font-medium border-b border-[#e5e5e5] w-48">订单号</th>
+<th class="py-2 px-4 font-medium border-b border-[#e5e5e5] w-32">顾客</th>
+<th class="py-2 px-4 font-medium border-b border-[#e5e5e5]">商品摘要</th>
+<th class="py-2 px-4 font-medium border-b border-[#e5e5e5] text-right w-24">金额</th>
+<th class="py-2 px-4 font-medium border-b border-[#e5e5e5] w-24">状态</th>
+<th class="py-2 px-4 font-medium border-b border-[#e5e5e5] w-40">下单时间</th>
+<th class="py-2 px-4 font-medium border-b border-[#e5e5e5] w-24 text-center">操作</th>
+</tr>
+</thead>
+<tbody class="font-body-main text-body-main text-on-surface divide-y divide-[#e5e5e5]">
+<!-- Row 1: Pending -->
+<tr class="hover-row transition-colors cursor-pointer group py-2">
+<td class="px-4 py-2 font-mono text-sm text-on-surface-variant">20260915143012001</td>
+<td class="px-4 py-2">张同学</td>
+<td class="px-4 py-2 truncate max-w-[200px]" title="香辣鸡腿堡 ×2, 可乐 (中杯) ×1">香辣鸡腿堡 ×2, 可乐 (中杯) ×1</td>
+<td class="px-4 py-2 text-right font-currency-display text-currency-display text-primary-container">¥42.00</td>
+<td class="px-4 py-2">
+<span class="bg-primary-container text-white text-xs font-bold px-2 py-1 rounded">待接单</span>
+</td>
+<td class="px-4 py-2 text-sm text-on-surface-variant">2026-09-15 12:30</td>
+<td class="px-4 py-2 text-center">
+<button class="text-primary-container font-medium hover:underline text-sm">接单</button>
+</td>
+</tr>
+<!-- Row 2: Pending -->
+<tr class="hover-row transition-colors cursor-pointer group py-2">
+<td class="px-4 py-2 font-mono text-sm text-on-surface-variant">20260915143012002</td>
+<td class="px-4 py-2">李同学</td>
+<td class="px-4 py-2 truncate max-w-[200px]" title="原味鸡块(6块) ×1, 薯条(大) ×1">原味鸡块(6块) ×1, 薯条(大) ×1</td>
+<td class="px-4 py-2 text-right font-currency-display text-currency-display text-primary-container">¥28.50</td>
+<td class="px-4 py-2">
+<span class="bg-primary-container text-white text-xs font-bold px-2 py-1 rounded">待接单</span>
+</td>
+<td class="px-4 py-2 text-sm text-on-surface-variant">2026-09-15 12:32</td>
+<td class="px-4 py-2 text-center">
+<button class="text-primary-container font-medium hover:underline text-sm">接单</button>
+</td>
+</tr>
+<!-- Row 3: Pending -->
+<tr class="hover-row transition-colors cursor-pointer group py-2">
+<td class="px-4 py-2 font-mono text-sm text-on-surface-variant">20260915143012003</td>
+<td class="px-4 py-2">王同学</td>
+<td class="px-4 py-2 truncate max-w-[200px]" title="蜜汁全鸡 ×1">蜜汁全鸡 ×1</td>
+<td class="px-4 py-2 text-right font-currency-display text-currency-display text-primary-container">¥39.90</td>
+<td class="px-4 py-2">
+<span class="bg-primary-container text-white text-xs font-bold px-2 py-1 rounded">待接单</span>
+</td>
+<td class="px-4 py-2 text-sm text-on-surface-variant">2026-09-15 12:35</td>
+<td class="px-4 py-2 text-center">
+<button class="text-primary-container font-medium hover:underline text-sm">接单</button>
+</td>
+</tr>
+<!-- Row 4: Cooking -->
+<tr class="hover-row transition-colors cursor-pointer group py-2">
+<td class="px-4 py-2 font-mono text-sm text-on-surface-variant">20260915143012004</td>
+<td class="px-4 py-2">赵同学</td>
+<td class="px-4 py-2 truncate max-w-[200px]" title="巨无霸套餐 ×1">巨无霸套餐 ×1</td>
+<td class="px-4 py-2 text-right font-currency-display text-currency-display text-primary-container">¥35.00</td>
+<td class="px-4 py-2">
+<span class="bg-[#ffb020] text-white text-xs font-bold px-2 py-1 rounded">制作中</span>
+</td>
+<td class="px-4 py-2 text-sm text-on-surface-variant">2026-09-15 12:15</td>
+<td class="px-4 py-2 text-center">
+<button class="text-on-surface-variant font-medium hover:text-primary-container text-sm">出餐</button>
+</td>
+</tr>
+<!-- Row 5: Cooking -->
+<tr class="hover-row transition-colors cursor-pointer group py-2">
+<td class="px-4 py-2 font-mono text-sm text-on-surface-variant">20260915143012005</td>
+<td class="px-4 py-2">孙同学</td>
+<td class="px-4 py-2 truncate max-w-[200px]" title="珍珠奶茶(大) ×2">珍珠奶茶(大) ×2</td>
+<td class="px-4 py-2 text-right font-currency-display text-currency-display text-primary-container">¥24.00</td>
+<td class="px-4 py-2">
+<span class="bg-[#ffb020] text-white text-xs font-bold px-2 py-1 rounded">制作中</span>
+</td>
+<td class="px-4 py-2 text-sm text-on-surface-variant">2026-09-15 12:18</td>
+<td class="px-4 py-2 text-center">
+<button class="text-on-surface-variant font-medium hover:text-primary-container text-sm">出餐</button>
+</td>
+</tr>
+<!-- Row 6: Delivering -->
+<tr class="hover-row transition-colors cursor-pointer group py-2">
+<td class="px-4 py-2 font-mono text-sm text-on-surface-variant">20260915143012006</td>
+<td class="px-4 py-2">周同学</td>
+<td class="px-4 py-2 truncate max-w-[200px]" title="麻辣香锅(微辣) ×1, 米饭 ×1">麻辣香锅(微辣) ×1, 米饭 ×1</td>
+<td class="px-4 py-2 text-right font-currency-display text-currency-display text-primary-container">¥45.00</td>
+<td class="px-4 py-2">
+<span class="bg-[#1f9d55] text-white text-xs font-bold px-2 py-1 rounded">配送中</span>
+</td>
+<td class="px-4 py-2 text-sm text-on-surface-variant">2026-09-15 11:50</td>
+<td class="px-4 py-2 text-center">
+<button class="text-on-surface-variant font-medium hover:text-primary-container text-sm">查看</button>
+</td>
+</tr>
+<!-- Row 7: Completed -->
+<tr class="hover-row transition-colors cursor-pointer group py-2">
+<td class="px-4 py-2 font-mono text-sm text-on-surface-variant">20260915143012007</td>
+<td class="px-4 py-2">吴同学</td>
+<td class="px-4 py-2 truncate max-w-[200px]" title="牛肉拉面 ×1, 卤蛋 ×1">牛肉拉面 ×1, 卤蛋 ×1</td>
+<td class="px-4 py-2 text-right font-currency-display text-currency-display text-primary-container">¥18.00</td>
+<td class="px-4 py-2">
+<span class="bg-gray-400 text-white text-xs font-bold px-2 py-1 rounded">已完成</span>
+</td>
+<td class="px-4 py-2 text-sm text-on-surface-variant">2026-09-15 11:10</td>
+<td class="px-4 py-2 text-center">
+<button class="text-on-surface-variant font-medium hover:text-primary-container text-sm">详情</button>
+</td>
+</tr>
+<!-- Row 8: Completed -->
+<tr class="hover-row transition-colors cursor-pointer group py-2">
+<td class="px-4 py-2 font-mono text-sm text-on-surface-variant">20260915143012008</td>
+<td class="px-4 py-2">郑同学</td>
+<td class="px-4 py-2 truncate max-w-[200px]" title="冰鲜柠檬水 ×3">冰鲜柠檬水 ×3</td>
+<td class="px-4 py-2 text-right font-currency-display text-currency-display text-primary-container">¥12.00</td>
+<td class="px-4 py-2">
+<span class="bg-gray-400 text-white text-xs font-bold px-2 py-1 rounded">已完成</span>
+</td>
+<td class="px-4 py-2 text-sm text-on-surface-variant">2026-09-15 10:45</td>
+<td class="px-4 py-2 text-center">
+<button class="text-on-surface-variant font-medium hover:text-primary-container text-sm">详情</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="px-4 py-3 border-t border-[#e5e5e5] bg-white flex items-center justify-end">
+<div class="flex items-center gap-2 text-sm text-on-surface-variant">
+<span>共 86 条记录</span>
+<div class="flex gap-1 ml-4">
+<button class="w-8 h-8 flex items-center justify-center rounded border border-[#e5e5e5] bg-white text-on-surface-variant hover:border-primary-container hover:text-primary-container transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled="">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-primary-container text-white font-medium">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-[#e5e5e5] bg-white text-on-surface-variant hover:border-primary-container hover:text-primary-container transition-colors font-medium">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-[#e5e5e5] bg-white text-on-surface-variant hover:border-primary-container hover:text-primary-container transition-colors font-medium">3</button>
+<span class="w-8 h-8 flex items-center justify-center">...</span>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-[#e5e5e5] bg-white text-on-surface-variant hover:border-primary-container hover:text-primary-container transition-colors font-medium">10</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-[#e5e5e5] bg-white text-on-surface-variant hover:border-primary-container hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

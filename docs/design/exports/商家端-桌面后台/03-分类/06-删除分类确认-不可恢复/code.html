@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>删除分类确认</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=PingFang+SC:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary": "#ffffff",
+                    "on-tertiary-fixed": "#00210c",
+                    "surface-tint": "#ae3200",
+                    "on-background": "#181c22",
+                    "on-primary-fixed": "#3a0b00",
+                    "outline-variant": "#e4beb3",
+                    "secondary-container": "#fdaf1e",
+                    "surface-bright": "#f8f9ff",
+                    "on-primary-fixed-variant": "#852400",
+                    "on-secondary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "background": "#f8f9ff",
+                    "on-secondary-fixed-variant": "#624000",
+                    "on-tertiary-container": "#003316",
+                    "secondary-fixed": "#ffddb1",
+                    "surface-dim": "#d7dae2",
+                    "on-secondary-fixed": "#291800",
+                    "inverse-on-surface": "#eef1f9",
+                    "primary-fixed-dim": "#ffb59e",
+                    "tertiary-container": "#2da65d",
+                    "on-secondary-container": "#6a4600",
+                    "on-surface": "#181c22",
+                    "secondary": "#815600",
+                    "on-error-container": "#93000a",
+                    "primary-container": "#ff5a1f",
+                    "on-tertiary-fixed-variant": "#005228",
+                    "surface-container-high": "#e5e8f0",
+                    "surface-container-highest": "#dfe2eb",
+                    "tertiary-fixed": "#86faa7",
+                    "primary-fixed": "#ffdbd0",
+                    "surface": "#f8f9ff",
+                    "outline": "#8f7067",
+                    "surface-container-low": "#f1f3fc",
+                    "primary": "#ae3200",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#2d3137",
+                    "on-tertiary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "on-primary-container": "#541400",
+                    "tertiary": "#006d37",
+                    "on-surface-variant": "#5b4038",
+                    "tertiary-fixed-dim": "#6add8d",
+                    "inverse-primary": "#ffb59e",
+                    "surface-container": "#ebeef6",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#dfe2eb",
+                    "secondary-fixed-dim": "#ffba4b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "card-padding": "12px",
+                    "module-gap": "12px",
+                    "item-gap": "8px",
+                    "page-margin": "16px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "page-title": ["PingFang SC"],
+                    "card-title": ["PingFang SC"],
+                    "section-title": ["PingFang SC"],
+                    "label-table": ["PingFang SC"],
+                    "caption-muted": ["PingFang SC"],
+                    "currency-display": ["PingFang SC"],
+                    "body-main": ["PingFang SC"]
+            },
+            "fontSize": {
+                    "page-title": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "card-title": ["15px", {"lineHeight": "22px", "fontWeight": "600"}],
+                    "section-title": ["18px", {"lineHeight": "26px", "fontWeight": "700"}],
+                    "label-table": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "caption-muted": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                    "currency-display": ["15px", {"lineHeight": "22px", "fontWeight": "700"}],
+                    "body-main": ["15px", {"lineHeight": "22px", "fontWeight": "400"}]
+            }
+          },
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body-main text-body-main text-on-surface antialiased overflow-hidden">
+<!-- Mock Background for Context -->
+<div class="h-screen w-full flex bg-surface-container-lowest opacity-50 filter blur-sm">
+<!-- SideNav Mock -->
+<aside class="fixed left-0 top-0 h-full w-[220px] bg-surface border-r border-outline-variant flex flex-col py-4 z-0">
+<div class="px-6 mb-8">
+<h1 class="font-page-title text-page-title text-primary">校园外卖商家后台</h1>
+<p class="font-caption-muted text-caption-muted text-on-surface-variant mt-1">店铺管理端</p>
+</div>
+<nav class="flex-1 px-4 space-y-2">
+<div class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200">
+<span class="material-symbols-outlined">shopping_cart</span>订单
+                 </div>
+<div class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200">
+<span class="material-symbols-outlined">inventory_2</span>商品
+                 </div>
+<div class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary bg-secondary-container font-bold border-r-4 border-primary">
+<span class="material-symbols-outlined">category</span>分类
+                 </div>
+</nav>
+</aside>
+<!-- Main Content Area Mock -->
+<main class="ml-[220px] flex-1 pt-[56px] p-page-margin">
+<header class="fixed top-0 right-0 h-[56px] left-[220px] bg-surface border-b border-outline-variant flex justify-between items-center px-6 z-0">
+<div class="font-section-title text-section-title text-on-surface">分类管理</div>
+</header>
+<div class="mt-8 bg-surface-container-lowest border border-outline-variant rounded-lg p-card-padding">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-table text-label-table">
+<th class="py-2 px-4 rounded-tl-lg">分类名称</th>
+<th class="py-2 px-4">商品数量</th>
+<th class="py-2 px-4 rounded-tr-lg">操作</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-b border-outline-variant/50">
+<td class="py-3 px-4">小食</td>
+<td class="py-3 px-4">0</td>
+<td class="py-3 px-4 text-error cursor-pointer">删除</td>
+</tr>
+</tbody>
+</table>
+</div>
+</main>
+</div>
+<!-- Overlay & Dialog -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-on-background/40 backdrop-blur-[2px] transition-opacity">
+<!-- Dialog Container -->
+<div class="bg-surface-container-lowest w-[420px] rounded-[12px] shadow-[0_12px_32px_rgba(0,0,0,0.08)] overflow-hidden transform transition-all scale-100 opacity-100 flex flex-col p-6">
+<!-- Header/Content Area -->
+<div class="flex items-start gap-4 mb-8">
+<span class="material-symbols-outlined text-[24px] text-error flex-shrink-0 mt-0.5" style="font-variation-settings: 'FILL' 1;">warning</span>
+<div class="flex flex-col gap-2">
+<h2 class="font-section-title text-section-title text-on-surface m-0 leading-tight">
+                        删除分类
+                    </h2>
+<p class="font-body-main text-body-main text-on-surface-variant m-0">
+                        确认删除分类「小食」吗？删除后不可恢复。
+                    </p>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="flex justify-end gap-3 mt-auto">
+<button class="px-4 py-2 rounded border border-outline-variant bg-surface-container-lowest text-on-surface font-label-table text-label-table hover:bg-surface-container transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20" type="button">
+                    取 消
+                </button>
+<button class="px-4 py-2 rounded bg-error text-on-error font-label-table text-label-table hover:bg-error/90 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-error/20" type="button">
+                    确 认删除
+                </button>
+</div>
+</div>
+</div>
+</body></html>

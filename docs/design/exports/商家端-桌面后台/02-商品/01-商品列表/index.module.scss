@@ -1,0 +1,1225 @@
+* {
+  box-sizing: border-box;
+}
+
+.frame {
+  display: flex;
+  position: relative;
+  align-items: flex-start;
+  justify-content: center;
+  background: #f7f7f7;
+  padding-top: 56px;
+  padding-left: 220px;
+  width: 1280px;
+  height: 1024px;
+
+  .container6 {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    align-items: flex-start;
+    padding: 16px 16px 60px;
+    max-width: 1152px;
+    height: 968px;
+    row-gap: 12px;
+
+    .headerSection {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: flex-start;
+      align-self: stretch;
+      row-gap: 4px;
+
+      .text {
+        flex-shrink: 0;
+        align-self: stretch;
+        line-height: 32px;
+        letter-spacing: 0;
+        color: #181c22;
+        font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+        font-size: 24px;
+        font-weight: 500;
+      }
+
+      .text2 {
+        flex-shrink: 0;
+        align-self: stretch;
+        line-height: 22px;
+        letter-spacing: 0;
+        color: #5b4038;
+        font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+      }
+    }
+
+    .toolbar {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      align-self: stretch;
+      justify-content: space-between;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 11px;
+
+      .container2 {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        column-gap: 8px;
+
+        .text3 {
+          flex-shrink: 0;
+          line-height: 18px;
+          letter-spacing: 0;
+          color: #5b4038;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+        }
+
+        .imageClip {
+          display: flex;
+          position: relative;
+          flex-direction: column;
+          flex-shrink: 0;
+          align-items: flex-start;
+          justify-content: center;
+          border: 1px solid #e5e5e5;
+          border-radius: 4px;
+          background: #ffffff;
+          padding: 6px 8px 6px 74px;
+          overflow: hidden;
+
+          .image {
+            flex-shrink: 0;
+            width: 23px;
+            height: 23px;
+            overflow: hidden;
+          }
+
+          .text4 {
+            position: absolute;
+            top: 6px;
+            left: 12px;
+            flex-shrink: 0;
+            width: 60px;
+            height: 22px;
+            line-height: 22px;
+            letter-spacing: 0;
+            color: #181c22;
+            font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+          }
+
+          .container {
+            position: absolute;
+            top: 7px;
+            right: 7px;
+            flex-shrink: 0;
+            z-index: 1;
+            width: 8px;
+            height: 20px;
+          }
+        }
+      }
+
+      .button {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        column-gap: 8px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 2px 0px #0000000d;
+        background: #ff5a1f;
+        padding: 8px 16px;
+
+        .container3 {
+          flex-shrink: 0;
+          width: 12px;
+          height: 12px;
+        }
+
+        .text5 {
+          flex-shrink: 0;
+          line-height: 22px;
+          letter-spacing: 0;
+          color: #ffffff;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 15px;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .tableCard {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: flex-start;
+      align-self: stretch;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      background: #ffffff;
+      overflow: hidden;
+
+      .table {
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        align-items: flex-start;
+        align-self: stretch;
+
+        .row {
+          display: flex;
+          flex-shrink: 0;
+          align-items: flex-start;
+          align-self: stretch;
+          justify-content: center;
+          background: #f3f3f3;
+
+          .text6 {
+            flex-shrink: 0;
+            line-height: 18px;
+            letter-spacing: 0;
+            color: #6b7280;
+            font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+          }
+
+          .cell {
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            align-items: flex-start;
+            border-width: 0px 0px 1px;
+            border-style: solid;
+            border-color: #e5e5e5;
+            padding: 8px 16px 7px;
+            width: 342px;
+          }
+
+          .cell2 {
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            align-items: flex-start;
+            border-width: 0px 0px 1px;
+            border-style: solid;
+            border-color: #e5e5e5;
+            padding: 8px 16px 7px;
+            width: 171px;
+          }
+
+          .cell3 {
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            align-items: flex-end;
+            border-width: 0px 0px 1px;
+            border-style: solid;
+            border-color: #e5e5e5;
+            padding: 8px 16px 7px;
+            width: 104px;
+          }
+
+          .cell4 {
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            align-items: flex-end;
+            border-width: 0px 0px 1px;
+            border-style: solid;
+            border-color: #e5e5e5;
+            padding: 8px 16px 7px;
+            width: 78px;
+          }
+
+          .cell5 {
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            align-items: flex-start;
+            border-width: 0px 0px 1px;
+            border-style: solid;
+            border-color: #e5e5e5;
+            padding: 8px 16px 7px;
+            width: 80px;
+          }
+        }
+
+        .body {
+          display: flex;
+          flex-direction: column;
+          flex-shrink: 0;
+          align-items: flex-start;
+          align-self: stretch;
+
+          .text14 {
+            flex-shrink: 0;
+            padding: 18px 16px;
+            width: 78px;
+            text-align: right;
+            line-height: 22px;
+            letter-spacing: 0;
+            color: #ba1a1a;
+            font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+          }
+
+          .text13 {
+            flex-shrink: 0;
+            overflow: hidden;
+            line-height: 22px;
+            letter-spacing: 0;
+            color: #5b4038;
+            font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+          }
+
+          .text12 {
+            flex-shrink: 0;
+            padding: 18px 16px;
+            width: 80px;
+            line-height: 22px;
+            letter-spacing: 0;
+            color: #ae3200;
+            font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+          }
+
+          .text10 {
+            flex-shrink: 0;
+            padding: 18px 16px;
+            width: 78px;
+            text-align: right;
+            line-height: 22px;
+            letter-spacing: 0;
+            color: #181c22;
+            font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+          }
+
+          .text9 {
+            flex-shrink: 0;
+            padding: 18px 16px;
+            width: 104px;
+            text-align: right;
+            line-height: 22px;
+            letter-spacing: 0;
+            color: #ff5a1f;
+            font-family: "Liberation Serif", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+          }
+
+          .text8 {
+            flex-shrink: 0;
+            padding: 18px 16px 18px 32px;
+            width: 187px;
+            line-height: 22px;
+            letter-spacing: 0;
+            color: #5b4038;
+            font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+          }
+
+          .text7 {
+            flex-shrink: 0;
+            overflow: hidden;
+            line-height: 22px;
+            letter-spacing: 0;
+            color: #181c22;
+            font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+          }
+
+          .background {
+            flex-shrink: 0;
+            border-radius: 8px;
+            background: #ffffff;
+            width: 16px;
+            height: 16px;
+          }
+
+          .data6 {
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            align-items: flex-start;
+            padding: 20px 16px 18px;
+            width: 171px;
+
+            .overlay2 {
+              display: inline-flex;
+              flex-shrink: 0;
+              align-items: center;
+              align-self: stretch;
+              margin-right: 99px;
+              border-radius: 4px;
+              background: #ffdad64d;
+              padding: 2px 8px;
+
+              .text15 {
+                flex-shrink: 0;
+                line-height: 16px;
+                letter-spacing: 0;
+                color: #ba1a1a;
+                font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+                font-size: 12px;
+                font-weight: 500;
+              }
+            }
+          }
+
+          .data3 {
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            align-items: flex-start;
+            padding: 20px 16px 17px;
+            width: 80px;
+
+            .input {
+              display: flex;
+              flex-shrink: 0;
+              align-items: flex-start;
+              border: 1px solid #00000000;
+              border-radius: 10px;
+              background: #ff5a1f;
+              padding-top: 1px;
+              padding-left: 17px;
+              width: 36px;
+              height: 20px;
+            }
+          }
+
+          .data2 {
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            align-items: flex-start;
+            padding: 20px 16px 18px;
+            width: 171px;
+
+            .overlay {
+              display: inline-flex;
+              flex-shrink: 0;
+              align-items: center;
+              align-self: stretch;
+              margin-right: 99px;
+              border-radius: 4px;
+              background: #ff5a1f1a;
+              padding: 2px 8px;
+
+              .text11 {
+                flex-shrink: 0;
+                line-height: 16px;
+                letter-spacing: 0;
+                color: #ff5a1f;
+                font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+                font-size: 12px;
+                font-weight: 500;
+              }
+            }
+          }
+
+          .row1 {
+            display: flex;
+            flex-shrink: 0;
+            align-items: center;
+            align-self: stretch;
+            justify-content: center;
+            border-width: 0px 0px 1px;
+            border-style: solid;
+            border-color: #e5e5e5;
+            padding-left: 16px;
+
+            .data {
+              display: flex;
+              flex-shrink: 0;
+              align-items: center;
+              column-gap: 12px;
+              width: 310px;
+
+              .imageBorder {
+                flex-shrink: 0;
+                border: 1px solid #e4beb3;
+                border-radius: 4px;
+                width: 40px;
+                height: 40px;
+                background-image: url(../../../shared-assets/商家端-桌面后台/02-商品/01-商品列表/mtib1vfz-ze39xwq.png);
+                background-position: left top;
+                background-size: 61px 38px;
+                background-repeat: repeat;
+              }
+            }
+          }
+
+          .row2 {
+            display: flex;
+            flex-shrink: 0;
+            align-items: center;
+            align-self: stretch;
+            justify-content: center;
+            margin-top: -1px;
+            border-width: 0px 0px 1px;
+            border-style: solid;
+            border-color: #e5e5e5;
+            padding-left: 16px;
+
+            .data4 {
+              display: flex;
+              flex-shrink: 0;
+              align-items: center;
+              column-gap: 12px;
+              width: 310px;
+
+              .imageBorder2 {
+                flex-shrink: 0;
+                border: 1px solid #e4beb3;
+                border-radius: 4px;
+                width: 40px;
+                height: 40px;
+                background-image: url(../../../shared-assets/商家端-桌面后台/02-商品/01-商品列表/mtib1vfz-95uaga4.png);
+                background-position: left top;
+                background-size: 70px 38px;
+                background-repeat: repeat;
+              }
+            }
+          }
+
+          .row3SoldOut {
+            display: flex;
+            flex-shrink: 0;
+            align-items: center;
+            align-self: stretch;
+            justify-content: center;
+            margin-top: -1px;
+            border-width: 0px 0px 1px;
+            border-style: solid;
+            border-color: #e5e5e5;
+            padding-left: 16px;
+
+            .data5 {
+              display: flex;
+              flex-shrink: 0;
+              align-items: center;
+              column-gap: 12px;
+              width: 310px;
+
+              .imageBorder3 {
+                flex-shrink: 0;
+                opacity: 0.7;
+                border: 1px solid #e4beb3;
+                border-radius: 4px;
+                width: 40px;
+                height: 40px;
+                background-image: url(../../../shared-assets/商家端-桌面后台/02-商品/01-商品列表/mtib1vfz-rcthtzd.png);
+                background-position: left top;
+                background-size: 38px 38px;
+                background-repeat: repeat;
+              }
+            }
+          }
+
+          .row4 {
+            display: flex;
+            flex-shrink: 0;
+            align-items: center;
+            align-self: stretch;
+            justify-content: center;
+            margin-top: -1px;
+            border-width: 0px 0px 1px;
+            border-style: solid;
+            border-color: #e5e5e5;
+            padding-left: 16px;
+
+            .data7 {
+              display: flex;
+              flex-shrink: 0;
+              align-items: center;
+              column-gap: 12px;
+              width: 310px;
+
+              .imageBorder4 {
+                flex-shrink: 0;
+                border: 1px solid #e4beb3;
+                border-radius: 4px;
+                width: 40px;
+                height: 40px;
+                background-image: url(../../../shared-assets/商家端-桌面后台/02-商品/01-商品列表/mtib1vfz-2rjjrdx.png);
+                background-position: left top;
+                background-size: 70px 38px;
+                background-repeat: repeat;
+              }
+            }
+
+            .data8 {
+              flex-shrink: 0;
+              width: 78px;
+              height: 45px;
+            }
+          }
+
+          .row5OffShelf {
+            display: flex;
+            flex-shrink: 0;
+            align-items: center;
+            align-self: stretch;
+            justify-content: center;
+            margin-top: -1px;
+            border-width: 0px 0px 1px;
+            border-style: solid;
+            border-color: #e5e5e5;
+            background: #f1f3fc80;
+            padding-left: 16px;
+
+            .data9 {
+              display: flex;
+              flex-shrink: 0;
+              align-items: center;
+              column-gap: 12px;
+              width: 310px;
+
+              .backgroundImageBorde {
+                flex-shrink: 0;
+                opacity: 0.5;
+                border: 1px solid #e4beb3;
+                border-radius: 4px;
+                background: #ffffff;
+                width: 40px;
+                height: 40px;
+              }
+
+              .text16 {
+                flex-shrink: 0;
+                overflow: hidden;
+                line-height: 22px;
+                letter-spacing: 0;
+                color: #9ca3af;
+                font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+                font-size: 15px;
+                font-weight: 500;
+              }
+            }
+
+            .text17 {
+              flex-shrink: 0;
+              padding: 18px 16px 18px 32px;
+              width: 187px;
+              line-height: 22px;
+              letter-spacing: 0;
+              color: #9ca3af;
+              font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+              font-size: 15px;
+              font-weight: 500;
+            }
+
+            .text18 {
+              flex-shrink: 0;
+              padding: 18px 16px;
+              width: 104px;
+              text-align: right;
+              line-height: 22px;
+              letter-spacing: 0;
+              color: #9ca3af;
+              font-family: "Liberation Serif", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+              font-size: 15px;
+              font-weight: 700;
+            }
+
+            .text19 {
+              flex-shrink: 0;
+              padding: 18px 16px;
+              width: 78px;
+              text-align: right;
+              line-height: 22px;
+              letter-spacing: 0;
+              color: #9ca3af;
+              font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+              font-size: 15px;
+              font-weight: 500;
+            }
+
+            .data10 {
+              display: flex;
+              flex-direction: column;
+              flex-shrink: 0;
+              align-items: flex-start;
+              padding: 20px 16px 18px;
+              width: 171px;
+
+              .background2 {
+                display: inline-flex;
+                flex-shrink: 0;
+                align-items: center;
+                align-self: stretch;
+                margin-right: 87px;
+                border-radius: 4px;
+                background: #e5e7eb;
+                padding: 2px 8px;
+
+                .text20 {
+                  flex-shrink: 0;
+                  line-height: 16px;
+                  letter-spacing: 0;
+                  color: #6b7280;
+                  font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+                  font-size: 12px;
+                  font-weight: 500;
+                }
+              }
+            }
+
+            .data11 {
+              display: flex;
+              flex-direction: column;
+              flex-shrink: 0;
+              align-items: flex-start;
+              padding: 20px 16px 17px;
+              width: 80px;
+
+              .input2 {
+                display: flex;
+                flex-shrink: 0;
+                align-items: flex-start;
+                border: 1px solid #6b7280;
+                border-radius: 10px;
+                background: #d1d5db;
+                padding: 1px 15px 0px 1px;
+                width: 36px;
+                height: 20px;
+              }
+            }
+          }
+
+          .row6 {
+            display: flex;
+            flex-shrink: 0;
+            align-items: center;
+            align-self: stretch;
+            justify-content: center;
+            margin-top: -1px;
+            border-width: 0px 0px 1px;
+            border-style: solid;
+            border-color: #e5e5e5;
+            padding-left: 16px;
+
+            .data12 {
+              display: flex;
+              flex-shrink: 0;
+              align-items: center;
+              column-gap: 12px;
+              width: 310px;
+
+              .imageBorder5 {
+                flex-shrink: 0;
+                border: 1px solid #e4beb3;
+                border-radius: 4px;
+                width: 40px;
+                height: 40px;
+                background-image: url(../../../shared-assets/商家端-桌面后台/02-商品/01-商品列表/mtib1vfz-37i0gpo.png);
+                background-position: left top;
+                background-size: 38px 38px;
+                background-repeat: repeat;
+              }
+            }
+          }
+
+          .row7 {
+            display: flex;
+            flex-shrink: 0;
+            align-items: center;
+            align-self: stretch;
+            justify-content: center;
+            margin-top: -1px;
+            border-width: 0px 0px 1px;
+            border-style: solid;
+            border-color: #e5e5e5;
+            padding-left: 16px;
+
+            .data13 {
+              display: flex;
+              flex-shrink: 0;
+              align-items: center;
+              column-gap: 12px;
+              width: 310px;
+
+              .imageBorder6 {
+                flex-shrink: 0;
+                border: 1px solid #e4beb3;
+                border-radius: 4px;
+                width: 40px;
+                height: 40px;
+                background-image: url(../../../shared-assets/商家端-桌面后台/02-商品/01-商品列表/mtib1vfz-16k4riy.png);
+                background-position: left top;
+                background-size: 70px 38px;
+                background-repeat: repeat;
+              }
+            }
+
+            .data14 {
+              flex-shrink: 0;
+              width: 78px;
+              height: 46px;
+            }
+          }
+
+          .row8SoldOut {
+            display: flex;
+            flex-shrink: 0;
+            align-items: center;
+            align-self: stretch;
+            justify-content: center;
+            margin-top: -1px;
+            border-width: 0px 0px 1px;
+            border-style: solid;
+            border-color: #e5e5e5;
+            padding-left: 16px;
+
+            .data15 {
+              display: flex;
+              flex-shrink: 0;
+              align-items: center;
+              column-gap: 12px;
+              width: 310px;
+
+              .imageBorder7 {
+                flex-shrink: 0;
+                opacity: 0.7;
+                border: 1px solid #e4beb3;
+                border-radius: 4px;
+                width: 40px;
+                height: 40px;
+                background-image: url(../../../shared-assets/商家端-桌面后台/02-商品/01-商品列表/mtib1vfz-f8942bb.png);
+                background-position: left top;
+                background-size: 70px 38px;
+                background-repeat: repeat;
+              }
+            }
+          }
+        }
+      }
+
+      .pagination {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        align-self: stretch;
+        justify-content: space-between;
+        border-width: 1px 0px 0px;
+        border-style: solid;
+        border-color: #e5e5e5;
+        background: #ffffff;
+        padding: 11px 16px 12px;
+
+        .text21 {
+          flex-shrink: 0;
+          line-height: 16px;
+          letter-spacing: 0;
+          color: #5b4038;
+          font-family: "Liberation Serif", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 12px;
+        }
+
+        .container5 {
+          display: inline-flex;
+          flex-shrink: 0;
+          align-items: center;
+          column-gap: 4px;
+
+          .button2 {
+            display: inline-flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            padding: 4px 4px 11px;
+
+            .container4 {
+              flex-shrink: 0;
+              width: 6px;
+              height: 10px;
+            }
+          }
+
+          .button3 {
+            display: flex;
+            flex-shrink: 0;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background: #ff5a1f;
+            padding-top: 6px;
+            padding-bottom: 7px;
+            width: 32px;
+
+            .text22 {
+              flex-shrink: 0;
+              line-height: 20px;
+              letter-spacing: 0;
+              color: #ffffff;
+              font-family: "Liberation Serif", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+              font-size: 14px;
+            }
+          }
+
+          .text23 {
+            flex-shrink: 0;
+            padding: 6px 0px 7px;
+            width: 32px;
+            height: 32px;
+            text-align: center;
+            line-height: 20px;
+            letter-spacing: 0;
+            color: #181c22;
+            font-family: "Liberation Serif", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 14px;
+          }
+        }
+      }
+    }
+  }
+
+  .headerTopNavBar {
+    display: flex;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 220px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    border-width: 0px 0px 1px;
+    border-style: solid;
+    border-color: #e4beb3;
+    box-shadow: 0px 1px 2px 0px #0000000d;
+    background: #ffffffe5;
+    padding-right: 24px;
+    padding-left: 24px;
+    width: 1060px;
+    height: 56px;
+    backdrop-filter: blur(6px);
+
+    .text24 {
+      flex-shrink: 0;
+      line-height: 26px;
+      letter-spacing: 0;
+      color: #181c22;
+      font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .container10 {
+      display: inline-flex;
+      flex-shrink: 0;
+      align-items: center;
+      column-gap: 24px;
+
+      .overlayBorder {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        column-gap: 8px;
+        border: 1px solid #006d3733;
+        border-radius: 9999px;
+        background: #006d371a;
+        padding: 3px 11px;
+
+        .container7 {
+          flex-shrink: 0;
+          width: 9px;
+          height: 9px;
+        }
+
+        .text25 {
+          flex-shrink: 0;
+          line-height: 20px;
+          letter-spacing: 0;
+          color: #006d37;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 14px;
+          font-weight: 500;
+        }
+      }
+
+      .container8 {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        column-gap: 8px;
+
+        .backgroundBorder {
+          display: flex;
+          flex-direction: column;
+          flex-shrink: 0;
+          align-items: flex-start;
+          justify-content: center;
+          border: 1px solid #e4beb3;
+          border-radius: 9999px;
+          background: #e5e8f0;
+          height: 32px;
+          overflow: hidden;
+
+          .avatar {
+            flex-grow: 1;
+            align-self: stretch;
+            width: 30px;
+            height: 30px;
+            overflow: hidden;
+          }
+        }
+
+        .text26 {
+          flex-shrink: 0;
+          line-height: 22px;
+          letter-spacing: 0;
+          color: #181c22;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 15px;
+          font-weight: 500;
+        }
+      }
+
+      .button4 {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px;
+        padding: 8px;
+
+        .container9 {
+          flex-shrink: 0;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+  }
+
+  .sideNavBar {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    flex-direction: column;
+    flex-shrink: 0;
+    align-items: flex-start;
+    justify-content: space-between;
+    z-index: 1;
+    border-width: 0px 1px 0px 0px;
+    border-style: solid;
+    border-color: #e4beb3;
+    box-shadow: 0px 1px 2px 0px #0000000d;
+    background: #f8f9ff;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    width: 220px;
+    height: 1024px;
+
+    .container12 {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: flex-start;
+      align-self: stretch;
+      padding: 0px 24px 32px;
+      row-gap: 4px;
+
+      .heading1 {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        align-self: stretch;
+        column-gap: 8px;
+
+        .container11 {
+          flex-shrink: 0;
+          width: 20px;
+          height: 18px;
+        }
+
+        .text27 {
+          flex-shrink: 0;
+          width: 120px;
+          line-height: 32px;
+          letter-spacing: 0;
+          color: #ae3200;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 24px;
+          font-weight: 500;
+        }
+      }
+
+      .text28 {
+        flex-shrink: 0;
+        align-self: stretch;
+        line-height: 16px;
+        letter-spacing: 0;
+        color: #5b4038;
+        font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+      }
+    }
+
+    .container15 {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: flex-start;
+      align-self: stretch;
+      padding-right: 8px;
+      padding-left: 8px;
+      height: 735px;
+      row-gap: 8px;
+
+      .text29 {
+        flex-shrink: 0;
+        line-height: 22px;
+        letter-spacing: 0;
+        color: #5b4038;
+        font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+      }
+
+      .container13 {
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+      }
+
+      .link {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        align-self: stretch;
+        column-gap: 12px;
+        border-radius: 8px;
+        padding: 12px 16px;
+      }
+
+      .link2 {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        align-self: stretch;
+        column-gap: 12px;
+        border-width: 0px 4px 0px 0px;
+        border-style: solid;
+        border-radius: 8px;
+        border-color: #ae3200;
+        background: #fdaf1e;
+        padding: 12px 12px 12px 16px;
+
+        .text30 {
+          flex-shrink: 0;
+          line-height: 22px;
+          letter-spacing: 0;
+          color: #ae3200;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 15px;
+          font-weight: 500;
+        }
+      }
+
+      .link3 {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        align-self: stretch;
+        column-gap: 12px;
+        border-radius: 8px;
+        padding: 12px 16px;
+
+        .container14 {
+          flex-shrink: 0;
+          width: 19px;
+          height: 20px;
+        }
+      }
+    }
+
+    .margin {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: flex-start;
+      align-self: stretch;
+      justify-content: flex-end;
+      padding-right: 8px;
+      padding-left: 8px;
+
+      .horizontalBorder {
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        align-items: flex-start;
+        align-self: stretch;
+        border-width: 1px 0px 0px;
+        border-style: solid;
+        border-color: #e4beb34d;
+        padding: 15px 8px 0px;
+        row-gap: 8px;
+
+        .text31 {
+          flex-shrink: 0;
+          line-height: 20px;
+          letter-spacing: 0;
+          color: #5b4038b2;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 14px;
+          font-weight: 500;
+        }
+
+        .link4 {
+          display: flex;
+          flex-shrink: 0;
+          align-items: center;
+          align-self: stretch;
+          column-gap: 12px;
+          border-radius: 8px;
+          padding: 8px 16px;
+
+          .container16 {
+            flex-shrink: 0;
+            width: 14px;
+            height: 14px;
+          }
+        }
+
+        .link5 {
+          display: flex;
+          flex-shrink: 0;
+          align-items: center;
+          align-self: stretch;
+          column-gap: 12px;
+          border-radius: 8px;
+          padding: 8px 16px;
+
+          .container17 {
+            flex-shrink: 0;
+            width: 12px;
+            height: 15px;
+          }
+        }
+      }
+    }
+  }
+}

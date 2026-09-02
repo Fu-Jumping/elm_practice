@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>订单列表</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Hide scrollbar for horizontal scrolling tabs */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#a14000",
+                        "secondary-container": "#e4e2e1",
+                        "surface-container-low": "#f3f3f3",
+                        "on-surface": "#1a1c1c",
+                        "surface-white": "#FFFFFF",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "inverse-on-surface": "#f1f1f1",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#f9f9f9",
+                        "secondary": "#5f5e5e",
+                        "secondary-fixed": "#e4e2e1",
+                        "surface-bright": "#f9f9f9",
+                        "error": "#ba1a1a",
+                        "text-tertiary": "#999999",
+                        "on-primary-fixed-variant": "#852400",
+                        "inverse-surface": "#2f3131",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-error-container": "#93000a",
+                        "on-background": "#1a1c1c",
+                        "outline-variant": "#e4beb3",
+                        "on-secondary-fixed-variant": "#474747",
+                        "inverse-primary": "#ffb59e",
+                        "tertiary-container": "#f46500",
+                        "surface-container-high": "#e8e8e8",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#ffdbd0",
+                        "on-tertiary-container": "#4d1b00",
+                        "primary-fixed-dim": "#ffb59e",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "on-primary-fixed": "#3a0b00",
+                        "surface-container": "#eeeeee",
+                        "primary": "#ae3200",
+                        "on-primary-container": "#541400",
+                        "on-surface-variant": "#5b4038",
+                        "border-light": "#E5E5E5",
+                        "on-secondary-container": "#656464",
+                        "surface-dim": "#dadada",
+                        "background": "#f9f9f9",
+                        "outline": "#8f7067",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "text-secondary": "#666666",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e2e2e2",
+                        "surface-tint": "#ae3200",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "on-tertiary-fixed": "#351000",
+                        "primary-container": "#ff5a1f",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "padding-card": "10px",
+                        "margin-page": "12px",
+                        "gap-module": "12px",
+                        "base": "4px",
+                        "gutter": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Be Vietnam Pro"],
+                        "headline-md": ["Be Vietnam Pro"],
+                        "body-md": ["Be Vietnam Pro"],
+                        "label-sm": ["Be Vietnam Pro"],
+                        "label-md": ["Be Vietnam Pro"],
+                        "cta-button": ["Be Vietnam Pro"],
+                        "body-lg": ["Be Vietnam Pro"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "cta-button": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface-container text-on-surface min-h-screen flex flex-col pb-20">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 flex items-center justify-between px-margin-page h-14 w-full bg-surface dark:bg-on-surface-variant transition-colors duration-200">
+<div class="flex items-center gap-2 cursor-pointer hover:bg-secondary-container/50 dark:hover:bg-secondary-container/20 rounded p-1 active:opacity-70 transition-colors">
+<span class="material-symbols-outlined text-on-surface" data-icon="location_on">location_on</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg font-bold text-on-surface truncate flex-1 text-center">饿了么</h1>
+<div class="flex items-center gap-2 cursor-pointer hover:bg-secondary-container/50 dark:hover:bg-secondary-container/20 rounded p-1 active:opacity-70 transition-colors">
+<span class="material-symbols-outlined text-on-surface" data-icon="search">search</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col">
+<!-- Tabs -->
+<nav class="bg-surface-white sticky top-14 z-40">
+<ul class="flex overflow-x-auto no-scrollbar px-margin-page gap-6 items-center h-12">
+<li class="whitespace-nowrap font-body-md text-body-md font-semibold text-[#FF5A1F] border-b-2 border-[#FF5A1F] h-full flex items-center px-1 cursor-pointer">全部</li>
+<li class="whitespace-nowrap font-body-md text-body-md text-secondary h-full flex items-center px-1 cursor-pointer">待支付</li>
+<li class="whitespace-nowrap font-body-md text-body-md text-secondary h-full flex items-center px-1 cursor-pointer">进行中</li>
+<li class="whitespace-nowrap font-body-md text-body-md text-secondary h-full flex items-center px-1 cursor-pointer">已完成</li>
+<li class="whitespace-nowrap font-body-md text-body-md text-secondary h-full flex items-center px-1 cursor-pointer">待评价</li>
+</ul>
+</nav>
+<!-- Order List -->
+<div class="flex flex-col gap-2 mt-2">
+<!-- Order Card 1: Completed -->
+<div class="bg-surface-white w-full p-4 flex flex-col gap-3">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center overflow-hidden">
+<img alt="Restaurant Logo" class="w-full h-full object-cover" data-alt="A small square logo image of a fresh, delicious-looking pizza slice on a white background, representing a fast-food or campus pizza joint." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvlrp01Gfb_HX0edBdsWn_KRFTY4v3dygocoBk2evnfRU8XPdCP28W5v9mTBYeIFb9Mxrs0uKSCj2NtxNoVfGZxDH-eTHsirhn3qJ4pRnb1eFy7WtxVELJbBZpO9SpGcgAeaNp2tUnq43Jr2zCxZLD1mPvI362Pf-ONdh0LijZUVQe7v726kGmlF6FIwZjNaV3rUFMnjHlcBroGmpbpFFaoJQ5wWRDUiVzjRtlmIGIIjaJEfAWqbrgUfQ4bo70saVX7JCr1pDogQx-"/>
+</div>
+<span class="font-body-md text-body-md font-semibold text-on-surface">香飘飘黄焖鸡米饭 (北区店)</span>
+<span class="material-symbols-outlined text-text-tertiary text-sm" data-icon="chevron_right">chevron_right</span>
+</div>
+<span class="font-label-md text-label-md text-text-secondary">订单已完成</span>
+</div>
+<div class="flex gap-3 items-center">
+<div class="w-14 h-14 rounded overflow-hidden shrink-0">
+<img alt="Product Thumbnail" class="w-full h-full object-cover" data-alt="A small square logo image of a fresh, delicious-looking pizza slice on a white background, representing a fast-food or campus pizza joint." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvlrp01Gfb_HX0edBdsWn_KRFTY4v3dygocoBk2evnfRU8XPdCP28W5v9mTBYeIFb9Mxrs0uKSCj2NtxNoVfGZxDH-eTHsirhn3qJ4pRnb1eFy7WtxVELJbBZpO9SpGcgAeaNp2tUnq43Jr2zCxZLD1mPvI362Pf-ONdh0LijZUVQe7v726kGmlF6FIwZjNaV3rUFMnjHlcBroGmpbpFFaoJQ5wWRDUiVzjRtlmIGIIjaJEfAWqbrgUfQ4bo70saVX7JCr1pDogQx-"/>
+</div>
+<div class="flex-1 flex flex-col gap-1">
+<span class="font-body-md text-body-md text-on-surface line-clamp-1">经典黄焖鸡米饭大份 + 冰红茶</span>
+<span class="font-label-md text-label-md text-text-secondary">2023-10-25 12:30</span>
+</div>
+<div class="flex flex-col items-end shrink-0">
+<span class="font-body-lg text-body-lg font-bold text-on-surface">¥24.50</span>
+<span class="font-label-md text-label-md text-text-secondary">共2件</span>
+</div>
+</div>
+<div class="flex justify-end gap-2 pt-1">
+<button class="px-4 py-1.5 rounded-full bg-surface-container text-on-surface font-body-md text-body-md transition-colors">再来一单</button>
+<button class="px-4 py-1.5 rounded-full text-[#FF5A1F] bg-[#FF5A1F]/10 font-body-md text-body-md font-semibold transition-colors">去评价</button>
+</div>
+</div>
+<!-- Order Card 2: In Progress -->
+<div class="bg-surface-white w-full p-4 flex flex-col gap-3">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center overflow-hidden">
+<img alt="Restaurant Logo" class="w-full h-full object-cover" data-alt="A small square logo image of a delicious bowl of ramen noodles with steam rising, set against a dark background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuSdZ5YfInhXb3UNKJKJYndQhx_ZNNsmF4UXNI5TCXogU_uHqgxN8GRqtCew8XL62LsV-A7P1okOl9AHSNrF-pn1n7hBxzJFw3uRHQrLJZdKcED5iY3GBc913ZL-aQy3nbaquOEsQuj5o_toGho749vIK6cHnMqZUoFU6dYazIw1xJ3ZmeloeAKUVogdz_VHjGTxWdof64A3Iloa2uoNdB_WHcDvILzHZbzs5Ek-40T7kG9oT6C2gkEwBU_RfXUhkkb0axchvMtgOi"/>
+</div>
+<span class="font-body-md text-body-md font-semibold text-on-surface">味千拉面 (南门广场)</span>
+<span class="material-symbols-outlined text-text-tertiary text-sm" data-icon="chevron_right">chevron_right</span>
+</div>
+<span class="font-label-md text-label-md text-[#FF5A1F] font-medium">配送中</span>
+</div>
+<div class="flex gap-3 items-center">
+<div class="w-14 h-14 rounded overflow-hidden shrink-0">
+<img alt="Product Thumbnail" class="w-full h-full object-cover" data-alt="A small square logo image of a delicious bowl of ramen noodles with steam rising, set against a dark background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuSdZ5YfInhXb3UNKJKJYndQhx_ZNNsmF4UXNI5TCXogU_uHqgxN8GRqtCew8XL62LsV-A7P1okOl9AHSNrF-pn1n7hBxzJFw3uRHQrLJZdKcED5iY3GBc913ZL-aQy3nbaquOEsQuj5o_toGho749vIK6cHnMqZUoFU6dYazIw1xJ3ZmeloeAKUVogdz_VHjGTxWdof64A3Iloa2uoNdB_WHcDvILzHZbzs5Ek-40T7kG9oT6C2gkEwBU_RfXUhkkb0axchvMtgOi"/>
+</div>
+<div class="flex-1 flex flex-col gap-1">
+<span class="font-body-md text-body-md text-on-surface line-clamp-1">招牌猪骨汤拉面 + 煎饺(3只)</span>
+<span class="font-label-md text-label-md text-text-secondary">预计 18:45 送达</span>
+</div>
+<div class="flex flex-col items-end shrink-0">
+<span class="font-body-lg text-body-lg font-bold text-on-surface">¥38.00</span>
+<span class="font-label-md text-label-md text-text-secondary">共2件</span>
+</div>
+</div>
+<div class="flex justify-end gap-2 pt-1">
+<button class="px-4 py-1.5 rounded-full bg-surface-container text-on-surface font-body-md text-body-md transition-colors">联系骑手</button>
+<button class="px-4 py-1.5 rounded-full text-[#FF5A1F] bg-[#FF5A1F]/10 font-body-md text-body-md font-semibold transition-colors">催单</button>
+</div>
+</div>
+<!-- Order Card 3: Pending Payment -->
+<div class="bg-surface-white w-full p-4 flex flex-col gap-3">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center overflow-hidden">
+<img alt="Restaurant Logo" class="w-full h-full object-cover" data-alt="A small square logo image showing a colorful bubble tea drink with tapioca pearls at the bottom." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFlZRK0eIhBeVv0YGAhINbKkHBDMP1zzomHoSY6T-63AZCgOMkSmnx-NqL1ALU7h4BMS6qSNmrj5rRw5C8b_iTReYg1Wf8GY-feAOTvzu_mojld18QrxQS1DEhUiiqaC150hBt5Bq3JgfNohcZTISiedvEBGATe3hu3HmeohVmssKIT3YsWA20AaxFIEMxNXnY8TQ8CPhOHlup_9XXZBsaWjiTj-no0UcCKJCrZ6Y1H8BAkIRCc64yFn3dFCCOOuXs7tnE_iO1Rglq"/>
+</div>
+<span class="font-body-md text-body-md font-semibold text-on-surface">一点点 (东区商业街)</span>
+<span class="material-symbols-outlined text-text-tertiary text-sm" data-icon="chevron_right">chevron_right</span>
+</div>
+<span class="font-label-md text-label-md text-error font-medium">待支付 (14:59)</span>
+</div>
+<div class="flex gap-3 items-center">
+<div class="w-14 h-14 rounded overflow-hidden shrink-0">
+<img alt="Product Thumbnail" class="w-full h-full object-cover" data-alt="A small square logo image showing a colorful bubble tea drink with tapioca pearls at the bottom." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFlZRK0eIhBeVv0YGAhINbKkHBDMP1zzomHoSY6T-63AZCgOMkSmnx-NqL1ALU7h4BMS6qSNmrj5rRw5C8b_iTReYg1Wf8GY-feAOTvzu_mojld18QrxQS1DEhUiiqaC150hBt5Bq3JgfNohcZTISiedvEBGATe3hu3HmeohVmssKIT3YsWA20AaxFIEMxNXnY8TQ8CPhOHlup_9XXZBsaWjiTj-no0UcCKJCrZ6Y1H8BAkIRCc64yFn3dFCCOOuXs7tnE_iO1Rglq"/>
+</div>
+<div class="flex-1 flex flex-col gap-1">
+<span class="font-body-md text-body-md text-on-surface line-clamp-1">波霸奶茶 (大杯/正常糖/少冰) x2</span>
+<span class="font-label-md text-label-md text-text-secondary">2023-10-25 15:20</span>
+</div>
+<div class="flex flex-col items-end shrink-0">
+<span class="font-body-lg text-body-lg font-bold text-on-surface">¥32.00</span>
+<span class="font-label-md text-label-md text-text-secondary">共2件</span>
+</div>
+</div>
+<div class="flex justify-end gap-2 pt-1">
+<button class="px-4 py-1.5 rounded-full bg-surface-container text-on-surface font-body-md text-body-md transition-colors">取消订单</button>
+<button class="px-4 py-1.5 rounded-full text-[#FF5A1F] bg-[#FF5A1F]/10 font-body-md text-body-md font-semibold transition-colors">立即支付</button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface-white h-16 px-base pb-safe border-t border-border-light">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-secondary hover:bg-secondary-container/30 rounded p-2 transition-transform duration-150 active:scale-90 scale-95 w-16" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">首页</span>
+</a>
+<!-- Messages -->
+<a class="flex flex-col items-center justify-center text-secondary hover:bg-secondary-container/30 rounded p-2 transition-transform duration-150 active:scale-90 scale-95 w-16" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-label-sm text-label-sm">消息</span>
+</a>
+<!-- Orders (Active) -->
+<a class="flex flex-col items-center justify-center text-[#FF5A1F] font-semibold hover:bg-secondary-container/30 rounded p-2 transition-transform duration-150 active:scale-90 scale-95 w-16" href="#">
+<span class="material-symbols-outlined icon-fill mb-1" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-sm text-label-sm">订单</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-secondary hover:bg-secondary-container/30 rounded p-2 transition-transform duration-150 active:scale-90 scale-95 w-16" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">我的</span>
+</a>
+</nav>
+<script>
+        // Simple script to handle tab clicks visually
+        document.querySelectorAll('nav ul li').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active classes from all tabs
+                document.querySelectorAll('nav ul li').forEach(t => {
+                    t.classList.remove('text-[#FF5A1F]', 'border-b-2', 'border-[#FF5A1F]', 'font-semibold');
+                    t.classList.add('text-secondary');
+                });
+                // Add active classes to clicked tab
+                this.classList.remove('text-secondary');
+                this.classList.add('text-[#FF5A1F]', 'border-b-2', 'border-[#FF5A1F]', 'font-semibold');
+            });
+        });
+    </script>
+</body></html>

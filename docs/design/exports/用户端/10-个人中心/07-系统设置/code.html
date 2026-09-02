@@ -1,0 +1,226 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>系统设置 - 饿了么</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed": "#351000",
+                      "tertiary-container": "#f46500",
+                      "on-background": "#1a1c1c",
+                      "border-light": "#E5E5E5",
+                      "on-surface-variant": "#5b4038",
+                      "surface-variant": "#e2e2e2",
+                      "surface-dim": "#dadada",
+                      "inverse-on-surface": "#f1f1f1",
+                      "inverse-surface": "#2f3131",
+                      "on-error": "#ffffff",
+                      "tertiary-fixed-dim": "#ffb694",
+                      "secondary": "#5f5e5e",
+                      "on-primary-container": "#541400",
+                      "text-tertiary": "#999999",
+                      "text-secondary": "#666666",
+                      "surface-bright": "#f9f9f9",
+                      "primary-container": "#ff5a1f",
+                      "on-secondary-fixed": "#1b1c1c",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-tint": "#ae3200",
+                      "surface-white": "#FFFFFF",
+                      "on-primary-fixed-variant": "#852400",
+                      "background": "#f9f9f9",
+                      "on-tertiary-fixed-variant": "#7b2f00",
+                      "primary": "#ae3200",
+                      "tertiary": "#a14000",
+                      "surface-container": "#eeeeee",
+                      "outline-variant": "#e4beb3",
+                      "on-primary-fixed": "#3a0b00",
+                      "error-container": "#ffdad6",
+                      "on-surface": "#1a1c1c",
+                      "error": "#ba1a1a",
+                      "tertiary-fixed": "#ffdbcc",
+                      "primary-fixed-dim": "#ffb59e",
+                      "inverse-primary": "#ffb59e",
+                      "secondary-fixed-dim": "#c8c6c6",
+                      "on-tertiary-container": "#4d1b00",
+                      "on-primary": "#ffffff",
+                      "on-secondary-container": "#656464",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "surface-container-high": "#e8e8e8",
+                      "surface-container-highest": "#e2e2e2",
+                      "outline": "#8f7067",
+                      "on-secondary-fixed-variant": "#474747",
+                      "primary-fixed": "#ffdbd0",
+                      "surface-container-low": "#f3f3f3",
+                      "secondary-fixed": "#e4e2e1",
+                      "secondary-container": "#e4e2e1",
+                      "surface": "#f9f9f9"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "padding-card": "10px",
+                      "gutter": "8px",
+                      "margin-page": "12px",
+                      "base": "4px",
+                      "gap-module": "12px"
+              },
+              "fontFamily": {
+                      "body-lg": [
+                              "beVietnamPro"
+                      ],
+                      "label-md": [
+                              "beVietnamPro"
+                      ],
+                      "headline-md": [
+                              "beVietnamPro"
+                      ],
+                      "headline-lg": [
+                              "beVietnamPro"
+                      ],
+                      "cta-button": [
+                              "beVietnamPro"
+                      ],
+                      "body-md": [
+                              "beVietnamPro"
+                      ],
+                      "label-sm": [
+                              "beVietnamPro"
+                      ]
+              },
+              "fontSize": {
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "22px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "cta-button": [
+                              "16px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "10px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+<!-- Custom TopAppBar for Settings (Back Button + Title) -->
+<header class="bg-surface-white fixed top-0 w-full z-50 border-b border-border-light flex justify-between items-center h-14 px-margin-page w-full flat no shadows">
+<button aria-label="Go back" class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors duration-200 active:opacity-80 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface flex-1 text-center pr-10">系统设置</h1>
+</header>
+<!-- Main Content -->
+<main class="flex-1 mt-14 pt-gap-module px-margin-page pb-24">
+<!-- Settings List Container -->
+<div class="bg-surface-white border border-border-light rounded-xl overflow-hidden shadow-sm">
+<!-- List Item: Profile -->
+<button class="w-full flex items-center justify-between p-4 bg-surface-white hover:bg-surface-container-low transition-colors active:bg-surface-container-high group border-b border-border-light">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary group-hover:text-primary transition-colors">person</span>
+<span class="font-body-lg text-body-lg text-on-surface">个人资料</span>
+</div>
+<span class="material-symbols-outlined text-border-light">chevron_right</span>
+</button>
+<!-- List Item: Notifications -->
+<button class="w-full flex items-center justify-between p-4 bg-surface-white hover:bg-surface-container-low transition-colors active:bg-surface-container-high group border-b border-border-light">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary group-hover:text-primary transition-colors">notifications</span>
+<span class="font-body-lg text-body-lg text-on-surface">通知设置</span>
+</div>
+<span class="material-symbols-outlined text-border-light">chevron_right</span>
+</button>
+<!-- List Item: Privacy -->
+<button class="w-full flex items-center justify-between p-4 bg-surface-white hover:bg-surface-container-low transition-colors active:bg-surface-container-high group border-b border-border-light">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary group-hover:text-primary transition-colors">lock</span>
+<span class="font-body-lg text-body-lg text-on-surface">隐私设置</span>
+</div>
+<span class="material-symbols-outlined text-border-light">chevron_right</span>
+</button>
+<!-- List Item: About -->
+<button class="w-full flex items-center justify-between p-4 bg-surface-white hover:bg-surface-container-low transition-colors active:bg-surface-container-high group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary group-hover:text-primary transition-colors">info</span>
+<span class="font-body-lg text-body-lg text-on-surface">关于饿了么</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-text-tertiary">v11.0.4</span>
+<span class="material-symbols-outlined text-border-light">chevron_right</span>
+</div>
+</button>
+</div>
+<!-- Logout Button -->
+<div class="mt-8">
+<button class="w-full py-4 bg-surface-white border rounded-lg font-cta-button text-cta-button transition-colors active:scale-95 duration-150 flex items-center justify-center gap-2 border-primary-container text-primary-container hover:bg-primary-fixed">
+<span class="material-symbols-outlined">logout</span>
+                退出登录
+            </button>
+</div>
+</main>
+<!-- Navigation Suppressed for Settings Screen as per rules -->
+
+
+</body></html>

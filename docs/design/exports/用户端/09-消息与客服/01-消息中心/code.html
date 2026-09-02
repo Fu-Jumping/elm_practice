@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>消息页 - CampusBites</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed": "#ffdbcc",
+                      "surface-container": "#eeeeee",
+                      "secondary": "#5f5e5e",
+                      "primary-container": "#ff5a1f",
+                      "surface-tint": "#ae3200",
+                      "primary": "#ae3200",
+                      "on-error": "#ffffff",
+                      "on-secondary-fixed-variant": "#474747",
+                      "error-container": "#ffdad6",
+                      "on-primary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "on-surface": "#1a1c1c",
+                      "secondary-container": "#e4e2e1",
+                      "on-secondary-fixed": "#1b1c1c",
+                      "on-tertiary-container": "#4d1b00",
+                      "inverse-surface": "#2f3131",
+                      "tertiary": "#a14000",
+                      "outline-variant": "#e4beb3",
+                      "inverse-primary": "#ffb59e",
+                      "on-primary-fixed": "#3a0b00",
+                      "surface-bright": "#f9f9f9",
+                      "on-tertiary-fixed-variant": "#7b2f00",
+                      "surface-container-highest": "#e2e2e2",
+                      "secondary-fixed-dim": "#c8c6c6",
+                      "background": "#f9f9f9",
+                      "error": "#ba1a1a",
+                      "primary-fixed": "#ffdbd0",
+                      "tertiary-container": "#f46500",
+                      "surface-container-low": "#f3f3f3",
+                      "on-background": "#1a1c1c",
+                      "on-primary-fixed-variant": "#852400",
+                      "border-light": "#E5E5E5",
+                      "secondary-fixed": "#e4e2e1",
+                      "surface-white": "#FFFFFF",
+                      "surface-variant": "#e2e2e2",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-high": "#e8e8e8",
+                      "surface": "#f9f9f9",
+                      "primary-fixed-dim": "#ffb59e",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-fixed-dim": "#ffb694",
+                      "on-tertiary-fixed": "#351000",
+                      "on-secondary": "#ffffff",
+                      "surface-dim": "#dadada",
+                      "text-tertiary": "#999999",
+                      "outline": "#8f7067",
+                      "on-surface-variant": "#5b4038",
+                      "on-primary-container": "#541400",
+                      "inverse-on-surface": "#f1f1f1",
+                      "text-secondary": "#666666",
+                      "on-secondary-container": "#656464"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "margin-page": "12px",
+                      "base": "4px",
+                      "padding-card": "10px",
+                      "gutter": "8px",
+                      "gap-module": "12px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "beVietnamPro"
+                      ],
+                      "cta-button": [
+                              "beVietnamPro"
+                      ],
+                      "body-md": [
+                              "beVietnamPro"
+                      ],
+                      "body-lg": [
+                              "beVietnamPro"
+                      ],
+                      "headline-lg": [
+                              "beVietnamPro"
+                      ],
+                      "label-sm": [
+                              "beVietnamPro"
+                      ],
+                      "label-md": [
+                              "beVietnamPro"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "cta-button": [
+                              "16px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "22px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-sm": [
+                              "10px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-20 md:pb-0">
+<!-- TopAppBar -->
+<header class="w-full sticky top-0 z-50 bg-surface dark:bg-surface-dim border-b border-outline-variant dark:border-outline flex items-center justify-between px-margin-page h-14 w-full">
+<button class="text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full active:opacity-80 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-lg text-headline-lg font-bold text-primary dark:text-primary-fixed">消息</h1>
+<button class="text-primary dark:text-primary-fixed hover:bg-surface-container-low transition-colors p-2 rounded-full active:opacity-80 transition-opacity flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+</header>
+<main class="py-gap-module flex flex-col gap-module max-w-3xl mx-auto w-full">
+<!-- Notification Section -->
+<section class="border border-border-light rounded-xl overflow-hidden flex flex-col">
+<div class="py-3 flex items-center gap-3 border-b border-border-light last:border-b-0 hover:bg-surface-container-low transition-colors cursor-pointer active:opacity-80 transition-opacity px-4">
+<div class="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined" data-icon="local_shipping">local_shipping</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-1">
+<h3 class="font-body-lg text-body-lg text-on-surface truncate">订单状态</h3>
+<span class="font-label-sm text-label-sm text-text-tertiary whitespace-nowrap ml-2">刚刚</span>
+</div>
+<p class="font-body-md text-body-md text-text-secondary truncate">您的订单正在配送中</p>
+</div>
+</div>
+<div class="py-3 flex items-center gap-3 border-b border-border-light last:border-b-0 hover:bg-surface-container-low transition-colors cursor-pointer active:opacity-80 transition-opacity px-4">
+<div class="w-10 h-10 rounded-full bg-tertiary-container/10 flex items-center justify-center text-tertiary shrink-0">
+<span class="material-symbols-outlined" data-icon="loyalty">loyalty</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-1">
+<h3 class="font-body-lg text-body-lg text-on-surface truncate">优惠活动</h3>
+<span class="font-label-sm text-label-sm text-text-tertiary whitespace-nowrap ml-2">1小时前</span>
+</div>
+<p class="font-body-md text-body-md text-text-secondary truncate">您收到一张5元优惠券</p>
+</div>
+</div>
+<div class="py-3 flex items-center gap-3 border-b border-border-light last:border-b-0 hover:bg-surface-container-low transition-colors cursor-pointer active:opacity-80 transition-opacity px-4">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant shrink-0">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-1">
+<h3 class="font-body-lg text-body-lg text-on-surface truncate">系统通知</h3>
+<span class="font-label-sm text-label-sm text-text-tertiary whitespace-nowrap ml-2">2小时前</span>
+</div>
+<p class="font-body-md text-body-md text-text-secondary truncate">会员权益已激活</p>
+</div>
+</div>
+</section>
+<!-- Merchant Conversations Section -->
+<section class="flex flex-col gap-base">
+<h2 class="font-headline-md text-headline-md text-on-surface mt-2 px-4">商家会话</h2>
+<div class="border border-border-light rounded-xl overflow-hidden flex flex-col">
+<!-- Conversation Item 1 -->
+<div class="px-4 py-3 flex items-center gap-3 border-b border-border-light last:border-b-0 hover:bg-surface-container-low transition-colors cursor-pointer active:opacity-80 transition-opacity relative">
+<div class="relative shrink-0">
+<img alt="KFC logo placeholder" class="w-12 h-12 rounded-lg object-cover border border-border-light bg-surface-container" data-alt="A close up, high quality studio shot of a delicious fast food burger and fries on a modern white plate, bright lighting, corporate food photography style, white background, conveying quality and efficiency." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLcPZN5x4FCvt21ehTZsI6fBdWcgIg3QkHJLHsGq8mK7Wd4Hpyok9B9obUYCyZuXTN4kNQ5JwxnkhAeuPk1uknA5jxj00JnE-zvA93OlpMw-gZOF1_MiTVD_6e565XimpFHE3TSXj_6FXNJNf_pJD1WCobQuXWXz5gbIQRPlLnpexKOZTf3c47urL6QQTpPmLgHi1ZFZwZIA2FE83L03g9Ig-Os4RtN_aBnCwKForGIiK8IuKR3AK09icVWLTrihQDfXOm5ikmHaeW"/>
+<div class="absolute -top-1 -right-1 w-4 h-4 bg-error text-on-error rounded-full flex items-center justify-center font-label-sm text-label-sm border border-surface-white">1</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-1">
+<h3 class="font-body-lg text-body-lg text-on-surface truncate font-semibold">KFC</h3>
+<span class="font-label-sm text-label-sm text-primary font-medium whitespace-nowrap ml-2">2分钟前</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface truncate font-medium">您的汉堡已准备好</p>
+</div>
+</div>
+<!-- Conversation Item 2 -->
+<div class="px-4 py-3 flex items-center gap-3 border-b border-border-light last:border-b-0 hover:bg-surface-container-low transition-colors cursor-pointer active:opacity-80 transition-opacity relative">
+<img alt="Old Wang's Shop logo placeholder" class="w-12 h-12 rounded-lg object-cover border border-border-light bg-surface-container shrink-0" data-alt="A steaming bowl of traditional noodles with vibrant toppings, captured in bright, even lighting on a clean white table, reflecting a modern local eatery aesthetic, high resolution." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgMI4CCNKPjXR3_wIbFAeHRZ3jwWnaFQmyj954sulWpqyX6zjjwPLcUUFloXXJQ9Q-r3owgSL0vKXZfXIguBSGqJoQN2lsOMmAEETf593Xq-G6brng-rjWr0tThnHZp3aUZFCLGqTqPgaHyljtBh10AsuH3xItVxYzXeLExAqKyJHALqPCkl0LzoBwb9ffd3vBMRxfbRlu5jsBz6cgLmnGp1OEA1nztvV7HDxeIG6k48ATBFzqTCGt8_frh2TozUNzHd2zS0jz_b2u"/>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-1">
+<h3 class="font-body-lg text-body-lg text-on-surface truncate">Old Wang's Shop</h3>
+<span class="font-label-sm text-label-sm text-text-tertiary whitespace-nowrap ml-2">15分钟前</span>
+</div>
+<p class="font-body-md text-body-md text-text-secondary truncate">好的，已按要求加酱</p>
+</div>
+</div>
+<!-- Conversation Item 3 -->
+<div class="px-4 py-3 flex items-center gap-3 border-b border-border-light last:border-b-0 hover:bg-surface-container-low transition-colors cursor-pointer active:opacity-80 transition-opacity relative">
+<img alt="McDonald's logo placeholder" class="w-12 h-12 rounded-lg object-cover border border-border-light bg-surface-container shrink-0 opacity-80" data-alt="A pristine shot of a classic fast food meal combo, fries and a drink, set against a seamless light gray background, lit with softbox studio lighting, perfectly styled for commercial use." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJ6JtNQIujra2AAtAGG03XSEgjrfwJlSLhFvPLnuNkHvMUv5Tq5PNLmXXJGDz6LzMOr60T19DTLu9-9HB4N6b0juWuHNWW_N6_zN532wWaKnhKUlsJbQ8nOPUqfKqshUtjH6pDseczFgHRdwi1f7qjUHVbRVXcUxEzJ9RYdQMUK8ykETTzy1S0r5NN0ENvL75slB5qVl7XTKdLnT5cfeS83w6CUkPWoI6B8Ngn06coK3BULDZLhaWQw4z-MSwycXJq0z-NsZRFPxB1"/>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-1">
+<h3 class="font-body-lg text-body-lg text-on-surface truncate">McDonald's</h3>
+<span class="font-label-sm text-label-sm text-text-tertiary whitespace-nowrap ml-2">昨天</span>
+</div>
+<p class="font-body-md text-body-md text-text-tertiary truncate">感谢您的订购</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 bg-surface-white dark:bg-surface-container-lowest border-t border-outline-variant dark:border-outline flex justify-around items-center w-full px-base py-2">
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim p-1 hover:bg-surface-container transition-colors active:scale-95 transition-transform duration-150 rounded-xl w-16" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">首页</span>
+</a>
+<a class="flex flex-col items-center justify-center dark:text-primary-fixed-dim rounded-xl p-1 hover:bg-surface-container transition-colors active:scale-95 transition-transform duration-150 w-16" href="#" style="color: #FF5A1F; background-color: rgba(255, 90, 31, 0.1);">
+<span class="material-symbols-outlined mb-1" data-icon="chat_bubble" style='font-variation-settings: "FILL" 1;'>chat_bubble</span>
+<span class="font-label-sm text-label-sm font-medium">消息</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim p-1 hover:bg-surface-container transition-colors active:scale-95 transition-transform duration-150 rounded-xl w-16" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-sm text-label-sm">订单</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim p-1 hover:bg-surface-container transition-colors active:scale-95 transition-transform duration-150 rounded-xl w-16" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">我的</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>商品列表 - 校园外卖商家后台</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=PingFang+SC:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#ffba4b",
+                        "secondary-container": "#fdaf1e",
+                        "surface-variant": "#dfe2eb",
+                        "on-primary-fixed-variant": "#852400",
+                        "surface": "#f8f9ff",
+                        "on-surface-variant": "#5b4038",
+                        "tertiary": "#006d37",
+                        "on-primary-fixed": "#3a0b00",
+                        "primary-fixed": "#ffdbd0",
+                        "tertiary-fixed-dim": "#6add8d",
+                        "primary-container": "#ff5a1f",
+                        "inverse-primary": "#ffb59e",
+                        "on-tertiary-fixed-variant": "#005228",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#ae3200",
+                        "primary-fixed-dim": "#ffb59e",
+                        "on-tertiary-container": "#003316",
+                        "surface-container-low": "#f1f3fc",
+                        "outline": "#8f7067",
+                        "inverse-surface": "#2d3137",
+                        "surface-container-highest": "#dfe2eb",
+                        "primary": "#ae3200",
+                        "on-secondary-fixed": "#291800",
+                        "error-container": "#ffdad6",
+                        "background": "#f8f9ff",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#624000",
+                        "on-primary-container": "#541400",
+                        "on-surface": "#181c22",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-secondary-container": "#6a4600",
+                        "outline-variant": "#e4beb3",
+                        "on-background": "#181c22",
+                        "secondary": "#815600",
+                        "error": "#ba1a1a",
+                        "surface-container-high": "#e5e8f0",
+                        "tertiary-fixed": "#86faa7",
+                        "inverse-on-surface": "#eef1f9",
+                        "on-tertiary-fixed": "#00210c",
+                        "surface-dim": "#d7dae2",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed": "#ffddb1",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container": "#ebeef6",
+                        "tertiary-container": "#2da65d",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "page-margin": "16px",
+                        "card-padding": "12px",
+                        "item-gap": "8px",
+                        "module-gap": "12px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "card-title": ["PingFang SC"],
+                        "label-table": ["PingFang SC"],
+                        "page-title": ["PingFang SC"],
+                        "body-main": ["PingFang SC"],
+                        "caption-muted": ["PingFang SC"],
+                        "currency-display": ["PingFang SC"],
+                        "section-title": ["PingFang SC"]
+                    },
+                    "fontSize": {
+                        "card-title": ["15px", { "lineHeight": "22px", "fontWeight": "600" }],
+                        "label-table": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "page-title": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-main": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+                        "caption-muted": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "currency-display": ["15px", { "lineHeight": "22px", "fontWeight": "700" }],
+                        "section-title": ["18px", { "lineHeight": "26px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #f7f7f7; }
+        /* Custom Checkbox/Switch overrides */
+        input[type="checkbox"].toggle {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 36px;
+            height: 20px;
+            background: #d1d5db;
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+            outline: none;
+        }
+        input[type="checkbox"].toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+        input[type="checkbox"].toggle:checked {
+            background: #ff5a1f;
+        }
+        input[type="checkbox"].toggle:checked::after {
+            left: 18px;
+        }
+    </style>
+</head>
+<body class="font-body-main text-on-surface antialiased h-screen overflow-hidden flex">
+<!-- SideNavBar -->
+<nav class="bg-surface dark:bg-inverse-surface text-primary dark:text-primary-fixed font-body-main text-body-main fixed left-0 top-0 h-full w-[220px] border-r border-outline-variant dark:border-outline flex flex-col h-full py-4 z-20 shadow-sm">
+<div class="px-6 mb-8">
+<h1 class="font-page-title text-page-title text-primary dark:text-primary-fixed flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">storefront</span>
+                校园外卖商家后台
+            </h1>
+<p class="font-caption-muted text-caption-muted text-on-surface-variant mt-1">店铺管理端</p>
+</div>
+<div class="flex-1 flex flex-col gap-2 px-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span>订单</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary dark:text-primary-fixed bg-secondary-container dark:bg-on-secondary-fixed-variant font-bold border-r-4 border-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span>商品</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">category</span>
+<span>分类</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>店铺设置</span>
+</a>
+</div>
+<div class="mt-auto px-2 flex flex-col gap-2 pt-4 border-t border-outline-variant/30 mx-2">
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant/70 text-sm hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[18px]">dashboard</span>
+<span>概览 (二期)</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant/70 text-sm hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[18px]">notifications</span>
+<span>消息 (二期)</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant/70 text-sm hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[18px]">analytics</span>
+<span>统计 (二期)</span>
+</a>
+</div>
+</nav>
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-inverse-surface text-primary dark:text-primary-fixed font-section-title text-section-title fixed top-0 right-0 h-[56px] left-[220px] border-b border-outline-variant dark:border-outline flex justify-between items-center px-6 z-10 shadow-sm bg-white/90 backdrop-blur-md">
+<div class="flex items-center gap-4">
+<h2 class="font-section-title text-section-title text-on-surface dark:text-inverse-on-surface">校园外卖商家后台</h2>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 text-sm text-[#006d37] bg-[#006d37]/10 px-3 py-1 rounded-full border border-[#006d37]/20">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">fiber_manual_record</span>
+<span class="font-bold">营业中</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant">
+<img alt="Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJLZJJ502xAvjo757UE9-PeeIFPwklU-n220tgJH6TJv0TGdEnIH-W4ZgAHullSnQs01Iqvw0uzC2WR2KP-fY-v6xhA7b75KfrQGSYmQgqU-roLI8z2YMVisZzYjmOUiW8wymRNrKGAcGeDBJxH2cSP8GWPgOTkB_iFwIE6ZT8apTonkIbbXxOow5gHOAjdkDdkzv99nS2VrIZR0L0KUs_Q3gZoSyjvIbvSYtyYVLrr2Pw6no3XFBa4g"/>
+</div>
+<span class="font-body-main text-body-main text-on-surface">账号名</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed cursor-pointer transition-opacity active:opacity-80 flex items-center justify-center p-2 rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined">logout</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 ml-[220px] mt-[56px] p-page-margin overflow-y-auto h-[calc(100vh-56px)]">
+<div class="max-w-6xl mx-auto space-y-module-gap">
+<!-- Header Section -->
+<div>
+<h1 class="font-page-title text-page-title text-on-surface">商品列表</h1>
+<p class="font-body-main text-body-main text-on-surface-variant mt-1">管理本店铺在售商品与库存。</p>
+</div>
+<!-- Toolbar -->
+<div class="flex justify-between items-center bg-surface-container-lowest p-card-padding rounded-lg border border-[#e5e5e5]">
+<div class="flex items-center gap-item-gap">
+<label class="font-label-table text-label-table text-on-surface-variant" for="category-filter">所属分类:</label>
+<div class="relative">
+<select class="appearance-none bg-surface-container-lowest border border-[#e5e5e5] rounded font-body-main text-body-main text-on-surface py-1.5 pl-3 pr-8 focus:outline-none focus:border-[#ff5a1f] focus:ring-2 focus:ring-[#ff5a1f]/10 transition-colors" id="category-filter">
+<option>全部分类</option>
+<option>热销爆款</option>
+<option>单人套餐</option>
+<option>饮品</option>
+<option>甜点</option>
+<option>小食</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[20px]">arrow_drop_down</span>
+</div>
+</div>
+<button class="bg-[#ff5a1f] hover:bg-[#ae3200] text-white font-body-main text-body-main py-2 px-4 rounded transition-colors flex items-center gap-2 shadow-sm">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                    新增商品
+                </button>
+</div>
+<!-- Table Card -->
+<div class="bg-surface-container-lowest rounded-lg border border-[#e5e5e5] overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead class="bg-[#f3f3f3]">
+<tr>
+<th class="font-label-table text-label-table text-[#6b7280] font-medium py-2 px-4 border-b border-[#e5e5e5] w-1/3">商品名称</th>
+<th class="font-label-table text-label-table text-[#6b7280] font-medium py-2 px-4 border-b border-[#e5e5e5] w-1/6">分类</th>
+<th class="font-label-table text-label-table text-[#6b7280] font-medium py-2 px-4 border-b border-[#e5e5e5] text-right w-1/8">价格</th>
+<th class="font-label-table text-label-table text-[#6b7280] font-medium py-2 px-4 border-b border-[#e5e5e5] text-right w-1/8">库存</th>
+<th class="font-label-table text-label-table text-[#6b7280] font-medium py-2 px-4 border-b border-[#e5e5e5] w-1/6">状态</th>
+<th class="font-label-table text-label-table text-[#6b7280] font-medium py-2 px-4 border-b border-[#e5e5e5] w-[80px]">上架</th>
+<th class="font-label-table text-label-table text-[#6b7280] font-medium py-2 px-4 border-b border-[#e5e5e5] w-[80px]">操作</th>
+</tr>
+</thead>
+<tbody class="font-body-main text-body-main text-on-surface">
+<!-- Row 1 -->
+<tr class="hover:bg-[#fff1eb] transition-colors border-b border-[#e5e5e5]">
+<td class="py-2 px-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-cover bg-center border border-outline-variant shrink-0" data-alt="A close up, studio lit photo of a delicious crispy fried chicken burger, modern light mode aesthetic, sharp focus, clean background." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCz7RXUFli__1MTGnLzj2TJ-OMtrHzAQPRIr3rr9ZYQBiv_iVo636mXSBk_uoAgNRKCXMWSGU6yTdBAfARQIXVOa1_aDhKY50yBalRRI5bQW1u8WOC86KR1X_JldM_Jy3ntwo_4uYnu1FfhDTuEmN2coxsrEZeTPnDt-lLZI0BMFjCtcLgjmp60GorAkOdbk3HDKUfZdwAn5B4C6pZcpP3Kh5G94aWRw0Y-esOc-So-DIW2H1nbOlz9lw')"></div>
+<span class="font-medium truncate">香酥鸡腿堡套餐</span>
+</div>
+</td>
+<td class="py-2 px-4 text-on-surface-variant">单人套餐</td>
+<td class="py-2 px-4 text-right font-currency-display text-currency-display text-[#ff5a1f]">¥ 28.50</td>
+<td class="py-2 px-4 text-right">150</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#ff5a1f]/10 text-[#ff5a1f]">在售</span>
+</td>
+<td class="py-2 px-4">
+<input checked="" class="toggle" type="checkbox"/>
+</td>
+<td class="py-2 px-4">
+<button class="text-primary hover:text-primary-container font-medium transition-colors">编辑</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-[#fff1eb] transition-colors border-b border-[#e5e5e5]">
+<td class="py-2 px-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-cover bg-center border border-outline-variant shrink-0" data-alt="A refreshing cup of iced lemon tea with condensation on the glass, modern bright food photography, light mode style, studio lighting." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDGOYAzmchuMm-X_hhe5ebAJ1HpDIf9a4KZEnvDOQTTbVYS9Kcwa6ETVWeB9LPgqtvqwUP2bY1k6NQzQGQak9WIChAa5_I-_R8Sm9cLYOq-deRTw7AW09bhWrGEX3b68907PXA6qAGbBgvSmGj_4y9WA4dQJPlFYLED71A1BMxDx8-9TOSKNHMNAvRaEn1i8vegfrRsosxfBiWIqgMwrvA1963gfBMR_o6CW46WT4ZxwOGz7T40Tcyd1A')"></div>
+<span class="font-medium truncate">招牌手打柠檬茶</span>
+</div>
+</td>
+<td class="py-2 px-4 text-on-surface-variant">饮品</td>
+<td class="py-2 px-4 text-right font-currency-display text-currency-display text-[#ff5a1f]">¥ 12.00</td>
+<td class="py-2 px-4 text-right">99+</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#ff5a1f]/10 text-[#ff5a1f]">在售</span>
+</td>
+<td class="py-2 px-4">
+<input checked="" class="toggle" type="checkbox"/>
+</td>
+<td class="py-2 px-4">
+<button class="text-primary hover:text-primary-container font-medium transition-colors">编辑</button>
+</td>
+</tr>
+<!-- Row 3 (Sold Out) -->
+<tr class="hover:bg-[#fff1eb] transition-colors border-b border-[#e5e5e5]">
+<td class="py-2 px-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-cover bg-center border border-outline-variant shrink-0 opacity-70" data-alt="A portion of golden french fries in a paper carton, bright modern fast food photography, shallow depth of field, white background." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCnLlz-vW4vbt9R9mCUs9YkQO5lD83pNYvSUfZeHU_ahUt8Nq8X19rs__buMf6bGr0PU4HbHORmvZT-eFkWS0MKnyTSsIbFn9RGgGFtKreuggUU7PDyU68jQXQBCdwKO1m8od2R2cLZUHenwUphSPD_E1XF_Z-S9OzWILvR2OWY8LXAfOQqs3imooGYJmEX8hSSrsAPswJbi2ifVFQhZdV15I2Qduv08ZO1SJUPOt98ne7zS1nFAYtXLg')"></div>
+<span class="font-medium truncate text-on-surface-variant">大份黄金薯条</span>
+</div>
+</td>
+<td class="py-2 px-4 text-on-surface-variant">小食</td>
+<td class="py-2 px-4 text-right font-currency-display text-currency-display text-[#ff5a1f]">¥ 15.00</td>
+<td class="py-2 px-4 text-right text-[#ba1a1a] font-bold">0</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#ffdad6]/30 text-[#ba1a1a]">售罄</span>
+</td>
+<td class="py-2 px-4">
+<input checked="" class="toggle" type="checkbox"/>
+</td>
+<td class="py-2 px-4">
+<button class="text-primary hover:text-primary-container font-medium transition-colors">编辑</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-[#fff1eb] transition-colors border-b border-[#e5e5e5]">
+<td class="py-2 px-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-cover bg-center border border-outline-variant shrink-0" data-alt="A bowl of rich tonkotsu ramen with soft boiled egg and pork slices, overhead shot, modern food photography aesthetic, bright lighting." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAMh-lpZmvUsGnbQivMvaA2C9dVbCXyxYrUMK6NbSrVzym-k5nqixXcpnOV_kgLwfsjbnCpl5pzuYr-2w-6Rz7XU0scQeDi6xab1K20Op12cvierktZp8ctvTYXHB55udjZOn6BNYT1UjKD5UUpvbEQq-giNrstcA-2GkGPiRnakDeBOxFtVRnPkKLYmbiVPyH9-_3Zd6S5D3ceIzPA5Bn4hqmo3MQmAQW1fbMUcryYDKpEoyCCC43f0w')"></div>
+<span class="font-medium truncate">豚骨拉面</span>
+</div>
+</td>
+<td class="py-2 px-4 text-on-surface-variant">热销爆款</td>
+<td class="py-2 px-4 text-right font-currency-display text-currency-display text-[#ff5a1f]">¥ 32.00</td>
+<td class="py-2 px-4 text-right">45</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#ff5a1f]/10 text-[#ff5a1f]">在售</span>
+</td>
+<td class="py-2 px-4">
+<input checked="" class="toggle" type="checkbox"/>
+</td>
+<td class="py-2 px-4">
+<button class="text-primary hover:text-primary-container font-medium transition-colors">编辑</button>
+</td>
+</tr>
+<!-- Row 5 (Off shelf) -->
+<tr class="hover:bg-[#fff1eb] transition-colors border-b border-[#e5e5e5] bg-surface-container-low/50">
+<td class="py-2 px-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-cover bg-center border border-outline-variant shrink-0 opacity-50 grayscale" data-alt="A slice of creamy strawberry cheesecake on a white plate, pastel tones, bright lighting, modern cafe aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCLiomiEEyrFvi0SDXLyO7_atDzQeAdG-EBf0Rl933APHSGro7HTbQQR6mSqPyi-FXGjFmDksEZ-h1x_sl6_2GaxoNrjr6sW1S8vmeybQm809F2B16RA1ydUlQOxF-4dxU3yD9ddJ1uZO9p4ATt020tesqpidfu2TBs9vdwpORPUmppSAOoZCQLiLJSa8U7Qy6QV34e7u39Azsp44-oky4bANAbP5J9nvE7l4P4wr7Y5OrzJDj_ZEByPQ')"></div>
+<span class="font-medium truncate text-[#9ca3af]">草莓芝士蛋糕 (季节限定)</span>
+</div>
+</td>
+<td class="py-2 px-4 text-[#9ca3af]">甜点</td>
+<td class="py-2 px-4 text-right font-currency-display text-currency-display text-[#9ca3af]">¥ 22.00</td>
+<td class="py-2 px-4 text-right text-[#9ca3af]">0</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#e5e7eb] text-[#6b7280]">已下架</span>
+</td>
+<td class="py-2 px-4">
+<input class="toggle" type="checkbox"/>
+</td>
+<td class="py-2 px-4">
+<button class="text-primary hover:text-primary-container font-medium transition-colors">编辑</button>
+</td>
+</tr>
+<!-- Row 6 -->
+<tr class="hover:bg-[#fff1eb] transition-colors border-b border-[#e5e5e5]">
+<td class="py-2 px-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-cover bg-center border border-outline-variant shrink-0" data-alt="Spicy popcorn chicken bites in a takeaway box, appetizing warm lighting, modern food photography style, light mode." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC_7I8pka2WWG_kf9s-Wvp_n5uau8WwUNoS16Aplp9Zn4A8Dh1BX3eIojOciwvoN6mXEdaKxlJDMbEULPMIjQDUp9kDoiLg2CdzAn88mUn1cy4bgHKNiaBt60A_lyjyGo6mfn4w9za7rMvlQzA_fvr3YCtnuB92EhmgOMSLOi98IU78Jmb6lVNF3h0Zynbv8oByvj-7TnwPYBSMbaaiJ0xMCSs6Zf7dqxTxN3Qz-CcKaBFshqaf9bMNZw')"></div>
+<span class="font-medium truncate">劲辣鸡米花</span>
+</div>
+</td>
+<td class="py-2 px-4 text-on-surface-variant">小食</td>
+<td class="py-2 px-4 text-right font-currency-display text-currency-display text-[#ff5a1f]">¥ 18.00</td>
+<td class="py-2 px-4 text-right">120</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#ff5a1f]/10 text-[#ff5a1f]">在售</span>
+</td>
+<td class="py-2 px-4">
+<input checked="" class="toggle" type="checkbox"/>
+</td>
+<td class="py-2 px-4">
+<button class="text-primary hover:text-primary-container font-medium transition-colors">编辑</button>
+</td>
+</tr>
+<!-- Row 7 -->
+<tr class="hover:bg-[#fff1eb] transition-colors border-b border-[#e5e5e5]">
+<td class="py-2 px-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-cover bg-center border border-outline-variant shrink-0" data-alt="A plastic cup of iced matcha latte with milk gradient, bright cafe style lighting, clean white background, fresh vibe." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDNei4DaMRttE78rDYO9gVstO7Lem1zcMa1cyKkpnxO1a22bMCUAkZz7NY9CxzfovrA_LJxqCP4Xz-FM-2ZQbybMil8ypiirDeaXGi0iXel1Elq3HKXiI-WNtpoKfz3awTECUoASbp0DXRXwiy3tsQVmUHFpojGoh07lqm62dh2-ipClBvkdPDGw6WJUt1Bm4ziISuA4bff-0Q4A2brAfNBU9XUbegyUH0J9Ca-QIqc7-r-3QOdr_OpmA')"></div>
+<span class="font-medium truncate">冰摇鲜奶抹茶</span>
+</div>
+</td>
+<td class="py-2 px-4 text-on-surface-variant">饮品</td>
+<td class="py-2 px-4 text-right font-currency-display text-currency-display text-[#ff5a1f]">¥ 16.00</td>
+<td class="py-2 px-4 text-right">85</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#ff5a1f]/10 text-[#ff5a1f]">在售</span>
+</td>
+<td class="py-2 px-4">
+<input checked="" class="toggle" type="checkbox"/>
+</td>
+<td class="py-2 px-4">
+<button class="text-primary hover:text-primary-container font-medium transition-colors">编辑</button>
+</td>
+</tr>
+<!-- Row 8 (Sold Out) -->
+<tr class="hover:bg-[#fff1eb] transition-colors border-b border-[#e5e5e5]">
+<td class="py-2 px-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-cover bg-center border border-outline-variant shrink-0 opacity-70" data-alt="A classic beef bento box with rice and vegetables, Japanese style takeaway, top down view, modern bright photography." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuADNMtGljR784wDkl92aEFGzYNo2kd8x1cQu3hIVq0M22GM1bFiHEHtV7oYzBlsZ1BFBAmK7R4Whk5XCLlUYxUwoEk9obKQzMCg1z2kC-nQZ9Ust3XRBCrXZhOcWXmaq4bpXIRFng_sxSNYCJEbqvj1g2I_HwZrUHMK8O_hN2-P2CLP-PJlXJuu1ac4XksH-3RHo_vVuGBn4zAVgLbaehKSEv-oB3Q2Mg80Zvo0qSAPavecpbb9-8qE4A')"></div>
+<span class="font-medium truncate text-on-surface-variant">招牌肥牛便当</span>
+</div>
+</td>
+<td class="py-2 px-4 text-on-surface-variant">热销爆款</td>
+<td class="py-2 px-4 text-right font-currency-display text-currency-display text-[#ff5a1f]">¥ 26.00</td>
+<td class="py-2 px-4 text-right text-[#ba1a1a] font-bold">0</td>
+<td class="py-2 px-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#ffdad6]/30 text-[#ba1a1a]">售罄</span>
+</td>
+<td class="py-2 px-4">
+<input checked="" class="toggle" type="checkbox"/>
+</td>
+<td class="py-2 px-4">
+<button class="text-primary hover:text-primary-container font-medium transition-colors">编辑</button>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination -->
+<div class="bg-surface-container-lowest px-4 py-3 flex items-center justify-between border-t border-[#e5e5e5]">
+<div class="font-caption-muted text-caption-muted text-on-surface-variant">
+                        共 12 条，每页 10 条
+                    </div>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded text-[#d1d5db] cursor-not-allowed">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded bg-[#ff5a1f] text-white font-medium flex items-center justify-center text-sm">1</button>
+<button class="w-8 h-8 rounded bg-transparent hover:bg-surface-container text-on-surface font-medium flex items-center justify-center text-sm transition-colors">2</button>
+<button class="p-1 rounded text-on-surface hover:bg-surface-container transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<div class="h-8"></div> <!-- Spacer -->
+</div>
+</main>
+</body></html>

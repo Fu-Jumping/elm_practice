@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>校园外卖商家后台 - 商品列表空状态</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=PingFang+SC:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#ffba4b",
+                        "secondary-container": "#fdaf1e",
+                        "surface-variant": "#dfe2eb",
+                        "on-primary-fixed-variant": "#852400",
+                        "surface": "#f8f9ff",
+                        "on-surface-variant": "#5b4038",
+                        "tertiary": "#006d37",
+                        "on-primary-fixed": "#3a0b00",
+                        "primary-fixed": "#ffdbd0",
+                        "tertiary-fixed-dim": "#6add8d",
+                        "primary-container": "#ff5a1f",
+                        "inverse-primary": "#ffb59e",
+                        "on-tertiary-fixed-variant": "#005228",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#ae3200",
+                        "primary-fixed-dim": "#ffb59e",
+                        "on-tertiary-container": "#003316",
+                        "surface-container-low": "#f1f3fc",
+                        "outline": "#8f7067",
+                        "inverse-surface": "#2d3137",
+                        "surface-container-highest": "#dfe2eb",
+                        "primary": "#ae3200",
+                        "on-secondary-fixed": "#291800",
+                        "error-container": "#ffdad6",
+                        "background": "#f8f9ff",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#624000",
+                        "on-primary-container": "#541400",
+                        "on-surface": "#181c22",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-secondary-container": "#6a4600",
+                        "outline-variant": "#e4beb3",
+                        "on-background": "#181c22",
+                        "secondary": "#815600",
+                        "error": "#ba1a1a",
+                        "surface-container-high": "#e5e8f0",
+                        "tertiary-fixed": "#86faa7",
+                        "inverse-on-surface": "#eef1f9",
+                        "on-tertiary-fixed": "#00210c",
+                        "surface-dim": "#d7dae2",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed": "#ffddb1",
+                        "surface-bright": "#f8f9ff",
+                        "surface-container": "#ebeef6",
+                        "tertiary-container": "#2da65d",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "page-margin": "16px",
+                        "card-padding": "12px",
+                        "item-gap": "8px",
+                        "module-gap": "12px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "card-title": ["PingFang SC"],
+                        "label-table": ["PingFang SC"],
+                        "page-title": ["PingFang SC"],
+                        "body-main": ["PingFang SC"],
+                        "caption-muted": ["PingFang SC"],
+                        "currency-display": ["PingFang SC"],
+                        "section-title": ["PingFang SC"]
+                    },
+                    "fontSize": {
+                        "card-title": ["15px", { "lineHeight": "22px", "fontWeight": "600" }],
+                        "label-table": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "page-title": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-main": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+                        "caption-muted": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "currency-display": ["15px", { "lineHeight": "22px", "fontWeight": "700" }],
+                        "section-title": ["18px", { "lineHeight": "26px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #f7f7f7; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="font-body-main text-body-main text-on-surface antialiased min-h-screen">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-[220px] bg-surface dark:bg-inverse-surface border-r border-outline-variant dark:border-outline flex flex-col py-4 z-20">
+<!-- Header -->
+<div class="px-6 mb-8 flex flex-col items-center">
+<div class="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center mb-4 overflow-hidden border border-outline-variant">
+<img alt="Merchant Logo" class="object-cover w-full h-full" data-alt="A modern, minimalist logo design for a campus food delivery merchant, featuring an abstract orange flame or bowl icon on a clean white background, high contrast, vibrant energy, professional corporate style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuABaVLfMbTu8YUpHjPNEqqaAy6PGxVwd_ED-EIx3IAbv_5oyL7OzgM88dvV9Ve_Dwh2L_Mf66jjNpu4uXgChEazkygRHyh6EkD4kavfpflSCk48CpXQwtpwbKaHSqkuzLt5IxxH9viQq3s5p9aRib5ZDsm8bW5xUyJCDc4XPElLiU7KZOrWGggijuQLRWey5ExpLsebBHsklW9LndFG8OYngTFHgZP-QVFWbkpb8QuvSEHrrsMlaxvLoA"/>
+</div>
+<h1 class="font-page-title text-page-title text-primary dark:text-primary-fixed text-center w-full truncate" title="校园外卖商家后台">校园外卖商家后台</h1>
+<span class="font-caption-muted text-caption-muted text-on-surface-variant dark:text-surface-variant mt-1">店铺管理端</span>
+</div>
+<!-- Main Nav -->
+<div class="flex-1 flex flex-col space-y-2 px-3">
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">shopping_cart</span>
+<span class="font-card-title text-card-title">订单</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-lg text-primary dark:text-primary-fixed bg-secondary-container dark:bg-on-secondary-fixed-variant border-r-4 border-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="font-card-title text-card-title">商品</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">category</span>
+<span class="font-card-title text-card-title">分类</span>
+</a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">settings</span>
+<span class="font-card-title text-card-title">店铺设置</span>
+</a>
+</div>
+<!-- Footer Nav -->
+<div class="px-3 mt-auto pt-4 border-t border-outline-variant dark:border-outline space-y-2">
+<a class="flex items-center px-4 py-2 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200 opacity-60" href="#">
+<span class="material-symbols-outlined mr-3 text-[18px]">dashboard</span>
+<span class="font-caption-muted text-caption-muted">概览 (二期)</span>
+</a>
+<a class="flex items-center px-4 py-2 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200 opacity-60" href="#">
+<span class="material-symbols-outlined mr-3 text-[18px]">notifications</span>
+<span class="font-caption-muted text-caption-muted">消息 (二期)</span>
+</a>
+<a class="flex items-center px-4 py-2 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200 opacity-60" href="#">
+<span class="material-symbols-outlined mr-3 text-[18px]">analytics</span>
+<span class="font-caption-muted text-caption-muted">统计 (二期)</span>
+</a>
+</div>
+</nav>
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 h-[56px] left-[220px] bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline flex justify-between items-center px-6 z-10">
+<div class="font-section-title text-section-title text-on-surface dark:text-inverse-on-surface hidden md:block">
+<!-- Left side empty or breadcrumbs if needed -->
+</div>
+<div class="flex items-center space-x-6">
+<div class="flex items-center space-x-2 text-tertiary-container dark:text-tertiary-fixed">
+<div class="w-2 h-2 rounded-full bg-current animate-pulse"></div>
+<span class="font-label-table text-label-table">营业中</span>
+</div>
+<div class="flex items-center space-x-4">
+<span class="font-body-main text-body-main text-on-surface dark:text-inverse-on-surface">账号名</span>
+<button class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors duration-200 flex items-center justify-center p-2 rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined">logout</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-[220px] mt-[56px] p-page-margin max-w-[1060px]">
+<!-- Page Header -->
+<div class="flex justify-between items-center mb-module-gap">
+<h2 class="font-section-title text-section-title text-on-surface">商品管理</h2>
+</div>
+<!-- Empty State Container -->
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant flex flex-col items-center justify-center py-32 px-6 h-[calc(100vh-160px)]">
+<!-- Illustration Placeholder -->
+<div class="w-48 h-48 mb-6 opacity-80" data-alt="A clean, modern flat illustration showing an empty open cardboard box or an empty store shelf, in muted gray and subtle orange tones, representing 'no products found', corporate style, white background, high clarity." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD9CA5FPny0kqQFlsUjbnY-Rya_GP1BzPwfNMjxA6xSY-Zwl9jgKt5bdKRvlhal-FKzqEwZssxKRdbKpk29fAMXfBrvwGWSVdNa6ruWKgJlbNL7WxsolB1GDjK_xR8Dd132pDRNZjMgnQrkG52BX5RNpwWbyzri8Tg0r4YsR1xo7NbIgzPjUZyGzXV9gRUEQ35rS1Mc4BcdcmMFGXfIsV-8W0PTt58nE7cw4sX5mRXIfaAVXcj5gtWaYg')"></div>
+<p class="font-card-title text-card-title text-on-surface-variant mb-6 text-center">暂无商品</p>
+<button class="bg-[#ff5a1f] text-white font-card-title text-card-title py-2 px-6 rounded hover:bg-primary transition-colors flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined mr-2 text-[20px]">add</span>
+                新增商品
+            </button>
+</div>
+</main>
+</body></html>

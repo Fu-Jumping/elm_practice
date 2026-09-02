@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>支付成功 - Ele.me</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=beVietnamPro:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#351000",
+                        "on-surface-variant": "#5b4038",
+                        "surface-dim": "#dadada",
+                        "tertiary": "#a14000",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#1a1c1c",
+                        "on-primary": "#ffffff",
+                        "surface": "#f9f9f9",
+                        "surface-white": "#FFFFFF",
+                        "outline-variant": "#e4beb3",
+                        "on-primary-container": "#541400",
+                        "surface-container-high": "#e8e8e8",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#852400",
+                        "tertiary-container": "#f46500",
+                        "inverse-primary": "#ffb59e",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "primary": "#ae3200",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "primary-fixed": "#ffdbd0",
+                        "surface-tint": "#ae3200",
+                        "on-error-container": "#93000a",
+                        "on-background": "#1a1c1c",
+                        "surface-container": "#eeeeee",
+                        "outline": "#8f7067",
+                        "surface-bright": "#f9f9f9",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "inverse-on-surface": "#f1f1f1",
+                        "text-secondary": "#666666",
+                        "on-tertiary-container": "#4d1b00",
+                        "primary-fixed-dim": "#ffb59e",
+                        "background": "#f9f9f9",
+                        "on-secondary-fixed-variant": "#474747",
+                        "on-primary-fixed": "#3a0b00",
+                        "surface-variant": "#e2e2e2",
+                        "inverse-surface": "#2f3131",
+                        "surface-container-low": "#f3f3f3",
+                        "secondary": "#5f5e5e",
+                        "text-tertiary": "#999999",
+                        "primary-container": "#ff5a1f",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#e4e2e1",
+                        "on-secondary-container": "#656464",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffdbcc",
+                        "secondary-fixed": "#e4e2e1",
+                        "surface-container-highest": "#e2e2e2",
+                        "border-light": "#E5E5E5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-page": "12px",
+                        "padding-card": "10px",
+                        "base": "4px",
+                        "gap-module": "12px",
+                        "gutter": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["beVietnamPro"],
+                        "body-lg": ["beVietnamPro"],
+                        "cta-button": ["beVietnamPro"],
+                        "label-md": ["beVietnamPro"],
+                        "headline-lg": ["beVietnamPro"],
+                        "headline-md": ["beVietnamPro"],
+                        "label-sm": ["beVietnamPro"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }],
+                        "cta-button": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #F7F7F7; }
+        /* Material symbols specific fill style */
+        .material-symbols-outlined[data-weight="fill"] { font-variation-settings: 'FILL' 1; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex flex-col font-body-md text-on-surface">
+<!-- Header / Success Banner (Full Bleed) -->
+<div class="w-full bg-surface-white flex flex-col items-center justify-center pt-12 pb-8 mb-gap-module">
+<div class="bg-primary-container rounded-full w-16 h-16 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-surface-white text-4xl" data-weight="fill">check_circle</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-2">支付成功</h1>
+<p class="font-headline-lg text-headline-lg font-bold text-on-surface">¥ 50.00</p>
+</div>
+<!-- Order Summary Card (Full Bleed) -->
+<div class="w-full bg-surface-white py-4 px-margin-page mb-gap-module flex flex-col gap-3">
+<div class="flex justify-between items-center w-full">
+<span class="font-body-md text-body-md text-text-secondary">订单编号</span>
+<span class="font-body-md text-body-md text-on-surface">ELM202310248888</span>
+</div>
+<div class="flex justify-between items-center w-full">
+<span class="font-body-md text-body-md text-text-secondary">支付方式</span>
+<span class="font-body-md text-body-md text-on-surface">支付宝</span>
+</div>
+<div class="flex justify-between items-center w-full">
+<span class="font-body-md text-body-md text-text-secondary">支付时间</span>
+<span class="font-body-md text-body-md text-on-surface">2023-10-24 12:30:05</span>
+</div>
+</div>
+<!-- Bonus / Promotion (Full Bleed) -->
+<div class="w-full bg-surface-white py-padding-card px-margin-page mb-gap-module flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="bg-primary-container/10 rounded-full p-2">
+<span class="material-symbols-outlined text-primary-container" data-weight="fill">loyalty</span>
+</div>
+<div>
+<p class="font-body-lg text-body-lg text-on-surface">获得 10 积分</p>
+<p class="font-label-md text-label-md text-text-secondary">下次下单可抵扣 ¥0.1</p>
+</div>
+</div>
+<button class="bg-primary-container/10 text-primary-container font-label-md text-label-md px-3 py-1.5 rounded-full">
+            查看积分
+        </button>
+</div>
+<!-- Actions (Full Bleed) -->
+<div class="w-full bg-surface-white py-6 px-margin-page mt-auto flex flex-col gap-4">
+<button class="w-full bg-primary-container text-surface-white font-cta-button text-cta-button py-3 rounded-lg text-center">
+            查看订单
+        </button>
+<button class="w-full bg-transparent text-text-secondary font-body-md text-body-md py-2 rounded-lg text-center">
+            回到首页
+        </button>
+</div>
+</body></html>

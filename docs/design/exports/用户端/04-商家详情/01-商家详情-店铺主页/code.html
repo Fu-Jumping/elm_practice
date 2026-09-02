@@ -1,0 +1,263 @@
+<!DOCTYPE html><html class="light" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#ba1a1a",
+                        "secondary-container": "#e4e2e1",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-primary-container": "#541400",
+                        "surface-container": "#eeeeee",
+                        "on-primary-fixed": "#3a0b00",
+                        "primary-fixed-dim": "#ffb59e",
+                        "on-background": "#1a1c1c",
+                        "surface-dim": "#dadada",
+                        "primary": "#ae3200",
+                        "on-surface": "#1a1c1c",
+                        "border-light": "#E5E5E5",
+                        "surface-white": "#FFFFFF",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-surface": "#2f3131",
+                        "inverse-primary": "#ffb59e",
+                        "on-secondary-fixed-variant": "#474747",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-container": "#f46500",
+                        "primary-fixed": "#ffdbd0",
+                        "on-secondary-container": "#656464",
+                        "surface": "#f9f9f9",
+                        "on-surface-variant": "#5b4038",
+                        "outline": "#8f7067",
+                        "surface-tint": "#ae3200",
+                        "background": "#f9f9f9",
+                        "outline-variant": "#e4beb3",
+                        "on-primary": "#ffffff",
+                        "tertiary": "#a14000",
+                        "text-secondary": "#666666",
+                        "on-tertiary-fixed": "#351000",
+                        "surface-bright": "#f9f9f9",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "surface-variant": "#e2e2e2",
+                        "primary-container": "#ff5a1f",
+                        "inverse-on-surface": "#f1f1f1",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "secondary-fixed": "#e4e2e1",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "surface-container-high": "#e8e8e8",
+                        "secondary": "#5f5e5e",
+                        "on-primary-fixed-variant": "#852400",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-error": "#ffffff",
+                        "surface-container-low": "#f3f3f3",
+                        "on-tertiary-container": "#4d1b00",
+                        "error-container": "#ffdad6",
+                        "text-tertiary": "#999999"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "4px",
+                        "lg": "6px",
+                        "xl": "8px",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "8px",
+                        "gap-module": "12px",
+                        "base": "4px",
+                        "padding-card": "12px",
+                        "margin-page": "12px"
+                    },
+                    "fontFamily": {
+                        "body": ["Be Vietnam Pro", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Be Vietnam Pro', sans-serif; -webkit-font-smoothing: antialiased; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .star-filled { font-variation-settings: 'FILL' 1; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface flex flex-col h-screen overflow-hidden m-0 p-0">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-[60] flex items-center justify-between px-margin-page h-12 w-full bg-surface-white border-b border-surface-container shrink-0">
+<div class="flex items-center p-1 cursor-pointer active:opacity-70">
+<span class="material-symbols-outlined text-primary-container text-xl" data-icon="arrow_back_ios">arrow_back_ios</span>
+</div>
+<div class="flex-1 text-center font-bold text-lg text-primary-container">饿了么</div>
+<div class="flex items-center p-1 cursor-pointer active:opacity-70">
+<span class="material-symbols-outlined text-primary-container text-2xl" data-icon="search">search</span>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto hide-scrollbar">
+<!-- Merchant Info Section -->
+<div class="relative bg-surface-white w-full">
+<div class="h-24 bg-cover bg-center" style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuBLoXRott5GwM3XcAZ8uavXrPPRubjEAvcYHjYXFX6-DHiaf0kXDerWfGe3DgiLjHA70IErDHCVvXKlBsBXyE6KlGUC4tSJh0r3wq7686Txhyjitd8Rh3GDN73uy-c9v4_11a5aBGiyIa74CAEdoLFcAz-QGMgFd2BFOZtvJRg2QACcLeb4kwBMDKAvvnU7WGRngvwABSoqqBI5F9HFUsMt7Kz2nFcFRb4WxqvBeIgKQmGdn9wqUDv1LR0NZBgMeuAoZQOx2V23j6Ca&quot;);">
+</div>
+<div class="px-margin-page pb-gap-module relative -mt-6">
+<div class="flex items-end gap-3">
+<div class="w-16 h-16 rounded-xl bg-surface-white border border-surface-container flex-shrink-0 overflow-hidden shadow-sm">
+<img alt="Logo" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvUXz74z5lyA83A8SQQP_6zeLrpDjbKgNalNt7gomRI6AFSbjZP5QqO64A0tqT7h_lRUmFuQ4ji1NNFISXEfq2AZPj-xJRsrl3gOxcmN3C92YTICZ76Wk7chNqERI7L26zyx7fEDQtOSLIbqOADBBepN1UW_VYjnveh4Uq0R5J-di3qkXeBeZpogsJM5eecJ4xULjuwjNzzMCMwjEfw27Zyqz2u48Dg9jDM2zfPiN08GLvczu8K7FmHiRr5MjPPYNKfZ5Km88oBR3k">
+</div>
+<div class="flex-1 pb-1">
+<h1 class="text-lg font-bold text-on-surface">肯德基 (校园二餐店)</h1>
+</div>
+</div>
+<div class="mt-2 flex flex-col gap-1">
+<div class="flex items-center gap-2 text-xs">
+<div class="flex items-center text-primary-container">
+<span class="material-symbols-outlined text-[14px] star-filled">star</span>
+<span class="ml-0.5 font-bold">4.8</span>
+</div>
+<span class="text-text-secondary">月售 8000+</span>
+<span class="text-surface-dim mx-0.5">|</span>
+<span class="text-text-secondary">约30分钟</span>
+</div>
+<div class="flex items-center gap-2 text-xs text-text-secondary">
+<span class="">起送 ¥15</span>
+<span class="">配送 ¥2</span>
+</div>
+<div class="flex flex-wrap gap-1.5 mt-2">
+<span class="px-1.5 py-0.5 rounded-DEFAULT bg-error-container text-on-error-container text-[10px] border border-outline-variant/30">满50减10</span>
+<span class="px-1.5 py-0.5 rounded-DEFAULT bg-primary-fixed text-on-primary-fixed text-[10px] border border-outline-variant/30">新客立减5</span>
+<span class="px-1.5 py-0.5 rounded-DEFAULT border border-surface-container text-text-secondary text-[10px] flex items-center gap-0.5"><span class="material-symbols-outlined text-[12px]">local_activity</span> 领券</span>
+</div>
+</div>
+</div>
+<!-- Tab Bar -->
+<div class="flex border-t border-surface-container mt-1">
+<div class="flex-1 flex justify-center py-3 relative cursor-pointer" onclick="window.location.reload()">
+<span class="text-sm text-text-secondary">点餐</span>
+</div>
+<div class="flex-1 flex justify-center py-3 relative cursor-pointer">
+<span class="text-sm font-bold text-on-surface">评价</span>
+<div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-[3px] bg-primary-container rounded-t-full"></div>
+</div>
+</div>
+</div>
+<!-- Reviews Content -->
+<div class="bg-surface-container-low min-h-full pb-10">
+<div class="space-y-3 max-w-lg mx-auto">
+<!-- Summary Card -->
+<section class="bg-surface-white p-4 flex items-center gap-6 w-full">
+<div class="flex flex-col items-center justify-center border-r border-surface-container pr-6">
+<span class="text-3xl font-bold text-primary-container leading-none">4.8</span>
+<span class="text-[11px] text-text-secondary mt-1">综合评分</span>
+<span class="text-[10px] text-text-tertiary">1289条评价</span>
+</div>
+<div class="flex-1 flex flex-col gap-1.5">
+<div class="flex items-center gap-2 text-xs">
+<span class="text-text-secondary w-8">味道</span>
+<div class="flex text-primary-container">
+<span class="material-symbols-outlined star-filled text-sm">star</span>
+<span class="material-symbols-outlined star-filled text-sm">star</span>
+<span class="material-symbols-outlined star-filled text-sm">star</span>
+<span class="material-symbols-outlined star-filled text-sm">star</span>
+<span class="material-symbols-outlined star-filled text-sm opacity-50">star_half</span>
+</div>
+<span class="text-primary-container font-medium">4.9</span>
+</div>
+<div class="flex items-center gap-2 text-xs">
+<span class="text-text-secondary w-8">包装</span>
+<div class="flex text-primary-container">
+<span class="material-symbols-outlined star-filled text-sm">star</span>
+<span class="material-symbols-outlined star-filled text-sm">star</span>
+<span class="material-symbols-outlined star-filled text-sm">star</span>
+<span class="material-symbols-outlined star-filled text-sm">star</span>
+<span class="material-symbols-outlined star-filled text-sm">star</span>
+</div>
+<span class="text-primary-container font-medium">5.0</span>
+</div>
+<div class="flex items-center gap-2 text-xs">
+<span class="text-text-secondary w-8">配送</span>
+<div class="flex text-primary-container">
+<span class="material-symbols-outlined star-filled text-sm">star</span>
+<span class="material-symbols-outlined star-filled text-sm">star</span>
+<span class="material-symbols-outlined star-filled text-sm">star</span>
+<span class="material-symbols-outlined star-filled text-sm">star</span>
+<span class="material-symbols-outlined text-sm opacity-30">star</span>
+</div>
+<span class="text-primary-container font-medium">4.5</span>
+</div>
+</div>
+</section>
+<!-- Filter Tags -->
+<section class="flex flex-wrap gap-2 px-margin-page">
+<button class="bg-primary-container text-white px-3 py-1.5 rounded-full text-xs font-medium border border-primary-container shadow-sm">全部 1289</button>
+<button class="bg-surface-white text-on-surface px-3 py-1.5 rounded-full text-xs border border-surface-container">最新</button>
+<button class="bg-surface-white text-on-surface px-3 py-1.5 rounded-full text-xs border border-surface-container">好评 1200</button>
+<button class="bg-surface-white text-on-surface px-3 py-1.5 rounded-full text-xs border border-surface-container">差评 12</button>
+<button class="bg-surface-white text-on-surface px-3 py-1.5 rounded-full text-xs border border-surface-container">有图 345</button>
+</section>
+<!-- Reviews List -->
+<section class="">
+<!-- Review 1 -->
+<article class="bg-surface-white p-padding-card border-b border-surface-container px-margin-page">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-surface-container overflow-hidden shrink-0">
+<img alt="User" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXpi-EuMIQJZdkBDLxN_XGtxer8W45RPs2-cQntSMXo4UlDcHX9PvRiWz3zkIiv_FTSsM-QCFIADRDW1AmJ2PBdE7E6sSfYBKml9tKpgr6gPm7-bX-TS_ua76G-YDtSx1y1gaP4djuZXgGVs4oAyL-3q3k7u5xbECydmleYsOPNDkSfnatGM5EKNLMaQoNZGliKbk5qYli2tvhLN3dP2rBGNzyKLtcqyHbY6mTzbWZKdbpRNMIpgLYDDd53jUxWQA5VSYwZhxxaTVV">
+</div>
+<div>
+<div class="text-sm font-bold">张**</div>
+<div class="flex text-primary-container mt-0.5">
+<span class="material-symbols-outlined star-filled text-[14px]">star</span>
+<span class="material-symbols-outlined star-filled text-[14px]">star</span>
+<span class="material-symbols-outlined star-filled text-[14px]">star</span>
+<span class="material-symbols-outlined star-filled text-[14px]">star</span>
+<span class="material-symbols-outlined star-filled text-[14px]">star</span>
+</div>
+</div>
+</div>
+<div class="text-[10px] text-text-tertiary">2023-10-25</div>
+</div>
+<p class="text-sm text-on-surface leading-relaxed my-3">味道不错，配送很快！炸鸡外酥里嫩，还是那个熟悉的味道。包装也很严实，没有漏洒。</p>
+<!-- Food Photos -->
+<div class="flex gap-2 mb-3 overflow-x-auto hide-scrollbar">
+<img alt="Burger" class="w-24 h-24 rounded-lg object-cover border border-surface-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAk8sbFPBB50f25ww-ORhB-HnZymLWUXjNhVZiAEFvix42Fcwkv_FMGmoosLQnINjaVTyyiHUqlX0Z8_nxJGbx727mgJhFrdHsAIaBsY8wFIlkFMTC4xt3SibYjEfiSCGFtywnzZWQqZAhPaKaD5yF8e16OHXCVRpJt6-vKveaU9QvXxcBH-kQopQSmHezm-W_rm0HftSTK1Aic0nuRUPVbfl2MgZBCaL6LqsNEJll3OHF8x_g6uThBNGW7FEGUlVEVaQDoWV4RXOOP">
+<img alt="Fries" class="w-24 h-24 rounded-lg object-cover border border-surface-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACvqnNsTElTgLCtVE7XzktevgRtukbDlcKHbaf9YKDeblC9aN-NSeQHFiaSEvhzSWCUR7iC2W6wMhcMKn3LQGImTMv3R8tf74Nrkcg94o65i3Z8by9xbNA5rclwpNmjGhLjEGJr35EdckZtisvcCtIQJAbY3iCEXJgnAZAY6eUwFO-88LBVVWVh_SSa1XvEgWVlo-OmLKZh2l42h5b_0gdAxkKdNRuxK9PjopCVjUWE7-qRpgvJUpOYNuq11RzyXRoG8Jz5iE57mMe">
+</div>
+<div class="bg-surface-container-lowest border border-surface-container/50 p-2.5 rounded-lg text-xs leading-relaxed">
+<span class="text-primary-container font-bold">商家回复：</span>感谢您的好评！我们会继续保持，祝您生活愉快！
+                        </div>
+</article>
+<!-- Review 2 -->
+<article class="bg-surface-white p-padding-card border-b border-surface-container px-margin-page">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed text-sm font-bold shrink-0">李*</div>
+<div>
+<div class="text-sm font-bold">李*</div>
+<div class="flex text-primary-container mt-0.5">
+<span class="material-symbols-outlined star-filled text-[14px]">star</span>
+<span class="material-symbols-outlined star-filled text-[14px]">star</span>
+<span class="material-symbols-outlined star-filled text-[14px]">star</span>
+<span class="material-symbols-outlined star-filled text-[14px]">star</span>
+<span class="material-symbols-outlined text-[14px] opacity-30">star</span>
+</div>
+</div>
+</div>
+<div class="text-[10px] text-text-tertiary">2023-10-24</div>
+</div>
+<p class="text-sm text-on-surface leading-relaxed my-3">汉堡热乎乎的，挺好吃。就是配送稍微久了一点点，希望能改进。</p>
+<div class="bg-surface-container-lowest border border-surface-container/50 p-2.5 rounded-lg text-xs leading-relaxed">
+<span class="text-primary-container font-bold">商家回复：</span>亲，不好意思让您久等了，由于高峰期单量较多，配送员已经在全力奔跑，请您谅解。
+                        </div>
+</article>
+</section>
+</div>
+</div>
+</div>
+
+
+</body></html>

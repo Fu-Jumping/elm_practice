@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>校园外卖商家后台 - 确认弹窗</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#181c22",
+                        "outline": "#8f7067",
+                        "on-secondary-fixed": "#291800",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#e5e8f0",
+                        "primary": "#ae3200",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#181c22",
+                        "tertiary-fixed": "#86faa7",
+                        "on-secondary-fixed-variant": "#624000",
+                        "on-surface-variant": "#5b4038",
+                        "inverse-surface": "#2d3137",
+                        "surface-container-highest": "#dfe2eb",
+                        "surface-container-low": "#f1f3fc",
+                        "on-secondary-container": "#6a4600",
+                        "tertiary": "#006d37",
+                        "primary-fixed": "#ffdbd0",
+                        "background": "#f8f9ff",
+                        "error": "#ba1a1a",
+                        "secondary": "#815600",
+                        "surface-container": "#ebeef6",
+                        "on-tertiary-fixed": "#00210c",
+                        "on-primary-fixed-variant": "#852400",
+                        "on-primary-container": "#541400",
+                        "surface-bright": "#f8f9ff",
+                        "on-primary-fixed": "#3a0b00",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#d7dae2",
+                        "on-tertiary-container": "#003316",
+                        "primary-fixed-dim": "#ffb59e",
+                        "on-tertiary-fixed-variant": "#005228",
+                        "surface": "#f8f9ff",
+                        "inverse-on-surface": "#eef1f9",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#e4beb3",
+                        "secondary-container": "#fdaf1e",
+                        "secondary-fixed": "#ffddb1",
+                        "inverse-primary": "#ffb59e",
+                        "tertiary-container": "#2da65d",
+                        "primary-container": "#ff5a1f",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#6add8d",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#dfe2eb",
+                        "secondary-fixed-dim": "#ffba4b",
+                        "surface-tint": "#ae3200"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "item-gap": "8px",
+                        "page-margin": "16px",
+                        "card-padding": "12px",
+                        "module-gap": "12px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "currency-display": ["PingFang SC", "sans-serif"],
+                        "label-table": ["PingFang SC", "sans-serif"],
+                        "card-title": ["PingFang SC", "sans-serif"],
+                        "page-title": ["PingFang SC", "sans-serif"],
+                        "caption-muted": ["PingFang SC", "sans-serif"],
+                        "section-title": ["PingFang SC", "sans-serif"],
+                        "body-main": ["PingFang SC", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "currency-display": ["15px", { "lineHeight": "22px", "fontWeight": "700" }],
+                        "label-table": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "card-title": ["15px", { "lineHeight": "22px", "fontWeight": "600" }],
+                        "page-title": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "caption-muted": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "section-title": ["18px", { "lineHeight": "26px", "fontWeight": "700" }],
+                        "body-main": ["15px", { "lineHeight": "22px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen relative font-body-main">
+<!-- Background Screen Context (Product Edit Screen Placeholder) -->
+<div class="absolute inset-0 z-0">
+<img alt="Background screen context" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdli_anE2iWlB6luaCOGe_4-_ctMl-pA5-u5bDG8IYj-bmsYtXYc5SI63gvxx77jWp5imzm4PBAcr-vRbnZcXmBUnMx2ZqtT94PPopp443EIbiNTGxW1LEMuFI8Ye8iObig4p7J-odkOXRtxYEoMBVHXy-CSyAaswtE1kBc9clWlRwHew94s8nfz8DlFNuXGg38F5-L1itfZThtMk6MqW2XPMMhPp0c7o5HWw-F0F0sKPbqOqZm9JfXQ"/>
+</div>
+<!-- Semi-transparent Overlay -->
+<div class="fixed inset-0 bg-[#000000] bg-opacity-40 z-40 flex items-center justify-center backdrop-blur-[2px]">
+<!-- Confirmation Dialog -->
+<div class="bg-surface-container-lowest w-[420px] rounded-xl shadow-[0_12px_32px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col transform transition-all duration-300 scale-100 opacity-100">
+<!-- Dialog Header -->
+<div class="px-6 py-5 flex items-start gap-4">
+<!-- Warning Icon -->
+<div class="flex-shrink-0 w-10 h-10 rounded-full bg-[#fff1eb] flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-container text-[24px]" style="font-variation-settings: 'FILL' 1;">
+                        warning
+                     </span>
+</div>
+<div class="flex-1 pt-1">
+<h3 class="font-section-title text-section-title text-on-surface mb-2">
+                        放弃未保存的修改？
+                    </h3>
+<p class="font-body-main text-body-main text-on-surface-variant">
+                        当前商品编辑内容尚未保存，离开后将丢失这些修改。
+                    </p>
+</div>
+</div>
+<!-- Dialog Actions (Bottom Right) -->
+<div class="px-6 py-4 flex justify-end gap-item-gap mt-2">
+<!-- Secondary Button (Left) -->
+<button class="px-4 py-2 rounded-DEFAULT border border-[#e5e5e5] bg-surface-container-lowest text-[#1f2329] font-label-table text-label-table hover:bg-surface transition-colors focus:outline-none focus:ring-2 focus:ring-primary-container focus:ring-opacity-20 cursor-pointer">
+                    放弃修改
+                </button>
+<!-- Primary Button (Right) -->
+<button class="px-4 py-2 rounded-DEFAULT bg-primary-container text-on-primary font-label-table text-label-table hover:bg-[#e64a13] transition-colors focus:outline-none focus:ring-2 focus:ring-primary-container focus:ring-opacity-50 cursor-pointer">
+                    继续编辑
+                </button>
+</div>
+</div>
+</div>
+</body></html>

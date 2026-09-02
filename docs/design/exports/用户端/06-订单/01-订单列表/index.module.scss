@@ -1,0 +1,474 @@
+* {
+  box-sizing: border-box;
+}
+
+.frame {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #eeeeee;
+  padding-bottom: 80px;
+  width: 390px;
+  height: 884px;
+  min-height: 884px;
+
+  .margin4 {
+    flex-shrink: 0;
+    width: 16px;
+    height: 20px;
+  }
+
+  .bottomNavBar {
+    display: flex;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    flex-shrink: 0;
+    align-items: center;
+    column-gap: 35px;
+    z-index: 3;
+    border-width: 1px 0px 0px;
+    border-style: solid;
+    border-color: #e5e5e5;
+    background: #ffffff;
+    padding-right: 21px;
+    padding-left: 21px;
+    width: 390px;
+    height: 65px;
+
+    .text {
+      flex-shrink: 0;
+      margin: -1px 0px 0px;
+      line-height: 14px;
+      letter-spacing: 0;
+      color: #5f5e5e;
+      font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .linkHome {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      padding: 13px 8px 12px;
+      width: 61px;
+      height: 64px;
+
+      .margin {
+        flex-shrink: 0;
+        width: 16px;
+        height: 22px;
+      }
+    }
+
+    .linkMessages {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      padding: 13px 8px 12px;
+      width: 61px;
+      height: 64px;
+
+      .margin2 {
+        flex-shrink: 0;
+        width: 20px;
+        height: 24px;
+      }
+    }
+
+    .linkOrdersActive {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      padding: 13px 8px 12px;
+      width: 61px;
+      height: 64px;
+
+      .margin3 {
+        flex-shrink: 0;
+        width: 18px;
+        height: 24px;
+      }
+
+      .text2 {
+        flex-shrink: 0;
+        margin: -1px 0px 0px;
+        line-height: 14px;
+        letter-spacing: 0;
+        color: #ff5a1f;
+        font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+        font-size: 10px;
+        font-weight: 500;
+      }
+    }
+
+    .linkProfile {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      padding: 13px 8px 12px;
+      width: 61px;
+      height: 64px;
+    }
+  }
+
+  .headerTopAppBar {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    align-self: stretch;
+    justify-content: space-between;
+    z-index: 2;
+    background: #f9f9f9;
+    padding-right: 12px;
+    padding-left: 12px;
+    height: 56px;
+
+    .container {
+      display: inline-flex;
+      flex-shrink: 0;
+      align-items: center;
+      border-radius: 2px;
+      padding: 4px;
+    }
+
+    .text3 {
+      flex-grow: 1;
+      overflow: hidden;
+      text-align: center;
+      line-height: 28px;
+      letter-spacing: 0;
+      color: #1a1c1c;
+      font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 20px;
+      font-weight: 500;
+    }
+
+    .container3 {
+      display: inline-flex;
+      flex-shrink: 0;
+      align-items: center;
+      border-radius: 2px;
+      padding: 4px;
+
+      .container2 {
+        flex-shrink: 0;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+
+  .mainContentCanvas {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    align-items: flex-start;
+    align-self: stretch;
+    z-index: 1;
+    padding-bottom: 136px;
+
+    .text4 {
+      flex-shrink: 0;
+      line-height: 20px;
+      letter-spacing: 0;
+      color: #ff5a1f;
+      font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .list {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      align-self: stretch;
+      column-gap: 24px;
+      z-index: 2;
+      background: #ffffff;
+      padding-right: 12px;
+      padding-left: 12px;
+      overflow: auto;
+
+      .item {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        align-self: stretch;
+        border-width: 0px 0px 2px;
+        border-style: solid;
+        border-color: #ff5a1f;
+        padding-right: 4px;
+        padding-left: 4px;
+      }
+
+      .text5 {
+        flex-shrink: 0;
+        align-self: stretch;
+        padding: 14px 4px;
+        width: 50px;
+        line-height: 20px;
+        letter-spacing: 0;
+        color: #5f5e5e;
+        font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+      }
+    }
+
+    .orderList {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: flex-start;
+      align-self: stretch;
+      z-index: 1;
+      padding-top: 8px;
+      row-gap: 8px;
+
+      .container11 {
+        display: flex;
+        flex-shrink: 0;
+        align-items: flex-start;
+        align-self: stretch;
+        justify-content: flex-end;
+        column-gap: 8px;
+        padding-top: 4px;
+
+        .button {
+          display: inline-flex;
+          flex-direction: column;
+          flex-shrink: 0;
+          align-items: center;
+          justify-content: center;
+          border-radius: 12px;
+          background: #eeeeee;
+          padding: 6px 16px;
+        }
+
+        .button2 {
+          display: inline-flex;
+          flex-direction: column;
+          flex-shrink: 0;
+          align-items: center;
+          justify-content: center;
+          border-radius: 12px;
+          background: #ff5a1f1a;
+          padding: 6px 16px;
+        }
+      }
+
+      .container10 {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        align-self: stretch;
+        column-gap: 12px;
+
+        .container7 {
+          display: flex;
+          flex-direction: column;
+          flex-shrink: 0;
+          align-items: flex-start;
+          justify-content: center;
+          border-radius: 2px;
+          height: 56px;
+          overflow: hidden;
+
+          .productThumbnail {
+            flex-grow: 1;
+            align-self: stretch;
+            width: 56px;
+            height: 56px;
+            overflow: hidden;
+          }
+        }
+
+        .container8 {
+          display: flex;
+          flex-direction: column;
+          flex-grow: 1;
+          align-items: flex-start;
+          row-gap: 4px;
+
+          .text8 {
+            flex-shrink: 0;
+            align-self: stretch;
+            overflow: hidden;
+            line-height: 20px;
+            letter-spacing: 0;
+            color: #1a1c1c;
+            font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+          }
+
+          .a202310251230 {
+            flex-shrink: 0;
+            align-self: stretch;
+            line-height: 16px;
+            letter-spacing: 0;
+            color: #666666;
+            font-family: "Be Vietnam Pro", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 12px;
+          }
+        }
+
+        .container9 {
+          display: inline-flex;
+          flex-direction: column;
+          flex-shrink: 0;
+          align-items: flex-end;
+
+          .text9 {
+            flex-shrink: 0;
+            line-height: 22px;
+            letter-spacing: 0;
+            color: #1a1c1c;
+            font-family: "Be Vietnam Pro", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+          }
+        }
+      }
+
+      .container5 {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        column-gap: 8px;
+
+        .background {
+          display: flex;
+          flex-shrink: 0;
+          align-items: center;
+          justify-content: center;
+          border-radius: 2px;
+          width: 32px;
+          overflow: hidden;
+
+          .restaurantLogo {
+            flex-grow: 1;
+            align-self: stretch;
+            width: 32px;
+            height: 32px;
+            overflow: hidden;
+          }
+        }
+
+        .container4 {
+          flex-shrink: 0;
+          width: 4px;
+          height: 7px;
+        }
+      }
+
+      .orderCard1Completed {
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        align-items: flex-start;
+        align-self: stretch;
+        background: #ffffff;
+        padding: 16px;
+        row-gap: 12px;
+
+        .text7 {
+          flex-shrink: 0;
+          line-height: 16px;
+          letter-spacing: 0;
+          color: #666666;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 12px;
+          font-weight: 500;
+        }
+
+        .text6 {
+          flex-shrink: 0;
+          line-height: 20px;
+          letter-spacing: 0;
+          color: #1a1c1c;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 14px;
+          font-weight: 500;
+        }
+
+        .container6 {
+          display: flex;
+          flex-shrink: 0;
+          align-items: center;
+          align-self: stretch;
+          justify-content: space-between;
+        }
+      }
+
+      .orderCard2InProgress {
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        align-items: flex-start;
+        align-self: stretch;
+        background: #ffffff;
+        padding: 16px;
+        row-gap: 12px;
+
+        .container12 {
+          display: flex;
+          flex-shrink: 0;
+          align-items: center;
+          align-self: stretch;
+          justify-content: space-between;
+
+          .text10 {
+            flex-shrink: 0;
+            line-height: 16px;
+            letter-spacing: 0;
+            color: #ff5a1f;
+            font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+          }
+        }
+      }
+
+      .orderCard3PendingPay {
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        align-items: flex-start;
+        align-self: stretch;
+        background: #ffffff;
+        padding: 16px;
+        row-gap: 12px;
+
+        .container13 {
+          display: flex;
+          flex-shrink: 0;
+          align-items: center;
+          align-self: stretch;
+          justify-content: space-between;
+
+          .text11 {
+            flex-shrink: 0;
+            line-height: 16px;
+            letter-spacing: 0;
+            color: #ba1a1a;
+            font-family: "Be Vietnam Pro", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  }
+}

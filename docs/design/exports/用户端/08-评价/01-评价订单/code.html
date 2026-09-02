@@ -1,0 +1,229 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>评价订单 - 饿了么</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-container": "#e4e2e1",
+                        "tertiary-container": "#f46500",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "tertiary-fixed": "#ffdbcc",
+                        "surface-container": "#eeeeee",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-background": "#1a1c1c",
+                        "surface-bright": "#f9f9f9",
+                        "tertiary": "#a14000",
+                        "on-surface": "#1a1c1c",
+                        "on-primary-fixed": "#3a0b00",
+                        "surface-tint": "#ae3200",
+                        "on-secondary-container": "#656464",
+                        "surface-variant": "#e2e2e2",
+                        "surface": "#f9f9f9",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "on-surface-variant": "#5b4038",
+                        "outline": "#8f7067",
+                        "surface-container-low": "#f3f3f3",
+                        "text-secondary": "#666666",
+                        "primary-fixed": "#ffdbd0",
+                        "border-light": "#E5E5E5",
+                        "secondary-fixed": "#e4e2e1",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed": "#351000",
+                        "on-tertiary-container": "#4d1b00",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "inverse-surface": "#2f3131",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#e4beb3",
+                        "inverse-primary": "#ffb59e",
+                        "on-tertiary": "#ffffff",
+                        "secondary": "#5f5e5e",
+                        "primary": "#ae3200",
+                        "inverse-on-surface": "#f1f1f1",
+                        "surface-dim": "#dadada",
+                        "surface-container-high": "#e8e8e8",
+                        "on-primary-fixed-variant": "#852400",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#474747",
+                        "surface-white": "#FFFFFF",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "text-tertiary": "#999999",
+                        "error": "#ba1a1a",
+                        "on-error": "#ffffff",
+                        "on-primary-container": "#541400",
+                        "primary-fixed-dim": "#ffb59e",
+                        "primary-container": "#ff5a1f",
+                        "background": "#f7f7f7"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.125rem",
+                        lg: "0.25rem",
+                        xl: "0.5rem",
+                        full: "0.75rem"
+                    },
+                    spacing: {
+                        gutter: "8px",
+                        "margin-page": "12px",
+                        base: "4px",
+                        "gap-module": "12px",
+                        "padding-card": "12px"
+                    },
+                    fontFamily: {
+                        "label-md": ["Be Vietnam Pro"],
+                        "cta-button": ["Be Vietnam Pro"],
+                        "headline-md": ["Be Vietnam Pro"],
+                        "body-lg": ["Be Vietnam Pro"],
+                        "label-sm": ["Be Vietnam Pro"],
+                        "headline-lg": ["Be Vietnam Pro"],
+                        "body-md": ["Be Vietnam Pro"]
+                    },
+                    fontSize: {
+                        "label-md": ["12px", { lineHeight: "16px", fontWeight: "400" }],
+                        "cta-button": ["16px", { lineHeight: "20px", fontWeight: "600" }],
+                        "headline-md": ["18px", { lineHeight: "24px", fontWeight: "600" }],
+                        "body-lg": ["16px", { lineHeight: "22px", fontWeight: "500" }],
+                        "label-sm": ["10px", { lineHeight: "14px", fontWeight: "400" }],
+                        "headline-lg": ["20px", { lineHeight: "28px", fontWeight: "700" }],
+                        "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .star-active {
+            color: #ff5a1f; /* Using hex as specified in prompt, overriding theme for this specific element if needed, though theme has primary-container */
+            font-variation-settings: 'FILL' 1;
+        }
+        .star-inactive {
+            color: #c8c6c6; /* secondary-fixed-dim */
+            font-variation-settings: 'FILL' 0;
+        }
+    </style>
+</head>
+<body class="bg-background font-body-md text-on-background antialiased flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 flex items-center justify-between px-margin-page h-14 w-full bg-surface border-b border-border-light flat no shadows transition-colors duration-200 active:opacity-70">
+<button aria-label="返回" class="flex items-center justify-center p-2 -ml-2 text-primary hover:bg-secondary-container/50 rounded-full">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">评价订单</h1>
+<div class="w-10"></div> <!-- Placeholder for balance -->
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 px-margin-page py-gap-module flex flex-col gap-gap-module pb-24">
+<!-- Header: Restaurant Info & Rating -->
+<section class="bg-surface-white border border-border-light rounded-lg p-padding-card flex flex-col items-center gap-base">
+<div class="w-16 h-16 rounded-full overflow-hidden border border-border-light mb-2">
+<img alt="肯德基" class="w-full h-full object-cover" data-alt="A clean, appetizing close-up of a fast-food restaurant logo featuring a stylized chicken character. The setting is bright and professional, evoking a modern, trustworthy brand identity. Colors are vibrant against a neutral background. The style is consistent with a high-end food delivery app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0eXVisQq6Ccgiq4CIjoeCx34Wn1ARlCGfSNAfnRzwvjYUUW2yAVdRktQ7DWZbWgKeiVZbpvK0DuNRvEstpqiWkHJxCveIKUPf7wP2UDZTZby8CT_OQEbeeZc2X2BWErp6WakqYXGnRby2trHLwb5md4bIVi9msb1gMtwwrLswaBjgyEGs7c9FtGsVn-UywgbSZ7-xTFWRG6jfZyZks5Cc95q9RRKzdwPBoL2xRKGjHid61t-eymOFYMkgkVOt2qpT-loSKJc4Dk4d">
+</div>
+<h2 class="font-body-lg text-body-lg text-on-surface">肯德基</h2>
+<p class="font-label-md text-label-md text-text-secondary">为本次服务打分</p>
+<!-- 5-star Rating -->
+<div class="flex gap-2 mt-2" id="star-rating">
+<span class="material-symbols-outlined text-3xl star-active cursor-pointer" data-rating="1">star</span>
+<span class="material-symbols-outlined text-3xl star-active cursor-pointer" data-rating="2">star</span>
+<span class="material-symbols-outlined text-3xl star-active cursor-pointer" data-rating="3">star</span>
+<span class="material-symbols-outlined text-3xl star-active cursor-pointer" data-rating="4">star</span>
+<span class="material-symbols-outlined text-3xl star-active cursor-pointer" data-rating="5">star</span>
+</div>
+<p class="font-label-md text-label-md text-primary-container mt-1 font-medium" id="rating-text">非常好</p><div class="mt-4 pt-4 border-t border-border-light w-full"><div class="flex flex-col gap-2 overflow-hidden">
+<div class="flex overflow-x-auto gap-3 pb-2 no-scrollbar scroll-smooth" style="-ms-overflow-style: none; scrollbar-width: none;">
+<div class="flex-none w-24 flex flex-col gap-1">
+<div class="w-24 h-24 rounded-lg bg-surface-container-high overflow-hidden flex items-center justify-center border border-border-light"><img alt="香辣脆皮鸡腿堡" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfuFH59-Km3R09zUR4yOMeuJkV_fSBWpI5zzaTWmp3D7_e9VnvTUGnyiZ9nTTExLBRYAl3PGXogcluSQJDDJLuDzKEJH0i3R8jfxgCWmcgatXUbD-ztpEwi-qqMZy26TTuGlv6Wgr8_Oo7ZzEwENEJ4DA75o6TB7GUvYMk7nVb4EanDJuwelzpkO6ThKhExWML0m73nPe1Uogd9TBKnm18RYJtC0-Hd3V-YzPOeV2Uyc59ONLP41aEO0AF77iUqOIwI5f5GsMFWUni"></div>
+<div class="flex flex-col">
+<span class="text-label-md font-medium text-on-surface truncate">香辣脆皮鸡腿堡</span>
+<span class="text-label-sm font-semibold text-[#FF5A1F]">x1</span>
+</div>
+</div>
+<div class="flex-none w-24 flex flex-col gap-1">
+<div class="w-24 h-24 rounded-lg bg-surface-container-high overflow-hidden flex items-center justify-center border border-border-light"><img alt="薯条(中)" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKCfu4wxmq8I5hiCFXJAovmb2okryI53o7IVJ4M_ab4nBpl1fLNqfymgXeUB1pwFR3MSHoClAz7E_DXwAc2D2flTBZRkk0JFrYPyG8iyD2TNhxXCJHPebHB-jFUV3UzHg0s7OgI3DVE7nLtRrsefz_t1QqRLCsqNkU7b3spQQ4_52VR-BI1nCNhUhWh9e83okMkMa7QGMp83vOeu4auTs-W51_3ap7RoDCm8EYiF9lU8m0Jtz_ne-7MZbOqZYJ7epL8HlTAENMznYO"></div>
+<div class="flex flex-col">
+<span class="text-label-md font-medium text-on-surface truncate">薯条(中)</span>
+<span class="text-label-sm font-semibold text-[#FF5A1F]">x1</span>
+</div>
+</div>
+<div class="flex-none w-24 flex flex-col gap-1">
+<div class="w-24 h-24 rounded-lg bg-surface-container-high overflow-hidden flex items-center justify-center border border-border-light"><img alt="可乐(大)" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpWLsptHoueb0qVplOmhUDLCJARFpj_X22zoR1CfUXDup2eV_SvAgXNLk0erIz5kV_HS5zj3nmdJ_-tBBOn98yWc7NIA16sFATol_-aqiO3CQ1TBPFO0A-ShnRczL9gBjzV50OhZSaZhswsVPwjBbUxNboEEjJYq26sp0-NypSJyowqosPlsglXb8hROleZv3N8RI-0U4AHtsk1SqT-n53DETHRXhIe_SrSjFxr0ln1RVKix0kKlCadINscDeiO1IULKYLKza5tgy9"></div>
+<div class="flex flex-col">
+<span class="text-label-md font-medium text-on-surface truncate">可乐(大)</span>
+<span class="text-label-sm font-semibold text-[#FF5A1F]">x1</span>
+</div>
+</div>
+</div>
+</div></div>
+</section>
+<!-- Tags Section -->
+<section class="bg-surface-white border border-border-light rounded-lg p-padding-card flex flex-col gap-base">
+<h3 class="font-body-md text-body-md text-on-surface font-medium mb-1">评价标签</h3>
+<div class="flex flex-wrap gap-2" id="tags-container">
+<button class="tag-btn px-3 py-1.5 rounded-lg border border-primary-container bg-primary-fixed text-primary-container font-label-md text-label-md transition-colors">配送快</button>
+<button class="tag-btn px-3 py-1.5 rounded-lg border border-border-light bg-surface-container-lowest text-text-secondary font-label-md text-label-md transition-colors">味道好</button>
+<button class="tag-btn px-3 py-1.5 rounded-lg border border-border-light bg-surface-container-lowest text-text-secondary font-label-md text-label-md transition-colors">包装完整</button>
+<button class="tag-btn px-3 py-1.5 rounded-lg border border-border-light bg-surface-container-lowest text-text-secondary font-label-md text-label-md transition-colors">分量足</button>
+</div>
+</section>
+<!-- Comment Area -->
+<section class="bg-surface-white border border-border-light rounded-lg p-padding-card">
+<textarea class="w-full bg-surface-container-lowest border-none focus:ring-0 resize-none font-body-md text-body-md text-on-surface placeholder:text-text-tertiary h-32 p-0" placeholder="说说本次用餐体验，分享给更多想吃的朋友吧"></textarea>
+<!-- Image Upload Placeholder -->
+<div class="mt-4 flex gap-2">
+<div class="w-16 h-16 rounded-lg border border-dashed border-border-light flex flex-col items-center justify-center text-text-tertiary cursor-pointer hover:bg-surface-container-low">
+<span class="material-symbols-outlined">add_a_photo</span>
+<span class="font-label-sm text-label-sm mt-1">添加图片</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer: Sticky Primary Button -->
+<footer class="fixed bottom-0 left-0 w-full bg-surface-white border-t border-border-light p-margin-page z-40 pb-safe">
+<button class="w-full bg-primary-container text-on-primary font-cta-button text-cta-button py-3 rounded-lg flex items-center justify-center active:bg-primary-container/90 transition-colors">
+            提交评价
+        </button>
+</footer>
+<script>
+        // Star Rating Interaction
+        const stars = document.querySelectorAll('#star-rating span');
+        const ratingText = document.getElementById('rating-text');
+        const ratingTexts = ["极差", "较差", "一般", "满意", "非常好"];
+
+        stars.forEach(star => {
+            star.addEventListener('click', (e) => {
+                const rating = parseInt(e.target.dataset.rating);
+                stars.forEach((s, index) => {
+                    if (index < rating) {
+                        s.classList.remove('star-inactive');
+                        s.classList.add('star-active');
+                    } else {
+                        s.classList.remove('star-active');
+                        s.classList.add('star-inactive');
+                    }
+                });
+                ratingText.textContent = ratingTexts[rating - 1];
+            });
+        });
+
+        // Tags Interaction
+        const tagBtns = document.querySelectorAll('.tag-btn');
+        tagBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.classList.contains('border-primary-container')) {
+                    btn.classList.remove('border-primary-container', 'bg-primary-fixed', 'text-primary-container');
+                    btn.classList.add('border-border-light', 'bg-surface-container-lowest', 'text-text-secondary');
+                } else {
+                    btn.classList.remove('border-border-light', 'bg-surface-container-lowest', 'text-text-secondary');
+                    btn.classList.add('border-primary-container', 'bg-primary-fixed', 'text-primary-container');
+                }
+            });
+        });
+    </script>
+</body></html>

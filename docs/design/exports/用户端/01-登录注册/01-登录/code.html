@@ -1,0 +1,174 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>CampusBites Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed": "#3a0b00",
+                        "surface-container": "#eeeeee",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "surface-bright": "#f9f9f9",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-tertiary-fixed": "#351000",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-container": "#f46500",
+                        "inverse-surface": "#2f3131",
+                        "on-tertiary-container": "#4d1b00",
+                        "on-secondary-container": "#656464",
+                        "on-primary-container": "#541400",
+                        "text-tertiary": "#999999",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-error-container": "#93000a",
+                        "surface-white": "#FFFFFF",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "outline-variant": "#e4beb3",
+                        "text-secondary": "#666666",
+                        "on-background": "#1a1c1c",
+                        "primary-fixed": "#ffdbd0",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "on-primary-fixed-variant": "#852400",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "border-light": "#E5E5E5",
+                        "background": "#f9f9f9",
+                        "inverse-on-surface": "#f1f1f1",
+                        "primary-container": "#ff5a1f",
+                        "inverse-primary": "#ffb59e",
+                        "surface-container-high": "#e8e8e8",
+                        "on-surface": "#1a1c1c",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#a14000",
+                        "on-surface-variant": "#5b4038",
+                        "surface-dim": "#dadada",
+                        "primary-fixed-dim": "#ffb59e",
+                        "surface-tint": "#ae3200",
+                        "surface": "#f9f9f9",
+                        "outline": "#8f7067",
+                        "on-secondary-fixed-variant": "#474747",
+                        "secondary-fixed": "#e4e2e1",
+                        "primary": "#ae3200",
+                        "secondary": "#5f5e5e",
+                        "surface-container-low": "#f3f3f3",
+                        "surface-variant": "#e2e2e2",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#e4e2e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "padding-card": "10px",
+                        "gap-module": "12px",
+                        "base": "4px",
+                        "margin-page": "12px",
+                        "gutter": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["beVietnamPro", "sans-serif"],
+                        "label-sm": ["beVietnamPro", "sans-serif"],
+                        "cta-button": ["beVietnamPro", "sans-serif"],
+                        "headline-md": ["beVietnamPro", "sans-serif"],
+                        "headline-lg": ["beVietnamPro", "sans-serif"],
+                        "body-lg": ["beVietnamPro", "sans-serif"],
+                        "label-md": ["beVietnamPro", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "cta-button": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #f9f9f9; /* Fallback */
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface-white min-h-screen flex flex-col font-body-md text-on-surface antialiased">
+<!-- Main Container: Constrained for mobile view -->
+<main class="flex-grow flex flex-col px-[24px] pt-[64px] pb-[32px] max-w-md w-full mx-auto relative">
+<!-- Brand Section -->
+<header class="flex flex-col items-center text-center mb-[40px]">
+<div class="w-16 h-16 rounded-full bg-primary-fixed flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-[32px] text-primary" data-weight="fill" style="font-variation-settings: 'FILL' 1;">ramen_dining</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-2 tracking-tight">饿了么</h1>
+<p class="font-body-md text-body-md text-text-secondary">欢迎加入饿了么，发现校园美食</p>
+</header>
+<!-- Login Form -->
+<form class="flex flex-col gap-module mb-[32px]" onsubmit="event.preventDefault();">
+<!-- Account Input -->
+<div class="flex flex-col gap-base">
+<label class="font-label-md text-label-md text-text-secondary ml-1" for="account">账号/手机号</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-text-tertiary">person</span>
+<input class="w-full bg-surface-white border border-border-light rounded-xl pl-10 pr-4 py-[12px] font-body-md text-body-md text-on-surface placeholder:text-text-tertiary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" id="account" placeholder="请输入账号或手机号" type="text">
+</div>
+</div>
+<!-- Password Input -->
+<div class="flex flex-col gap-base">
+<label class="font-label-md text-label-md text-text-secondary ml-1" for="password">密码</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-text-tertiary">lock</span>
+<input class="w-full bg-surface-white border border-border-light rounded-xl pl-10 pr-4 py-[12px] font-body-md text-body-md text-on-surface placeholder:text-text-tertiary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" id="password" placeholder="请输入密码" type="password">
+</div>
+</div>
+<!-- Submit Button -->
+<button class="w-full bg-primary-container text-surface-white font-cta-button text-cta-button rounded-xl py-[14px] mt-4 flex items-center justify-center transition-transform active:scale-[0.98]" type="submit">
+                登录
+            </button>
+</form>
+<!-- Secondary Section: Demo Accounts -->
+<div class="flex flex-col mb-auto">
+<!-- Divider -->
+<div class="flex items-center gap-4 mb-4">
+<div class="h-[1px] flex-grow bg-border-light"></div>
+<span class="font-label-md text-label-md text-text-tertiary">使用演示账号登录</span>
+<div class="h-[1px] flex-grow bg-border-light"></div>
+</div>
+<!-- Demo Buttons -->
+<div class="flex gap-module">
+<button class="flex-1 bg-surface-white border border-border-light rounded-xl py-[10px] flex items-center justify-center gap-2 font-body-md text-body-md text-on-surface hover:bg-surface-container-low transition-colors active:bg-surface-variant" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary">face</span>
+                    User A
+                </button>
+<button class="flex-1 bg-surface-white border border-border-light rounded-xl py-[10px] flex items-center justify-center gap-2 font-body-md text-body-md text-on-surface hover:bg-surface-container-low transition-colors active:bg-surface-variant" type="button">
+<span class="material-symbols-outlined text-[18px] text-tertiary-container">face_3</span>
+                    User B
+                </button>
+</div>
+</div>
+<!-- Bottom Links -->
+<footer class="mt-[48px] flex justify-between items-center px-2">
+<a class="font-body-md text-body-md text-text-secondary hover:text-primary transition-colors" href="#">还没有账号？立即注册</a>
+<a class="font-body-md text-body-md text-primary font-medium hover:text-on-primary-fixed transition-colors" href="#">商家端入口</a>
+</footer>
+</main>
+
+
+</body></html>

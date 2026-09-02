@@ -1,0 +1,208 @@
+<!DOCTYPE html><html class="light" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>订单备注 - CampusBites</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed": "#e4e2e1",
+                        "on-secondary-fixed-variant": "#474747",
+                        "tertiary": "#a14000",
+                        "tertiary-container": "#f46500",
+                        "inverse-on-surface": "#f1f1f1",
+                        "on-primary-fixed": "#3a0b00",
+                        "outline": "#8f7067",
+                        "on-surface-variant": "#5b4038",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-primary-container": "#541400",
+                        "surface-tint": "#ae3200",
+                        "surface-container-low": "#f3f3f3",
+                        "surface-bright": "#f9f9f9",
+                        "on-secondary": "#ffffff",
+                        "border-light": "#E5E5E5",
+                        "on-primary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-dim": "#dadada",
+                        "text-tertiary": "#999999",
+                        "inverse-primary": "#ffb59e",
+                        "primary": "#ae3200",
+                        "primary-fixed-dim": "#ffb59e",
+                        "secondary": "#5f5e5e",
+                        "surface-container": "#eeeeee",
+                        "background": "#f9f9f9",
+                        "on-background": "#1a1c1c",
+                        "on-secondary-container": "#656464",
+                        "primary-fixed": "#ffdbd0",
+                        "surface-container-high": "#e8e8e8",
+                        "text-secondary": "#666666",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "surface-white": "#FFFFFF",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "outline-variant": "#e4beb3",
+                        "inverse-surface": "#2f3131",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed-variant": "#852400",
+                        "on-error-container": "#93000a",
+                        "surface": "#f9f9f9",
+                        "surface-variant": "#e2e2e2",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-surface": "#1a1c1c",
+                        "secondary-container": "#e4e2e1",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#4d1b00",
+                        "primary-container": "#ff5a1f",
+                        "on-tertiary-fixed": "#351000"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.125rem",
+                        lg: "0.25rem",
+                        xl: "0.5rem",
+                        full: "0.75rem"
+                    },
+                    spacing: {
+                        "padding-card": "10px",
+                        "margin-page": "12px",
+                        "gutter": "8px",
+                        "gap-module": "12px",
+                        "base": "4px"
+                    },
+                    fontFamily: {
+                        "label-md": ["Be Vietnam Pro", "sans-serif"],
+                        "headline-md": ["Be Vietnam Pro", "sans-serif"],
+                        "headline-lg": ["Be Vietnam Pro", "sans-serif"],
+                        "body-lg": ["Be Vietnam Pro", "sans-serif"],
+                        "label-sm": ["Be Vietnam Pro", "sans-serif"],
+                        "cta-button": ["Be Vietnam Pro", "sans-serif"],
+                        "body-md": ["Be Vietnam Pro", "sans-serif"]
+                    },
+                    fontSize: {
+                        "label-md-mobile": ["12px", { lineHeight: "16px", fontWeight: "400" }],
+                        "headline-md-mobile": ["18px", { lineHeight: "24px", fontWeight: "600" }],
+                        "headline-lg-mobile": ["20px", { lineHeight: "28px", fontWeight: "700" }],
+                        "body-lg-mobile": ["16px", { lineHeight: "22px", fontWeight: "500" }],
+                        "label-sm-mobile": ["10px", { lineHeight: "14px", fontWeight: "400" }],
+                        "cta-button-mobile": ["16px", { lineHeight: "20px", fontWeight: "600" }],
+                        "body-md-mobile": ["14px", { lineHeight: "20px", fontWeight: "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md-mobile antialiased h-screen overflow-hidden flex flex-col relative">
+<!-- Simulated App Background Content -->
+<div class="flex-1 bg-surface flex flex-col items-center justify-center text-text-secondary font-body-md-mobile opacity-50">
+<span class="material-symbols-outlined text-4xl mb-2">receipt_long</span>
+<p>订单确认页面背景</p>
+</div>
+<!-- Backdrop Overlay (Level 3) -->
+<div class="absolute inset-0 bg-black/40 z-40 transition-opacity duration-300" id="modal-backdrop"></div>
+<!-- Bottom Sheet Drawer (Level 3) -->
+<div class="absolute bottom-0 left-0 w-full h-[65%] bg-surface-white rounded-t-xl z-50 flex flex-col transition-transform duration-300 transform translate-y-0" id="bottom-sheet">
+<!-- Drag Handle Indicator (Optional UX improvement for mobile) -->
+<div class="w-full flex justify-center pt-3 pb-1">
+<div class="w-10 h-1 bg-border-light rounded-full"></div>
+</div>
+<!-- Header -->
+<div class="flex items-center justify-between px-margin-page py-3 border-b border-border-light">
+<div class="w-6"></div> <!-- Spacer for centering title -->
+<h2 class="font-headline-md-mobile text-headline-md-mobile text-on-surface">订单备注</h2>
+<button aria-label="关闭" class="text-text-secondary hover:text-on-surface transition-colors w-6 h-6 flex items-center justify-center rounded-full" onclick="closeModal()">
+<span class="material-symbols-outlined text-xl">close</span>
+</button>
+</div>
+<!-- Scrollable Content Area -->
+<div class="flex-1 overflow-y-auto px-margin-page py-4 space-y-gap-module">
+<!-- Quick Tags Section -->
+<div class="space-y-2">
+<h3 class="font-body-md-mobile text-body-md-mobile font-medium text-on-surface">快捷标签</h3>
+<div class="flex flex-wrap gap-2">
+<button class="px-3 py-1.5 bg-primary-fixed text-primary font-label-md-mobile text-label-md-mobile rounded border border-primary/20 hover:bg-primary-fixed-dim transition-colors">不要辣</button>
+<button class="px-3 py-1.5 bg-primary-fixed text-primary font-label-md-mobile text-label-md-mobile rounded border border-primary/20 hover:bg-primary-fixed-dim transition-colors">多点辣</button>
+<button class="px-3 py-1.5 bg-primary-fixed text-primary font-label-md-mobile text-label-md-mobile rounded border border-primary/20 hover:bg-primary-fixed-dim transition-colors">不吃香菜</button>
+<button class="px-3 py-1.5 bg-primary-fixed text-primary font-label-md-mobile text-label-md-mobile rounded border border-primary/20 hover:bg-primary-fixed-dim transition-colors">多点葱</button>
+<button class="px-3 py-1.5 bg-primary-fixed text-primary font-label-md-mobile text-label-md-mobile rounded border border-primary/20 hover:bg-primary-fixed-dim transition-colors">放门口</button>
+<button class="px-3 py-1.5 bg-surface-container text-text-secondary font-label-md-mobile text-label-md-mobile rounded border border-border-light hover:bg-surface-container-high transition-colors">米饭多点</button>
+</div>
+</div>
+<!-- Text Input Area -->
+<div class="space-y-2">
+<h3 class="font-body-md-mobile text-body-md-mobile font-medium text-on-surface">自定义备注</h3>
+<div class="relative">
+<textarea class="w-full bg-surface-bright border border-border-light rounded-lg p-padding-card font-body-md-mobile text-body-md-mobile text-on-surface placeholder:text-text-tertiary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-shadow resize-none h-32" id="remark-input" maxlength="50" placeholder="请输入备注内容，我们将尽力满足您的需求..."></textarea>
+<div class="absolute bottom-3 right-3 font-label-sm-mobile text-label-sm-mobile text-text-tertiary">
+<span id="char-count">0</span>/50
+                    </div>
+</div>
+</div>
+</div>
+<!-- Footer / Action Area -->
+<div class="px-margin-page py-4 border-t border-border-light bg-surface-white pb-safe">
+<button class="w-full bg-primary-container text-on-primary font-cta-button-mobile text-cta-button-mobile py-3 rounded-lg flex items-center justify-center transition-colors hover:bg-primary active:scale-[0.98] duration-150">
+                确定
+            </button>
+</div>
+</div>
+<script>
+        // Simple character counter logic
+        const textarea = document.getElementById('remark-input');
+        const charCount = document.getElementById('char-count');
+
+        textarea.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+        });
+
+        // Quick tag click logic
+        const tags = document.querySelectorAll('.flex-wrap button');
+        tags.forEach(tag => {
+            tag.addEventListener('click', function() {
+                const currentVal = textarea.value;
+                const tagText = this.textContent;
+                
+                // Toggle visual state (active/inactive) - simplified for demo
+                this.classList.toggle('bg-primary-fixed');
+                this.classList.toggle('text-primary');
+                this.classList.toggle('border-primary/20');
+                
+                this.classList.toggle('bg-surface-container');
+                this.classList.toggle('text-text-secondary');
+                this.classList.toggle('border-border-light');
+
+                // Basic append logic (doesn't handle removal on un-toggle in this simple version)
+                if(currentVal.length + tagText.length + 1 <= 50 && this.classList.contains('text-primary')) {
+                    if(currentVal) {
+                        textarea.value = currentVal + '，' + tagText;
+                    } else {
+                        textarea.value = tagText;
+                    }
+                    charCount.textContent = textarea.value.length;
+                }
+            });
+        });
+
+        // Modal close simulation
+        function closeModal() {
+            document.getElementById('bottom-sheet').style.transform = 'translateY(100%)';
+            document.getElementById('modal-backdrop').style.opacity = '0';
+            setTimeout(() => {
+                // In a real app, you'd hide or remove the elements here
+            }, 300);
+        }
+    </script>
+</body></html>

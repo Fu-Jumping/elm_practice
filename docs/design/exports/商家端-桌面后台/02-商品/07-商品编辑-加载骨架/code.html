@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>商品编辑 - 加载中</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config from Design System -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#ffb59e",
+                        "surface-tint": "#ae3200",
+                        "on-primary-fixed": "#3a0b00",
+                        "on-surface": "#181c22",
+                        "tertiary": "#006d37",
+                        "primary-container": "#ff5a1f",
+                        "on-tertiary-container": "#003316",
+                        "on-secondary": "#ffffff",
+                        "secondary": "#815600",
+                        "on-primary-fixed-variant": "#852400",
+                        "surface": "#f8f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed": "#86faa7",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#dfe2eb",
+                        "on-tertiary-fixed": "#00210c",
+                        "tertiary-container": "#2da65d",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#6add8d",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary-container": "#6a4600",
+                        "primary-fixed": "#ffdbd0",
+                        "on-primary-container": "#541400",
+                        "surface-dim": "#d7dae2",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#ffddb1",
+                        "surface-container-low": "#f1f3fc",
+                        "secondary-container": "#fdaf1e",
+                        "outline-variant": "#e4beb3",
+                        "surface-container-highest": "#dfe2eb",
+                        "on-tertiary-fixed-variant": "#005228",
+                        "on-tertiary": "#ffffff",
+                        "primary": "#ae3200",
+                        "inverse-on-surface": "#eef1f9",
+                        "background": "#f8f9ff",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#ffba4b",
+                        "outline": "#8f7067",
+                        "inverse-surface": "#2d3137",
+                        "inverse-primary": "#ffb59e",
+                        "on-secondary-fixed-variant": "#624000",
+                        "surface-container-high": "#e5e8f0",
+                        "surface-container": "#ebeef6",
+                        "on-background": "#181c22",
+                        "on-secondary-fixed": "#291800",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#5b4038"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "page-margin": "16px",
+                        "base": "4px",
+                        "module-gap": "12px",
+                        "card-padding": "12px",
+                        "item-gap": "8px"
+                    },
+                    "fontFamily": {
+                        "currency-display": ["PingFang SC", "sans-serif"],
+                        "card-title": ["PingFang SC", "sans-serif"],
+                        "body-main": ["PingFang SC", "sans-serif"],
+                        "caption-muted": ["PingFang SC", "sans-serif"],
+                        "section-title": ["PingFang SC", "sans-serif"],
+                        "label-table": ["PingFang SC", "sans-serif"],
+                        "page-title": ["PingFang SC", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "currency-display": ["15px", { "lineHeight": "22px", "fontWeight": "700" }],
+                        "card-title": ["15px", { "lineHeight": "22px", "fontWeight": "600" }],
+                        "body-main": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+                        "caption-muted": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "section-title": ["18px", { "lineHeight": "26px", "fontWeight": "700" }],
+                        "label-table": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "page-title": ["24px", { "lineHeight": "32px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Skeleton Shimmer Animation requested in prompt */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        .skeleton-shimmer {
+            animation: shimmer 2s infinite linear;
+            background: linear-gradient(to right, #f3f3f3 4%, #e5e5e5 25%, #f3f3f3 36%);
+            background-size: 1000px 100%;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-main antialiased min-h-screen">
+<!-- TopNavBar (Generated from JSON) -->
+<header class="fixed top-0 right-0 h-[56px] left-[220px] bg-surface border-b border-outline-variant flex justify-between items-center px-6 z-10">
+<div class="font-section-title text-section-title text-on-surface">
+<!-- Space left for potential breadcrumbs or page context in nav if needed, but JSON dictates product name is here. However, typical layout puts breadcrumbs in content. We follow JSON strictly for components. -->
+</div>
+<div class="flex items-center gap-6">
+<!-- Trailing Actions -->
+<div class="flex items-center gap-4">
+<span class="font-label-table text-label-table text-tertiary-container flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-tertiary-container block"></span>
+                    营业中
+                </span>
+<span class="font-body-main text-body-main text-on-surface-variant">
+                    账号名
+                </span>
+</div>
+<!-- Icon Actions -->
+<button class="text-on-surface-variant hover:text-primary transition-opacity active:opacity-80 flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined text-[20px]" data-icon="logout">logout</span>
+</button>
+</div>
+</header>
+<!-- SideNavBar (Generated from JSON) -->
+<nav class="fixed left-0 top-0 h-full w-[220px] bg-surface border-r border-outline-variant flex flex-col py-4 z-20">
+<!-- Header -->
+<div class="px-6 mb-8 flex flex-col gap-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center overflow-hidden shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant">storefront</span>
+</div>
+<div class="flex flex-col">
+<span class="font-section-title text-section-title text-primary truncate w-[140px]" title="校园外卖商家后台">校园外卖商家后台</span>
+<span class="font-caption-muted text-caption-muted text-on-surface-variant">店铺管理端</span>
+</div>
+</div>
+</div>
+<!-- Main Tabs -->
+<div class="flex-1 flex flex-col px-3 gap-1 overflow-y-auto">
+<!-- Index 0 -->
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="font-body-main text-body-main">订单</span>
+</a>
+<!-- Index 1 (Active) -->
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-primary bg-secondary-container font-bold border-r-4 border-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-body-main text-body-main">商品</span>
+</a>
+<!-- Index 2 -->
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+<span class="font-body-main text-body-main">分类</span>
+</a>
+<!-- Index 3 -->
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-main text-body-main">店铺设置</span>
+</a>
+</div>
+<!-- Footer Tabs -->
+<div class="px-3 pt-4 border-t border-outline-variant flex flex-col gap-1 mt-auto">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200 opacity-60" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="dashboard">dashboard</span>
+<span class="font-caption-muted text-caption-muted">概览 (二期)</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200 opacity-60" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications">notifications</span>
+<span class="font-caption-muted text-caption-muted">消息 (二期)</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200 opacity-60" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="analytics">analytics</span>
+<span class="font-caption-muted text-caption-muted">统计 (二期)</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-[220px] pt-[56px] p-page-margin min-h-screen flex flex-col gap-module-gap relative z-0">
+<!-- Top Section Skeletons (Breadcrumbs & Title) -->
+<div class="flex flex-col gap-3 mb-2">
+<!-- Breadcrumb Skeleton -->
+<div class="flex items-center gap-2">
+<div class="w-12 h-[16px] rounded skeleton-shimmer"></div>
+<span class="text-surface-variant">/</span>
+<div class="w-16 h-[16px] rounded skeleton-shimmer"></div>
+</div>
+<!-- Page Title Skeleton -->
+<div class="w-[200px] h-[32px] rounded skeleton-shimmer mt-2"></div>
+</div>
+<!-- Main Form Card Skeleton -->
+<div class="bg-surface-container-lowest border border-surface-container-high rounded-lg p-card-padding flex flex-col gap-module-gap shadow-sm">
+<!-- Form Section Title Skeleton -->
+<div class="w-[120px] h-[24px] rounded skeleton-shimmer mb-2"></div>
+<!-- Form Field 1 -->
+<div class="flex flex-col gap-item-gap">
+<div class="w-[60px] h-[20px] rounded skeleton-shimmer"></div>
+<div class="w-[480px] h-[36px] rounded skeleton-shimmer"></div>
+</div>
+<!-- Form Field 2 -->
+<div class="flex flex-col gap-item-gap">
+<div class="w-[80px] h-[20px] rounded skeleton-shimmer"></div>
+<div class="w-[480px] h-[100px] rounded skeleton-shimmer"></div> <!-- Textarea mock -->
+</div>
+<!-- Form Field 3 -->
+<div class="flex flex-col gap-item-gap">
+<div class="w-[70px] h-[20px] rounded skeleton-shimmer"></div>
+<div class="flex gap-4">
+<div class="w-[120px] h-[120px] rounded skeleton-shimmer"></div> <!-- Image upload mock -->
+<div class="w-[120px] h-[120px] rounded skeleton-shimmer"></div>
+</div>
+</div>
+<!-- Form Field 4 -->
+<div class="flex flex-col gap-item-gap">
+<div class="w-[60px] h-[20px] rounded skeleton-shimmer"></div>
+<div class="w-[480px] h-[36px] rounded skeleton-shimmer"></div>
+</div>
+</div>
+<!-- Bottom Actions Skeleton -->
+<div class="bg-surface-container-lowest border border-surface-container-high rounded-lg p-card-padding flex justify-end gap-module-gap mt-auto shadow-sm">
+<div class="w-[80px] h-[36px] rounded skeleton-shimmer"></div>
+<div class="w-[80px] h-[36px] rounded skeleton-shimmer"></div>
+</div>
+</main>
+</body></html>

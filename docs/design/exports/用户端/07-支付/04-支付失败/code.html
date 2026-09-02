@@ -1,0 +1,158 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Payment Failure</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#5f5e5e",
+                        "surface-bright": "#f9f9f9",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#ffdbcc",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "primary-fixed": "#ffdbd0",
+                        "inverse-primary": "#ffb59e",
+                        "on-primary-fixed": "#3a0b00",
+                        "surface-container": "#eeeeee",
+                        "on-surface": "#1a1c1c",
+                        "on-primary": "#ffffff",
+                        "surface": "#f9f9f9",
+                        "secondary-container": "#e4e2e1",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "text-secondary": "#666666",
+                        "surface-tint": "#ae3200",
+                        "on-tertiary-fixed": "#351000",
+                        "on-background": "#1a1c1c",
+                        "inverse-surface": "#2f3131",
+                        "tertiary": "#a14000",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#541400",
+                        "primary-container": "#ff5a1f",
+                        "outline-variant": "#e4beb3",
+                        "surface-container-highest": "#e2e2e2",
+                        "surface-variant": "#e2e2e2",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "on-surface-variant": "#5b4038",
+                        "on-primary-fixed-variant": "#852400",
+                        "outline": "#8f7067",
+                        "background": "#f9f9f9",
+                        "on-tertiary-container": "#4d1b00",
+                        "inverse-on-surface": "#f1f1f1",
+                        "on-error-container": "#93000a",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#e4e2e1",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#474747",
+                        "border-light": "#E5E5E5",
+                        "surface-dim": "#dadada",
+                        "surface-container-low": "#f3f3f3",
+                        "surface-container-high": "#e8e8e8",
+                        "tertiary-container": "#f46500",
+                        "on-secondary-container": "#656464",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#ffb59e",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "primary": "#ae3200",
+                        "text-tertiary": "#999999",
+                        "surface-white": "#FFFFFF"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem",
+                        "button": "0.5rem"
+                    },
+                    "spacing": {
+                        "margin-page": "12px",
+                        "gap-module": "12px",
+                        "base": "4px",
+                        "gutter": "8px",
+                        "padding-card": "10px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Be Vietnam Pro", "sans-serif"],
+                        "body-lg": ["Be Vietnam Pro", "sans-serif"],
+                        "label-sm": ["Be Vietnam Pro", "sans-serif"],
+                        "headline-md": ["Be Vietnam Pro", "sans-serif"],
+                        "headline-lg": ["Be Vietnam Pro", "sans-serif"],
+                        "cta-button": ["Be Vietnam Pro", "sans-serif"],
+                        "body-md": ["Be Vietnam Pro", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }],
+                        "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "cta-button": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #F7F7F7;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center bg-surface-white sm:bg-surface w-full max-w-md mx-auto relative overflow-hidden">
+<!-- Top Navigation -->
+<header class="w-full flex items-center justify-between px-margin-page h-14 bg-surface-white sm:bg-surface border-b border-border-light sm:border-transparent sticky top-0 z-50">
+<button aria-label="Back" class="p-2 -ml-2 rounded-full hover:bg-surface-container active:scale-95 transition-transform text-on-surface">
+<span class="material-symbols-outlined text-headline-md" style="font-variation-settings: 'FILL' 0;">arrow_back_ios</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-on-surface absolute left-1/2 transform -translate-x-1/2">
+            支付失败
+        </h1>
+<div class="w-8"></div> <!-- Spacer for centering -->
+</header>
+<!-- Main Content -->
+<main class="flex-1 w-full px-margin-page flex flex-col items-center pt-10 pb-6">
+<!-- Status Icon & Title -->
+<div class="flex flex-col items-center mb-8">
+<div class="w-20 h-20 bg-error-container rounded-full flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-error text-5xl" style="font-variation-settings: 'FILL' 1;">error</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">
+                支付失败
+            </h2>
+<p class="font-body-md text-body-md text-text-secondary text-center max-w-[280px]">
+                支付超时或余额不足，请尝试重新支付
+            </p>
+</div>
+<!-- Order Details Card -->
+<div class="w-full bg-surface-white border border-border-light rounded-xl p-4 mb-10">
+<div class="flex justify-between items-center mb-3 pb-3 border-b border-border-light">
+<span class="font-body-md text-body-md text-text-secondary">待支付金额</span>
+<span class="font-headline-md text-headline-md text-on-surface">¥38.90</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-text-tertiary">订单号</span>
+<span class="font-label-md text-label-md text-text-secondary font-mono">1023 9485 2049 3921</span>
+</div>
+</div>
+<!-- Spacer to push buttons to bottom on smaller screens if needed -->
+<div class="flex-1"></div>
+<!-- Action Buttons -->
+<div class="w-full flex flex-col gap-3 mt-auto">
+<button class="w-full bg-primary-container text-on-primary font-cta-button text-cta-button py-3 px-4 rounded-button hover:bg-primary transition-colors active:scale-95 duration-200">
+                重新支付
+            </button>
+<button class="w-full bg-surface-white border border-border-light text-on-surface font-cta-button text-cta-button py-3 px-4 rounded-button hover:bg-surface-container-lowest transition-colors active:scale-95 duration-200">
+                联系客服
+            </button>
+</div>
+</main>
+</body></html>

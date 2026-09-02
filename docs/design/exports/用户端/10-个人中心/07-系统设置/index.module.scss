@@ -1,0 +1,242 @@
+* {
+  box-sizing: border-box;
+}
+
+.frame {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #f9f9f9;
+  padding-top: 56px;
+  width: 390px;
+  height: 480px;
+  min-height: 480px;
+  overflow-y: auto;
+
+  .container {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+  }
+
+  .mainContent {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    align-items: flex-start;
+    align-self: stretch;
+    padding: 12px 12px 96px;
+    row-gap: 32px;
+
+    .settingsListContaine {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: flex-start;
+      align-self: stretch;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      box-shadow: 0px 1px 2px 0px #0000000d;
+      background: #ffffff;
+      overflow: hidden;
+
+      .container3 {
+        flex-shrink: 0;
+        width: 7px;
+        height: 12px;
+      }
+
+      .text {
+        flex-shrink: 0;
+        line-height: 22px;
+        letter-spacing: 0;
+        color: #1a1c1c;
+        font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .buttonListItemProfil {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        align-self: stretch;
+        justify-content: space-between;
+        border-width: 0px 0px 1px;
+        border-style: solid;
+        border-color: #e5e5e5;
+        background: #ffffff;
+        padding: 16px 16px 15px;
+
+        .container2 {
+          display: inline-flex;
+          flex-shrink: 0;
+          align-items: center;
+          column-gap: 12px;
+        }
+      }
+
+      .buttonListItemNotifi {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        align-self: stretch;
+        justify-content: space-between;
+        border-width: 0px 0px 1px;
+        border-style: solid;
+        border-color: #e5e5e5;
+        background: #ffffff;
+        padding: 16px 16px 15px;
+
+        .container5 {
+          display: inline-flex;
+          flex-shrink: 0;
+          align-items: center;
+          column-gap: 12px;
+
+          .container4 {
+            flex-shrink: 0;
+            width: 16px;
+            height: 20px;
+          }
+        }
+      }
+
+      .buttonListItemPrivac {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        align-self: stretch;
+        justify-content: space-between;
+        border-width: 0px 0px 1px;
+        border-style: solid;
+        border-color: #e5e5e5;
+        background: #ffffff;
+        padding: 16px 16px 15px;
+
+        .container7 {
+          display: inline-flex;
+          flex-shrink: 0;
+          align-items: center;
+          column-gap: 12px;
+
+          .container6 {
+            flex-shrink: 0;
+            width: 16px;
+            height: 21px;
+          }
+        }
+      }
+
+      .buttonListItemAbout {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        align-self: stretch;
+        justify-content: space-between;
+        background: #ffffff;
+        padding: 16px;
+
+        .container9 {
+          display: inline-flex;
+          flex-shrink: 0;
+          align-items: center;
+          column-gap: 12px;
+
+          .container8 {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+          }
+        }
+
+        .container10 {
+          display: inline-flex;
+          flex-shrink: 0;
+          align-items: center;
+          column-gap: 8px;
+
+          .text2 {
+            flex-shrink: 0;
+            line-height: 16px;
+            letter-spacing: 0;
+            color: #999999;
+            font-family: "Liberation Serif", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 12px;
+          }
+        }
+      }
+    }
+
+    .logoutButtonButton {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      align-self: stretch;
+      justify-content: center;
+      column-gap: 8px;
+      border: 1px solid #ff5a1f;
+      border-radius: 4px;
+      background: #ffffff;
+      padding-top: 15px;
+      padding-bottom: 15px;
+
+      .container11 {
+        flex-shrink: 0;
+        width: 18px;
+        height: 18px;
+      }
+
+      .text3 {
+        flex-shrink: 0;
+        line-height: 20px;
+        letter-spacing: 0;
+        color: #ff5a1f;
+        font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+        font-size: 16px;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .headerCustomTopAppBa {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    border-width: 0px 0px 1px;
+    border-style: solid;
+    border-color: #e5e5e5;
+    background: #ffffff;
+    padding-right: 12px;
+    padding-left: 12px;
+    width: 390px;
+    height: 56px;
+
+    .buttonGoBack {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      width: 40px;
+      height: 40px;
+    }
+
+    .text4 {
+      flex-grow: 1;
+      padding: 0px 40px 0px 0px;
+      text-align: center;
+      line-height: 24px;
+      letter-spacing: 0;
+      color: #1a1c1c;
+      font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 18px;
+      font-weight: 500;
+    }
+  }
+}

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+
+<html lang="zh" style="font-family: 'Be Vietnam Pro', sans-serif;"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Chat Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#ffdbd0",
+                        "surface-bright": "#f9f9f9",
+                        "on-primary": "#ffffff",
+                        "on-secondary-container": "#656464",
+                        "on-primary-fixed": "#3a0b00",
+                        "on-primary-container": "#541400",
+                        "surface": "#f9f9f9",
+                        "primary-fixed-dim": "#ffb59e",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "primary-container": "#ff5a1f",
+                        "on-secondary-fixed-variant": "#474747",
+                        "on-tertiary-fixed": "#351000",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "outline": "#8f7067",
+                        "border-light": "#E5E5E5",
+                        "on-tertiary-container": "#4d1b00",
+                        "secondary-container": "#e4e2e1",
+                        "error": "#ba1a1a",
+                        "surface-container": "#eeeeee",
+                        "tertiary-container": "#f46500",
+                        "inverse-primary": "#ffb59e",
+                        "on-background": "#1a1c1c",
+                        "on-surface": "#1a1c1c",
+                        "inverse-surface": "#2f3131",
+                        "on-secondary": "#ffffff",
+                        "surface-white": "#FFFFFF",
+                        "text-tertiary": "#999999",
+                        "surface-container-lowest": "#ffffff",
+                        "text-secondary": "#666666",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "surface-container-low": "#f3f3f3",
+                        "surface-tint": "#ae3200",
+                        "on-surface-variant": "#5b4038",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#e2e2e2",
+                        "secondary": "#5f5e5e",
+                        "surface-variant": "#e2e2e2",
+                        "surface-dim": "#dadada",
+                        "on-error": "#ffffff",
+                        "primary": "#ae3200",
+                        "tertiary": "#a14000",
+                        "on-primary-fixed-variant": "#852400",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#ffdbcc",
+                        "surface-container-high": "#e8e8e8",
+                        "background": "#f9f9f9",
+                        "secondary-fixed": "#e4e2e1",
+                        "inverse-on-surface": "#f1f1f1",
+                        "on-tertiary": "#ffffff",
+                        "outline-variant": "#e4beb3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-page": "12px",
+                        "gutter": "8px",
+                        "padding-card": "10px",
+                        "gap-module": "12px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["beVietnamPro", "sans-serif"],
+                        "headline-lg": ["beVietnamPro", "sans-serif"],
+                        "label-sm": ["beVietnamPro", "sans-serif"],
+                        "cta-button": ["beVietnamPro", "sans-serif"],
+                        "headline-md": ["beVietnamPro", "sans-serif"],
+                        "body-lg": ["beVietnamPro", "sans-serif"],
+                        "body-md": ["beVietnamPro", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "cta-button": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased overflow-x-hidden">
+<!-- Shared Component: TopAppBar -->
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-surface-bright group/design-root overflow-x-hidden pb-40" style='font-family: "Be Vietnam Pro", "Noto Sans", sans-serif;'>
+<div class="flex items-center bg-[#fcf9f8] p-4 pb-2 justify-between sticky top-0 z-20"><div class="flex items-center gap-4 w-full"><button aria-label="返回" class="flex items-center justify-center size-10 rounded-lg hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-on-surface">arrow_back</span></button><h1 class="text-headline-md text-on-surface flex-1">聊天详情</h1><button class="flex items-center justify-center size-10 rounded-lg hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-on-surface">more_horiz</span></button></div></div>
+<div class="p-4">
+<div class="flex flex-col gap-4 p-4 rounded-xl bg-surface-container-low shadow-sm"><div class="flex justify-between items-start"><div class="flex flex-col gap-1"><div class="flex items-center gap-2"><span class="px-2 py-0.5 bg-primary-container text-on-primary-container text-label-sm font-bold rounded uppercase">配送中</span><p class="text-body-md text-text-secondary">订单编号: #20231024</p></div><p class="text-headline-md text-on-surface">肯德基 (万达店)</p></div><div class="size-16 rounded-lg bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBjA8bOk7D7fIdp29M7wwG-Zd-TAba335FSmX-Lyij6dx-aMx7C5-0fhu8DP2ZolsjspvFHuHdeQiIBgQGSRnirKz3MT9NvoTWLedisJ7NhRL09TlnKmFdCXg-AgyY0XOFP1IX2ySfskVJ0SWsMdIF_Yc6M9OGGrPaak6GOC71i7dav7pzp9CLvBpnJoS07R-0EQrEUiTMc98rp2EqaKBRuV3oDFYgwI-qQsnsJc-ga7VGDu6CJWLRYlfbrIDoQ8E02qyPF0XGgKv1K");'></div></div><div class="flex gap-3"><button class="flex-1 h-9 bg-[#FF5A1F] text-white text-label-md font-bold rounded-lg transition-colors">查看详情</button><button class="flex-1 h-9 bg-[#FF5A1F] text-white text-label-md font-bold rounded-lg transition-colors">联系骑手</button></div></div>
+</div>
+<div class="flex flex-col gap-2 p-4"><div class="flex items-center gap-2"><div class="size-8 rounded-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBtIZZSr6HaIf2oLrOLcOHoiHi2-zTCGt6bUBze6rYiBDxGMtAtUNr-qvPT3PTkHhuWZBRFUMTM6QiCE_nYWGZ2NaftgKS68jSyaP4O8wA5hA32uLOwYsD6NCvzMsMO6RkGK1x66A76T-QNesN1G_p1mMg_a4yxoN_j3iUpsxpSwP5qxnqrFkBNR9tNOInOc1NC25DZtlVkkYLwycPGnH5JHtYKe8kUrHVfvPhd70r1VqKEVnDhji6q6Yvb3t6k8EMV2rgLvQEc0dpK");'></div><p class="text-label-md font-bold text-text-secondary">肯德基 <span class="ml-2 font-normal text-text-tertiary">14:02</span></p></div><div class="ml-10 bg-surface-container-high text-on-surface p-3 rounded-tr-xl rounded-br-xl rounded-bl-xl max-w-[85%] text-body-md">您好，您的餐点已经准备好，骑手正在路上。</div></div>
+<div class="flex flex-col gap-2 p-4 items-end"><div class="flex items-center flex-row-reverse gap-2"><div class="size-8 rounded-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuClXdvKYv1XUg68Kmq_YzALCWKM4WueaE5AEmR83sZuxUIfh0lEunzAOSrW6RBYCNrkKbPE7gbOFO_DGW8cVBKRAR92QqMxjlFztoXNgijIRjbQbn9W8G_TC27EaoVmx3AgP_VyLSUMIcXp-ayGLsmNydSALqb_2fEYgR4XmYTmw6aCYGVe3QaNH_8H8W5MYURR_tthIfyo_s-yWLxIW5qw_5najJXuiuGkr6ruAOf_6vkVkPEKO3ZVSznuAnQqSCmE7_X2y4t9v8R1");'></div><p class="text-label-md font-bold text-text-secondary">我 <span class="mr-2 font-normal text-text-tertiary">14:05</span></p></div><div class="mr-10 text-white p-3 rounded-tl-xl rounded-bl-xl rounded-br-xl max-w-[85%] text-body-md shadow-sm bg-[#FF5A1F]">好的，麻烦让骑手放到前台，谢谢。</div></div>
+<div class="flex flex-col gap-2 p-4"><div class="flex items-center gap-2"><div class="size-8 rounded-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBmCIXZKJTVfKvXVRhXX6NSOpOcAMAWwtVitBNeG8Vz2dIASOzm0dyjE9xY97hML2U6TF7an7s6_683HFx-kyBSeohaSRezVkPk9Q84fWngqIgagYdtPehwa8pTKBy7YmpFusvCCKcVsHL6B9KqmoGF0InqU3Etpv6o5NZYKbmr3lQyhDb3Vgm4k8qOFAC0icqHudEvjVeyZO-Ae-q3VzL-TQTi93PJiJlpG7kbIRN_04NCVQgiLqU3F5nyy1d4TEN5XwCak2SDYhjV");'></div><p class="text-label-md font-bold text-text-secondary">肯德基 <span class="ml-2 font-normal text-text-tertiary">14:06</span></p></div><div class="ml-10 bg-surface-container-high text-on-surface p-3 rounded-tr-xl rounded-br-xl rounded-bl-xl max-w-[85%] text-body-md">没问题，已经备注。</div></div>
+</div>
+<!-- Fixed Bottom Input Area -->
+<div class="fixed bottom-0 left-0 right-0 w-full bg-surface px-4 py-3 flex flex-col gap-module z-30 shadow-[0_-4px_16px_rgba(0,0,0,0.03)] pb-[calc(12px+env(safe-area-inset-bottom))]"><div class="flex gap-2 overflow-x-auto no-scrollbar pb-3 px-4"><button class="px-4 py-2 bg-[#f3f3f3] rounded-lg text-label-md text-on-surface hover:bg-surface-container-high transition-colors">请问多久送达</button><button class="px-4 py-2 bg-[#f3f3f3] rounded-lg text-label-md text-on-surface hover:bg-surface-container-high transition-colors">麻烦尽快</button><button class="px-4 py-2 bg-[#f3f3f3] rounded-lg text-label-md text-on-surface hover:bg-surface-container-high transition-colors">不用餐具</button></div><div class="flex items-center gap-3 px-4"><button class="text-secondary size-10 flex items-center justify-center rounded-lg hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[24px]">add</span></button><div class="flex-1"><input class="w-full h-11 px-4 bg-surface-container-lowest rounded-lg text-body-md focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="输入消息..." type="text"/></div><button class="h-11 px-6 text-white rounded-lg text-cta-button font-bold shadow-md transition-all border-none bg-[#FF5A1F]">发送</button></div></div>
+</body></html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>收货地址</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#1a1c1c",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#f9f9f9",
+                        "outline": "#8f7067",
+                        "on-tertiary": "#ffffff",
+                        "tertiary": "#a14000",
+                        "on-surface-variant": "#5b4038",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "surface-dim": "#dadada",
+                        "on-tertiary-fixed": "#351000",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#ffb59e",
+                        "primary-fixed-dim": "#ffb59e",
+                        "on-surface": "#1a1c1c",
+                        "outline-variant": "#e4beb3",
+                        "surface-container": "#eeeeee",
+                        "on-error-container": "#93000a",
+                        "background": "#f9f9f9",
+                        "surface-container-low": "#f3f3f3",
+                        "on-secondary-fixed-variant": "#474747",
+                        "primary": "#ae3200",
+                        "inverse-surface": "#2f3131",
+                        "on-primary-fixed-variant": "#852400",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "on-secondary-container": "#656464",
+                        "on-error": "#ffffff",
+                        "border-light": "#E5E5E5",
+                        "secondary": "#5f5e5e",
+                        "text-secondary": "#666666",
+                        "surface": "#f9f9f9",
+                        "on-primary-fixed": "#3a0b00",
+                        "surface-container-high": "#e8e8e8",
+                        "primary-fixed": "#ffdbd0",
+                        "surface-variant": "#e2e2e2",
+                        "primary-container": "#ff5a1f",
+                        "inverse-on-surface": "#f1f1f1",
+                        "tertiary-container": "#f46500",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#4d1b00",
+                        "secondary-fixed": "#e4e2e1",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "secondary-container": "#e4e2e1",
+                        "surface-container-lowest": "#ffffff",
+                        "text-tertiary": "#999999",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-primary-container": "#541400",
+                        "surface-tint": "#ae3200",
+                        "surface-white": "#FFFFFF",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "surface-container-highest": "#e2e2e2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "padding-card": "10px",
+                        "gap-module": "12px",
+                        "margin-page": "12px",
+                        "gutter": "8px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "cta-button": ["beVietnamPro", "sans-serif"],
+                        "body-md": ["beVietnamPro", "sans-serif"],
+                        "headline-md": ["beVietnamPro", "sans-serif"],
+                        "body-lg": ["beVietnamPro", "sans-serif"],
+                        "label-md": ["beVietnamPro", "sans-serif"],
+                        "label-sm": ["beVietnamPro", "sans-serif"],
+                        "headline-lg": ["beVietnamPro", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "cta-button": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background min-h-screen text-on-surface antialiased flex flex-col font-body-md">
+<!-- Task-Focused Top App Bar -->
+<header class="sticky top-0 z-50 bg-surface-white border-b border-border-light h-14 flex items-center justify-between px-margin-page">
+<button aria-label="返回" class="w-8 h-8 flex items-center justify-center text-on-surface active:opacity-70 transition-opacity">
+<span class="material-symbols-outlined text-[24px]" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-on-surface flex-1 text-center pr-8">收货地址</h1>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col gap-module pb-[100px] py-margin-page">
+<!-- Address Card: Default -->
+<div class="bg-surface-white border-border-light p-padding-card flex items-center justify-between relative overflow-hidden border-b last:border-b-0">
+<!-- Left Content -->
+<div class="flex-1 flex flex-col gap-base pr-gap-module">
+<div class="flex items-center gap-gutter flex-wrap">
+<span class="font-headline-md text-headline-md text-on-surface">张同学</span>
+<span class="font-body-md text-body-md text-text-secondary">138****8888</span>
+<span class="bg-primary-fixed text-primary font-label-sm text-label-sm px-1.5 py-0.5 rounded-sm border border-primary-fixed-dim">默认</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface leading-tight mt-1">
+                    天津大学软件园校区 4号楼 201室
+                </p>
+</div>
+<!-- Right Action -->
+<button class="h-full flex items-center justify-center pl-gutter border-l border-border-light text-text-tertiary hover:text-primary transition-colors active:scale-95 p-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit_square">edit_square</span>
+</button>
+</div>
+<!-- Address Card: Secondary -->
+<div class="bg-surface-white border-border-light p-padding-card flex items-center justify-between relative overflow-hidden border-b last:border-b-0">
+<!-- Left Content -->
+<div class="flex-1 flex flex-col gap-base pr-gap-module">
+<div class="flex items-center gap-gutter flex-wrap">
+<span class="font-headline-md text-headline-md text-on-surface">张同学</span>
+<span class="font-body-md text-body-md text-text-secondary">138****8888</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface leading-tight mt-1">
+                    天津大学北洋园校区 诚园6斋 102室
+                </p>
+</div>
+<!-- Right Action -->
+<button class="h-full flex items-center justify-center pl-gutter border-l border-border-light text-text-tertiary hover:text-primary transition-colors active:scale-95 p-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit_square">edit_square</span>
+</button>
+</div>
+<!-- Address Card: Third -->
+<div class="bg-surface-white border-border-light p-padding-card flex items-center justify-between relative overflow-hidden border-b last:border-b-0">
+<!-- Left Content -->
+<div class="flex-1 flex flex-col gap-base pr-gap-module">
+<div class="flex items-center gap-gutter flex-wrap">
+<span class="font-headline-md text-headline-md text-on-surface">王小明</span>
+<span class="font-body-md text-body-md text-text-secondary">139****1234</span>
+<span class="bg-surface-variant text-text-secondary font-label-sm text-label-sm px-1.5 py-0.5 rounded-sm">公司</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface leading-tight mt-1">
+                    南开区 卫津路94号 科技大厦 15层
+                </p>
+</div>
+<!-- Right Action -->
+<button class="h-full flex items-center justify-center pl-gutter border-l border-border-light text-text-tertiary hover:text-primary transition-colors active:scale-95 p-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit_square">edit_square</span>
+</button>
+</div>
+</main>
+<!-- Fixed Bottom Action Area -->
+<footer class="fixed bottom-0 left-0 w-full bg-surface-white border-t border-border-light p-margin-page pb-6 z-50">
+<button class="w-full bg-primary-container text-on-primary font-cta-button text-cta-button h-12 rounded-xl flex items-center justify-center gap-gutter transition-all active:scale-[0.98] active:opacity-90 shadow-sm" style="background-color: #FF5A1F;">
+<span class="material-symbols-outlined text-[20px]" data-icon="add_circle">add_circle</span>
+            新增地址
+        </button>
+</footer>
+</body></html>

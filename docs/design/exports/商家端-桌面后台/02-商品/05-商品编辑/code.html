@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>商品编辑 - 校园外卖商家后台</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=PingFang+SC:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#e4beb3",
+                        "secondary-fixed-dim": "#ffba4b",
+                        "tertiary-fixed-dim": "#6add8d",
+                        "on-secondary-container": "#6a4600",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "background": "#f8f9ff",
+                        "on-surface-variant": "#5b4038",
+                        "tertiary-fixed": "#86faa7",
+                        "surface-tint": "#ae3200",
+                        "surface-container-highest": "#dfe2eb",
+                        "on-error-container": "#93000a",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed": "#00210c",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#ffb59e",
+                        "on-primary-fixed-variant": "#852400",
+                        "tertiary": "#006d37",
+                        "on-secondary-fixed": "#291800",
+                        "outline": "#8f7067",
+                        "primary": "#ae3200",
+                        "surface-dim": "#d7dae2",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary-fixed-variant": "#005228",
+                        "secondary-fixed": "#ffddb1",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#ffb59e",
+                        "surface": "#f8f9ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#ebeef6",
+                        "primary-fixed": "#ffdbd0",
+                        "on-primary-container": "#541400",
+                        "on-surface": "#181c22",
+                        "on-background": "#181c22",
+                        "error": "#ba1a1a",
+                        "secondary": "#815600",
+                        "on-primary-fixed": "#3a0b00",
+                        "surface-variant": "#dfe2eb",
+                        "surface-container-low": "#f1f3fc",
+                        "on-secondary-fixed-variant": "#624000",
+                        "inverse-surface": "#2d3137",
+                        "surface-container-high": "#e5e8f0",
+                        "secondary-container": "#fdaf1e",
+                        "inverse-on-surface": "#eef1f9",
+                        "primary-container": "#ff5a1f",
+                        "tertiary-container": "#2da65d",
+                        "on-tertiary-container": "#003316"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "module-gap": "12px",
+                        "page-margin": "16px",
+                        "item-gap": "8px",
+                        "base": "4px",
+                        "card-padding": "12px"
+                    },
+                    "fontFamily": {
+                        "section-title": ["PingFang SC"],
+                        "currency-display": ["PingFang SC"],
+                        "page-title": ["PingFang SC"],
+                        "body-main": ["PingFang SC"],
+                        "label-table": ["PingFang SC"],
+                        "card-title": ["PingFang SC"],
+                        "caption-muted": ["PingFang SC"]
+                    },
+                    "fontSize": {
+                        "section-title": ["18px", { "lineHeight": "26px", "fontWeight": "700" }],
+                        "currency-display": ["15px", { "lineHeight": "22px", "fontWeight": "700" }],
+                        "page-title": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-main": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+                        "label-table": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "card-title": ["15px", { "lineHeight": "22px", "fontWeight": "600" }],
+                        "caption-muted": ["12px", { "lineHeight": "16px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .material-symbols-outlined {
+                font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen font-body-main">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-[220px] bg-surface border-r border-outline-variant flex flex-col py-4 z-20">
+<!-- Brand -->
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary font-bold">ML</div>
+<div>
+<h1 class="font-section-title text-section-title text-primary">校园外卖商家后台</h1>
+<p class="font-caption-muted text-caption-muted text-on-surface-variant mt-1">店铺管理端</p>
+</div>
+</div>
+<!-- Main Navigation -->
+<ul class="flex-1 px-3 space-y-1">
+<!-- 订单 -->
+<li>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-body-main text-body-main">订单</span>
+</a>
+</li>
+<!-- 商品 (Active) -->
+<li>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-primary bg-secondary-container font-bold border-r-4 border-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="font-body-main text-body-main">商品</span>
+</a>
+</li>
+<!-- 分类 -->
+<li>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">category</span>
+<span class="font-body-main text-body-main">分类</span>
+</a>
+</li>
+<!-- 店铺设置 -->
+<li>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-main text-body-main">店铺设置</span>
+</a>
+</li>
+</ul>
+<!-- Footer Navigation -->
+<div class="px-3 border-t border-outline-variant pt-4 mt-auto">
+<ul class="space-y-1">
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200 opacity-60" href="#">
+<span class="material-symbols-outlined text-sm">dashboard</span>
+<span class="font-caption-muted text-caption-muted">概览 (二期)</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200 opacity-60" href="#">
+<span class="material-symbols-outlined text-sm">notifications</span>
+<span class="font-caption-muted text-caption-muted">消息 (二期)</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200 opacity-60" href="#">
+<span class="material-symbols-outlined text-sm">analytics</span>
+<span class="font-caption-muted text-caption-muted">统计 (二期)</span>
+</a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 h-[56px] left-[220px] bg-surface border-b border-outline-variant flex justify-between items-center px-6 z-10">
+<!-- Breadcrumbs -->
+<div class="flex items-center text-on-surface-variant font-body-main text-body-main gap-2">
+<a class="hover:text-primary transition-colors" href="#">商品列表</a>
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+<span class="text-on-surface font-semibold">商品编辑</span>
+</div>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-4">
+<span class="flex items-center gap-1.5 font-label-table text-label-table text-tertiary">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+                营业中
+            </span>
+<div class="h-4 w-px bg-outline-variant mx-2"></div>
+<span class="font-body-main text-body-main text-on-surface">账号名</span>
+<button class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:opacity-80 flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined">logout</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-[220px] mt-[56px] p-page-margin">
+<!-- Page Header -->
+<div class="mb-module-gap">
+<h2 class="font-page-title text-page-title text-on-surface mb-2">商品编辑</h2>
+<p class="font-body-main text-body-main text-on-surface-variant">编辑商品的基础信息与售卖状态</p>
+</div>
+<!-- Form Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg">
+<form class="p-6">
+<!-- Form Layout: CSS Grid for label/input alignment -->
+<div class="grid grid-cols-[100px_1fr] gap-y-6 items-start">
+<!-- 1. 商品名称 (Error State Example) -->
+<div class="pt-2 text-right pr-4 font-body-main text-body-main text-on-surface">
+<span class="text-error mr-1">*</span>商品名称
+                    </div>
+<div>
+<input class="w-[480px] h-10 px-3 rounded border border-error bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-error focus:ring-opacity-20 focus:border-error transition-shadow font-body-main text-body-main" placeholder="请输入商品名称" type="text" value=""/>
+<p class="mt-1.5 font-caption-muted text-caption-muted text-error">请输入商品名称</p>
+</div>
+<!-- 2. 所属分类 -->
+<div class="pt-2 text-right pr-4 font-body-main text-body-main text-on-surface">
+                        所属分类
+                    </div>
+<div>
+<select class="w-[480px] h-10 px-3 rounded border border-outline-variant bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:ring-opacity-10 focus:border-primary-container transition-shadow font-body-main text-body-main appearance-none">
+<option selected="" value="热销爆款">热销爆款</option>
+<option value="主食">主食</option>
+<option value="小吃">小吃</option>
+<option value="饮品">饮品</option>
+</select>
+</div>
+<!-- 3. 商品说明 -->
+<div class="pt-2 text-right pr-4 font-body-main text-body-main text-on-surface">
+                        商品说明
+                    </div>
+<div>
+<textarea class="w-[480px] p-3 rounded border border-outline-variant bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:ring-opacity-10 focus:border-primary-container transition-shadow font-body-main text-body-main resize-none" rows="3">经典香辣口味，搭配生菜与沙拉酱</textarea>
+</div>
+<!-- 4. 价格（元） -->
+<div class="pt-2 text-right pr-4 font-body-main text-body-main text-on-surface">
+                        价格（元）
+                    </div>
+<div>
+<input class="w-[480px] h-10 px-3 rounded border border-outline-variant bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:ring-opacity-10 focus:border-primary-container transition-shadow font-body-main text-body-main" step="0.01" type="number" value="13.50"/>
+<p class="mt-1.5 font-caption-muted text-caption-muted text-on-surface-variant">≥ 0，精确到分</p>
+</div>
+<!-- 5. 库存 -->
+<div class="pt-2 text-right pr-4 font-body-main text-body-main text-on-surface">
+                        库存
+                    </div>
+<div>
+<input class="w-[480px] h-10 px-3 rounded border border-outline-variant bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:ring-opacity-10 focus:border-primary-container transition-shadow font-body-main text-body-main" step="1" type="number" value="86"/>
+<p class="mt-1.5 font-caption-muted text-caption-muted text-on-surface-variant">非负整数；库存为 0 时顾客端显示售罄</p>
+</div>
+<!-- 6. 上架状态 -->
+<div class="pt-1 text-right pr-4 font-body-main text-body-main text-on-surface">
+                        上架状态
+                    </div>
+<div class="flex items-center h-[30px]">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+<span class="ml-3 font-body-main text-body-main text-on-surface-variant">关闭后顾客不可见该商品</span>
+</div>
+</div>
+</form>
+<!-- Card Footer / Actions -->
+<div class="px-6 py-4 border-t border-outline-variant flex justify-end gap-3 bg-surface-bright rounded-b-lg">
+<button class="px-6 py-2 rounded font-card-title text-card-title bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container-low transition-colors" type="button">
+                    取 消
+                </button>
+<button class="px-6 py-2 rounded font-card-title text-card-title bg-primary-container text-on-primary hover:bg-surface-tint transition-colors" type="submit">
+                    保 存
+                </button>
+</div>
+</div>
+</main>
+</body></html>

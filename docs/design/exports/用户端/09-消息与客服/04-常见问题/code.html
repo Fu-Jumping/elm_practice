@@ -1,0 +1,225 @@
+<!DOCTYPE html><html class="light" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>常见问题 - 饿了么</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#351000",
+                        "tertiary-container": "#f46500",
+                        "on-background": "#1a1c1c",
+                        "border-light": "#E5E5E5",
+                        "on-surface-variant": "#5b4038",
+                        "surface-variant": "#e2e2e2",
+                        "surface-dim": "#dadada",
+                        "inverse-on-surface": "#f1f1f1",
+                        "inverse-surface": "#2f3131",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "secondary": "#5f5e5e",
+                        "on-primary-container": "#541400",
+                        "text-tertiary": "#999999",
+                        "text-secondary": "#666666",
+                        "surface-bright": "#f9f9f9",
+                        "primary-container": "#ff5a1f",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#ae3200",
+                        "surface-white": "#FFFFFF",
+                        "on-primary-fixed-variant": "#852400",
+                        "background": "#f9f9f9",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "primary": "#ae3200",
+                        "tertiary": "#a14000",
+                        "surface-container": "#eeeeee",
+                        "outline-variant": "#e4beb3",
+                        "on-primary-fixed": "#3a0b00",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#1a1c1c",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffdbcc",
+                        "primary-fixed-dim": "#ffb59e",
+                        "inverse-primary": "#ffb59e",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "on-tertiary-container": "#4d1b00",
+                        "on-primary": "#ffffff",
+                        "on-secondary-container": "#656464",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#e8e8e8",
+                        "surface-container-highest": "#e2e2e2",
+                        "outline": "#8f7067",
+                        "on-secondary-fixed-variant": "#474747",
+                        "primary-fixed": "#ffdbd0",
+                        "surface-container-low": "#f3f3f3",
+                        "secondary-fixed": "#e4e2e1",
+                        "secondary-container": "#e4e2e1",
+                        "surface": "#f9f9f9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "padding-card": "10px",
+                        "gutter": "8px",
+                        "margin-page": "12px",
+                        "base": "4px",
+                        "gap-module": "12px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["beVietnamPro"],
+                        "label-md": ["beVietnamPro"],
+                        "headline-md": ["beVietnamPro"],
+                        "headline-lg": ["beVietnamPro"],
+                        "cta-button": ["beVietnamPro"],
+                        "body-md": ["beVietnamPro"],
+                        "label-sm": ["beVietnamPro"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", {"lineHeight": "22px", "fontWeight": "500"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "headline-lg": ["20px", {"lineHeight": "28px", "fontWeight": "700"}],
+                        "cta-button": ["16px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-sm": ["10px", {"lineHeight": "14px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-item.active .accordion-content {
+            max-height: 500px;
+        }
+        .accordion-item.active .material-symbols-outlined.expand-icon {
+            transform: rotate(180deg);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md antialiased pt-14 pb-16">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-on-background fixed top-0 w-full z-50 border-b border-border-light dark:border-outline flex justify-between items-center h-14 px-margin-page">
+<button class="text-primary dark:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-surface-variant transition-colors duration-200 active:opacity-80 p-2 -ml-2 rounded-full" onclick="history.back()">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-lg text-headline-lg font-bold text-primary dark:text-primary-fixed-dim">常见问题</h1>
+<div class="w-10"></div> <!-- Placeholder for layout balance -->
+</header>
+<!-- Main Content -->
+<main class="max-w-3xl mx-auto px-margin-page py-6">
+<div class="mb-6">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">常见问题解答</h2>
+<p class="font-body-md text-text-secondary text-secondary">请查看以下常见问题，如果您的问题没有得到解决，可以联系在线客服。</p>
+</div>
+<!-- FAQ Accordion -->
+<div class="bg-surface-white border border-border-light rounded-xl overflow-hidden shadow-sm">
+<!-- Question 1 -->
+<div class="accordion-item border-b border-border-light last:border-b-0">
+<button class="w-full flex items-center justify-between p-4 text-left hover:bg-surface-container-low transition-colors duration-200 focus:outline-none" onclick="toggleAccordion(this)">
+<span class="font-body-lg text-body-lg text-on-surface">如何修改收货地址?</span>
+<span class="material-symbols-outlined text-text-secondary transition-transform duration-300 expand-icon" data-icon="expand_more">expand_more</span>
+</button>
+<div class="accordion-content bg-surface-bright">
+<div class="p-4 pt-0 text-text-secondary font-body-md text-body-md">
+<p class="">您可以在提交订单前修改收货地址。如果是已经提交但商家尚未接单的订单，您可以尝试取消订单后重新下单并选择正确的地址。如果商家已经接单，建议您尽快通过订单页面的联系方式联系商家或骑手协商修改送餐地址。</p>
+</div>
+</div>
+</div>
+<!-- Question 2 -->
+<div class="accordion-item border-b border-border-light last:border-b-0">
+<button class="w-full flex items-center justify-between p-4 text-left hover:bg-surface-container-low transition-colors duration-200 focus:outline-none" onclick="toggleAccordion(this)">
+<span class="font-body-lg text-body-lg text-on-surface">优惠券如何使用?</span>
+<span class="material-symbols-outlined text-text-secondary transition-transform duration-300 expand-icon" data-icon="expand_more">expand_more</span>
+</button>
+<div class="accordion-content bg-surface-bright">
+<div class="p-4 pt-0 text-text-secondary font-body-md text-body-md">
+<p class="">在结算页面，系统会自动为您推荐并选中当前可用的最大面额优惠券。如果您想使用其他优惠券，可以点击“红包/抵用券”选项进入选择页面手动勾选。请注意，部分优惠券可能存在使用门槛或特定商家/商品限制。</p>
+</div>
+</div>
+</div>
+<!-- Question 3 -->
+<div class="accordion-item border-b border-border-light last:border-b-0">
+<button class="w-full flex items-center justify-between p-4 text-left hover:bg-surface-container-low transition-colors duration-200 focus:outline-none" onclick="toggleAccordion(this)">
+<span class="font-body-lg text-body-lg text-on-surface">如何申请退款?</span>
+<span class="material-symbols-outlined text-text-secondary transition-transform duration-300 expand-icon" data-icon="expand_more">expand_more</span>
+</button>
+<div class="accordion-content bg-surface-bright">
+<div class="p-4 pt-0 text-text-secondary font-body-md text-body-md">
+<p class="">对于未接单的订单，您可以直接在订单详情页点击“取消订单”自动退款。若商家已接单，需点击“申请退款”，填写退款原因后提交，等待商家审核。若商家拒绝退款，您可以申请客服介入处理。</p>
+</div>
+</div>
+</div>
+<!-- Question 4 -->
+<div class="accordion-item border-b border-border-light last:border-b-0">
+<button class="w-full flex items-center justify-between p-4 text-left hover:bg-surface-container-low transition-colors duration-200 focus:outline-none" onclick="toggleAccordion(this)">
+<span class="font-body-lg text-body-lg text-on-surface">配送超时怎么办?</span>
+<span class="material-symbols-outlined text-text-secondary transition-transform duration-300 expand-icon" data-icon="expand_more">expand_more</span>
+</button>
+<div class="accordion-content bg-surface-bright">
+<div class="p-4 pt-0 text-text-secondary font-body-md text-body-md">
+<p class="">如果您购买了“准时达”或“超时赔”服务，超出承诺时间后，系统会自动向您的账户发放赔付红包。如果没有购买相关服务，您可以在订单页催单，或直接联系骑手了解配送进度。严重超时也可申请退款。</p>
+</div>
+</div>
+</div>
+<!-- Question 5 -->
+<div class="accordion-item border-b border-border-light last:border-b-0">
+<button class="w-full flex items-center justify-between p-4 text-left hover:bg-surface-container-low transition-colors duration-200 focus:outline-none" onclick="toggleAccordion(this)">
+<span class="font-body-lg text-body-lg text-on-surface">如何联系客服?</span>
+<span class="material-symbols-outlined text-text-secondary transition-transform duration-300 expand-icon" data-icon="expand_more">expand_more</span>
+</button>
+<div class="accordion-content bg-surface-bright">
+<div class="p-4 pt-0 text-text-secondary font-body-md text-body-md">
+<p class="">您可以在APP“我的”页面找到“我的客服”入口，点击进入后可以查看更多自助服务，或输入“人工客服”直接与人工客服建立连接。您也可以在具体订单详情页中找到联系客服的入口。</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Contact Support CTA -->
+<div class="mt-8 flex flex-col items-center">
+<p class="font-body-md text-text-secondary mb-4">没有找到您的问题？</p>
+<button class="hover:bg-primary-container text-on-primary font-cta-button text-cta-button py-3 px-6 rounded-lg transition-colors duration-200 w-full md:w-auto text-center flex items-center justify-center gap-2" style="background-color: rgb(255, 90, 31); color: rgb(255, 255, 255);">
+<span class="material-symbols-outlined" data-icon="support_agent">support_agent</span>
+                联系在线客服
+            </button>
+</div>
+</main>
+<script>
+        function toggleAccordion(button) {
+            const item = button.parentElement;
+            const isExpanded = item.classList.contains('active');
+            
+            // Close all other accordions (optional, remove if you want multiple open)
+            document.querySelectorAll('.accordion-item').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            if (!isExpanded) {
+                item.classList.add('active');
+            }
+        }
+    </script>
+
+
+</body></html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title class="">饿了么 - 注册</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed": "#3a0b00",
+                        "surface-container": "#eeeeee",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "surface-bright": "#f9f9f9",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-tertiary-fixed": "#351000",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-container": "#f46500",
+                        "inverse-surface": "#2f3131",
+                        "on-tertiary-container": "#4d1b00",
+                        "on-secondary-container": "#656464",
+                        "on-primary-container": "#541400",
+                        "text-tertiary": "#999999",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-error-container": "#93000a",
+                        "surface-white": "#FFFFFF",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "outline-variant": "#e4beb3",
+                        "text-secondary": "#666666",
+                        "on-background": "#1a1c1c",
+                        "primary-fixed": "#ffdbd0",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "on-primary-fixed-variant": "#852400",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "border-light": "#E5E5E5",
+                        "background": "#f9f9f9",
+                        "inverse-on-surface": "#f1f1f1",
+                        "primary-container": "#ff5a1f",
+                        "inverse-primary": "#ffb59e",
+                        "surface-container-high": "#e8e8e8",
+                        "on-surface": "#1a1c1c",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#a14000",
+                        "on-surface-variant": "#5b4038",
+                        "surface-dim": "#dadada",
+                        "primary-fixed-dim": "#ffb59e",
+                        "surface-tint": "#ae3200",
+                        "surface": "#f9f9f9",
+                        "outline": "#8f7067",
+                        "on-secondary-fixed-variant": "#474747",
+                        "secondary-fixed": "#e4e2e1",
+                        "primary": "#ae3200",
+                        "secondary": "#5f5e5e",
+                        "surface-container-low": "#f3f3f3",
+                        "surface-variant": "#e2e2e2",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#e4e2e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "padding-card": "10px",
+                        "gap-module": "12px",
+                        "base": "4px",
+                        "margin-page": "12px",
+                        "gutter": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["beVietnamPro"],
+                        "label-sm": ["beVietnamPro"],
+                        "cta-button": ["beVietnamPro"],
+                        "headline-md": ["beVietnamPro"],
+                        "headline-lg": ["beVietnamPro"],
+                        "body-lg": ["beVietnamPro"],
+                        "label-md": ["beVietnamPro"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "cta-button": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+        .material-symbols-outlined {
+          font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col items-center">
+<!-- Mobile Container -->
+<div class="w-full max-w-[480px] min-h-screen bg-surface-white relative shadow-sm border-x border-border-light">
+<!-- TopAppBar (Transactional - Hidden Global Nav Logic overrides TopAppBar if intent is purely transactional, but user requested a specific TopNav with Back button) -->
+<header class="sticky top-0 z-50 flex items-center justify-between px-margin-page h-14 w-full bg-surface border-b border-border-light transition-colors duration-200">
+<button class="text-on-surface hover:bg-secondary-container/50 p-2 rounded-full transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-on-surface absolute left-1/2 -translate-x-1/2">注册账号</h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</header>
+<!-- Main Content Canvas -->
+<main class="px-margin-page py-6 flex flex-col gap-gap-module">
+<div class="text-center mb-8 mt-4">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-2">饿了么</h2>
+<p class="font-body-md text-body-md text-text-secondary">欢迎加入，发现校园美食</p>
+</div>
+<!-- Registration Form -->
+<form class="flex flex-col gap-5">
+<!-- Phone Number -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface" for="phone">手机号</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-text-tertiary text-[20px]" data-icon="phone_iphone">phone_iphone</span>
+<input class="w-full h-12 pl-10 pr-4 bg-surface-bright border border-border-light rounded-DEFAULT font-body-md text-body-md text-on-surface placeholder:text-text-tertiary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" id="phone" placeholder="请输入手机号" type="tel">
+</div>
+</div>
+<!-- Nickname -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface" for="nickname">昵称</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-text-tertiary text-[20px]" data-icon="person">person</span>
+<input class="w-full h-12 pl-10 pr-4 bg-surface-bright border border-border-light rounded-DEFAULT font-body-md text-body-md text-on-surface placeholder:text-text-tertiary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" id="nickname" placeholder="设置你的昵称" type="text">
+</div>
+</div>
+<!-- Password -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface" for="password">密码</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-text-tertiary text-[20px]" data-icon="lock">lock</span>
+<input class="w-full h-12 pl-10 pr-10 bg-surface-bright border border-border-light rounded-DEFAULT font-body-md text-body-md text-on-surface placeholder:text-text-tertiary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" id="password" placeholder="设置6-20位密码" type="password">
+<button class="absolute right-3 text-text-tertiary flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility_off">visibility_off</span>
+</button>
+</div>
+</div>
+<!-- Confirm Password -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface" for="confirm-password">确认密码</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-text-tertiary text-[20px]" data-icon="lock_reset">lock_reset</span>
+<input class="w-full h-12 pl-10 pr-10 bg-surface-bright border border-border-light rounded-DEFAULT font-body-md text-body-md text-on-surface placeholder:text-text-tertiary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" id="confirm-password" placeholder="再次输入密码" type="password">
+<button class="absolute right-3 text-text-tertiary flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility_off">visibility_off</span>
+</button>
+</div>
+</div>
+<!-- Terms Checkbox -->
+<div class="flex items-start gap-2 mt-2">
+<input class="mt-1 w-4 h-4 text-primary bg-surface-bright border-border-light rounded-sm focus:ring-primary focus:ring-offset-0" id="terms" type="checkbox">
+<label class="font-label-md text-label-md text-text-secondary leading-snug" for="terms">
+                        我已阅读并同意 <a class="text-primary hover:underline" href="#">《用户服务协议》</a> 和 <a class="text-primary hover:underline" href="#">《隐私政策》</a>
+</label>
+</div>
+<!-- Primary Action Button -->
+<button class="mt-6 w-full h-12 bg-primary-container text-on-primary font-cta-button text-cta-button rounded-DEFAULT active:scale-[0.98] transition-transform flex items-center justify-center" type="button">
+                    立即注册
+                </button>
+</form>
+<!-- Bottom Link -->
+<div class="mt-8 text-center">
+<a class="font-body-md text-body-md text-text-secondary hover:text-primary transition-colors" href="#">
+                    已有账号？去登录
+                </a>
+</div>
+</main>
+</div>
+
+
+</body></html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>新增收货地址</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#1a1c1c",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#f9f9f9",
+                        "outline": "#8f7067",
+                        "on-tertiary": "#ffffff",
+                        "tertiary": "#a14000",
+                        "on-surface-variant": "#5b4038",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "surface-dim": "#dadada",
+                        "on-tertiary-fixed": "#351000",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#ffb59e",
+                        "primary-fixed-dim": "#ffb59e",
+                        "on-surface": "#1a1c1c",
+                        "outline-variant": "#e4beb3",
+                        "surface-container": "#eeeeee",
+                        "on-error-container": "#93000a",
+                        "background": "#f9f9f9",
+                        "surface-container-low": "#f3f3f3",
+                        "on-secondary-fixed-variant": "#474747",
+                        "primary": "#ae3200",
+                        "inverse-surface": "#2f3131",
+                        "on-primary-fixed-variant": "#852400",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "on-secondary-container": "#656464",
+                        "on-error": "#ffffff",
+                        "border-light": "#E5E5E5",
+                        "secondary": "#5f5e5e",
+                        "text-secondary": "#666666",
+                        "surface": "#f9f9f9",
+                        "on-primary-fixed": "#3a0b00",
+                        "surface-container-high": "#e8e8e8",
+                        "primary-fixed": "#ffdbd0",
+                        "surface-variant": "#e2e2e2",
+                        "primary-container": "#ff5a1f",
+                        "inverse-on-surface": "#f1f1f1",
+                        "tertiary-container": "#f46500",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#4d1b00",
+                        "secondary-fixed": "#e4e2e1",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "secondary-container": "#e4e2e1",
+                        "surface-container-lowest": "#ffffff",
+                        "text-tertiary": "#999999",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-primary-container": "#541400",
+                        "surface-tint": "#ae3200",
+                        "surface-white": "#FFFFFF",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "surface-container-highest": "#e2e2e2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "padding-card": "10px",
+                        "gap-module": "12px",
+                        "margin-page": "12px",
+                        "gutter": "8px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "cta-button": ["beVietnamPro"],
+                        "body-md": ["beVietnamPro"],
+                        "headline-md": ["beVietnamPro"],
+                        "body-lg": ["beVietnamPro"],
+                        "label-md": ["beVietnamPro"],
+                        "label-sm": ["beVietnamPro"],
+                        "headline-lg": ["beVietnamPro"]
+                    },
+                    "fontSize": {
+                        "cta-button": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom styles for the toggle switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #ff5a1f;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #ff5a1f;
+        }
+        .toggle-checkbox {
+            right: 0;
+            z-index: 1;
+            border-color: #e2e8f0;
+            transition: all 0.3s;
+        }
+        .toggle-label {
+            width: 3rem;
+            height: 1.5rem;
+            background-color: #cbd5e1;
+            border-radius: 9999px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .toggle-label::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 1.25rem;
+            height: 1.25rem;
+            background-color: white;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        .toggle-checkbox:checked + .toggle-label::after {
+            transform: translateX(1.5rem);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col relative pb-20">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-on-background font-headline-md text-headline-md w-full sticky top-0 z-50 border-b border-border-light transition-colors duration-200 flex items-center justify-between px-4 h-14">
+<button class="text-on-surface hover:bg-surface-container-low dark:hover:bg-surface-variant p-1 rounded active:opacity-80 flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="arrow_back_ios_new">arrow_back_ios_new</span>
+</button>
+<h1 class="text-on-surface font-headline-md flex-1 text-center pr-8">新增收货地址</h1>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full pt-gap-module">
+<form class="bg-surface-white flex flex-col">
+<!-- Contact Person Row -->
+<div class="flex items-center border-b border-border-light py-3 min-h-[56px] px-4">
+<label class="w-20 text-on-surface font-body-lg whitespace-nowrap mr-4" for="contact-person">收货人</label>
+<input class="flex-1 bg-transparent border-none p-0 focus:ring-0 text-on-surface font-body-md placeholder-text-tertiary" id="contact-person" placeholder="请填写收货人姓名" type="text"/>
+</div>
+<!-- Gender Selection Row -->
+<div class="flex items-center border-b border-border-light py-3 min-h-[56px] px-4">
+<div class="w-20 mr-4"></div>
+<div class="flex items-center gap-6">
+<label class="flex items-center cursor-pointer group">
+<input checked="" class="peer sr-only" name="gender" type="radio" value="mr"/>
+<div class="w-4 h-4 rounded-full border border-secondary peer-checked:border-[#ff5a1f] peer-checked:border-[5px] flex items-center justify-center mr-2 transition-all"></div>
+<span class="text-on-surface font-body-md group-hover:text-[#ff5a1f] transition-colors peer-checked:text-on-surface">先生</span>
+</label>
+<label class="flex items-center cursor-pointer group">
+<input class="peer sr-only" name="gender" type="radio" value="ms"/>
+<div class="w-4 h-4 rounded-full border border-secondary peer-checked:border-[#ff5a1f] peer-checked:border-[5px] flex items-center justify-center mr-2 transition-all"></div>
+<span class="text-on-surface font-body-md group-hover:text-[#ff5a1f] transition-colors peer-checked:text-on-surface">女士</span>
+</label>
+</div>
+</div>
+<!-- Phone Number Row -->
+<div class="flex items-center border-b border-border-light py-3 min-h-[56px] px-4">
+<label class="w-20 text-on-surface font-body-lg whitespace-nowrap mr-4" for="phone">手机号</label>
+<div class="flex flex-1 items-center">
+<span class="text-on-surface-variant font-body-md mr-2">+86 <span class="material-symbols-outlined text-[16px] align-middle">expand_more</span></span>
+<input class="flex-1 bg-transparent border-none p-0 focus:ring-0 text-on-surface font-body-md placeholder-text-tertiary" id="phone" placeholder="请填写收货人手机号" type="tel"/>
+</div>
+</div>
+<!-- Area Row -->
+<div class="flex items-center border-b border-border-light py-3 min-h-[56px] px-4 cursor-pointer hover:bg-surface-container-low transition-colors group">
+<label class="w-20 text-on-surface font-body-lg whitespace-nowrap mr-4 cursor-pointer group-hover:text-[#ff5a1f] transition-colors">所在地区</label>
+<div class="flex-1 flex justify-between items-center text-text-tertiary font-body-md">
+<span>小区/写字楼/学校等</span>
+<span class="material-symbols-outlined text-secondary">chevron_right</span>
+</div>
+</div>
+<!-- Detailed Address Row -->
+<div class="flex items-start border-b border-border-light py-3 min-h-[80px] px-4">
+<label class="w-20 text-on-surface font-body-lg whitespace-nowrap mr-4 mt-1" for="detailed-address">详细地址</label>
+<textarea class="flex-1 bg-transparent border-none p-0 focus:ring-0 text-on-surface font-body-md placeholder-text-tertiary resize-none mt-1" id="detailed-address" placeholder="街道门牌、楼层房间号等信息" rows="2"></textarea>
+</div>
+<!-- Tag Selection Row -->
+<div class="flex items-center border-b border-border-light py-3 min-h-[56px] px-4">
+<label class="w-20 text-on-surface font-body-lg whitespace-nowrap mr-4">标签</label>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-1 rounded-full border border-border-light text-on-surface font-body-md hover:border-[#ff5a1f] hover:text-[#ff5a1f] transition-colors" type="button">家</button>
+<button class="px-4 py-1 rounded-full border border-border-light text-on-surface font-body-md hover:border-[#ff5a1f] hover:text-[#ff5a1f] transition-colors" type="button">公司</button>
+<button class="px-4 py-1 rounded-full border border-border-light text-on-surface font-body-md hover:border-[#ff5a1f] hover:text-[#ff5a1f] transition-colors" type="button">学校</button>
+</div>
+</div>
+</form>
+<!-- Set Default Switch -->
+<div class="mt-gap-module bg-surface-white border-y border-border-light py-4 px-4 flex items-center justify-between">
+<span class="text-on-surface font-body-lg">设为默认地址</span>
+<div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer opacity-0" id="default-toggle" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer" for="default-toggle"></label>
+</div>
+</div>
+</main>
+<!-- Fixed Action Button at Bottom -->
+<div class="fixed bottom-0 left-0 w-full bg-surface-white border-t border-border-light p-4 z-40 pb-safe pb-4">
+<button class="w-full bg-[#ff5a1f] text-on-primary font-cta-button text-cta-button py-3 rounded-lg hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center">
+        保存
+    </button>
+</div>
+</body></html>

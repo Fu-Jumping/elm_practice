@@ -1,0 +1,54 @@
+* {
+  box-sizing: border-box;
+}
+
+.headerTopAppBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-width: 0px 0px 1px;
+  border-style: solid;
+  border-color: #eeeeee;
+  background: #ffffff;
+  padding-right: 12px;
+  padding-left: 12px;
+  width: 390px;
+  height: 48px;
+
+  .container2 {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    padding: 4px;
+
+    .container {
+      flex-shrink: 0;
+      width: 10px;
+      height: 17px;
+    }
+  }
+
+  .text {
+    flex-grow: 1;
+    text-align: center;
+    line-height: 28px;
+    letter-spacing: 0;
+    color: #ff5a1f;
+    font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .container4 {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    padding: 4px;
+
+    .container3 {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}

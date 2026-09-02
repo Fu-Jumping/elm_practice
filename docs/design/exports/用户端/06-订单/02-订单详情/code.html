@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>订单详情 - 饿了么</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#e4e2e1",
+                        "tertiary-container": "#f46500",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "tertiary-fixed": "#ffdbcc",
+                        "surface-container": "#eeeeee",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-background": "#1a1c1c",
+                        "surface-bright": "#f9f9f9",
+                        "tertiary": "#a14000",
+                        "on-surface": "#1a1c1c",
+                        "on-primary-fixed": "#3a0b00",
+                        "surface-tint": "#ae3200",
+                        "on-secondary-container": "#656464",
+                        "surface-variant": "#e2e2e2",
+                        "surface": "#f9f9f9",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "on-surface-variant": "#5b4038",
+                        "outline": "#8f7067",
+                        "surface-container-low": "#f3f3f3",
+                        "text-secondary": "#666666",
+                        "primary-fixed": "#ffdbd0",
+                        "border-light": "#E5E5E5",
+                        "secondary-fixed": "#e4e2e1",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed": "#351000",
+                        "on-tertiary-container": "#4d1b00",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "inverse-surface": "#2f3131",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#e4beb3",
+                        "inverse-primary": "#ffb59e",
+                        "on-tertiary": "#ffffff",
+                        "secondary": "#5f5e5e",
+                        "primary": "#ae3200",
+                        "inverse-on-surface": "#f1f1f1",
+                        "surface-dim": "#dadada",
+                        "surface-container-high": "#e8e8e8",
+                        "on-primary-fixed-variant": "#852400",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#474747",
+                        "surface-white": "#FFFFFF",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "text-tertiary": "#999999",
+                        "error": "#ba1a1a",
+                        "on-error": "#ffffff",
+                        "on-primary-container": "#541400",
+                        "primary-fixed-dim": "#ffb59e",
+                        "primary-container": "#ff5a1f",
+                        "background": "#f7f7f7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "8px",
+                        "margin-page": "12px",
+                        "base": "4px",
+                        "gap-module": "12px",
+                        "padding-card": "12px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["sans-serif"],
+                        "cta-button": ["sans-serif"],
+                        "headline-md": ["sans-serif"],
+                        "body-lg": ["sans-serif"],
+                        "label-sm": ["sans-serif"],
+                        "headline-lg": ["sans-serif"],
+                        "body-md": ["sans-serif"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "cta-button": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }],
+                        "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased pb-[80px]">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 flex items-center justify-between px-margin-page h-14 w-full bg-surface-white border-b border-border-light">
+<button class="text-on-surface hover:bg-secondary-container/50 transition-colors duration-200 active:opacity-70 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-on-surface">订单详情</h1>
+<div class="w-10"></div> <!-- Placeholder for balance -->
+</header>
+<main class="space-y-gap-module p-0">
+<!-- Status Section -->
+<section class="bg-surface-white p-padding-card flex flex-col gap-4 px-margin-page border-b border-surface-container-high">
+<div class="text-center">
+<h2 class="font-headline-lg text-headline-lg text-on-background mb-1">商家已接单</h2>
+<p class="font-label-md text-label-md text-text-secondary">预计 12:30 送达</p>
+</div>
+<!-- Progress Stepper -->
+<div class="relative flex justify-between items-center px-4 mt-2"><!-- Progress Stepper Content with Correct Line Colors -->
+<div class="absolute top-1/2 left-0 right-0 h-[2px] bg-border-light -z-10 translate-y-[-50%] mx-8"></div>
+<div class="absolute top-1/2 left-0 w-1/2 h-[2px] bg-[#FF5A1F] -z-10 translate-y-[-50%] ml-8"></div>
+<div class="flex flex-col items-center gap-1 bg-surface-white px-1">
+<div class="w-3 h-3 rounded-full bg-[#FF5A1F]"></div>
+<span class="font-label-sm text-label-sm text-on-background">已下单</span>
+</div>
+<div class="flex flex-col items-center gap-1 bg-surface-white px-1">
+<div class="w-3 h-3 rounded-full bg-[#FF5A1F]"></div>
+<span class="font-label-sm text-label-sm text-on-background">已支付</span>
+</div>
+<div class="flex flex-col items-center gap-1 bg-surface-white px-1">
+<div class="w-4 h-4 rounded-full border-2 border-[#FF5A1F] bg-surface-white flex items-center justify-center">
+<div class="w-2 h-2 rounded-full bg-[#FF5A1F]"></div>
+</div>
+<span class="font-label-sm text-label-sm text-[#FF5A1F] font-semibold">商家接单</span>
+</div>
+<div class="flex flex-col items-center gap-1 bg-surface-white px-1">
+<div class="w-3 h-3 rounded-full bg-border-light"></div>
+<span class="font-label-sm text-label-sm text-text-secondary">配送中</span>
+</div>
+<div class="flex flex-col items-center gap-1 bg-surface-white px-1">
+<div class="w-3 h-3 rounded-full bg-border-light"></div>
+<span class="font-label-sm text-label-sm text-text-secondary">已完成</span>
+</div></div>
+</section>
+<!-- Order Items Section -->
+<section class="bg-surface-white p-padding-card px-margin-page border-b border-surface-container-high">
+<div class="flex items-center gap-2 mb-4 pb-2 border-b border-border-light">
+<span class="font-body-lg text-body-lg font-semibold">肯德基</span>
+<span class="material-symbols-outlined text-sm text-text-secondary">chevron_right</span>
+</div>
+<div class="space-y-4">
+<!-- Item 1 -->
+<div class="flex justify-between items-start">
+<div class="flex gap-3">
+<img alt="香辣脆皮鸡腿堡" class="w-12 h-12 rounded object-cover" data-alt="A close-up of a crispy fried chicken burger, golden brown crust, fresh lettuce, and mayonnaise on a toasted sesame seed bun. Bright, appetizing studio lighting. Modern food photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7uKeCkrawFtdRFE1HrnK3n0kubMnQk2FqleTZmUythRtMY0f8xWqBo4TzIzaDghrRobfWFWOPc4XEaegDuVEsi_wmeg2jvhVjRlzTexzgox2Xx8Gypp7QrOTk1_C2D3RZz5PZgNaolk88iSoapv4Gi_5fo0r71o4GIUa9J09_fN1g1Mj66sNtB2FG0BnSIoH4q6lIVDYA65VU_fteFIO-Ch370a0djbPXjq-umXpE8J9zpESz0UGZpX_MkGpgq-8RlGl0gBzONcV_"/>
+<div>
+<p class="font-body-md text-body-md text-on-background">香辣脆皮鸡腿堡</p>
+<p class="font-label-sm text-label-sm text-text-secondary mt-1">x1</p>
+</div>
+</div>
+<span class="font-body-md text-body-md text-on-background">¥ 19.9</span>
+</div>
+<!-- Item 2 -->
+<div class="flex justify-between items-start">
+<div class="flex gap-3">
+<img alt="薯条(中)" class="w-12 h-12 rounded object-cover" data-alt="A serving of golden, crispy french fries in a classic red and white striped container. Bright overhead lighting highlighting the texture and salt crystals. Professional food styling." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFmqencOC6a-PI0901BNmPTtBfnzRRBQsRNovwkkSj6bCJME23TQQSINNwomcVSKjhLPyRt0aKWflWE5IhU0ZBq_FbJC5HrHvQgY9ZizC_UuJBi8D6vhQdbAKT-pmAunc6ntSMp_jD8Bw61kSdV9uKYyt9MgdBkeX1E25J4Pt0bgVhVLYXNA0xRwNbkRb_IUun0ytUPoYyWP19M6crkZnuNFZoNcdxv5sGm4T0Z8e4ZzWwW_kXSMGKBHxOIPZY12YLrOAA5SPI_BGW"/>
+<div>
+<p class="font-body-md text-body-md text-on-background">薯条(中)</p>
+<p class="font-label-sm text-label-sm text-text-secondary mt-1">x1</p>
+</div>
+</div>
+<span class="font-body-md text-body-md text-on-background">¥ 11.5</span>
+</div>
+<!-- Item 3 -->
+<div class="flex justify-between items-start">
+<div class="flex gap-3">
+<img alt="可乐(大)" class="w-12 h-12 rounded object-cover" data-alt="A tall glass of dark cola with ice cubes and condensation on the outside. Crisp, refreshing lighting with subtle backlighting to show the amber color of the drink. Studio food photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIdr8DgE5fb5LB9GikqEfJBQtPfm4QJusWbVim9o7nSwsK7Cvu8ebj6GiuZVVrRsld6F0tIHCj65Va5I8I9o45xDjDHe73AbRxGLf9HVYyJHfz6iFZR9sGk_V4ZBWQnHw8h8xFvJeZ6R7CgDu1tUnYTZElZRfUx6FYJJ29iQjZw0QHzCdAG6ecJgX2vOoS276FatzbVpr-71RA8FeYFhuTZlr8cTrpDOtSws_x0kyyJGrodyrwoo_kOVMxurtraVvik-Yr86AnvJxD"/>
+<div>
+<p class="font-body-md text-body-md text-on-background">可乐(大)</p>
+<p class="font-label-sm text-label-sm text-text-secondary mt-1">x1</p>
+</div>
+</div>
+<span class="font-body-md text-body-md text-on-background">¥ 9.0</span>
+</div>
+</div>
+<!-- Subtotals -->
+<div class="mt-4 pt-4 border-t border-border-light space-y-2">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-text-secondary">配送费</span>
+<span class="font-label-md text-label-md text-on-background">¥ 3.5</span>
+</div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-1">
+<span class="bg-tertiary-container text-white text-[10px] px-1 rounded-sm">减</span>
+<span class="font-label-md text-label-md text-text-secondary">满减优惠</span>
+</div>
+<span class="font-label-md text-label-md text-tertiary-container">-¥ 5.0</span>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-border-light flex justify-between items-center">
+<span class="font-label-md text-label-md text-text-secondary">共 3 件商品</span>
+<div>
+<span class="font-label-md text-label-md text-on-background mr-1">实付</span>
+<span class="font-headline-md text-headline-md text-on-background font-bold">¥ 38.9</span>
+</div>
+</div>
+</section>
+<!-- Delivery Info Section -->
+<section class="bg-surface-white p-padding-card px-margin-page border-b border-surface-container-high">
+<h3 class="font-body-lg text-body-lg font-semibold mb-3 border-b border-border-light pb-2">配送信息</h3>
+<div class="space-y-3">
+<div class="flex">
+<span class="font-label-md text-label-md text-text-secondary w-20 shrink-0">配送地址</span>
+<div class="font-label-md text-label-md text-on-background">
+<p>天津大学软件园校区 4号楼</p>
+<p class="mt-1">张同学 138****8888</p>
+</div>
+</div>
+<div class="flex">
+<span class="font-label-md text-label-md text-text-secondary w-20 shrink-0">配送服务</span>
+<span class="font-label-md text-label-md text-on-background">由 蜂鸟专送 提供配送服务</span>
+</div>
+</div>
+</section>
+<!-- Order Info Section -->
+<section class="bg-surface-white p-padding-card mb-4 px-margin-page border-b border-surface-container-high">
+<h3 class="font-body-lg text-body-lg font-semibold mb-3 border-b border-border-light pb-2">订单信息</h3>
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-text-secondary">订单号</span>
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-background">3492847192837482</span>
+<span class="font-label-sm text-label-sm text-primary-container border border-primary-container px-1 rounded">复制</span>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-text-secondary">下单时间</span>
+<span class="font-label-md text-label-md text-on-background">2023-10-27 11:45:23</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-text-secondary">支付方式</span>
+<span class="font-label-md text-label-md text-on-background">微信支付</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Actions -->
+<footer class="fixed bottom-0 left-0 w-full z-50 bg-surface-white border-t border-border-light p-margin-page pb-safe flex justify-end gap-3 h-[72px] items-center">
+<button class="px-4 py-2 rounded-lg border border-border-light font-body-md text-body-md text-on-background hover:bg-surface-container transition-colors">联系商家</button>
+<button class="px-4 py-2 rounded-lg bg-primary-container text-white font-body-md text-body-md hover:bg-primary transition-colors bg-[#FF5A1F]" style="background-color: #FF5A1F;">查看配送进度</button>
+</footer>
+</body></html>

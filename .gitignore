@@ -1,0 +1,38 @@
+# 依赖与构建产物
+node_modules/
+dist/
+coverage/
+
+# Java 后端构建产物（预置，backend/ 开工后生效）
+target/
+build/
+.gradle/
+
+# 本地环境与临时文件
+.env
+.env.*
+*.log
+tmp/
+.uploads/
+
+# 参考导出与工具目录（不入库）
+.figma/
+.design/
+.stitch/
+.trae/
+.obsidian/
+.playwright-*/
+_reference_archive/
+
+# 归档目录与课程原始资料（不入库，仅本地保留）
+docs/_archive/
+
+# 测试产物
+test-results/
+playwright-report/
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

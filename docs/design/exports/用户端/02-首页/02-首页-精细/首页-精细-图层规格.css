@@ -1,0 +1,3030 @@
+/*bg*/
+
+left: 0px;
+top: 0px;
+width: 393px;
+height: 852px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 2*/
+
+left: 0px;
+top: 0px;
+width: 373px;
+height: 218px;
+opacity: 1;
+border-radius: 8px;
+background: rgba(255, 255, 255, 1);
+
+
+/*路径 6*/
+
+left: 14px;
+top: 30px;
+width: 4.5px;
+height: 2px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 15*/
+
+left: 16px;
+top: 16px;
+width: 112px;
+height: 186px;
+opacity: 1;
+border-radius: 8px;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 16*/
+
+left: 16px;
+top: 16px;
+width: 112px;
+height: 113px;
+opacity: 1;
+border-radius: 8px;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 17*/
+
+left: 14px;
+top: 14px;
+width: 49px;
+height: 16px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 18px;
+top: 15px;
+width: 40px;
+height: 14px;
+opacity: 1;
+/** 文本1 */
+font-size: 10px;
+font-weight: 500;
+letter-spacing: 0px;
+line-height: 14px;
+color: rgba(214, 195, 133, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 2*/
+
+left: 140px;
+top: 41px;
+width: 17px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 14px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 16.3px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 3*/
+
+left: 159px;
+top: 41px;
+width: 12px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 600;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 4*/
+
+left: 179px;
+top: 42px;
+width: 56px;
+height: 16px;
+opacity: 1;
+/** 文本1 */
+font-size: 11px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 15.4px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 5*/
+
+left: 330px;
+top: 42px;
+width: 31px;
+height: 16px;
+opacity: 1;
+/** 文本1 */
+font-size: 11px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 15.4px;
+color: rgba(153, 153, 153, 1);
+text-align: right;
+vertical-align: top;
+
+
+/*文本 6*/
+
+left: 290px;
+top: 42px;
+width: 36px;
+height: 16px;
+opacity: 1;
+/** 文本1 */
+font-size: 11px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 15.4px;
+color: rgba(153, 153, 153, 1);
+text-align: right;
+vertical-align: top;
+
+
+/*分组 5*/
+
+left: 140px;
+top: 41px;
+width: 221px;
+height: 17px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 140px;
+top: 16px;
+width: 192px;
+height: 23px;
+opacity: 1;
+/** 文本1 */
+font-size: 16px;
+font-weight: 600;
+letter-spacing: 0px;
+line-height: 22.4px;
+color: rgba(0, 0, 0, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*矩形 18*/
+
+left: 345px;
+top: 20px;
+width: 16px;
+height: 16px;
+opacity: 0.4;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 6*/
+
+left: 140px;
+top: 16px;
+width: 221px;
+height: 23px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 4px;
+top: 1px;
+width: 51px;
+height: 16px;
+opacity: 1;
+display: flex;
+
+/** 文本1 */
+font-size: 11px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 15.4px;
+color: rgba(128, 108, 46, 1);
+text-align: right;
+vertical-align: top;
+
+
+/*画板 3*/
+
+left: 140px;
+top: 62px;
+width: 59px;
+height: 18px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+  border: 1px solid rgba(214, 195, 133, 1);
+  
+display: flex;
+justify-content: flex-start;
+align-items: flex-start;
+padding: 1px 4px 1px 4px;
+
+
+/*文本 1*/
+
+left: 4px;
+top: 1px;
+width: 68px;
+height: 16px;
+opacity: 1;
+display: flex;
+
+/** 文本1 */
+font-size: 11px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 15.4px;
+color: rgba(255, 90, 31, 1);
+text-align: right;
+vertical-align: top;
+
+
+/*画板 4*/
+
+left: 203px;
+top: 62px;
+width: 76px;
+height: 18px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+  border: 1px solid rgba(255, 214, 199, 1);
+  
+display: flex;
+justify-content: flex-start;
+align-items: flex-start;
+padding: 1px 4px 1px 4px;
+
+
+/*文本 1*/
+
+left: 4px;
+top: 1px;
+width: 33px;
+height: 16px;
+opacity: 1;
+display: flex;
+
+/** 文本1 */
+font-size: 11px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 15.4px;
+color: rgba(102, 102, 102, 1);
+text-align: right;
+vertical-align: top;
+
+
+/*画板 5*/
+
+left: 283px;
+top: 62px;
+width: 41px;
+height: 18px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+  border: 1px solid rgba(204, 204, 204, 1);
+  
+display: flex;
+justify-content: flex-start;
+align-items: flex-start;
+padding: 1px 4px 1px 4px;
+
+
+/*分组 7*/
+
+left: 140px;
+top: 62px;
+width: 184px;
+height: 18px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 19*/
+
+left: 220px;
+top: 88px;
+width: 72px;
+height: 72px;
+opacity: 1;
+border-radius: 4px;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 220px;
+top: 164px;
+width: 72px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(0, 0, 0, 1);
+text-align: right;
+vertical-align: top;
+
+
+/*文本 7*/
+
+left: 220px;
+top: 185px;
+width: 34px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 10px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 16.3px;
+color: rgba(255, 90, 31, 1);
+/** 文本2 */
+font-size: 14px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 16.3px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 8*/
+
+left: 256px;
+top: 190px;
+width: 27px;
+height: 11px;
+opacity: 1;
+/** 文本1 */
+font-size: 9px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 10.48px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*分组 1*/
+
+left: 220px;
+top: 185px;
+width: 63px;
+height: 17px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 8*/
+
+left: 220px;
+top: 88px;
+width: 72px;
+height: 114px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 19*/
+
+left: 300px;
+top: 88px;
+width: 72px;
+height: 72px;
+opacity: 1;
+border-radius: 4px;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 300px;
+top: 164px;
+width: 72px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(0, 0, 0, 1);
+text-align: right;
+vertical-align: top;
+
+
+/*文本 7*/
+
+left: 300px;
+top: 185px;
+width: 34px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 10px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 16.3px;
+color: rgba(255, 90, 31, 1);
+/** 文本2 */
+font-size: 14px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 16.3px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 8*/
+
+left: 336px;
+top: 190px;
+width: 27px;
+height: 11px;
+opacity: 1;
+/** 文本1 */
+font-size: 9px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 10.48px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*分组 1*/
+
+left: 300px;
+top: 185px;
+width: 63px;
+height: 17px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 9*/
+
+left: 300px;
+top: 88px;
+width: 72px;
+height: 114px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 20*/
+
+left: 334px;
+top: 81px;
+width: 39px;
+height: 129px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 19*/
+
+left: 140px;
+top: 88px;
+width: 72px;
+height: 72px;
+opacity: 1;
+border-radius: 4px;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 140px;
+top: 164px;
+width: 72px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(0, 0, 0, 1);
+text-align: right;
+vertical-align: top;
+
+
+/*文本 7*/
+
+left: 140px;
+top: 185px;
+width: 34px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 10px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 16.3px;
+color: rgba(255, 90, 31, 1);
+/** 文本2 */
+font-size: 14px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 16.3px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 8*/
+
+left: 176px;
+top: 190px;
+width: 27px;
+height: 11px;
+opacity: 1;
+/** 文本1 */
+font-size: 9px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 10.48px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*分组 1*/
+
+left: 140px;
+top: 185px;
+width: 63px;
+height: 17px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 8*/
+
+left: 140px;
+top: 88px;
+width: 72px;
+height: 114px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*店铺*/
+
+left: 10px;
+top: 755px;
+width: 373px;
+height: 218px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*路径*/
+
+left: 0px;
+top: 0px;
+width: 393px;
+height: 53px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*路径*/
+
+left: 333.2px;
+top: 22.6px;
+width: 27.23px;
+height: 13px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*路径*/
+
+left: 333.2px;
+top: 22.6px;
+width: 25px;
+height: 13px;
+opacity: 0.35;
+background: rgba(255, 255, 255, 1);
+
+border: 1px solid rgba(0, 0, 0, 1);
+
+
+
+/*路径*/
+
+left: 359.1px;
+top: 27.27px;
+width: 1.33px;
+height: 4px;
+opacity: 0.4;
+background: rgba(255, 255, 255, 1);
+
+
+/*路径*/
+
+left: 335px;
+top: 24.6px;
+width: 21px;
+height: 9px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*路径*/
+
+left: 308.7px;
+top: 23.2px;
+width: 17.14px;
+height: 5.04px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*路径*/
+
+left: 311.72px;
+top: 27.23px;
+width: 11.09px;
+height: 4.03px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*路径*/
+
+left: 314.75px;
+top: 31.27px;
+width: 5.04px;
+height: 4.03px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*路径*/
+
+left: 282px;
+top: 30.5px;
+width: 3.2px;
+height: 4.6px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*路径*/
+
+left: 287.3px;
+top: 28.1px;
+width: 3.2px;
+height: 7px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*路径*/
+
+left: 292.7px;
+top: 25.5px;
+width: 3.2px;
+height: 9.6px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*路径*/
+
+left: 298px;
+top: 23.1px;
+width: 3.2px;
+height: 12px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*路径*/
+
+left: 43px;
+top: 18px;
+width: 54px;
+height: 22px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*time*/
+
+left: 43px;
+top: 18px;
+width: 54px;
+height: 22px;
+opacity: 1;
+/** 文本1 */
+font-size: 17px;
+font-weight: 600;
+letter-spacing: 0px;
+line-height: 22px;
+color: rgba(0, 0, 0, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*顶部状态栏*/
+
+left: 0px;
+top: 0px;
+width: 393px;
+height: 53px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 1*/
+
+left: 0px;
+top: 818px;
+width: 393px;
+height: 34px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*路径*/
+
+left: 126.5px;
+top: 839px;
+width: 140px;
+height: 5px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*home indactor*/
+
+left: 0px;
+top: 818px;
+width: 393px;
+height: 34px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 2*/
+
+left: 0px;
+top: 0px;
+width: 393px;
+height: 44px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 0px;
+top: 0.5px;
+width: 36px;
+height: 26px;
+opacity: 1;
+display: flex;
+
+/** 文本1 */
+font-size: 18px;
+font-weight: 600;
+letter-spacing: 0px;
+line-height: 25.2px;
+color: rgba(166, 166, 166, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*直线 1*/
+
+left: 48px;
+top: 6.48px;
+width: 14.04px;
+height: 0px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+  border: 1px solid rgba(204, 204, 204, 1);
+  
+display: flex;
+
+
+
+/*文本 2*/
+
+left: 60px;
+top: 0px;
+width: 38px;
+height: 27px;
+opacity: 1;
+display: flex;
+
+/** 文本1 */
+font-size: 19px;
+font-weight: 600;
+letter-spacing: 0px;
+line-height: 26.6px;
+color: rgba(13, 13, 13, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*画板 1*/
+
+left: 16px;
+top: 8px;
+width: 98px;
+height: 27px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+display: flex;
+justify-content: center;
+align-items: center;
+
+
+/*文本 2*/
+
+left: 315px;
+top: 11px;
+width: 48px;
+height: 23px;
+opacity: 1;
+/** 文本1 */
+font-size: 16px;
+font-weight: 500;
+letter-spacing: 0px;
+line-height: 22.4px;
+color: rgba(13, 13, 13, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*矩形 4*/
+
+left: 367px;
+top: 14px;
+width: 16px;
+height: 16px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*三角形 1*/
+
+left: 370px;
+top: 25px;
+width: 10px;
+height: 7px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 1*/
+
+left: 367px;
+top: 14px;
+width: 16px;
+height: 16px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*顶栏*/
+
+left: 0px;
+top: 53px;
+width: 393px;
+height: 44px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 1*/
+
+left: 0px;
+top: 1px;
+width: 393px;
+height: 52px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*搜索*/
+
+left: 10px;
+top: 8px;
+width: 373px;
+height: 36px;
+opacity: 1;
+border-radius: 270px;
+background: rgba(255, 255, 255, 1);
+
+  border: 1.5px solid rgba(255, 90, 31, 1);
+  
+
+
+/*直线 1*/
+
+left: 56px;
+top: 17px;
+width: 18.04px;
+height: 0px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+  border: 1px solid rgba(204, 204, 204, 1);
+  
+
+
+/*矩形 5*/
+
+left: 0px;
+top: 0px;
+width: 24px;
+height: 24px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*路径 1*/
+
+left: 2.75px;
+top: 2.75px;
+width: 4.12px;
+height: 4.12px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+border: 1.33px solid rgba(255, 90, 31, 1);
+
+
+
+/*路径 2*/
+
+left: 2.75px;
+top: 15.13px;
+width: 4.12px;
+height: 4.12px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+border: 1.33px solid rgba(255, 90, 31, 1);
+
+
+
+/*路径 3*/
+
+left: 15.13px;
+top: 15.13px;
+width: 4.12px;
+height: 4.12px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+border: 1.33px solid rgba(255, 90, 31, 1);
+
+
+
+/*路径 4*/
+
+left: 15.13px;
+top: 2.75px;
+width: 4.12px;
+height: 4.12px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+border: 1.33px solid rgba(255, 90, 31, 1);
+
+
+
+/*路径 5*/
+
+left: 4.58px;
+top: 11px;
+width: 12.83px;
+height: 0px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+border: 1.33px solid rgba(255, 90, 31, 1);
+
+
+
+/*扫码*/
+
+left: 1px;
+top: 1px;
+width: 22px;
+height: 22px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*扫码*/
+
+left: 24px;
+top: 14px;
+width: 24px;
+height: 24px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 64px;
+top: 15px;
+width: 154px;
+height: 21px;
+opacity: 1;
+/** 文本1 */
+font-size: 15px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 21px;
+color: rgba(51, 51, 51, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*矩形 6*/
+
+left: 310px;
+top: 11px;
+width: 70px;
+height: 30px;
+opacity: 1;
+border-radius: 218px;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 331px;
+top: 15px;
+width: 32px;
+height: 23px;
+opacity: 1;
+/** 文本1 */
+font-size: 16px;
+font-weight: 500;
+letter-spacing: 0px;
+line-height: 22.4px;
+color: rgba(255, 255, 255, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*搜索*/
+
+left: 0px;
+top: 97px;
+width: 393px;
+height: 52px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 3*/
+
+left: 0px;
+top: 0px;
+width: 393px;
+height: 219px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*图标1.png*/
+
+left: 19px;
+top: 8px;
+width: 56px;
+height: 56px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 23px;
+top: 68px;
+width: 48px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(26, 26, 26, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*分组 1*/
+
+left: 19px;
+top: 8px;
+width: 56px;
+height: 77px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*2.png*/
+
+left: 94px;
+top: 8px;
+width: 56px;
+height: 56px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 2*/
+
+left: 98px;
+top: 68px;
+width: 48px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(26, 26, 26, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*分组 2*/
+
+left: 94px;
+top: 8px;
+width: 56px;
+height: 77px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*3.png*/
+
+left: 169px;
+top: 8px;
+width: 56px;
+height: 56px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 3*/
+
+left: 173px;
+top: 68px;
+width: 48px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(26, 26, 26, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*分组 3*/
+
+left: 169px;
+top: 8px;
+width: 56px;
+height: 77px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*4.png*/
+
+left: 243px;
+top: 8px;
+width: 56px;
+height: 56px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 4*/
+
+left: 259px;
+top: 68px;
+width: 24px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(26, 26, 26, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*分组 4*/
+
+left: 243px;
+top: 8px;
+width: 56px;
+height: 77px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*5.png*/
+
+left: 317px;
+top: 8px;
+width: 56px;
+height: 56px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 5*/
+
+left: 333px;
+top: 68px;
+width: 24px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(26, 26, 26, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*分组 5*/
+
+left: 317px;
+top: 8px;
+width: 56px;
+height: 77px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 12*/
+
+left: 92px;
+top: 194px;
+width: 60px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(26, 26, 26, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*图标2.png*/
+
+left: 104px;
+top: 156px;
+width: 36px;
+height: 36px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 12*/
+
+left: 92px;
+top: 156px;
+width: 60px;
+height: 55px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 13*/
+
+left: 173px;
+top: 194px;
+width: 48px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(26, 26, 26, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*图标3.png*/
+
+left: 179px;
+top: 156px;
+width: 36px;
+height: 36px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 13*/
+
+left: 173px;
+top: 156px;
+width: 48px;
+height: 55px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 14*/
+
+left: 247px;
+top: 194px;
+width: 48px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(26, 26, 26, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*图标4.png*/
+
+left: 253px;
+top: 156px;
+width: 36px;
+height: 36px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 14*/
+
+left: 247px;
+top: 156px;
+width: 48px;
+height: 55px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 15*/
+
+left: 333px;
+top: 194px;
+width: 24px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(26, 26, 26, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*图标5.png*/
+
+left: 327px;
+top: 156px;
+width: 36px;
+height: 36px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 15*/
+
+left: 327px;
+top: 156px;
+width: 36px;
+height: 55px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 6*/
+
+left: 22px;
+top: 131px;
+width: 48px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(26, 26, 26, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*图标6.png*/
+
+left: 29px;
+top: 93px;
+width: 36px;
+height: 36px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 6*/
+
+left: 22px;
+top: 93px;
+width: 48px;
+height: 55px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 7*/
+
+left: 92px;
+top: 131px;
+width: 60px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(26, 26, 26, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*图标7.png*/
+
+left: 104px;
+top: 93px;
+width: 36px;
+height: 36px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 7*/
+
+left: 92px;
+top: 93px;
+width: 60px;
+height: 55px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 8*/
+
+left: 169px;
+top: 131px;
+width: 56px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(26, 26, 26, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*图标8.png*/
+
+left: 179px;
+top: 93px;
+width: 36px;
+height: 36px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 8*/
+
+left: 169px;
+top: 93px;
+width: 56px;
+height: 55px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 9*/
+
+left: 259px;
+top: 131px;
+width: 24px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(26, 26, 26, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*图标9.png*/
+
+left: 253px;
+top: 93px;
+width: 36px;
+height: 36px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 9*/
+
+left: 253px;
+top: 93px;
+width: 36px;
+height: 55px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 10*/
+
+left: 333px;
+top: 131px;
+width: 24px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(26, 26, 26, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*图标10.png*/
+
+left: 327px;
+top: 93px;
+width: 36px;
+height: 36px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 10*/
+
+left: 327px;
+top: 93px;
+width: 36px;
+height: 55px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 11*/
+
+left: 22px;
+top: 194px;
+width: 48px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(26, 26, 26, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*图标11.png*/
+
+left: 28px;
+top: 156px;
+width: 36px;
+height: 36px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 11*/
+
+left: 22px;
+top: 156px;
+width: 48px;
+height: 55px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*快速入口*/
+
+left: 0px;
+top: 149px;
+width: 393px;
+height: 219px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 8*/
+
+left: 205px;
+top: 0px;
+width: 80px;
+height: 116px;
+opacity: 1;
+border-radius: 12px;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 4*/
+
+left: 217px;
+top: 11px;
+width: 56px;
+height: 20px;
+opacity: 1;
+/** 文本1 */
+font-size: 14px;
+font-weight: 600;
+letter-spacing: 0px;
+line-height: 19.6px;
+color: rgba(51, 51, 51, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 6*/
+
+left: 224px;
+top: 89px;
+width: 42px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(153, 153, 153, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*图片1.png*/
+
+left: 217px;
+top: 33px;
+width: 56px;
+height: 56px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 3*/
+
+left: 205px;
+top: 0px;
+width: 80px;
+height: 116px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 9*/
+
+left: 293px;
+top: 0px;
+width: 80px;
+height: 116px;
+opacity: 1;
+border-radius: 12px;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 7*/
+
+left: 309px;
+top: 89px;
+width: 48px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(153, 153, 153, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 5*/
+
+left: 305px;
+top: 11px;
+width: 56px;
+height: 20px;
+opacity: 1;
+/** 文本1 */
+font-size: 14px;
+font-weight: 600;
+letter-spacing: 0px;
+line-height: 19.6px;
+color: rgba(51, 51, 51, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*图片2.png*/
+
+left: 305px;
+top: 33px;
+width: 56px;
+height: 56px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 2*/
+
+left: 293px;
+top: 0px;
+width: 80px;
+height: 116px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 7*/
+
+left: 0px;
+top: 0px;
+width: 197px;
+height: 116px;
+opacity: 1;
+border-radius: 12px;
+background: rgba(255, 255, 255, 1);
+
+
+/*圆形 1*/
+
+left: 105px;
+top: 28px;
+width: 103px;
+height: 103px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*图标7（1）.png*/
+
+left: 118px;
+top: 47px;
+width: 79px;
+height: 62px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*蒙版分组*/
+
+left: 0px;
+top: 0px;
+width: 197px;
+height: 116px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*图标16.png*/
+
+left: 10px;
+top: 10px;
+width: 20px;
+height: 22px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 34px;
+top: 11px;
+width: 46px;
+height: 20px;
+opacity: 1;
+/** 文本1 */
+font-size: 14px;
+font-weight: 600;
+letter-spacing: 0px;
+line-height: 19.6px;
+color: rgba(13, 13, 13, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 2*/
+
+left: 82px;
+top: 11px;
+width: 42px;
+height: 20px;
+opacity: 1;
+/** 文本1 */
+font-size: 14px;
+font-weight: 500;
+letter-spacing: 0px;
+line-height: 19.6px;
+color: rgba(51, 51, 51, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 3*/
+
+left: 12px;
+top: 46px;
+width: 70px;
+height: 20px;
+opacity: 1;
+/** 文本1 */
+font-size: 14px;
+font-weight: 500;
+letter-spacing: 0px;
+line-height: 19.6px;
+color: rgba(51, 51, 51, 1);
+/** 文本2 */
+font-size: 14px;
+font-weight: 500;
+letter-spacing: 0px;
+line-height: 19.6px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*矩形 10*/
+
+left: 9px;
+top: 74px;
+width: 66px;
+height: 28px;
+opacity: 0.1;
+border-radius: 154px;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 22px;
+top: 78px;
+width: 42px;
+height: 20px;
+opacity: 1;
+/** 文本1 */
+font-size: 14px;
+font-weight: 500;
+letter-spacing: 0px;
+line-height: 19.6px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*分组 4*/
+
+left: 0px;
+top: 0px;
+width: 197px;
+height: 116px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*瓷片区*/
+
+left: 10px;
+top: 368px;
+width: 373px;
+height: 116px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 1*/
+
+left: 0px;
+top: 0px;
+width: 393px;
+height: 45px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 11*/
+
+left: 10px;
+top: 12px;
+width: 84px;
+height: 23px;
+opacity: 1;
+border-radius: 4px;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 12*/
+
+left: 98px;
+top: 12px;
+width: 84px;
+height: 23px;
+opacity: 1;
+border-radius: 4px;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 13*/
+
+left: 186px;
+top: 12px;
+width: 84px;
+height: 23px;
+opacity: 1;
+border-radius: 4px;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 14*/
+
+left: 274px;
+top: 12px;
+width: 84px;
+height: 23px;
+opacity: 1;
+border-radius: 4px;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 12*/
+
+left: 0px;
+top: 0px;
+width: 20px;
+height: 20px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*直线 2*/
+
+left: 6px;
+top: 4px;
+width: 14px;
+height: 0px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+  border: 1px solid rgba(51, 51, 51, 1);
+  
+
+
+/*直线 3*/
+
+left: 6px;
+top: 10px;
+width: 14px;
+height: 0px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+  border: 1px solid rgba(51, 51, 51, 1);
+  
+
+
+/*直线 4*/
+
+left: 6px;
+top: 16px;
+width: 14px;
+height: 0px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+  border: 1px solid rgba(51, 51, 51, 1);
+  
+
+
+/*画板 2*/
+
+left: 361px;
+top: 14px;
+width: 20px;
+height: 20px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 28px;
+top: 15px;
+width: 48px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 600;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 2*/
+
+left: 110px;
+top: 15px;
+width: 60px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(102, 102, 102, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 3*/
+
+left: 204px;
+top: 15px;
+width: 48px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(102, 102, 102, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 4*/
+
+left: 286px;
+top: 15px;
+width: 60px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(102, 102, 102, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*标签选择*/
+
+left: 0px;
+top: 484px;
+width: 393px;
+height: 45px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 2*/
+
+left: 0px;
+top: 0px;
+width: 373px;
+height: 218px;
+opacity: 1;
+border-radius: 8px;
+background: rgba(255, 255, 255, 1);
+
+
+/*路径 6*/
+
+left: 14px;
+top: 30px;
+width: 4.5px;
+height: 2px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 15*/
+
+left: 16px;
+top: 16px;
+width: 112px;
+height: 186px;
+opacity: 1;
+border-radius: 8px;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 16*/
+
+left: 16px;
+top: 16px;
+width: 112px;
+height: 113px;
+opacity: 1;
+border-radius: 8px;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 17*/
+
+left: 14px;
+top: 14px;
+width: 49px;
+height: 16px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 18px;
+top: 15px;
+width: 40px;
+height: 14px;
+opacity: 1;
+/** 文本1 */
+font-size: 10px;
+font-weight: 500;
+letter-spacing: 0px;
+line-height: 14px;
+color: rgba(214, 195, 133, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 2*/
+
+left: 140px;
+top: 41px;
+width: 17px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 14px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 16.3px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 3*/
+
+left: 159px;
+top: 41px;
+width: 12px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 600;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 4*/
+
+left: 179px;
+top: 42px;
+width: 56px;
+height: 16px;
+opacity: 1;
+/** 文本1 */
+font-size: 11px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 15.4px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 5*/
+
+left: 330px;
+top: 42px;
+width: 31px;
+height: 16px;
+opacity: 1;
+/** 文本1 */
+font-size: 11px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 15.4px;
+color: rgba(153, 153, 153, 1);
+text-align: right;
+vertical-align: top;
+
+
+/*文本 6*/
+
+left: 290px;
+top: 42px;
+width: 36px;
+height: 16px;
+opacity: 1;
+/** 文本1 */
+font-size: 11px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 15.4px;
+color: rgba(153, 153, 153, 1);
+text-align: right;
+vertical-align: top;
+
+
+/*分组 5*/
+
+left: 140px;
+top: 41px;
+width: 221px;
+height: 17px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 140px;
+top: 16px;
+width: 192px;
+height: 23px;
+opacity: 1;
+/** 文本1 */
+font-size: 16px;
+font-weight: 600;
+letter-spacing: 0px;
+line-height: 22.4px;
+color: rgba(0, 0, 0, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*5.关闭.png*/
+
+left: 345px;
+top: 20px;
+width: 16px;
+height: 16px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 6*/
+
+left: 140px;
+top: 16px;
+width: 221px;
+height: 23px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 4px;
+top: 1px;
+width: 51px;
+height: 16px;
+opacity: 1;
+display: flex;
+
+/** 文本1 */
+font-size: 11px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 15.4px;
+color: rgba(128, 108, 46, 1);
+text-align: right;
+vertical-align: top;
+
+
+/*画板 3*/
+
+left: 140px;
+top: 62px;
+width: 59px;
+height: 18px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+  border: 1px solid rgba(214, 195, 133, 1);
+  
+display: flex;
+justify-content: flex-start;
+align-items: flex-start;
+padding: 1px 4px 1px 4px;
+
+
+/*文本 1*/
+
+left: 4px;
+top: 1px;
+width: 68px;
+height: 16px;
+opacity: 1;
+display: flex;
+
+/** 文本1 */
+font-size: 11px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 15.4px;
+color: rgba(255, 90, 31, 1);
+/** 文本2 */
+font-size: 11px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 15.4px;
+color: rgba(224, 215, 215, 1);
+/** 文本3 */
+font-size: 11px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 15.4px;
+color: rgba(255, 90, 31, 1);
+text-align: right;
+vertical-align: top;
+
+
+/*画板 4*/
+
+left: 203px;
+top: 62px;
+width: 76px;
+height: 18px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+  border: 1px solid rgba(255, 214, 199, 1);
+  
+display: flex;
+justify-content: flex-start;
+align-items: flex-start;
+padding: 1px 4px 1px 4px;
+
+
+/*文本 1*/
+
+left: 4px;
+top: 1px;
+width: 33px;
+height: 16px;
+opacity: 1;
+display: flex;
+
+/** 文本1 */
+font-size: 11px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 15.4px;
+color: rgba(102, 102, 102, 1);
+text-align: right;
+vertical-align: top;
+
+
+/*画板 5*/
+
+left: 283px;
+top: 62px;
+width: 41px;
+height: 18px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+  border: 1px solid rgba(204, 204, 204, 1);
+  
+display: flex;
+justify-content: flex-start;
+align-items: flex-start;
+padding: 1px 4px 1px 4px;
+
+
+/*分组 7*/
+
+left: 140px;
+top: 62px;
+width: 184px;
+height: 18px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 19*/
+
+left: 220px;
+top: 88px;
+width: 72px;
+height: 72px;
+opacity: 1;
+border-radius: 4px;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 220px;
+top: 164px;
+width: 60px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(0, 0, 0, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 7*/
+
+left: 220px;
+top: 185px;
+width: 24px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 10px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 16.3px;
+color: rgba(255, 90, 31, 1);
+/** 文本2 */
+font-size: 14px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 16.3px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 8*/
+
+left: 246px;
+top: 190px;
+width: 27px;
+height: 11px;
+opacity: 1;
+/** 文本1 */
+font-size: 9px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 10.48px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*分组 1*/
+
+left: 220px;
+top: 185px;
+width: 53px;
+height: 17px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 8*/
+
+left: 220px;
+top: 88px;
+width: 72px;
+height: 114px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 19*/
+
+left: 300px;
+top: 88px;
+width: 72px;
+height: 72px;
+opacity: 1;
+border-radius: 4px;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 300px;
+top: 164px;
+width: 60px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(0, 0, 0, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 7*/
+
+left: 300px;
+top: 185px;
+width: 24px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 10px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 16.3px;
+color: rgba(255, 90, 31, 1);
+/** 文本2 */
+font-size: 14px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 16.3px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 8*/
+
+left: 326px;
+top: 190px;
+width: 27px;
+height: 11px;
+opacity: 1;
+/** 文本1 */
+font-size: 9px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 10.48px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*分组 1*/
+
+left: 300px;
+top: 185px;
+width: 53px;
+height: 17px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 9*/
+
+left: 300px;
+top: 88px;
+width: 72px;
+height: 114px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 20*/
+
+left: 334px;
+top: 81px;
+width: 39px;
+height: 129px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 19*/
+
+left: 140px;
+top: 88px;
+width: 72px;
+height: 72px;
+opacity: 1;
+border-radius: 4px;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 140px;
+top: 164px;
+width: 72px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(0, 0, 0, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 2*/
+
+left: 24px;
+top: 160px;
+width: 84px;
+height: 34px;
+opacity: 1;
+/** 文本1 */
+font-size: 12px;
+font-weight: 600;
+letter-spacing: 0px;
+line-height: 16.8px;
+color: rgba(110, 59, 37, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 3*/
+
+left: 24px;
+top: 137px;
+width: 84px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 15px;
+font-weight: 500;
+letter-spacing: 0px;
+line-height: 21px;
+color: rgba(235, 111, 74, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 7*/
+
+left: 140px;
+top: 185px;
+width: 24px;
+height: 17px;
+opacity: 1;
+/** 文本1 */
+font-size: 10px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 16.3px;
+color: rgba(255, 90, 31, 1);
+/** 文本2 */
+font-size: 14px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 16.3px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*文本 8*/
+
+left: 166px;
+top: 190px;
+width: 27px;
+height: 11px;
+opacity: 1;
+/** 文本1 */
+font-size: 9px;
+font-weight: 700;
+letter-spacing: 0px;
+line-height: 10.48px;
+color: rgba(255, 90, 31, 1);
+text-align: left;
+vertical-align: top;
+
+
+/*分组 1*/
+
+left: 140px;
+top: 185px;
+width: 53px;
+height: 17px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*分组 8*/
+
+left: 24px;
+top: 88px;
+width: 188px;
+height: 114px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*店铺*/
+
+left: 10px;
+top: 529px;
+width: 373px;
+height: 218px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*矩形 1*/
+
+left: 0px;
+top: 768px;
+width: 393px;
+height: 50px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+border-top: 0.5px solid rgba(230, 230, 230, 1);
+
+
+
+/*矩形 2*/
+
+left: 0px;
+top: 768px;
+width: 78.6px;
+height: 50px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+border-top: 0.5px solid rgba(230, 230, 230, 1);
+
+
+
+/*矩形 3*/
+
+left: 79px;
+top: 768px;
+width: 78.6px;
+height: 50px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+border-top: 0.5px solid rgba(230, 230, 230, 1);
+
+
+
+/*矩形 4*/
+
+left: 157px;
+top: 768px;
+width: 78.6px;
+height: 50px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+border-top: 0.5px solid rgba(230, 230, 230, 1);
+
+
+
+/*矩形 5*/
+
+left: 236px;
+top: 768px;
+width: 78.6px;
+height: 50px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+border-top: 0.5px solid rgba(230, 230, 230, 1);
+
+
+
+/*矩形 6*/
+
+left: 314px;
+top: 768px;
+width: 78.6px;
+height: 50px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+border-top: 0.5px solid rgba(230, 230, 230, 1);
+
+
+
+/*图标18.png*/
+
+left: 22px;
+top: 776px;
+width: 34px;
+height: 34px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*图标19.png*/
+
+left: 102px;
+top: 770px;
+width: 32px;
+height: 32px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*图标19.png*/
+
+left: 180px;
+top: 770px;
+width: 32px;
+height: 32px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*图标19.png*/
+
+left: 259px;
+top: 770px;
+width: 32px;
+height: 32px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*图标19.png*/
+
+left: 337px;
+top: 770px;
+width: 32px;
+height: 32px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);
+
+
+/*文本 1*/
+
+left: 98px;
+top: 802px;
+width: 40px;
+height: 14px;
+opacity: 1;
+/** 文本1 */
+font-size: 10px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 14px;
+color: rgba(102, 102, 102, 1);
+text-align: right;
+vertical-align: top;
+
+
+/*文本 2*/
+
+left: 186px;
+top: 802px;
+width: 20px;
+height: 14px;
+opacity: 1;
+/** 文本1 */
+font-size: 10px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 14px;
+color: rgba(102, 102, 102, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*文本 3*/
+
+left: 260px;
+top: 802px;
+width: 30px;
+height: 14px;
+opacity: 1;
+/** 文本1 */
+font-size: 10px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 14px;
+color: rgba(102, 102, 102, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*文本 4*/
+
+left: 343px;
+top: 802px;
+width: 20px;
+height: 14px;
+opacity: 1;
+/** 文本1 */
+font-size: 10px;
+font-weight: 400;
+letter-spacing: 0px;
+line-height: 14px;
+color: rgba(102, 102, 102, 1);
+text-align: center;
+vertical-align: top;
+
+
+/*临摹*/
+
+left: 736px;
+top: 558px;
+width: 393px;
+height: 852px;
+opacity: 1;
+background: rgba(255, 255, 255, 1);

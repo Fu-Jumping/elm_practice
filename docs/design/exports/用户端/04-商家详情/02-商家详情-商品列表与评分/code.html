@@ -1,0 +1,345 @@
+<!DOCTYPE html><html class="light" lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "outline-variant": "#e4beb3",
+                "on-primary-container": "#541400",
+                "surface-white": "#FFFFFF",
+                "primary": "#ae3200",
+                "error": "#ba1a1a",
+                "on-secondary-fixed-variant": "#474747",
+                "on-secondary": "#ffffff",
+                "border-light": "#E5E5E5",
+                "background": "#f9f9f9",
+                "secondary-fixed-dim": "#c8c6c6",
+                "surface-container-high": "#e8e8e8",
+                "surface-variant": "#e2e2e2",
+                "on-secondary-container": "#656464",
+                "text-secondary": "#666666",
+                "primary-fixed-dim": "#ffb59e",
+                "surface-tint": "#ae3200",
+                "on-primary": "#ffffff",
+                "surface-dim": "#dadada",
+                "surface-container": "#eeeeee",
+                "secondary-container": "#e4e2e1",
+                "outline": "#8f7067",
+                "text-tertiary": "#999999",
+                "tertiary-fixed": "#ffdbcc",
+                "surface-bright": "#f9f9f9",
+                "inverse-primary": "#ffb59e",
+                "inverse-surface": "#2f3131",
+                "primary-fixed": "#ffdbd0",
+                "secondary-fixed": "#e4e2e1",
+                "on-surface-variant": "#5b4038",
+                "on-error": "#ffffff",
+                "error-container": "#ffdad6",
+                "on-tertiary-container": "#4d1b00",
+                "on-background": "#1a1c1c",
+                "on-error-container": "#93000a",
+                "on-tertiary-fixed-variant": "#7b2f00",
+                "primary-container": "#ff5a1f",
+                "tertiary": "#a14000",
+                "inverse-on-surface": "#f1f1f1",
+                "surface-container-highest": "#e2e2e2",
+                "on-primary-fixed-variant": "#852400",
+                "on-primary-fixed": "#3a0b00",
+                "tertiary-container": "#f46500",
+                "on-tertiary": "#ffffff",
+                "surface-container-low": "#f3f3f3",
+                "on-tertiary-fixed": "#351000",
+                "surface-container-lowest": "#ffffff",
+                "surface": "#f9f9f9",
+                "secondary": "#5f5e5e",
+                "tertiary-fixed-dim": "#ffb694",
+                "on-surface": "#1a1c1c",
+                "on-secondary-fixed": "#1b1c1c"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+        },
+        "spacing": {
+                "margin-page": "12px",
+                "gap-module": "12px",
+                "padding-card": "10px",
+                "base": "4px",
+                "gutter": "8px"
+        },
+        "fontFamily": {
+                "headline-lg": [
+                        "beVietnamPro"
+                ],
+                "label-sm": [
+                        "beVietnamPro"
+                ],
+                "cta-button": [
+                        "beVietnamPro"
+                ],
+                "body-lg": [
+                        "beVietnamPro"
+                ],
+                "headline-md": [
+                        "beVietnamPro"
+                ],
+                "label-md": [
+                        "beVietnamPro"
+                ],
+                "body-md": [
+                        "beVietnamPro"
+                ]
+        },
+        "fontSize": {
+                "headline-lg": [
+                        "20px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "label-sm": [
+                        "10px",
+                        {
+                                "lineHeight": "14px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "cta-button": [
+                        "16px",
+                        {
+                                "lineHeight": "20px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-lg": [
+                        "16px",
+                        {
+                                "lineHeight": "22px",
+                                "fontWeight": "500"
+                        }
+                ],
+                "headline-md": [
+                        "18px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "label-md": [
+                        "12px",
+                        {
+                                "lineHeight": "16px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "body-md": [
+                        "14px",
+                        {
+                                "lineHeight": "20px",
+                                "fontWeight": "400"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+  /* Add Material Icons font if needed for the UI styling */
+  @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
+  body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
+<style>
+  .active-category-item::before, .active-category-item::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    background: transparent;
+    pointer-events: none;
+  }
+
+  .active-category-item::before {
+    top: -20px;
+    border-radius: 0 0 20px 0;
+    box-shadow: 10px 10px 0 10px #ffffff;
+    z-index: -1;
+  }
+
+  .active-category-item::after {
+    bottom: -20px;
+    border-radius: 0 20px 0 0;
+    box-shadow: 10px -10px 0 10px #ffffff;
+    z-index: -1;
+  }
+
+  /* If first item, hide top reverse corner */
+  .active-category-item.first-item-active::before {
+    display: none;
+  }
+
+  /* Ensure main content background doesn't overlap and z-indexing is correct */
+  .active-category-item {
+    position: relative;
+    background-color: #ffffff !important;
+    z-index: 10;
+  }
+</style></head>
+<body class="bg-[#F7F7F7] text-on-surface font-body-md h-screen flex flex-col overflow-hidden">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 flex items-center justify-between px-margin-page h-14 w-full bg-surface-white transition-colors duration-200">
+<div class="flex items-center hover:bg-secondary-container/50 dark:hover:bg-secondary-container/20 rounded-full p-2 cursor-pointer active:opacity-70">
+<span class="material-symbols-outlined text-primary">arrow_back_ios</span>
+</div>
+<div class="flex-1 text-center font-headline-md text-headline-md font-bold text-[#FF5A1F]">饿了么</div>
+<div class="flex items-center hover:bg-secondary-container/50 dark:hover:bg-secondary-container/20 rounded-full p-2 cursor-pointer active:opacity-70">
+<span class="material-symbols-outlined text-primary">search</span>
+</div>
+</header>
+<!-- Merchant Header Banner -->
+<div class="relative bg-surface-white w-full flex-shrink-0">
+<div class="h-24 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBLoXRott5GwM3XcAZ8uavXrPPRubjEAvcYHjYXFX6-DHiaf0kXDerWfGe3DgiLjHA70IErDHCVvXKlBsBXyE6KlGUC4tSJh0r3wq7686Txhyjitd8Rh3GDN73uy-c9v4_11a5aBGiyIa74CAEdoLFcAz-QGMgFd2BFOZtvJRg2QACcLeb4kwBMDKAvvnU7WGRngvwABSoqqBI5F9HFUsMt7Kz2nFcFRb4WxqvBeIgKQmGdn9wqUDv1LR0NZBgMeuAoZQOx2V23j6Ca');">
+</div>
+<div class="px-margin-page pb-gap-module relative -mt-6">
+<div class="flex items-end gap-3">
+<div class="w-16 h-16 rounded-lg bg-surface-white border border-border-light flex-shrink-0 overflow-hidden shadow-sm">
+<img alt="KFC Logo Placeholder" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvUXz74z5lyA83A8SQQP_6zeLrpDjbKgNalNt7gomRI6AFSbjZP5QqO64A0tqT7h_lRUmFuQ4ji1NNFISXEfq2AZPj-xJRsrl3gOxcmN3C92YTICZ76Wk7chNqERI7L26zyx7fEDQtOSLIbqOADBBepN1UW_VYjnveh4Uq0R5J-di3qkXeBeZpogsJM5eecJ4xULjuwjNzzMCMwjEfw27Zyqz2u48Dg9jDM2zfPiN08GLvczu8K7FmHiRr5MjPPYNKfZ5Km88oBR3k">
+</div>
+<div class="flex-1 pb-1">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">肯德基 (校园二餐店)</h1>
+</div>
+</div>
+<div class="mt-2 flex flex-col gap-1">
+<div class="flex items-center gap-2 font-label-md text-label-md">
+<div class="flex items-center text-[#FF5A1F]">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="ml-0.5 font-bold">4.8</span>
+</div>
+<span class="text-text-secondary">月售 8000+</span>
+<span class="text-border-light mx-1">|</span>
+<span class="text-text-secondary">约30分钟</span>
+</div>
+<div class="flex items-center gap-2 font-label-md text-label-md text-text-secondary">
+<span class="">起送 ¥15</span>
+<span class="">配送 ¥2</span>
+</div>
+<!-- Promotional Tags -->
+<div class="flex flex-wrap gap-2 mt-2">
+<span class="px-1.5 py-0.5 rounded-[4px] bg-error-container text-on-error-container font-label-sm text-label-sm border border-outline-variant">满50减10</span>
+<span class="px-1.5 py-0.5 rounded-[4px] bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm border border-outline-variant">新客立减5</span>
+<span class="px-1.5 py-0.5 rounded-[4px] border border-border-light text-text-secondary font-label-sm text-label-sm flex items-center gap-0.5"><span class="material-symbols-outlined text-[12px]">local_activity</span> 领券</span>
+</div>
+</div>
+</div>
+<!-- Tab Bar -->
+<div class="flex border-t border-border-light px-margin-page">
+<div class="flex-1 flex justify-center py-3 relative cursor-pointer">
+<span class="font-body-md text-body-md font-bold text-on-surface" id="tab-text-order">点餐</span>
+<div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-[#FF5A1F] rounded-t-full" id="tab-indicator-order"></div>
+</div>
+<div class="flex-1 flex justify-center py-3 relative cursor-pointer">
+<span class="font-body-md text-body-md text-text-secondary" id="tab-text-reviews">评价</span>
+<div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-[#FF5A1F] rounded-t-full hidden" id="tab-indicator-reviews"></div>
+</div>
+</div>
+</div>
+<!-- Main Content Container -->
+<div class="flex flex-1 overflow-hidden relative w-full">
+<div class="flex flex-1 overflow-hidden w-full absolute inset-0" id="tab-content-order">
+<!-- Left SideNav -->
+<div class="w-[84px] bg-[#F7F7F7] overflow-y-auto hide-scrollbar flex-shrink-0 pb-20">
+<ul class="flex flex-col pb-3">
+<li class="active-category-item relative bg-surface-white py-4 px-2 text-center cursor-pointer first-item-active">
+<span class="font-body-md text-body-md font-bold text-on-surface">热销</span>
+</li>
+<li class="relative py-4 px-2 text-center cursor-pointer hover:bg-surface-white/50 transition-colors">
+<span class="font-body-md text-body-md text-text-secondary">汉堡</span>
+</li>
+<li class="relative py-4 px-2 text-center cursor-pointer hover:bg-surface-white/50 transition-colors">
+<span class="font-body-md text-body-md text-text-secondary">小食</span>
+</li>
+<li class="relative py-4 px-2 text-center cursor-pointer hover:bg-surface-white/50 transition-colors">
+<span class="font-body-md text-body-md text-text-secondary">饮品</span>
+</li>
+<li class="relative py-4 px-2 text-center cursor-pointer hover:bg-surface-white/50 transition-colors">
+<span class="font-body-md text-body-md text-text-secondary">超值套餐</span>
+</li>
+</ul>
+</div>
+<!-- Right Content Canvas -->
+<div class="flex-1 bg-surface-white overflow-y-auto hide-scrollbar px-3 pb-20">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-3 sticky top-0 bg-surface-white/95 py-2 z-10 backdrop-blur-sm">热销</h2>
+<div class="flex flex-col gap-5">
+<!-- Product Item 1 -->
+<div class="flex gap-3">
+<div class="w-24 h-24 rounded-DEFAULT bg-surface-container-high flex-shrink-0 overflow-hidden relative">
+<img alt="Burger" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAk8sbFPBB50f25ww-ORhB-HnZymLWUXjNhVZiAEFvix42Fcwkv_FMGmoosLQnINjaVTyyiHUqlX0Z8_nxJGbx727mgJhFrdHsAIaBsY8wFIlkFMTC4xt3SibYjEfiSCGFtywnzZWQqZAhPaKaD5yF8e16OHXCVRpJt6-vKveaU9QvXxcBH-kQopQSmHezm-W_rm0HftSTK1Aic0nuRUPVbfl2MgZBCaL6LqsNEJll3OHF8x_g6uThBNGW7FEGUlVEVaQDoWV4RXOOP">
+<div class="absolute top-0 left-0 bg-[#E83C3C] text-white font-label-sm text-label-sm px-1 py-0.5 rounded-br-DEFAULT">热卖</div>
+</div>
+<div class="flex flex-1 flex-col justify-between">
+<div>
+<h3 class="font-body-lg text-body-lg text-on-surface font-bold line-clamp-2">香辣鸡腿堡</h3>
+<p class="font-label-md text-label-md text-text-secondary mt-1 line-clamp-1">经典香脆，辣味十足</p>
+<p class="font-label-sm text-label-sm text-text-secondary mt-0.5">月售 1200+ · 好评率 98%</p>
+</div>
+<div class="flex items-center justify-between mt-2">
+<div class="flex items-baseline gap-1">
+<span class="font-label-md text-label-md text-[#FF5A1F] font-bold">¥</span>
+<span class="font-headline-md text-headline-md text-[#FF5A1F] font-bold">19.9</span>
+</div>
+<button class="w-6 h-6 rounded-full text-white flex items-center justify-center transition-colors bg-[#FF5A1F]">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="fixed bottom-0 left-0 right-0 h-16 bg-surface-white border-t border-border-light shadow-[0_-2px_10px_rgba(0,0,0,0.05)] flex items-center px-margin-page z-50">
+  <!-- Cart Icon & Badge -->
+  <div class="relative flex items-center justify-center w-12 h-12 -mt-6 bg-[#FF5A1F] rounded-full shadow-lg border-4 border-surface-white">
+    <span class="material-symbols-outlined text-white text-[24px]">shopping_cart</span>
+    <div class="absolute -top-1 -right-1 bg-error text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-surface-white">
+      2
+    </div>
+  </div>
+
+  <!-- Price Info -->
+  <div class="flex-1 ml-4 flex flex-col">
+    <div class="flex items-baseline gap-1">
+      <span class="text-primary font-headline-lg">¥ 19.9</span>
+    </div>
+    <div class="text-text-tertiary text-label-sm">
+      另需配送费 ¥2
+    </div>
+  </div>
+
+  <!-- Action Button -->
+  <button class="bg-[#FF5A1F] hover:bg-[#E64A12] active:scale-95 transition-all text-white px-6 py-2 rounded-full font-headline-md">
+    去结算
+  </button>
+</div>
+
+</body></html>

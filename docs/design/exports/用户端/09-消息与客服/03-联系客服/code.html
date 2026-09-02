@@ -1,0 +1,205 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>联系客服 - 饿了么</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#351000",
+                        "tertiary-container": "#f46500",
+                        "on-background": "#1a1c1c",
+                        "border-light": "#E5E5E5",
+                        "on-surface-variant": "#5b4038",
+                        "surface-variant": "#e2e2e2",
+                        "surface-dim": "#dadada",
+                        "inverse-on-surface": "#f1f1f1",
+                        "inverse-surface": "#2f3131",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "secondary": "#5f5e5e",
+                        "on-primary-container": "#541400",
+                        "text-tertiary": "#999999",
+                        "text-secondary": "#666666",
+                        "surface-bright": "#f9f9f9",
+                        "primary-container": "#ff5a1f",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#ae3200",
+                        "surface-white": "#FFFFFF",
+                        "on-primary-fixed-variant": "#852400",
+                        "background": "#f9f9f9",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "primary": "#ae3200",
+                        "tertiary": "#a14000",
+                        "surface-container": "#eeeeee",
+                        "outline-variant": "#e4beb3",
+                        "on-primary-fixed": "#3a0b00",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#1a1c1c",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffdbcc",
+                        "primary-fixed-dim": "#ffb59e",
+                        "inverse-primary": "#ffb59e",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "on-tertiary-container": "#4d1b00",
+                        "on-primary": "#ffffff",
+                        "on-secondary-container": "#656464",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#e8e8e8",
+                        "surface-container-highest": "#e2e2e2",
+                        "outline": "#8f7067",
+                        "on-secondary-fixed-variant": "#474747",
+                        "primary-fixed": "#ffdbd0",
+                        "surface-container-low": "#f3f3f3",
+                        "secondary-fixed": "#e4e2e1",
+                        "secondary-container": "#e4e2e1",
+                        "surface": "#f9f9f9"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.125rem",
+                        lg: "0.25rem",
+                        xl: "0.5rem",
+                        full: "0.75rem"
+                    },
+                    spacing: {
+                        "padding-card": "10px",
+                        "gutter": "8px",
+                        "margin-page": "12px",
+                        "base": "4px",
+                        "gap-module": "12px"
+                    },
+                    fontFamily: {
+                        "body-lg": ["Be Vietnam Pro", "sans-serif"],
+                        "label-md": ["Be Vietnam Pro", "sans-serif"],
+                        "headline-md": ["Be Vietnam Pro", "sans-serif"],
+                        "headline-lg": ["Be Vietnam Pro", "sans-serif"],
+                        "cta-button": ["Be Vietnam Pro", "sans-serif"],
+                        "body-md": ["Be Vietnam Pro", "sans-serif"],
+                        "label-sm": ["Be Vietnam Pro", "sans-serif"]
+                    },
+                    fontSize: {
+                        "body-lg": ["16px", { lineHeight: "22px", fontWeight: "500" }],
+                        "label-md": ["12px", { lineHeight: "16px", fontWeight: "400" }],
+                        "headline-md": ["18px", { lineHeight: "24px", fontWeight: "600" }],
+                        "headline-lg": ["20px", { lineHeight: "28px", fontWeight: "700" }],
+                        "cta-button": ["16px", { lineHeight: "20px", fontWeight: "600" }],
+                        "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+                        "label-sm": ["10px", { lineHeight: "14px", fontWeight: "400" }]
+                    }
+                }
+            }
+        };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface fixed top-0 w-full z-50 border-b border-border-light flat no shadows flex justify-between items-center h-14 px-margin-page w-full transition-colors duration-200">
+<button class="text-on-surface hover:bg-surface-container-low transition-colors duration-200 active:opacity-80 p-2 -ml-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-lg text-headline-lg font-bold text-on-surface">联系客服</h1>
+<div class="w-8"></div> <!-- Placeholder for balance -->
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-[calc(3.5rem+12px)] pb-safe px-margin-page overflow-y-auto">
+<!-- Welcome Message / Avatar -->
+<div class="flex flex-col items-center justify-center mt-6 mb-8">
+<div class="w-20 h-20 rounded-full bg-primary-container flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-[40px] text-on-primary-container" data-icon="support_agent">support_agent</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-background">您好，有什么可以帮您？</h2>
+<p class="font-body-md text-body-md text-text-secondary mt-1">智能客服与人工客服随时为您服务</p>
+</div>
+<!-- Support Categories Grid (Bento Style) -->
+<div class="grid grid-cols-2 gap-gutter mb-8">
+<!-- Category 1 -->
+<button class="bg-surface-white border border-border-light rounded-lg p-4 flex flex-col items-start hover:bg-surface-container-low transition-colors duration-200 active:scale-95 text-left">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-primary" data-icon="receipt_long">receipt_long</span>
+</div>
+<span class="font-body-lg text-body-lg text-on-surface mb-1">订单问题</span>
+<span class="font-label-md text-label-md text-text-secondary">催单、修改订单、骑手位置</span>
+</button>
+<!-- Category 2 -->
+<button class="bg-surface-white border border-border-light rounded-lg p-4 flex flex-col items-start hover:bg-surface-container-low transition-colors duration-200 active:scale-95 text-left">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-primary" data-icon="payments">payments</span>
+</div>
+<span class="font-body-lg text-body-lg text-on-surface mb-1">支付问题</span>
+<span class="font-label-md text-label-md text-text-secondary">支付失败、红包使用、发票</span>
+</button>
+<!-- Category 3 -->
+<button class="bg-surface-white border border-border-light rounded-lg p-4 flex flex-col items-start hover:bg-surface-container-low transition-colors duration-200 active:scale-95 text-left">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-primary" data-icon="currency_exchange">currency_exchange</span>
+</div>
+<span class="font-body-lg text-body-lg text-on-surface mb-1">退款咨询</span>
+<span class="font-label-md text-label-md text-text-secondary">退款进度、餐品问题退款</span>
+</button>
+<!-- Category 4 -->
+<button class="bg-surface-white border border-border-light rounded-lg p-4 flex flex-col items-start hover:bg-surface-container-low transition-colors duration-200 active:scale-95 text-left">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-primary" data-icon="more_horiz">more_horiz</span>
+</div>
+<span class="font-body-lg text-body-lg text-on-surface mb-1">其他问题</span>
+<span class="font-label-md text-label-md text-text-secondary">账号设置、活动规则、投诉</span>
+</button>
+</div>
+<!-- Recent Orders Help -->
+<div class="bg-surface-white border border-border-light rounded-lg p-padding-card mb-8">
+<div class="flex justify-between items-center mb-4 border-b border-border-light pb-2">
+<h3 class="font-headline-md text-headline-md text-on-surface">近期订单咨询</h3>
+<button class="font-label-md text-label-md text-primary flex items-center">
+                    查看全部 <span class="material-symbols-outlined text-[16px] ml-1" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<div class="flex items-center p-2 hover:bg-surface-container-low rounded-lg transition-colors duration-200">
+<div class="w-12 h-12 bg-surface-container rounded-lg mr-3 flex-shrink-0 bg-cover bg-center" data-alt="A close-up shot of a delicious, freshly made burger with a soft bun, juicy patty, melted cheese, and crisp lettuce. The burger is presented in a modern, clean light-mode aesthetic against a white background, highlighting its appetizing textures and colors. The lighting is bright and even, evoking a pragmatic and trustworthy food delivery experience." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCukMU7n1-YwnUdt8_E4EAg9_YJmFWFjx66yCZJXwf4Lm-Q18H-UtT3t1s7Xv4ChfUNVYB4SdeX1APGcRm__uUYYJn6Ijjx3TVqzRWMVTfhJ6JOK0nIcGcidZkVkuv7nYoqBDYZ5zdvGQfLGwD-nov9kUkRpPExdiLlQXqVcvQlNaKjy2p5-6xWm3tlPPmvjqKCfNS6SGzaFK_Wh9UNm0SjvvvbXuAzBkLEKVpbxtg0-qbVfmsJSNuJgOPhc1F1NPRoZ_wgmRCALtUw');"></div>
+<div class="flex-grow">
+<h4 class="font-body-md text-body-md text-on-surface font-semibold">麦当劳 (大学城店)</h4>
+<p class="font-label-md text-label-md text-text-secondary">已送达 · 2小时前</p>
+</div>
+<button class="bg-primary-container text-on-primary font-label-md text-label-md px-3 py-1.5 rounded-lg active:opacity-80 transition-opacity">
+                    咨询此单
+                </button>
+</div>
+</div>
+</main>
+<!-- Bottom Fixed Actions (Canvas Layer, not Nav Shell) -->
+<div class="fixed bottom-0 w-full bg-surface-white border-t border-border-light p-margin-page z-40 flex gap-gutter">
+<button class="flex-1 bg-surface-container text-on-surface font-cta-button text-cta-button py-3 rounded-lg flex items-center justify-center hover:bg-surface-container-high transition-colors duration-200 active:scale-95">
+<span class="material-symbols-outlined mr-2 text-[20px]" data-icon="call">call</span>
+            电话客服
+        </button>
+<button class="flex-1 text-on-primary font-cta-button text-cta-button py-3 rounded-lg flex items-center justify-center transition-colors duration-200 active:scale-95 bg-primary-container hover:opacity-90">
+<span class="material-symbols-outlined mr-2 text-[20px]" data-icon="chat">chat</span>
+            在线客服
+        </button>
+</div>
+
+
+</body></html>

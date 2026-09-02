@@ -1,0 +1,224 @@
+<!DOCTYPE html><html lang="zh-CN" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>会员权益</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-background": "#1a1c1c",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#f9f9f9",
+                        "outline": "#8f7067",
+                        "on-tertiary": "#ffffff",
+                        "tertiary": "#a14000",
+                        "on-surface-variant": "#5b4038",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "surface-dim": "#dadada",
+                        "on-tertiary-fixed": "#351000",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#ffb59e",
+                        "primary-fixed-dim": "#ffb59e",
+                        "on-surface": "#1a1c1c",
+                        "outline-variant": "#e4beb3",
+                        "surface-container": "#eeeeee",
+                        "on-error-container": "#93000a",
+                        "background": "#f9f9f9",
+                        "surface-container-low": "#f3f3f3",
+                        "on-secondary-fixed-variant": "#474747",
+                        "primary": "#ae3200",
+                        "inverse-surface": "#2f3131",
+                        "on-primary-fixed-variant": "#852400",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "on-secondary-container": "#656464",
+                        "on-error": "#ffffff",
+                        "border-light": "#E5E5E5",
+                        "secondary": "#5f5e5e",
+                        "text-secondary": "#666666",
+                        "surface": "#f9f9f9",
+                        "on-primary-fixed": "#3a0b00",
+                        "surface-container-high": "#e8e8e8",
+                        "primary-fixed": "#ffdbd0",
+                        "surface-variant": "#e2e2e2",
+                        "primary-container": "#ff5a1f",
+                        "inverse-on-surface": "#f1f1f1",
+                        "tertiary-container": "#f46500",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#4d1b00",
+                        "secondary-fixed": "#e4e2e1",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "secondary-container": "#e4e2e1",
+                        "surface-container-lowest": "#ffffff",
+                        "text-tertiary": "#999999",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-primary-container": "#541400",
+                        "surface-tint": "#ae3200",
+                        "surface-white": "#FFFFFF",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "surface-container-highest": "#e2e2e2"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    spacing: {
+                        "padding-card": "10px",
+                        "gap-module": "12px",
+                        "margin-page": "12px",
+                        "gutter": "8px",
+                        "base": "4px"
+                    },
+                    fontFamily: {
+                        "cta-button": ["beVietnamPro"],
+                        "body-md": ["beVietnamPro"],
+                        "headline-md": ["beVietnamPro"],
+                        "body-lg": ["beVietnamPro"],
+                        "label-md": ["beVietnamPro"],
+                        "label-sm": ["beVietnamPro"],
+                        "headline-lg": ["beVietnamPro"]
+                    },
+                    fontSize: {
+                        "cta-button": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+        .gradient-gold {
+            background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 50%, #FFCC80 100%);
+        }
+        .text-gold {
+            color: #8D6E63;
+        }
+        .btn-gradient {
+            background: linear-gradient(90deg, #ff5a1f 0%, #ae3200 100%);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased max-w-md mx-auto relative min-h-screen pb-safe">
+<!-- TopAppBar Semantic Shell: Suppressed for Sub-page. Creating contextual back header -->
+<header class="sticky top-0 z-50 bg-surface-white border-b border-border-light flex items-center justify-between px-margin-page h-14 w-full">
+<button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors active:opacity-80">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">arrow_back_ios</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-on-surface">会员权益</h1>
+<div class="w-8"></div> <!-- Spacer for center alignment -->
+</header>
+<main class="p-margin-page space-y-gap-module">
+<!-- Hero: Membership Card -->
+<section class="gradient-gold rounded-xl p-4 shadow-sm border border-outline-variant relative overflow-hidden">
+<!-- Decorative element -->
+<div class="absolute -right-4 -top-4 opacity-20">
+<span class="material-symbols-outlined text-[100px] text-tertiary">star</span>
+</div>
+<div class="relative z-10 flex flex-col h-full justify-between space-y-6">
+<div class="flex justify-between items-start">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-gold flex items-center gap-2">
+                            饿了么超级会员
+                            <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: &quot;FILL&quot; 1;">workspace_premium</span>
+</h2>
+<p class="font-body-md text-body-md text-gold mt-1 opacity-80">当前状态：<span class="font-semibold">已开通</span></p>
+</div>
+</div>
+<div class="flex justify-between items-end">
+<div>
+<p class="font-label-md text-label-md text-gold opacity-80">有效期至: 2024-12-31</p>
+</div>
+<button class="btn-gradient text-on-primary font-cta-button text-cta-button px-4 py-2 rounded-xl active:opacity-80 transition-opacity">
+                        立即续费
+                    </button>
+</div>
+</div>
+</section>
+<!-- Benefits Grid -->
+<section class="bg-surface-white rounded-xl border border-border-light p-padding-card">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-4 pl-2 border-l-4 border-primary" style="border-color: rgb(255, 90, 31);">核心权益</h3>
+<div class="grid grid-cols-4 gap-2">
+<!-- Benefit 1 -->
+<div class="flex flex-col items-center justify-center space-y-2 p-2">
+<div class="w-12 h-12 bg-primary-fixed rounded-full flex items-center justify-center text-primary" style="color: rgb(255, 90, 31);">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">redeem</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant text-center">专享红包</span>
+</div>
+<!-- Benefit 2 -->
+<div class="flex flex-col items-center justify-center space-y-2 p-2">
+<div class="w-12 h-12 bg-primary-fixed rounded-full flex items-center justify-center text-primary" style="color: rgb(255, 90, 31);">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">local_shipping</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant text-center">免配送费</span>
+</div>
+<!-- Benefit 3 -->
+<div class="flex flex-col items-center justify-center space-y-2 p-2">
+<div class="w-12 h-12 bg-primary-fixed rounded-full flex items-center justify-center text-primary" style="color: rgb(255, 90, 31);">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">bolt</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant text-center">积分加速</span>
+</div>
+<!-- Benefit 4 -->
+<div class="flex flex-col items-center justify-center space-y-2 p-2">
+<div class="w-12 h-12 bg-primary-fixed rounded-full flex items-center justify-center text-primary" style="color: rgb(255, 90, 31);">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">local_offer</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant text-center">专属优惠</span>
+</div>
+</div>
+</section>
+<!-- Details List -->
+<section class="bg-surface-white rounded-xl border border-border-light p-padding-card">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-4 pl-2 border-l-4 border-primary" style="border-color: rgb(255, 90, 31);">权益详情</h3>
+<ul class="space-y-4">
+<li class="flex gap-4 items-start pb-4 border-b border-border-light last:border-0 last:pb-0">
+<div class="w-10 h-10 rounded-lg flex items-center justify-center text-primary flex-shrink-0 mt-1 bg-primary-fixed" style="color: rgb(255, 90, 31); background-color: rgba(255, 90, 31, 0.1);">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">card_giftcard</span>
+</div>
+<div>
+<h4 class="font-body-lg text-body-lg text-on-surface">每月专享大额红包</h4>
+<p class="font-body-md text-body-md text-text-secondary mt-1">每月可领取总价值最高100元的无门槛或满减红包，点餐更省钱。</p>
+</div>
+</li>
+<li class="flex gap-4 items-start pb-4 border-b border-border-light last:border-0 last:pb-0">
+<div class="w-10 h-10 rounded-lg flex items-center justify-center text-primary flex-shrink-0 mt-1 bg-primary-fixed" style="color: rgb(255, 90, 31); background-color: rgba(255, 90, 31, 0.1);">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">two_wheeler</span>
+</div>
+<div>
+<h4 class="font-body-lg text-body-lg text-on-surface">无限次免配送费特权</h4>
+<p class="font-body-md text-body-md text-text-secondary mt-1">在指定超级会员商家下单，满足起送价即可享受免配送费服务，多点多省。</p>
+</div>
+</li>
+<li class="flex gap-4 items-start pb-4 border-b border-border-light last:border-0 last:pb-0">
+<div class="w-10 h-10 rounded-lg flex items-center justify-center text-primary flex-shrink-0 mt-1 bg-primary-fixed" style="color: rgb(255, 90, 31); background-color: rgba(255, 90, 31, 0.1);">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">moving</span>
+</div>
+<div>
+<h4 class="font-body-lg text-body-lg text-on-surface">吃货豆多倍累积</h4>
+<p class="font-body-md text-body-md text-text-secondary mt-1">每笔订单可获得基础吃货豆外，超级会员额外奖励50%吃货豆，加速兑换奖励。</p>
+</div>
+</li>
+</ul>
+</section>
+</main>
+<!-- BottomNavBar Semantic Shell: Suppressed for Sub-page intent (Member Benefits Details) -->
+
+
+
+
+</body></html>

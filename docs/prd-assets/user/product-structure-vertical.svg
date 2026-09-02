@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1530" viewBox="0 0 900 1530" role="img" aria-labelledby="title desc">
+<title id="title">外卖平台课程实践项目产品结构图</title>
+<desc id="desc">从项目根节点向下展开用户端浏览搜索、交易链路、服务能力、商家端经营能力与公共能力五个模块的纵向结构图。</desc>
+<defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#16324f" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .canvas { fill: #ffffff; }
+      .title { fill: #16324f; font: 700 26px "Microsoft YaHei", "PingFang SC", sans-serif; text-anchor: middle; }
+      .root-box { fill: #245b8f; stroke: #17456f; stroke-width: 2; }
+      .root-text { fill: #ffffff; font: 700 22px "Microsoft YaHei", "PingFang SC", sans-serif; text-anchor: middle; }
+      .module { fill: #ffffff; stroke-width: 2; filter: url(#shadow); }
+      .module-title { fill: #ffffff; font: 700 19px "Microsoft YaHei", "PingFang SC", sans-serif; }
+      .leaf { fill: #ffffff; stroke-width: 1.5; }
+      .leaf-text { fill: #24384a; font: 15px "Microsoft YaHei", "PingFang SC", sans-serif; text-anchor: middle; }
+      .branch { fill: none; stroke: #7794ad; stroke-width: 2; }
+      .branch-dot { fill: #245b8f; }
+    </style>
+  </defs>
+<rect class="canvas" width="900" height="1530"/>
+<text class="title" x="450" y="38">产品结构图</text>
+<rect class="root-box" x="100" y="66" width="700" height="88" rx="8"/>
+<text class="root-text" x="450" y="103"><tspan x="450">外卖平台</tspan><tspan x="450" dy="30">课程实践项目</tspan></text>
+<path class="branch" d="M450 154 V182 H92 V1384"/>
+<circle class="branch-dot" cx="92" cy="252" r="5"/>
+<path class="branch" d="M92 252 H140"/>
+<rect class="module" x="140" y="182" width="710" height="220" rx="8" stroke="#4f86c6"/>
+<path d="M148 182 H842 A8 8 0 0 1 850 190 V232 H140 V190 A8 8 0 0 1 148 182 Z" fill="#4f86c6"/>
+<text class="module-title" x="166" y="215">用户端-浏览与搜索</text>
+<rect class="leaf" x="166" y="252" width="316" height="56" rx="6" style="stroke:#a9c7e8; fill:#f5f9fe;"/>
+<text class="leaf-text" x="324" y="286">首页推荐</text>
+<rect class="leaf" x="508" y="252" width="316" height="56" rx="6" style="stroke:#a9c7e8; fill:#f5f9fe;"/>
+<text class="leaf-text" x="666" y="286">分类商家列表</text>
+<rect class="leaf" x="166" y="326" width="316" height="56" rx="6" style="stroke:#a9c7e8; fill:#f5f9fe;"/>
+<text class="leaf-text" x="324" y="360">关键词搜索</text>
+<rect class="leaf" x="508" y="326" width="316" height="56" rx="6" style="stroke:#a9c7e8; fill:#f5f9fe;"/>
+<text class="leaf-text" x="666" y="360">搜索结果汇总</text>
+<circle class="branch-dot" cx="92" cy="502" r="5"/>
+<path class="branch" d="M92 502 H140"/>
+<rect class="module" x="140" y="432" width="710" height="220" rx="8" stroke="#3c8c78"/>
+<path d="M148 432 H842 A8 8 0 0 1 850 440 V482 H140 V440 A8 8 0 0 1 148 432 Z" fill="#3c8c78"/>
+<text class="module-title" x="166" y="465">用户端-交易链路</text>
+<rect class="leaf" x="166" y="502" width="202" height="56" rx="6" style="stroke:#9bcaba; fill:#f3faf7;"/>
+<text class="leaf-text" x="267" y="536">商家详情</text>
+<rect class="leaf" x="394" y="502" width="202" height="56" rx="6" style="stroke:#9bcaba; fill:#f3faf7;"/>
+<text class="leaf-text" x="495" y="536">规格选择与购物车</text>
+<rect class="leaf" x="622" y="502" width="202" height="56" rx="6" style="stroke:#9bcaba; fill:#f3faf7;"/>
+<text class="leaf-text" x="723" y="536">确认订单</text>
+<rect class="leaf" x="166" y="576" width="202" height="56" rx="6" style="stroke:#9bcaba; fill:#f3faf7;"/>
+<text class="leaf-text" x="267" y="610">模拟支付</text>
+<rect class="leaf" x="394" y="576" width="202" height="56" rx="6" style="stroke:#9bcaba; fill:#f3faf7;"/>
+<text class="leaf-text" x="495" y="600"><tspan x="495">订单列表</tspan><tspan x="495" dy="21">订单详情</tspan></text>
+<rect class="leaf" x="622" y="576" width="202" height="56" rx="6" style="stroke:#9bcaba; fill:#f3faf7;"/>
+<text class="leaf-text" x="723" y="610">评价订单</text>
+<circle class="branch-dot" cx="92" cy="752" r="5"/>
+<path class="branch" d="M92 752 H140"/>
+<rect class="module" x="140" y="682" width="710" height="220" rx="8" stroke="#bd7a24"/>
+<path d="M148 682 H842 A8 8 0 0 1 850 690 V732 H140 V690 A8 8 0 0 1 148 682 Z" fill="#bd7a24"/>
+<text class="module-title" x="166" y="715">用户端-服务能力</text>
+<rect class="leaf" x="166" y="752" width="202" height="56" rx="6" style="stroke:#e3bf86; fill:#fff9ef;"/>
+<text class="leaf-text" x="267" y="786">地址管理</text>
+<rect class="leaf" x="394" y="752" width="202" height="56" rx="6" style="stroke:#e3bf86; fill:#fff9ef;"/>
+<text class="leaf-text" x="495" y="776"><tspan x="495">联系商家</tspan><tspan x="495" dy="21">消息会话</tspan></text>
+<rect class="leaf" x="622" y="752" width="202" height="56" rx="6" style="stroke:#e3bf86; fill:#fff9ef;"/>
+<text class="leaf-text" x="723" y="786">收藏</text>
+<rect class="leaf" x="166" y="826" width="202" height="56" rx="6" style="stroke:#e3bf86; fill:#fff9ef;"/>
+<text class="leaf-text" x="267" y="860">会员权益</text>
+<rect class="leaf" x="394" y="826" width="202" height="56" rx="6" style="stroke:#e3bf86; fill:#fff9ef;"/>
+<text class="leaf-text" x="495" y="860">红包</text>
+<rect class="leaf" x="622" y="826" width="202" height="56" rx="6" style="stroke:#e3bf86; fill:#fff9ef;"/>
+<text class="leaf-text" x="723" y="860">设置与 FAQ</text>
+<circle class="branch-dot" cx="92" cy="1002" r="5"/>
+<path class="branch" d="M92 1002 H140"/>
+<rect class="module" x="140" y="932" width="710" height="220" rx="8" stroke="#a65361"/>
+<path d="M148 932 H842 A8 8 0 0 1 850 940 V982 H140 V940 A8 8 0 0 1 148 932 Z" fill="#a65361"/>
+<text class="module-title" x="166" y="965">商家端-经营能力</text>
+<rect class="leaf" x="166" y="1002" width="202" height="56" rx="6" style="stroke:#d6a3ab; fill:#fff6f7;"/>
+<text class="leaf-text" x="267" y="1026"><tspan x="267">运营概览</tspan><tspan x="267" dy="21">数据统计</tspan></text>
+<rect class="leaf" x="394" y="1002" width="202" height="56" rx="6" style="stroke:#d6a3ab; fill:#fff6f7;"/>
+<text class="leaf-text" x="495" y="1036">订单处理</text>
+<rect class="leaf" x="622" y="1002" width="202" height="56" rx="6" style="stroke:#d6a3ab; fill:#fff6f7;"/>
+<text class="leaf-text" x="723" y="1026"><tspan x="723">商品维护</tspan><tspan x="723" dy="21">分类管理</tspan></text>
+<rect class="leaf" x="166" y="1076" width="202" height="56" rx="6" style="stroke:#d6a3ab; fill:#fff6f7;"/>
+<text class="leaf-text" x="267" y="1100"><tspan x="267">店铺设置</tspan><tspan x="267" dy="21">营业状态</tspan></text>
+<rect class="leaf" x="394" y="1076" width="202" height="56" rx="6" style="stroke:#d6a3ab; fill:#fff6f7;"/>
+<text class="leaf-text" x="495" y="1110">优惠配置</text>
+<rect class="leaf" x="622" y="1076" width="202" height="56" rx="6" style="stroke:#d6a3ab; fill:#fff6f7;"/>
+<text class="leaf-text" x="723" y="1100"><tspan x="723">消息会话</tspan><tspan x="723" dy="21">评价回复</tspan></text>
+<circle class="branch-dot" cx="92" cy="1252" r="5"/>
+<path class="branch" d="M92 1252 H140"/>
+<rect class="module" x="140" y="1182" width="710" height="220" rx="8" stroke="#4f7188"/>
+<path d="M148 1182 H842 A8 8 0 0 1 850 1190 V1232 H140 V1190 A8 8 0 0 1 148 1182 Z" fill="#4f7188"/>
+<text class="module-title" x="166" y="1215">公共能力与交付</text>
+<rect class="leaf" x="166" y="1252" width="316" height="56" rx="6" style="stroke:#a8bbc7; fill:#f5f8fa;"/>
+<text class="leaf-text" x="324" y="1286">账号与角色入口</text>
+<rect class="leaf" x="508" y="1252" width="316" height="56" rx="6" style="stroke:#a8bbc7; fill:#f5f8fa;"/>
+<text class="leaf-text" x="666" y="1286">双版本视觉基线</text>
+<rect class="leaf" x="166" y="1326" width="316" height="56" rx="6" style="stroke:#a8bbc7; fill:#f5f8fa;"/>
+<text class="leaf-text" x="324" y="1350"><tspan x="324">后端接口约定</tspan><tspan x="324" dy="21">联调验收</tspan></text>
+<rect class="leaf" x="508" y="1326" width="316" height="56" rx="6" style="stroke:#a8bbc7; fill:#f5f8fa;"/>
+<text class="leaf-text" x="666" y="1360">静态页面版</text>
+<text class="leaf-text" x="450" y="1462">用户端主链路与商家端订单、商品、营业状态保持联动</text>
+<text class="leaf-text" x="450" y="1490">金额以后端计算结果为准；演示固定 5 家商家，主演示商家为肯德基宅急送</text>
+</svg>

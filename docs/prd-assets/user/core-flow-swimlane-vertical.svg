@@ -1,0 +1,196 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1260" height="2300" viewBox="0 0 1260 2300" role="img" aria-labelledby="title desc">
+<title id="title">外卖平台课程实践项目核心流程泳道图</title>
+<desc id="desc">五条纵向泳道展示用户下单支付、商家接单与跨端状态联动、评价与消息双端闭环的核心流程。</desc>
+<defs>
+    <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#2f78a8"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#c47b18"/>
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#18364d" flood-opacity="0.13"/>
+    </filter>
+    <style>
+      .canvas { fill: #ffffff; }
+      .title { fill: #16324f; font: 700 27px "Microsoft YaHei", "PingFang SC", sans-serif; text-anchor: middle; }
+      .lane-bg-a { fill: #fbfdff; } .lane-bg-b { fill: #f5f8fb; }
+      .lane-line { stroke: #c7d3dc; stroke-width: 1.5; }
+      .lane-head { fill: #315f7e; }
+      .lane-title { fill: #ffffff; font: 700 17px "Microsoft YaHei", "PingFang SC", sans-serif; text-anchor: middle; }
+      .phase { fill: #dbeaf4; }
+      .phase-text { fill: #204c69; font: 700 17px "Microsoft YaHei", "PingFang SC", sans-serif; text-anchor: middle; }
+      .task { fill: #ffffff; stroke: #4b83a8; stroke-width: 1.7; filter: url(#shadow); }
+      .task-text { fill: #24384a; font: 15px "Microsoft YaHei", "PingFang SC", sans-serif; text-anchor: middle; }
+      .decision { fill: #eaf4fb; stroke: #2f78a8; stroke-width: 1.8; filter: url(#shadow); }
+      .decision-text { fill: #1f4f70; font: 700 14px "Microsoft YaHei", "PingFang SC", sans-serif; text-anchor: middle; }
+      .flow { fill: none; stroke: #2f78a8; stroke-width: 2.2; marker-end: url(#arrow-blue); }
+      .exception { fill: none; stroke: #c47b18; stroke-width: 2.1; stroke-dasharray: 7 6; marker-end: url(#arrow-orange); }
+      .label { fill: #486174; font: 13px "Microsoft YaHei", "PingFang SC", sans-serif; }
+      .label-warn { fill: #a26314; font: 13px "Microsoft YaHei", "PingFang SC", sans-serif; }
+      .legend { fill: #ffffff; stroke: #b8c7d2; stroke-width: 1.2; }
+    </style>
+  </defs>
+<rect class="canvas" width="1260" height="2300"/>
+<text class="title" x="630" y="38">外卖平台核心业务流程泳道图</text>
+<rect class="lane-bg-a" x="30" y="64" width="235" height="2192"/>
+<rect class="lane-bg-b" x="265" y="64" width="235" height="2192"/>
+<rect class="lane-bg-a" x="500" y="64" width="235" height="2192"/>
+<rect class="lane-bg-b" x="735" y="64" width="235" height="2192"/>
+<rect class="lane-bg-a" x="970" y="64" width="260" height="2192"/>
+<rect class="lane-head" x="30" y="64" width="235" height="58"/>
+<text class="lane-title" x="147" y="99">用户</text>
+<rect class="lane-head" x="265" y="64" width="235" height="58"/>
+<text class="lane-title" x="382" y="99">用户端系统</text>
+<rect class="lane-head" x="500" y="64" width="235" height="58"/>
+<text class="lane-title" x="617" y="99">后端服务</text>
+<rect class="lane-head" x="735" y="64" width="235" height="58"/>
+<text class="lane-title" x="852" y="99">商家端系统</text>
+<rect class="lane-head" x="970" y="64" width="260" height="58"/>
+<text class="lane-title" x="1100" y="99">商家</text>
+<line class="lane-line" x1="30" y1="64" x2="30" y2="2256"/>
+<line class="lane-line" x1="265" y1="64" x2="265" y2="2256"/>
+<line class="lane-line" x1="500" y1="64" x2="500" y2="2256"/>
+<line class="lane-line" x1="735" y1="64" x2="735" y2="2256"/>
+<line class="lane-line" x1="970" y1="64" x2="970" y2="2256"/>
+<line class="lane-line" x1="1230" y1="64" x2="1230" y2="2256"/>
+<rect class="phase" x="30" y="122" width="1200" height="36"/>
+<text class="phase-text" x="630" y="146">阶段一：用户下单与支付主流程</text>
+<rect class="phase" x="30" y="830" width="1200" height="36"/>
+<text class="phase-text" x="630" y="854">阶段二：商家接单与跨端状态联动</text>
+<rect class="phase" x="30" y="1634" width="1200" height="36"/>
+<text class="phase-text" x="630" y="1658">阶段三：评价与消息双端闭环</text>
+<rect class="task" x="57" y="182" width="180" height="64" rx="7"/>
+<text class="task-text" x="147" y="208"><tspan x="147">登录/注册</tspan><tspan x="147" dy="22">（角色=用户）</tspan></text>
+<rect class="task" x="292" y="182" width="180" height="64" rx="7"/>
+<text class="task-text" x="382" y="208"><tspan x="382">校验账号密码</tspan><tspan x="382" dy="22">并进入首页</tspan></text>
+<rect class="task" x="527" y="274" width="180" height="64" rx="7"/>
+<text class="task-text" x="617" y="300"><tspan x="617">返回用户</tspan><tspan x="617" dy="22">与会话数据</tspan></text>
+<rect class="task" x="57" y="366" width="180" height="64" rx="7"/>
+<text class="task-text" x="147" y="392"><tspan x="147">浏览商家与搜索</tspan><tspan x="147" dy="22">选规格并加购</tspan></text>
+<rect class="task" x="292" y="366" width="180" height="64" rx="7"/>
+<text class="task-text" x="382" y="392"><tspan x="382">查询商品并加购</tspan><tspan x="382" dy="22">（cartLineId 分行）</tspan></text>
+<rect class="task" x="57" y="458" width="180" height="64" rx="7"/>
+<text class="task-text" x="147" y="484"><tspan x="147">进入确认订单</tspan><tspan x="147" dy="22">并提交订单</tspan></text>
+<rect class="task" x="292" y="458" width="180" height="64" rx="7"/>
+<text class="task-text" x="382" y="484"><tspan x="382">创建订单</tspan><tspan x="382" dy="22">（事务+商品快照）</tspan></text>
+<rect class="task" x="527" y="550" width="180" height="64" rx="7"/>
+<text class="task-text" x="617" y="576"><tspan x="617">检查金额</tspan><tspan x="617" dy="22">与订单归属</tspan></text>
+<rect class="task" x="57" y="642" width="180" height="64" rx="7"/>
+<text class="task-text" x="147" y="668"><tspan x="147">按提示修正</tspan><tspan x="147" dy="22">重新提交</tspan></text>
+<polygon class="decision" points="617,638 667,674 617,710 567,674"/><text class="decision-text" x="617" y="670"><tspan x="617">检查</tspan><tspan x="617" dy="19">通过？</tspan></text>
+<rect class="task" x="57" y="734" width="180" height="64" rx="7"/>
+<text class="task-text" x="147" y="770">模拟支付</text>
+<rect class="task" x="292" y="734" width="180" height="64" rx="7"/>
+<text class="task-text" x="382" y="760"><tspan x="382">支付成功更新</tspan><tspan x="382" dy="22">（防重复提交）</tspan></text>
+<rect class="task" x="527" y="734" width="180" height="64" rx="7"/>
+<text class="task-text" x="617" y="760"><tspan x="617">订单状态</tspan><tspan x="617" dy="22">= 进行中</tspan></text>
+<path class="flow" d="M237 214 H292"/>
+<path class="flow" d="M382 246 H617 V274"/>
+<path class="flow" d="M617 338 H382 V366"/>
+<path class="flow" d="M237 398 H292"/>
+<path class="flow" d="M147 430 V458"/>
+<path class="flow" d="M237 490 H292"/>
+<path class="flow" d="M382 522 H617 V550"/>
+<path class="flow" d="M617 614 V638"/>
+<path class="exception" d="M567 674 H237"/>
+<text class="label-warn" x="400" y="666">否</text>
+<path class="flow" d="M617 710 H147 V734"/>
+<text class="label" x="450" y="702">是</text>
+<path class="flow" d="M237 766 H292"/>
+<path class="flow" d="M472 766 H527"/>
+<rect class="task" x="1010" y="894" width="180" height="64" rx="7"/>
+<text class="task-text" x="1100" y="920"><tspan x="1100">商家登录</tspan><tspan x="1100" dy="22">（肯德基宅急送）</tspan></text>
+<rect class="task" x="762" y="894" width="180" height="64" rx="7"/>
+<text class="task-text" x="852" y="920"><tspan x="852">进入运营概览</tspan><tspan x="852" dy="22">查看待接单</tspan></text>
+<rect class="task" x="527" y="986" width="180" height="64" rx="7"/>
+<text class="task-text" x="617" y="1012"><tspan x="617">提供待接单订单</tspan><tspan x="617" dy="22">（pending）</tspan></text>
+<rect class="task" x="762" y="986" width="180" height="64" rx="7"/>
+<text class="task-text" x="852" y="1012"><tspan x="852">订单列表</tspan><tspan x="852" dy="22">出现新订单</tspan></text>
+<rect class="task" x="1010" y="1078" width="180" height="64" rx="7"/>
+<text class="task-text" x="1100" y="1104"><tspan x="1100">接单并更新状态</tspan><tspan x="1100" dy="22">直至配送完成</tspan></text>
+<rect class="task" x="762" y="1078" width="180" height="64" rx="7"/>
+<text class="task-text" x="852" y="1104"><tspan x="852">调用状态推进</tspan><tspan x="852" dy="22">接口</tspan></text>
+<rect class="task" x="527" y="1170" width="180" height="64" rx="7"/>
+<text class="task-text" x="617" y="1196"><tspan x="617">检查状态顺序</tspan><tspan x="617" dy="22">并更新（防重复）</tspan></text>
+<polygon class="decision" points="617,1258 667,1294 617,1330 567,1294"/><text class="decision-text" x="617" y="1290"><tspan x="617">状态顺序</tspan><tspan x="617" dy="19">通过？</tspan></text>
+<rect class="task" x="762" y="1354" width="180" height="64" rx="7"/>
+<text class="task-text" x="852" y="1380"><tspan x="852">提示不能跳状态</tspan><tspan x="852" dy="22">（拒绝）</tspan></text>
+<rect class="task" x="292" y="1446" width="180" height="64" rx="7"/>
+<text class="task-text" x="382" y="1472"><tspan x="382">同步订单状态</tspan><tspan x="382" dy="22">（制作/配送/已完成）</tspan></text>
+<rect class="task" x="1010" y="1538" width="180" height="64" rx="7"/>
+<text class="task-text" x="1100" y="1564"><tspan x="1100">商品上下架/改价</tspan><tspan x="1100" dy="22">营业开关切换</tspan></text>
+<rect class="task" x="762" y="1538" width="180" height="64" rx="7"/>
+<text class="task-text" x="852" y="1574">保存修改</text>
+<rect class="task" x="527" y="1538" width="180" height="64" rx="7"/>
+<text class="task-text" x="617" y="1574">联动同步</text>
+<rect class="task" x="292" y="1538" width="180" height="64" rx="7"/>
+<text class="task-text" x="382" y="1564"><tspan x="382">商家详情、购物车</tspan><tspan x="382" dy="22">下单入口同步</tspan></text>
+<path class="flow" d="M1010 926 H942"/>
+<path class="flow" d="M852 958 H617 V986"/>
+<path class="flow" d="M707 1018 H762"/>
+<path class="flow" d="M942 1018 H1100 V1078"/>
+<path class="flow" d="M1010 1110 H942"/>
+<path class="flow" d="M852 1142 H617 V1170"/>
+<path class="flow" d="M617 1234 V1258"/>
+<path class="exception" d="M667 1294 H852 V1354"/>
+<text class="label-warn" x="755" y="1286">否</text>
+<path class="flow" d="M617 1330 H382 V1446"/>
+<text class="label" x="500" y="1322">是</text>
+<path class="flow" d="M1010 1570 H942"/>
+<path class="flow" d="M762 1570 H707"/>
+<path class="flow" d="M527 1570 H472"/>
+<rect class="task" x="57" y="1698" width="180" height="64" rx="7"/>
+<text class="task-text" x="147" y="1724"><tspan x="147">提交评价</tspan><tspan x="147" dy="22">（星级/标签/内容）</tspan></text>
+<rect class="task" x="292" y="1698" width="180" height="64" rx="7"/>
+<text class="task-text" x="382" y="1724"><tspan x="382">一单一评检查</tspan><tspan x="382" dy="22">并提交</tspan></text>
+<rect class="task" x="527" y="1790" width="180" height="64" rx="7"/>
+<text class="task-text" x="617" y="1826">保存评价</text>
+<rect class="task" x="762" y="1790" width="180" height="64" rx="7"/>
+<text class="task-text" x="852" y="1816"><tspan x="852">评价出现</tspan><tspan x="852" dy="22">（未回复）</tspan></text>
+<rect class="task" x="1010" y="1882" width="180" height="64" rx="7"/>
+<text class="task-text" x="1100" y="1918">回复评价</text>
+<rect class="task" x="762" y="1882" width="180" height="64" rx="7"/>
+<text class="task-text" x="852" y="1918">保存回复</text>
+<rect class="task" x="527" y="1882" width="180" height="64" rx="7"/>
+<text class="task-text" x="617" y="1918">更新回复</text>
+<rect class="task" x="292" y="1882" width="180" height="64" rx="7"/>
+<text class="task-text" x="382" y="1908"><tspan x="382">回显</tspan><tspan x="382" dy="22">reply/repliedAt</tspan></text>
+<rect class="task" x="57" y="1974" width="180" height="64" rx="7"/>
+<text class="task-text" x="147" y="2010">发送消息</text>
+<rect class="task" x="292" y="1974" width="180" height="64" rx="7"/>
+<text class="task-text" x="382" y="2010">保存消息</text>
+<rect class="task" x="527" y="2066" width="180" height="64" rx="7"/>
+<text class="task-text" x="617" y="2102">商家未读 +1</text>
+<rect class="task" x="762" y="2066" width="180" height="64" rx="7"/>
+<text class="task-text" x="852" y="2102">会话未读 +1</text>
+<rect class="task" x="1010" y="2158" width="180" height="64" rx="7"/>
+<text class="task-text" x="1100" y="2194">回复消息</text>
+<rect class="task" x="762" y="2158" width="180" height="64" rx="7"/>
+<text class="task-text" x="852" y="2194">保存回复</text>
+<rect class="task" x="527" y="2158" width="180" height="64" rx="7"/>
+<text class="task-text" x="617" y="2194">用户未读 +1</text>
+<rect class="task" x="292" y="2158" width="180" height="64" rx="7"/>
+<text class="task-text" x="382" y="2194">会话未读 +1</text>
+<path class="flow" d="M237 1730 H292"/>
+<path class="flow" d="M382 1762 H617 V1790"/>
+<path class="flow" d="M707 1822 H762"/>
+<path class="flow" d="M852 1854 H1100 V1882"/>
+<path class="flow" d="M1010 1914 H942"/>
+<path class="flow" d="M762 1914 H707"/>
+<path class="flow" d="M527 1914 H472"/>
+<path class="flow" d="M292 1914 H147 V1974"/>
+<path class="flow" d="M237 2006 H292"/>
+<path class="flow" d="M382 2038 H617 V2066"/>
+<path class="flow" d="M707 2098 H762"/>
+<path class="flow" d="M852 2130 H1100 V2158"/>
+<path class="flow" d="M1010 2190 H942"/>
+<path class="flow" d="M762 2190 H707"/>
+<path class="flow" d="M527 2190 H472"/>
+<rect class="legend" x="30" y="2254" width="1200" height="30" rx="6"/>
+<path class="flow" d="M62 2269 H112"/>
+<text class="label" x="124" y="2274">主流程与正常交接</text>
+<path class="exception" d="M310 2269 H360"/>
+<text class="label-warn" x="372" y="2274">检查失败、退回与重试</text>
+<text class="label" x="690" y="2274">状态只能按顺序更新；金额以后端计算结果为准</text>
+</svg>

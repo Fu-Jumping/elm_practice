@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>校园外卖商家版 - 登录/注册</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=PingFang+SC:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#86faa7",
+                        "primary-fixed-dim": "#ffb59e",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#ae3200",
+                        "on-tertiary-fixed": "#00210c",
+                        "on-tertiary-container": "#003316",
+                        "on-primary-fixed-variant": "#852400",
+                        "outline-variant": "#e4beb3",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed": "#291800",
+                        "background": "#f8f9ff",
+                        "on-surface-variant": "#5b4038",
+                        "inverse-on-surface": "#eef1f9",
+                        "on-primary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#006d37",
+                        "inverse-primary": "#ffb59e",
+                        "tertiary-fixed-dim": "#6add8d",
+                        "secondary": "#815600",
+                        "secondary-fixed-dim": "#ffba4b",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#2da65d",
+                        "on-background": "#181c22",
+                        "surface-container-highest": "#dfe2eb",
+                        "surface-bright": "#f8f9ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#d7dae2",
+                        "on-tertiary-fixed-variant": "#005228",
+                        "surface": "#f8f9ff",
+                        "surface-container-low": "#f1f3fc",
+                        "surface-variant": "#dfe2eb",
+                        "on-primary-fixed": "#3a0b00",
+                        "on-secondary-container": "#6a4600",
+                        "on-primary-container": "#541400",
+                        "secondary-fixed": "#ffddb1",
+                        "surface-container": "#ebeef6",
+                        "on-surface": "#181c22",
+                        "on-error-container": "#93000a",
+                        "outline": "#8f7067",
+                        "surface-container-high": "#e5e8f0",
+                        "on-secondary-fixed-variant": "#624000",
+                        "inverse-surface": "#2d3137",
+                        "primary-container": "#ff5a1f",
+                        "primary-fixed": "#ffdbd0",
+                        "primary": "#ae3200",
+                        "secondary-container": "#fdaf1e",
+                        "page-bg": "#eceff3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "page-margin": "16px",
+                        "module-gap": "12px",
+                        "base": "4px",
+                        "card-padding": "12px",
+                        "item-gap": "8px"
+                    },
+                    "fontFamily": {
+                        "currency-display": ["PingFang SC"],
+                        "section-title": ["PingFang SC"],
+                        "card-title": ["PingFang SC"],
+                        "body-main": ["PingFang SC"],
+                        "label-table": ["PingFang SC"],
+                        "page-title": ["PingFang SC"],
+                        "caption-muted": ["PingFang SC"]
+                    },
+                    "fontSize": {
+                        "currency-display": ["15px", { "lineHeight": "22px", "fontWeight": "700" }],
+                        "section-title": ["18px", { "lineHeight": "26px", "fontWeight": "700" }],
+                        "card-title": ["15px", { "lineHeight": "22px", "fontWeight": "600" }],
+                        "body-main": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+                        "label-table": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "page-title": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "caption-muted": ["12px", { "lineHeight": "16px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        /* Tab functionality via CSS */
+        #tab-login:checked ~ #content-login { display: block; }
+        #tab-login:checked ~ #content-register { display: none; }
+        #tab-register:checked ~ #content-login { display: none; }
+        #tab-register:checked ~ #content-register { display: block; }
+        
+        #tab-login:checked ~ .tab-headers .label-login { 
+            color: #ff5a1f; 
+            border-bottom: 2px solid #ff5a1f; 
+        }
+        #tab-register:checked ~ .tab-headers .label-register { 
+            color: #ff5a1f; 
+            border-bottom: 2px solid #ff5a1f; 
+        }
+    </style>
+</head>
+<body class="bg-page-bg min-h-screen flex items-center justify-center p-page-margin font-body-main text-on-surface">
+<main class="w-[420px] bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.08)] overflow-hidden">
+<!-- Header -->
+<div class="px-8 pt-10 pb-6 text-center">
+<div class="w-12 h-12 bg-primary-container rounded-lg mx-auto flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-on-primary text-2xl" data-icon="storefront">storefront</span>
+</div>
+<h1 class="font-page-title text-page-title text-on-surface mb-1">校园外卖商家版</h1>
+<p class="font-caption-muted text-caption-muted text-on-surface-variant">商家经营后台</p>
+</div>
+<!-- Hidden Radio Inputs for Tabs -->
+<input checked="" class="hidden" id="tab-login" name="auth_tab" type="radio"/>
+<input class="hidden" id="tab-register" name="auth_tab" type="radio"/>
+<!-- Tab Headers -->
+<div class="tab-headers flex border-b border-surface-variant px-8 mb-6">
+<label class="label-login flex-1 text-center py-3 cursor-pointer text-[16px] font-medium text-on-surface-variant transition-colors hover:text-primary-container" for="tab-login">
+                登录
+            </label>
+<label class="label-register flex-1 text-center py-3 cursor-pointer text-[16px] font-medium text-on-surface-variant transition-colors hover:text-primary-container" for="tab-register">
+                注册
+            </label>
+</div>
+<!-- Login Content -->
+<div class="px-8 pb-10" id="content-login">
+<form class="space-y-5" onsubmit="event.preventDefault();">
+<!-- Username Input (Normal State) -->
+<div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]" data-icon="person">person</span>
+<input class="w-full pl-10 pr-3 py-2 border border-surface-variant rounded-lg text-body-main focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/10 transition-shadow bg-surface-container-lowest h-[40px]" placeholder="请输入商家账号" type="text"/>
+</div>
+</div>
+<!-- Password Input -->
+<div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]" data-icon="lock">lock</span>
+<input class="w-full pl-10 pr-10 py-2 border border-surface-variant rounded-lg text-body-main focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/10 transition-shadow bg-surface-container-lowest h-[40px]" placeholder="请输入密码" type="password"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility_off">visibility_off</span>
+</button>
+</div>
+</div>
+<!-- Login Button -->
+<button class="w-full h-[40px] bg-primary-container text-on-primary rounded-lg font-card-title text-card-title hover:bg-primary transition-colors flex items-center justify-center" type="submit">
+                    登 录
+                </button>
+<!-- Footer Hint -->
+<div class="flex items-center justify-between mt-4 font-caption-muted text-caption-muted text-on-surface-variant">
+<span>演示账号：merchant-a / 123456</span>
+<button class="text-primary-container hover:text-primary transition-colors cursor-pointer" type="button">一键填充</button>
+</div>
+</form>
+<div class="mt-8 pt-6 border-t border-surface-variant border-dashed">
+<p class="font-caption-muted text-caption-muted text-on-surface-variant mb-4 text-center">状态演示 (同屏展示用)</p>
+<!-- Error State Example -->
+<div class="mb-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-error text-[20px]" data-icon="person">person</span>
+<input class="w-full pl-10 pr-3 py-2 border border-error rounded-lg text-body-main text-error focus:outline-none bg-error-container/10 h-[40px]" type="text" value="admin"/>
+</div>
+<p class="mt-1 font-caption-muted text-caption-muted text-error">账号已存在</p>
+</div>
+<!-- Loading Button Example -->
+<button class="w-full h-[40px] bg-surface-variant text-on-surface-variant rounded-lg font-card-title text-card-title flex items-center justify-center cursor-not-allowed" disabled="">
+<span class="material-symbols-outlined spin mr-2 text-[20px]" data-icon="progress_activity">progress_activity</span>
+                    登录中
+                </button>
+</div>
+</div>
+<!-- Register Content -->
+<div class="px-8 pb-10 hidden" id="content-register">
+<form class="space-y-5" onsubmit="event.preventDefault();">
+<!-- Username -->
+<div>
+<input class="w-full px-3 py-2 border border-surface-variant rounded-lg text-body-main focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/10 transition-shadow bg-surface-container-lowest h-[40px]" placeholder="账号 (3-20位字母数字)" type="text"/>
+</div>
+<!-- Password -->
+<div>
+<div class="relative">
+<input class="w-full pl-3 pr-10 py-2 border border-surface-variant rounded-lg text-body-main focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/10 transition-shadow bg-surface-container-lowest h-[40px]" placeholder="密码 (6-20位)" type="password"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility_off">visibility_off</span>
+</button>
+</div>
+</div>
+<!-- Shop Name -->
+<div>
+<input class="w-full px-3 py-2 border border-surface-variant rounded-lg text-body-main focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/10 transition-shadow bg-surface-container-lowest h-[40px]" placeholder="店铺名称" type="text"/>
+</div>
+<!-- Phone -->
+<div>
+<input class="w-full px-3 py-2 border border-surface-variant rounded-lg text-body-main focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/10 transition-shadow bg-surface-container-lowest h-[40px]" placeholder="联系电话" type="tel"/>
+</div>
+<!-- Register Button -->
+<button class="w-full h-[40px] bg-primary-container text-on-primary rounded-lg font-card-title text-card-title hover:bg-primary transition-colors flex items-center justify-center mt-6" type="submit">
+                    注 册
+                </button>
+<!-- Footer Hint -->
+<div class="mt-4 text-center">
+<p class="font-caption-muted text-caption-muted text-on-surface-variant">注册成功后将自动创建店铺，初始为关店状态...</p>
+</div>
+</form>
+</div>
+</main>
+</body></html>

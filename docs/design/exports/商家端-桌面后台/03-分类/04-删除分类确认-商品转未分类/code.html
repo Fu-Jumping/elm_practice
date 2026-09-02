@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>删除确认 - 校园外卖商家后台</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=PingFang+SC:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#ffb59e",
+                        "inverse-surface": "#2d3137",
+                        "tertiary-fixed-dim": "#6add8d",
+                        "secondary-fixed-dim": "#ffba4b",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#181c22",
+                        "error-container": "#ffdad6",
+                        "background": "#f8f9ff",
+                        "on-surface": "#181c22",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#e4beb3",
+                        "inverse-primary": "#ffb59e",
+                        "on-secondary-fixed": "#291800",
+                        "surface-container": "#ebeef6",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#003316",
+                        "surface-bright": "#f8f9ff",
+                        "tertiary-fixed": "#86faa7",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#6a4600",
+                        "surface-tint": "#ae3200",
+                        "inverse-on-surface": "#eef1f9",
+                        "primary-container": "#ff5a1f",
+                        "secondary-container": "#fdaf1e",
+                        "on-primary-fixed": "#3a0b00",
+                        "secondary-fixed": "#ffddb1",
+                        "on-tertiary-fixed-variant": "#005228",
+                        "on-secondary-fixed-variant": "#624000",
+                        "tertiary-container": "#2da65d",
+                        "surface": "#f8f9ff",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#dfe2eb",
+                        "on-primary-fixed-variant": "#852400",
+                        "tertiary": "#006d37",
+                        "on-tertiary-fixed": "#00210c",
+                        "primary": "#ae3200",
+                        "on-surface-variant": "#5b4038",
+                        "surface-container-highest": "#dfe2eb",
+                        "on-primary-container": "#541400",
+                        "primary-fixed": "#ffdbd0",
+                        "on-error": "#ffffff",
+                        "secondary": "#815600",
+                        "outline": "#8f7067",
+                        "surface-container-high": "#e5e8f0",
+                        "surface-container-low": "#f1f3fc",
+                        "surface-dim": "#d7dae2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "item-gap": "8px",
+                        "module-gap": "12px",
+                        "page-margin": "16px",
+                        "card-padding": "12px"
+                    },
+                    "fontFamily": {
+                        "page-title": ["PingFang SC"],
+                        "caption-muted": ["PingFang SC"],
+                        "currency-display": ["PingFang SC"],
+                        "label-table": ["PingFang SC"],
+                        "section-title": ["PingFang SC"],
+                        "body-main": ["PingFang SC"],
+                        "card-title": ["PingFang SC"]
+                    },
+                    "fontSize": {
+                        "page-title": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "caption-muted": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "currency-display": ["15px", { "lineHeight": "22px", "fontWeight": "700" }],
+                        "label-table": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "section-title": ["18px", { "lineHeight": "26px", "fontWeight": "700" }],
+                        "body-main": ["15px", { "lineHeight": "22px", "fontWeight": "400" }],
+                        "card-title": ["15px", { "lineHeight": "22px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'PingFang SC', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background m-0 p-0 overflow-hidden h-screen w-screen flex">
+<!-- Background Content (Blurred) -->
+<div class="flex w-full h-full filter blur-[2px] opacity-70 pointer-events-none">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-[220px] bg-surface border-r border-outline-variant flex flex-col py-4 z-10 transition-colors duration-200">
+<div class="px-6 mb-6">
+<h1 class="font-page-title text-page-title text-primary">校园外卖商家后台</h1>
+<p class="font-caption-muted text-caption-muted text-on-surface-variant">店铺管理端</p>
+</div>
+<div class="flex-1 overflow-y-auto flex flex-col gap-1 px-3">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container font-body-main text-body-main" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+                    订单
+                </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container font-body-main text-body-main" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+                    商品
+                </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-primary bg-secondary-container font-bold border-r-4 border-primary font-body-main text-body-main" href="#">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+                    分类
+                </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container font-body-main text-body-main" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                    店铺设置
+                </a>
+</div>
+<div class="mt-auto px-3 border-t border-outline-variant pt-4 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant opacity-70 hover:bg-surface-container font-caption-muted text-caption-muted" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="dashboard">dashboard</span>
+                    概览 (二期)
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant opacity-70 hover:bg-surface-container font-caption-muted text-caption-muted" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="notifications">notifications</span>
+                    消息 (二期)
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant opacity-70 hover:bg-surface-container font-caption-muted text-caption-muted" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="analytics">analytics</span>
+                    统计 (二期)
+                </a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 ml-[220px] flex flex-col">
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 h-[56px] left-[220px] bg-surface border-b border-outline-variant flex justify-between items-center px-6 z-10 transition-colors duration-200">
+<div class="font-section-title text-section-title text-on-surface">分类管理</div>
+<div class="flex items-center gap-4">
+<span class="px-2 py-1 rounded bg-tertiary-container text-on-tertiary font-caption-muted text-caption-muted">营业中</span>
+<span class="font-body-main text-body-main text-on-surface-variant">账号名</span>
+<button class="text-on-surface-variant hover:text-primary transition-opacity active:opacity-80">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+</button>
+</div>
+</header>
+<!-- Page Content (Dummy data to fill background) -->
+<main class="mt-[56px] p-page-margin bg-background flex-1 overflow-auto">
+<div class="bg-surface-container-lowest border border-surface-variant rounded-lg p-card-padding">
+<div class="flex justify-between items-center mb-module-gap">
+<h2 class="font-card-title text-card-title">分类列表</h2>
+<button class="bg-primary-container text-on-primary px-4 py-2 rounded-lg font-body-main text-body-main">新增分类</button>
+</div>
+<div class="w-full">
+<div class="grid grid-cols-4 gap-4 bg-surface-container p-3 rounded-t-lg font-label-table text-label-table text-on-surface-variant">
+<div>分类名称</div>
+<div>商品数量</div>
+<div>排序</div>
+<div>操作</div>
+</div>
+<div class="grid grid-cols-4 gap-4 p-3 border-b border-surface-variant items-center bg-surface-container-lowest font-body-main text-body-main">
+<div>招牌主食</div>
+<div>12</div>
+<div>1</div>
+<div class="flex gap-2 text-error">删除</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+<!-- Modal Overlay -->
+<div class="fixed inset-0 bg-on-background/40 z-50 flex items-center justify-center backdrop-blur-sm transition-opacity duration-300">
+<!-- Modal Dialog -->
+<div class="bg-surface-container-lowest rounded-xl shadow-lg border border-surface-variant w-[420px] transform transition-transform duration-300 scale-100 flex flex-col" style="box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.08);">
+<!-- Header -->
+<div class="px-6 py-5 border-b border-surface-variant flex justify-between items-center">
+<h3 class="font-section-title text-section-title text-on-surface">确认删除分类</h3>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<!-- Body -->
+<div class="px-6 py-8 flex flex-col items-center justify-center text-center">
+<div class="w-12 h-12 rounded-full bg-error-container text-error flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-[28px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<p class="font-body-main text-body-main text-on-surface-variant max-w-[85%]">
+                    确定要删除该分类吗？删除后该分类下的商品将变为“未分类”状态。
+                </p>
+</div>
+<!-- Footer -->
+<div class="px-6 py-4 bg-surface-container/30 border-t border-surface-variant rounded-b-xl flex justify-end gap-3">
+<button class="px-5 py-2 bg-surface-container-lowest border border-surface-variant text-on-surface rounded-lg font-body-main text-body-main hover:bg-surface-variant transition-colors">
+                    取 消
+                </button>
+<button class="px-5 py-2 bg-error text-on-error rounded-lg font-body-main text-body-main hover:bg-[#93000a] transition-colors focus:ring-2 focus:ring-error-container focus:outline-none">
+                    删 除
+                </button>
+</div>
+</div>
+</div>
+</body></html>

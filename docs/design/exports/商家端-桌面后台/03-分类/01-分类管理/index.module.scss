@@ -1,0 +1,599 @@
+* {
+  box-sizing: border-box;
+}
+
+.frame {
+  display: flex;
+  position: relative;
+  align-items: flex-start;
+  justify-content: center;
+  background: #f7f7f7;
+  padding-top: 56px;
+  padding-left: 220px;
+  width: 1280px;
+  height: 1024px;
+
+  .text2 {
+    flex-shrink: 0;
+    align-self: stretch;
+    line-height: 16px;
+    letter-spacing: 0;
+    color: #5b4038;
+    font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .mainContentCanvas {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    align-items: flex-start;
+    align-self: stretch;
+    padding: 16px;
+    max-width: 1280px;
+    min-height: 968px;
+    row-gap: 12px;
+
+    .pageHeaderToolbar {
+      display: flex;
+      flex-shrink: 0;
+      align-items: flex-end;
+      align-self: stretch;
+      justify-content: space-between;
+
+      .container {
+        display: inline-flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        align-items: flex-start;
+        row-gap: 4px;
+
+        .text {
+          flex-shrink: 0;
+          align-self: stretch;
+          line-height: 32px;
+          letter-spacing: 0;
+          color: #181c22;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 24px;
+          font-weight: 500;
+        }
+      }
+
+      .button {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        column-gap: 8px;
+        background: #ff5a1f;
+        padding: 8px 16px;
+
+        .container2 {
+          flex-shrink: 0;
+          width: 12px;
+          height: 12px;
+        }
+
+        .text3 {
+          flex-shrink: 0;
+          line-height: 22px;
+          letter-spacing: 0;
+          color: #ffffff;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 15px;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .table {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: flex-start;
+      align-self: stretch;
+      border: 1px solid #dfe2eb;
+      border-radius: 8px;
+      background: #ffffff;
+
+      .headerRow {
+        display: flex;
+        flex-shrink: 0;
+        align-items: flex-start;
+        align-self: stretch;
+        justify-content: center;
+        border-width: 0px 0px 1px;
+        border-style: solid;
+        border-color: #e5e5e5;
+        background: #f3f3f3;
+
+        .text4 {
+          flex-shrink: 0;
+          padding: 12px 16px;
+          width: 342px;
+          line-height: 18px;
+          letter-spacing: 0;
+          color: #6b7280;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+        }
+
+        .text5 {
+          flex-shrink: 0;
+          padding: 12px 16px;
+          width: 257px;
+          text-align: center;
+          line-height: 18px;
+          letter-spacing: 0;
+          color: #6b7280;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+        }
+
+        .text6 {
+          flex-shrink: 0;
+          padding: 12px 16px;
+          width: 257px;
+          text-align: right;
+          line-height: 18px;
+          letter-spacing: 0;
+          color: #6b7280;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+        }
+
+        .text7 {
+          flex-shrink: 0;
+          padding: 12px 16px;
+          width: 171px;
+          text-align: right;
+          line-height: 18px;
+          letter-spacing: 0;
+          color: #6b7280;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+        }
+      }
+
+      .body {
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        align-items: flex-start;
+        align-self: stretch;
+        margin-top: -1px;
+
+        .text14 {
+          flex-shrink: 0;
+          padding: 8px 0px 8px 38px;
+          width: 342px;
+          height: 38px;
+          line-height: 22px;
+          letter-spacing: 0;
+          color: #181c22;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 15px;
+          font-weight: 500;
+        }
+
+        .text13 {
+          flex-shrink: 0;
+          line-height: 22px;
+          letter-spacing: 0;
+          color: #ba1a1a;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 15px;
+          font-weight: 500;
+        }
+
+        .text12 {
+          flex-shrink: 0;
+          line-height: 22px;
+          letter-spacing: 0;
+          color: #ff5a1f;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 15px;
+          font-weight: 500;
+        }
+
+        .row1 {
+          display: flex;
+          flex-shrink: 0;
+          align-items: flex-start;
+          align-self: stretch;
+          justify-content: center;
+          border-width: 0px 0px 1px;
+          border-style: solid;
+          border-color: #e5e5e5;
+
+          .data {
+            display: flex;
+            flex-shrink: 0;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 196px 8px 38px;
+            width: 342px;
+            min-width: 342px;
+            height: 42px;
+
+            .text8 {
+              line-height: 22px;
+              letter-spacing: 0;
+              color: #181c22;
+              font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+              font-size: 15px;
+              font-weight: 500;
+            }
+
+            .overlay {
+              display: inline-flex;
+              flex-direction: column;
+              align-items: flex-start;
+              border-radius: 9999px;
+              background: #ba1a1a1a;
+              padding: 2px 8px;
+
+              .text9 {
+                flex-shrink: 0;
+                line-height: 22px;
+                letter-spacing: 0;
+                color: #ba1a1a;
+                font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+                font-size: 10px;
+                font-weight: 500;
+              }
+            }
+          }
+
+          .text10 {
+            flex-shrink: 0;
+            padding: 11px 16px;
+            width: 257px;
+            text-align: center;
+            line-height: 22px;
+            letter-spacing: 0;
+            color: #5b4038;
+            font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+          }
+
+          .text11 {
+            flex-shrink: 0;
+            padding: 11px 16px;
+            width: 257px;
+            text-align: right;
+            line-height: 22px;
+            letter-spacing: 0;
+            color: #181c22;
+            font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+          }
+
+          .data2 {
+            display: flex;
+            flex-shrink: 0;
+            align-items: flex-start;
+            column-gap: 16px;
+            padding: 11px 16px 11px 79px;
+          }
+        }
+
+        .row2 {
+          display: flex;
+          flex-shrink: 0;
+          align-items: flex-start;
+          align-self: stretch;
+          justify-content: center;
+          margin-top: -1px;
+          border-width: 0px 0px 1px;
+          border-style: solid;
+          border-color: #e5e5e5;
+
+          .text15 {
+            flex-shrink: 0;
+            padding: 10px 16px;
+            width: 257px;
+            text-align: center;
+            line-height: 22px;
+            letter-spacing: 0;
+            color: #5b4038;
+            font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+          }
+
+          .text16 {
+            flex-shrink: 0;
+            padding: 10px 16px;
+            width: 257px;
+            text-align: right;
+            line-height: 22px;
+            letter-spacing: 0;
+            color: #181c22;
+            font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+          }
+
+          .data3 {
+            display: flex;
+            flex-shrink: 0;
+            align-items: flex-start;
+            column-gap: 16px;
+            padding: 10px 16px 10px 79px;
+          }
+        }
+
+        .row5 {
+          display: flex;
+          flex-shrink: 0;
+          align-items: flex-start;
+          align-self: stretch;
+          justify-content: center;
+          margin-top: -1px;
+
+          .text17 {
+            flex-shrink: 0;
+            padding: 10px 16px 9px;
+            width: 257px;
+            text-align: center;
+            line-height: 22px;
+            letter-spacing: 0;
+            color: #5b4038;
+            font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+          }
+
+          .text18 {
+            flex-shrink: 0;
+            padding: 10px 16px 9px;
+            width: 257px;
+            text-align: right;
+            line-height: 22px;
+            letter-spacing: 0;
+            color: #181c22;
+            font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+          }
+
+          .data4 {
+            display: flex;
+            flex-shrink: 0;
+            align-items: flex-start;
+            column-gap: 16px;
+            padding: 10px 16px 9px 79px;
+          }
+        }
+      }
+    }
+  }
+
+  .spacerForLayout {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 220px;
+    flex-shrink: 0;
+    align-items: center;
+    column-gap: 24px;
+    background: #f8f9ff;
+    padding-right: 24px;
+    padding-left: 858px;
+    width: 1060px;
+    height: 56px;
+
+    .container3 {
+      display: inline-flex;
+      flex-shrink: 0;
+      align-items: center;
+      column-gap: 8px;
+
+      .background {
+        flex-shrink: 0;
+        border-radius: 9999px;
+        background: #006d37;
+        width: 8px;
+        height: 8px;
+      }
+
+      .text19 {
+        flex-shrink: 0;
+        line-height: 22px;
+        letter-spacing: 0;
+        color: #006d37;
+        font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+      }
+    }
+
+    .text20 {
+      flex-shrink: 0;
+      line-height: 22px;
+      letter-spacing: 0;
+      color: #181c22;
+      font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .button2 {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .sideNavBar {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    flex-direction: column;
+    flex-shrink: 0;
+    align-items: flex-start;
+    justify-content: space-between;
+    z-index: 1;
+    border-width: 0px 1px 0px 0px;
+    border-style: solid;
+    border-color: #e4beb3;
+    background: #f8f9ff;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    width: 220px;
+    height: 1024px;
+
+    .container4 {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: flex-start;
+      align-self: stretch;
+      padding: 0px 24px 24px;
+      row-gap: 4px;
+
+      .text21 {
+        flex-shrink: 0;
+        align-self: stretch;
+        width: 171px;
+        line-height: 32px;
+        letter-spacing: 0;
+        color: #ae3200;
+        font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+        font-size: 24px;
+        font-weight: 500;
+      }
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      align-items: flex-start;
+      align-self: stretch;
+      row-gap: 8px;
+
+      .itemLink {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        align-self: stretch;
+        padding: 12px 24px;
+
+        .margin {
+          flex-shrink: 0;
+          width: 36px;
+          height: 20px;
+        }
+
+        .text22 {
+          flex-shrink: 0;
+          line-height: 22px;
+          letter-spacing: 0;
+          color: #5b4038;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 15px;
+          font-weight: 500;
+        }
+      }
+
+      .itemLink2 {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        align-self: stretch;
+        border-width: 0px 4px 0px 0px;
+        border-style: solid;
+        border-color: #ae3200;
+        background: #fdaf1e;
+        padding: 12px 20px 12px 24px;
+
+        .margin2 {
+          flex-shrink: 0;
+          width: 35px;
+          height: 20px;
+        }
+
+        .text23 {
+          flex-shrink: 0;
+          line-height: 22px;
+          letter-spacing: 0;
+          color: #ae3200;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 15px;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .horizontalBorder {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      align-items: flex-start;
+      align-self: stretch;
+      border-width: 1px 0px 0px;
+      border-style: solid;
+      border-color: #e4beb3;
+      padding-top: 15px;
+
+      .list2 {
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        align-items: flex-start;
+        align-self: stretch;
+        row-gap: 8px;
+
+        .text24 {
+          flex-shrink: 0;
+          line-height: 16px;
+          letter-spacing: 0;
+          color: #5b4038;
+          font-family: "WenQuanYi Zen Hei", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+          font-size: 12px;
+          font-weight: 500;
+        }
+
+        .itemLink3 {
+          display: flex;
+          flex-shrink: 0;
+          align-items: center;
+          align-self: stretch;
+          opacity: 0.6;
+          padding: 8px 24px;
+
+          .margin3 {
+            flex-shrink: 0;
+            width: 31px;
+            height: 15px;
+          }
+        }
+
+        .itemLink4 {
+          display: flex;
+          flex-shrink: 0;
+          align-items: center;
+          align-self: stretch;
+          opacity: 0.6;
+          padding: 8px 24px;
+
+          .margin4 {
+            flex-shrink: 0;
+            width: 29px;
+            height: 17px;
+          }
+        }
+      }
+    }
+  }
+}

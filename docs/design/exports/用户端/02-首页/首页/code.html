@@ -1,0 +1,404 @@
+<!DOCTYPE html><html class="light" lang="zh-CN" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>CampusBites - 首页</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed": "#3a0b00",
+                        "surface-bright": "#f9f9f9",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "tertiary": "#a14000",
+                        "outline-variant": "#e4beb3",
+                        "inverse-primary": "#ffb59e",
+                        "on-tertiary-container": "#4d1b00",
+                        "inverse-surface": "#2f3131",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-surface": "#1a1c1c",
+                        "secondary-container": "#e4e2e1",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#474747",
+                        "surface-tint": "#ae3200",
+                        "primary": "#ae3200",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#ffdbcc",
+                        "surface-container": "#eeeeee",
+                        "secondary": "#5f5e5e",
+                        "primary-container": "#ff5a1f",
+                        "text-secondary": "#666666",
+                        "on-secondary-container": "#656464",
+                        "surface-dim": "#dadada",
+                        "text-tertiary": "#999999",
+                        "outline": "#8f7067",
+                        "on-surface-variant": "#5b4038",
+                        "on-primary-container": "#541400",
+                        "inverse-on-surface": "#f1f1f1",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "on-tertiary-fixed": "#351000",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed-dim": "#ffb59e",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e2e2e2",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#e8e8e8",
+                        "surface": "#f9f9f9",
+                        "surface-white": "#FFFFFF",
+                        "on-background": "#1a1c1c",
+                        "on-primary-fixed-variant": "#852400",
+                        "border-light": "#E5E5E5",
+                        "secondary-fixed": "#e4e2e1",
+                        "surface-container-highest": "#e2e2e2",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "background": "#f9f9f9",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#ffdbd0",
+                        "tertiary-container": "#f46500",
+                        "surface-container-low": "#f3f3f3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "8px",
+                        "gap-module": "12px",
+                        "margin-page": "12px",
+                        "base": "4px",
+                        "padding-card": "10px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["beVietnamPro"],
+                        "label-sm": ["beVietnamPro"],
+                        "headline-lg": ["beVietnamPro"],
+                        "headline-md": ["beVietnamPro"],
+                        "cta-button": ["beVietnamPro"],
+                        "body-md": ["beVietnamPro"],
+                        "body-lg": ["beVietnamPro"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "cta-button": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #f9f9f9;
+            -webkit-tap-highlight-color: transparent;
+            padding-bottom: 70px;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="text-on-surface antialiased max-w-md mx-auto relative bg-background">
+<!-- TopAppBar -->
+<header class="w-full sticky top-0 z-50 bg-surface dark:bg-surface-dim border-b border-outline-variant dark:border-outline flex items-center justify-between px-margin-page h-14">
+<div class="flex items-center gap-1 active:opacity-80 transition-opacity cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1; color: rgb(255, 90, 31);">location_on</span>
+<span class="font-body-md text-body-md text-on-surface font-semibold max-w-[200px] truncate">天津大学软件园校区</span>
+<span class="material-symbols-outlined text-on-surface text-sm" style="font-variation-settings: &quot;FILL&quot; 1; color: rgb(255, 90, 31);">arrow_drop_down</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-low transition-colors rounded-full p-1 cursor-pointer">notifications</span>
+</div>
+</header>
+<main class="flex flex-col gap-gap-module px-margin-page py-3">
+<!-- Search Bar -->
+<div class="relative w-full flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-primary-container pointer-events-none" style="font-size: 20px;">search</span>
+<input class="w-full bg-surface-white border-2 border-primary-container pl-11 pr-[88px] font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary shadow-sm rounded-xl h-9" placeholder="搜索附近美食、商家" type="text">
+<button class="absolute right-1 top-1 bottom-1 bg-primary-container text-on-primary font-cta-button hover:opacity-90 transition-opacity flex items-center justify-center whitespace-nowrap rounded-lg px-4 text-[12px]">搜索</button>
+</div>
+<!-- King Kong Grid (Categories) -->
+<div class="grid grid-cols-5 gap-y-4 gap-x-2 py-2">
+<div class="flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-transform bg-transparent border-0">
+<div class="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center">
+<span class="material-symbols-outlined text-surface-white" style="font-size: 28px;">local_fire_department</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface mt-1">川菜</span>
+</div>
+<div class="flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-transform bg-transparent border-0">
+<div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
+<span class="material-symbols-outlined text-surface-white" style="font-size: 28px;">set_meal</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface mt-1">鲁菜</span>
+</div>
+<div class="flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-transform bg-transparent border-0">
+<div class="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center">
+<span class="material-symbols-outlined text-surface-white" style="font-size: 28px;">restaurant</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface mt-1">东北菜</span>
+</div>
+<div class="flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-transform bg-transparent border-0">
+<div class="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center">
+<span class="material-symbols-outlined text-surface-white" style="font-size: 28px;">ramen_dining</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface mt-1">粤菜</span>
+</div>
+<div class="flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-transform bg-transparent border-0">
+<div class="w-12 h-12 rounded-full bg-purple-500 flex items-center justify-center">
+<span class="material-symbols-outlined text-surface-white" style="font-size: 28px;">local_dining</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface mt-1">湘菜</span>
+</div>
+<div class="flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-transform bg-transparent border-0">
+<div class="w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center">
+<span class="material-symbols-outlined text-surface-white" style="font-size: 28px;">fastfood</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface mt-1">快餐</span>
+</div>
+<div class="flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-transform relative bg-transparent border-0">
+<span class="absolute -top-1 -right-2 bg-error text-on-error font-label-sm text-[8px] px-1 rounded-full z-10 scale-90">特价</span>
+<div class="w-12 h-12 rounded-full bg-teal-500 flex items-center justify-center">
+<span class="material-symbols-outlined text-surface-white" style="font-size: 28px;">lunch_dining</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface mt-1">汉堡炸鸡</span>
+</div>
+<div class="flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-transform bg-transparent border-0">
+<div class="w-12 h-12 rounded-full bg-rose-500 flex items-center justify-center">
+<span class="material-symbols-outlined text-surface-white" style="font-size: 28px;">kebab_dining</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface mt-1">烧烤</span>
+</div>
+<div class="flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-transform bg-transparent border-0">
+<div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-surface-white" style="font-size: 28px;">soup_kitchen</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface mt-1">火锅</span>
+</div>
+<div class="flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-transform bg-transparent border-0">
+<div class="w-12 h-12 rounded-full bg-cyan-500 flex items-center justify-center">
+<span class="material-symbols-outlined text-surface-white" style="font-size: 28px;">icecream</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface mt-1">甜品饮品</span>
+</div>
+</div>
+<!-- Promotional Bento Grid (Glassmorphism) -->
+<div class="grid grid-cols-2 gap-2 mt-2">
+<div class="glass-panel rounded-xl p-3 flex flex-col relative overflow-hidden bg-gradient-to-br from-primary-fixed to-surface-white border-0">
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold z-10">天天特价</h3>
+<p class="font-label-md text-label-md text-primary mt-1 z-10">低至5折起</p>
+<button class="mt-2 bg-primary-container text-on-primary rounded-full px-3 py-1 font-label-sm text-label-sm w-fit z-10">立即抢</button>
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-cover bg-center rounded-full opacity-80" data-alt="A delicious, colorful healthy food bowl with fresh vegetables, grilled chicken, and grains, styled appetizingly on a clean surface with bright, high-key lighting highlighting the fresh ingredients." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuAEXkNKDpgr7GyG-sbmUjpt6g0MXWjUUfqZiPdgbTgovAw0c6j-cAerDQDnZC0rfm7GavOdrXd7FUSzHxC1EfaYVGi4d22snSdRLD0LH6Tb_IKBjQvylGhRNC4OhLdvtkNPsP29Xeourxey_pZtHay5RumB0ZCDsBGubSjtxisnWNzyS8OoqPxi4NV8oUFRsAFrIZ_4vaNQt061Q6QUYuyhcSOfP0Xdgbv8B1tjj1SoHvQM-dfLk7q7rQ4pd5XjI8gQk0Y3mZtlra3E&quot;);"></div>
+</div>
+<div class="glass-panel rounded-xl p-3 flex flex-col justify-between bg-gradient-to-br from-surface-variant to-surface-white border-0">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold">新店尝鲜</h3>
+<p class="font-label-md text-label-md text-text-secondary mt-1">大牌入驻 免费配送</p>
+</div>
+<button class="bg-on-surface text-surface-white rounded-full px-4 py-1 font-label-md text-label-md w-fit mt-2">去看</button>
+</div>
+</div>
+<!-- Section Title -->
+<div class="flex items-center justify-between mt-4 mb-2">
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-4 bg-primary-container rounded-full"></div>
+<h2 class="font-headline-lg text-headline-lg font-bold text-on-surface">附近优选商家</h2>
+</div>
+<div class="flex items-center gap-1 text-text-secondary cursor-pointer">
+<span class="font-label-md text-label-md">筛选</span>
+<span class="material-symbols-outlined text-[16px]">tune</span>
+</div>
+</div>
+<!-- Merchant List -->
+<div class="flex flex-col gap-3">
+<!-- Merchant Card 1 -->
+<div class="bg-surface-white rounded-xl p-padding-card flex gap-3 shadow-sm active:bg-surface-container transition-colors border-0">
+<div class="w-24 h-24 rounded-lg bg-cover bg-center flex-shrink-0 relative" data-alt="A rustic, hearty bowl of traditional Chinese noodles topped with minced meat, fresh green scallions, and a rich, savory broth, served in an authentic ceramic bowl under warm, inviting restaurant lighting." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuAyFNfMm7oNvgeSLCl2fWaSRE6M0w85MjgU1etpzc24FU9574-tIAWYAqMj17Epq8VrqqpZfIBaMoCeeNZ8vrE29fUaA1D4pbN7dT-CM-PvDyijrDxczcl2usLx3sBzofLGepT8k1-tuxDVYoniIgmuS4T2OvzWti6RG1aGY3v6SOlwSyhA_Yn-y2yv1IIKHk6NAGbTW3klQSaEWVdoIL2k5yn0JMUOxxPVAWnoOfUvzTRWZkDwUSOD82UHqdxWSPAuDH5m0Eeq_2Xj&quot;);">
+<span class="absolute top-0 left-0 bg-secondary text-surface-white font-label-sm text-[9px] px-1.5 py-0.5 rounded-tl-lg rounded-br-lg">老店</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold truncate">老王小店 (软件园店)</h3>
+<div class="flex items-center gap-2 mt-1">
+<div class="flex items-center text-primary-container">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: &quot;FILL&quot; 1;">star</span>
+<span class="font-label-md text-label-md font-bold ml-0.5">4.7</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-tertiary">月售 2000+</span>
+</div>
+<div class="flex items-center gap-2 mt-1 font-label-sm text-label-sm text-text-secondary">
+<span class="">起送 ¥15</span>
+<span class="w-[1px] h-2 bg-border-light"></span>
+<span class="">配送 ¥0</span>
+<span class="w-[1px] h-2 bg-border-light"></span>
+<span class="">25分钟</span>
+</div>
+<div class="flex flex-wrap gap-1 mt-2">
+<span class="border border-primary-fixed-dim text-primary-container font-label-sm text-[9px] px-1 rounded-sm">满20减5</span>
+<span class="border border-outline-variant text-on-surface-variant font-label-sm text-[9px] px-1 rounded-sm">支持自取</span>
+</div>
+</div>
+</div>
+<!-- Merchant Card 2 -->
+<div class="bg-surface-white rounded-xl p-padding-card flex gap-3 shadow-sm active:bg-surface-container transition-colors border-0">
+<div class="w-24 h-24 rounded-lg bg-cover bg-center flex-shrink-0 relative" data-alt="A classic, mouth-watering fast food hamburger featuring a perfectly grilled beef patty, melted cheddar cheese, fresh lettuce, and tomato, stacked neatly in a sesame seed bun against a clean, bright background." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuDI6QpZ8wNJxiTDoBmte8lgBGoTDEjg3vR2h7mIYevn1aq4FZ3mwIPxkZEBTHZOQgOPQxjxjDcGluVAGBCtm5z2JYt5Q19Hcu4YTgDFup1SwVymUbquogUHFQOkSRiMO9klrd3-8IH4cRYM_uMdUW_B-0iNjvVlP8DN0meBYxUjW2vddzkmLPDo13enYOaXd6M1TMYXctz7PppRhQlYGm7bksY3Kzaucnp_3hcvYpcCl8VZ-385YK9fOMppvLee0s4REKmqbjFHv7Ix&quot;);">
+<span class="absolute top-0 left-0 bg-primary-container text-surface-white font-label-sm text-[9px] px-1.5 py-0.5 rounded-tl-lg rounded-br-lg">品牌</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold truncate">肯德基宅急送 (大学城店)</h3>
+<div class="flex items-center gap-2 mt-1">
+<div class="flex items-center text-primary-container">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: &quot;FILL&quot; 1;">star</span>
+<span class="font-label-md text-label-md font-bold ml-0.5">4.9</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-tertiary">月售 5000+</span>
+</div>
+<div class="flex items-center justify-between mt-1">
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-text-secondary">
+<span class="">起送 ¥20</span>
+<span class="w-[1px] h-2 bg-border-light"></span>
+<span class="">配送 ¥6</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-secondary">30分钟 800m</span>
+</div>
+<div class="flex flex-wrap gap-1 mt-2">
+<span class="border border-primary-fixed-dim text-primary-container font-label-sm text-[9px] px-1 rounded-sm">0元起送</span>
+<span class="border border-outline-variant text-on-surface-variant font-label-sm text-[9px] px-1 rounded-sm">会员特权</span>
+</div>
+</div>
+</div>
+<!-- Merchant Card 3 -->
+<div class="bg-surface-white rounded-xl p-padding-card flex gap-3 shadow-sm active:bg-surface-container transition-colors border-0">
+<div class="w-24 h-24 rounded-lg bg-cover bg-center flex-shrink-0 relative" data-alt="A premium, towering double cheeseburger with crispy bacon, melting cheese, fresh greens, and thick tomato slices, professionally photographed under studio lighting to highlight every delicious detail." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuCYefm49Mx7gKmwcrmoKaBKLN6jFZ9pzw25fcD1F8ndLlCOwUw8NTGyexZcQn1uh4ZKc27K179WZyMhQTHukU0FiQTJdbbXCmWGbTraLAeMYvN6D7FFSox3bACElLhWer_w22DP81S80MGFfJn9CmxN7D4GYy9JX3YmakGf0eGJxvCOJuvXhIU_QBy24ac8DamIBlr2sYvM0EZGY5u7BYkvcxNsnl0hCzOxXRqtUzHy2AylUEH7v5UiX3741ujGi54avUEevGrwdWKD&quot;);">
+<span class="absolute top-0 left-0 bg-primary-container text-surface-white font-label-sm text-[9px] px-1.5 py-0.5 rounded-tl-lg rounded-br-lg">品牌</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold truncate">麦当劳 (大学城店)</h3>
+<div class="flex items-center gap-2 mt-1">
+<div class="flex items-center text-primary-container">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: &quot;FILL&quot; 1;">star</span>
+<span class="font-label-md text-label-md font-bold ml-0.5">4.8</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-tertiary">月售 8000+</span>
+</div>
+<div class="flex items-center justify-between mt-1">
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-text-secondary">
+<span class="">起送 ¥20</span>
+<span class="w-[1px] h-2 bg-border-light"></span>
+<span class="">配送 ¥0</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-secondary">30分钟</span>
+</div>
+<div class="flex flex-wrap gap-1 mt-2">
+<span class="border border-primary-fixed-dim text-primary-container font-label-sm text-[9px] px-1 rounded-sm">满30减15</span>
+<span class="border border-outline-variant text-on-surface-variant font-label-sm text-[9px] px-1 rounded-sm">首单立减</span>
+</div>
+</div>
+</div>
+<!-- Merchant Card 4 -->
+<div class="bg-surface-white rounded-xl p-padding-card flex gap-3 shadow-sm active:bg-surface-container transition-colors border-0">
+<div class="w-24 h-24 rounded-lg bg-cover bg-center flex-shrink-0" data-alt="A vibrant spread of grilled meat skewers (BBQ), glistening with spices and oils, cooked over an open charcoal flame, presented on a rustic metal tray in a bustling, warmly lit night market setting." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuB0tLxw-d-Aaun_P_FwM_C52UOBd4-8esMAgCmm2Owbd37ridFD5qS2s3hVUKhbboir0I8pwh92xTy4cAMd4KwmkC8Q9LQ5o1sKlSYx5dYTxp-y2dq6skzcwSojsRkRsw-wSi40bEFNUkzh7XAgGmAgKHX28MfLPOQJNQRW182mfDMo35qS3zIAhDm8l3BseQy8BJ9AOZl5eCptd5k6ugfbKlUsoMSPrIp-KD3-z6BEgQhcMpZa2TfhIus_x_f2_NmNlmO0xA0enCYM&quot;);">
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold truncate">老胖烧烤 (夜市街)</h3>
+<div class="flex items-center gap-2 mt-1">
+<div class="flex items-center text-primary-container">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: &quot;FILL&quot; 1;">star</span>
+<span class="font-label-md text-label-md font-bold ml-0.5">4.6</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-tertiary">月售 3000+</span>
+</div>
+<div class="flex items-center gap-2 mt-1 font-label-sm text-label-sm text-text-secondary">
+<span class="">起送 ¥30</span>
+<span class="w-[1px] h-2 bg-border-light"></span>
+<span class="">配送 ¥3</span>
+<span class="w-[1px] h-2 bg-border-light"></span>
+<span class="">40分钟</span>
+</div>
+<div class="flex flex-wrap gap-1 mt-2">
+<span class="border border-primary-fixed-dim text-primary-container font-label-sm text-[9px] px-1 rounded-sm">夜宵首选</span>
+<span class="border border-outline-variant text-on-surface-variant font-label-sm text-[9px] px-1 rounded-sm">支持预订</span>
+</div>
+</div>
+</div>
+<!-- Merchant Card 5 -->
+<div class="bg-surface-white rounded-xl p-padding-card flex gap-3 shadow-sm active:bg-surface-container transition-colors mb-4 border-0">
+<div class="w-24 h-24 rounded-lg bg-cover bg-center flex-shrink-0" data-alt="A steaming, traditional Chinese hot pot split into spicy red broth and clear savory broth, surrounded by plates of thinly sliced fresh raw beef and vegetables, set on a dark wooden table in a moody restaurant." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuB4rkvlk3AGxcO7DB6_sQCMFZb8I2cDbcOWeQg21aZIxWG7fuIZfNm98KNBI_fRuoOHVOUwpuvOsujVmqfH_XEvSpjoallM7eBGfEMuiS11_eUiu67Qb9Zvl_SbLanCicsrf7JQk5fQVuZI1LqnRo3OFWH_glYDr43jG74OLIfHi6XuvSFHh6eYAaeV0k4EjRP7fm9ufVPMg6V5hd3EdRLyJ7Jut5CG1VW6qVCzehaar-_5sGkARI9cL-NOWdTrNjYqjyuJmVOMKUuE&quot;);">
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold truncate">元盛居火锅 (科创园店)</h3>
+<div class="flex items-center gap-2 mt-1">
+<div class="flex items-center text-primary-container">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: &quot;FILL&quot; 1;">star</span>
+<span class="font-label-md text-label-md font-bold ml-0.5">4.9</span>
+</div>
+<span class="font-label-sm text-label-sm text-text-tertiary">月售 1500+</span>
+</div>
+<div class="flex items-center gap-2 mt-1 font-label-sm text-label-sm text-text-secondary">
+<span class="">起送 ¥50</span>
+<span class="w-[1px] h-2 bg-border-light"></span>
+<span class="">配送 ¥5</span>
+<span class="w-[1px] h-2 bg-border-light"></span>
+<span class="">45分钟</span>
+</div>
+<div class="flex flex-wrap gap-1 mt-2">
+<span class="border border-primary-fixed-dim text-primary-container font-label-sm text-[9px] px-1 rounded-sm">聚餐推荐</span>
+<span class="border border-outline-variant text-on-surface-variant font-label-sm text-[9px] px-1 rounded-sm">全城送</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 bg-surface-white dark:bg-surface-container-lowest border-t border-outline-variant dark:border-outline flat no shadows flex justify-around items-center px-base py-2 max-w-md mx-auto left-0 right-0">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center dark:text-primary-fixed-dim bg-primary-container/10 rounded-xl p-1 w-16 active:scale-95 transition-transform duration-150" href="#" style="color: #FF5A1F;">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: &quot;FILL&quot; 1; color: rgb(255, 90, 31);">home</span>
+<span class="font-label-sm text-label-sm mt-0.5 font-bold">首页</span>
+</a>
+<!-- Messages -->
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim p-1 w-16 hover:bg-surface-container transition-colors rounded-xl active:scale-95 transition-transform duration-150 relative" href="#">
+<span class="absolute top-0 right-3 w-2 h-2 bg-error rounded-full border border-surface-white"></span>
+<span class="material-symbols-outlined text-[24px]">chat_bubble</span>
+<span class="font-label-sm text-label-sm mt-0.5">消息</span>
+</a>
+<!-- Orders -->
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim p-1 w-16 hover:bg-surface-container transition-colors rounded-xl active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[24px]">receipt_long</span>
+<span class="font-label-sm text-label-sm mt-0.5">订单</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim p-1 w-16 hover:bg-surface-container transition-colors rounded-xl active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<span class="font-label-sm text-label-sm mt-0.5">个人中心</span>
+</a>
+</nav>
+
+
+
+
+
+
+
+
+
+
+</body></html>

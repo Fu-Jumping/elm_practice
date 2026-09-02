@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>校园外卖商家后台 - 商品加载中</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#ffb59e",
+                    "surface-tint": "#ae3200",
+                    "on-primary-fixed": "#3a0b00",
+                    "on-surface": "#181c22",
+                    "tertiary": "#006d37",
+                    "primary-container": "#ff5a1f",
+                    "on-tertiary-container": "#003316",
+                    "on-secondary": "#ffffff",
+                    "secondary": "#815600",
+                    "on-primary-fixed-variant": "#852400",
+                    "surface": "#f8f9ff",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed": "#86faa7",
+                    "error": "#ba1a1a",
+                    "surface-variant": "#dfe2eb",
+                    "on-tertiary-fixed": "#00210c",
+                    "tertiary-container": "#2da65d",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed-dim": "#6add8d",
+                    "surface-bright": "#f8f9ff",
+                    "on-secondary-container": "#6a4600",
+                    "primary-fixed": "#ffdbd0",
+                    "on-primary-container": "#541400",
+                    "surface-dim": "#d7dae2",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed": "#ffddb1",
+                    "surface-container-low": "#f1f3fc",
+                    "secondary-container": "#fdaf1e",
+                    "outline-variant": "#e4beb3",
+                    "surface-container-highest": "#dfe2eb",
+                    "on-tertiary-fixed-variant": "#005228",
+                    "on-tertiary": "#ffffff",
+                    "primary": "#ae3200",
+                    "inverse-on-surface": "#eef1f9",
+                    "background": "#f8f9ff",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed-dim": "#ffba4b",
+                    "outline": "#8f7067",
+                    "inverse-surface": "#2d3137",
+                    "inverse-primary": "#ffb59e",
+                    "on-secondary-fixed-variant": "#624000",
+                    "surface-container-high": "#e5e8f0",
+                    "surface-container": "#ebeef6",
+                    "on-background": "#181c22",
+                    "on-secondary-fixed": "#291800",
+                    "on-error-container": "#93000a",
+                    "on-surface-variant": "#5b4038"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "page-margin": "16px",
+                    "base": "4px",
+                    "module-gap": "12px",
+                    "card-padding": "12px",
+                    "item-gap": "8px"
+            },
+            "fontFamily": {
+                    "currency-display": [
+                            "PingFang SC"
+                    ],
+                    "card-title": [
+                            "PingFang SC"
+                    ],
+                    "body-main": [
+                            "PingFang SC"
+                    ],
+                    "caption-muted": [
+                            "PingFang SC"
+                    ],
+                    "section-title": [
+                            "PingFang SC"
+                    ],
+                    "label-table": [
+                            "PingFang SC"
+                    ],
+                    "page-title": [
+                            "PingFang SC"
+                    ]
+            },
+            "fontSize": {
+                    "currency-display": [
+                            "15px",
+                            {
+                                    "lineHeight": "22px",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "card-title": [
+                            "15px",
+                            {
+                                    "lineHeight": "22px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-main": [
+                            "15px",
+                            {
+                                    "lineHeight": "22px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "caption-muted": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "section-title": [
+                            "18px",
+                            {
+                                    "lineHeight": "26px",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "label-table": [
+                            "13px",
+                            {
+                                    "lineHeight": "18px",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "page-title": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "700"
+                            }
+                    ]
+            }
+          },
+        }
+      }
+    </script>
+<style>
+        .shimmer {
+            background: #f3f3f3;
+            background-image: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.4) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-main antialiased h-screen flex overflow-hidden">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-[220px] bg-surface dark:bg-inverse-surface border-r border-outline-variant dark:border-outline flex flex-col py-4 transition-colors duration-200 z-20">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-lg">
+                M
+            </div>
+<div>
+<h1 class="font-page-title text-page-title text-primary dark:text-primary-fixed leading-tight">校园外卖商家后台</h1>
+<p class="font-caption-muted text-caption-muted text-on-surface-variant mt-1">店铺管理端</p>
+</div>
+</div>
+<ul class="flex-1 flex flex-col gap-1 px-3">
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200 font-body-main text-body-main" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">shopping_cart</span>
+                    订单
+                </a>
+</li>
+<li>
+<!-- Active State -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-primary dark:text-primary-fixed bg-secondary-container dark:bg-on-secondary-fixed-variant font-bold border-r-4 border-primary transition-colors duration-200 font-body-main text-body-main" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+                    商品
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200 font-body-main text-body-main" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">category</span>
+                    分类
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200 font-body-main text-body-main" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+                    店铺设置
+                </a>
+</li>
+</ul>
+<div class="mt-auto px-3 border-t border-outline-variant dark:border-outline pt-4">
+<ul class="flex flex-col gap-1">
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200 font-caption-muted text-caption-muted" href="#">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+                        概览 (二期)
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200 font-caption-muted text-caption-muted" href="#">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 0;">notifications</span>
+                        消息 (二期)
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-colors duration-200 font-caption-muted text-caption-muted" href="#">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 0;">analytics</span>
+                        统计 (二期)
+                    </a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 ml-[220px] flex flex-col h-full bg-background relative z-10">
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 h-[56px] left-[220px] bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline flex justify-between items-center px-6 transition-opacity active:opacity-80 z-20">
+<div class="flex items-center gap-4">
+<span class="font-section-title text-section-title text-on-surface dark:text-inverse-on-surface">校园外卖商家后台</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary-container"></span>
+<span class="font-body-main text-body-main text-on-surface-variant">营业中</span>
+</div>
+<div class="h-4 w-px bg-outline-variant"></div>
+<div class="flex items-center gap-2 cursor-pointer hover:text-primary dark:hover:text-primary-fixed">
+<img class="w-8 h-8 rounded-full object-cover border border-outline-variant" data-alt="A modern, abstract geometric avatar placeholder. Small, circular, using deep blacks and bright high-key white, with a subtle accent of vibrant orange #ff5a1f to match the brand identity. Clean vector style, minimal detail." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDe3v_U2bVmdyGNw4IINHZDMbd_iN3wZS0mfMPaJ4b6E75EGn1RqBIXvG0HMuAW2pCvF9v_IDjhhQkypnkBifBTkc_AiiQb4szBHA8nUl-5tnCPtNe4Qi_xoZQDa8_pPi1xy2qobw-46WE8k9q3U1mUfsbWKZv8buW2tcTXcfboK2CH0uvONt_iFWHRyy32W9wz1L6ShVdk1gSDJoWQsYAgzTznhy7TBa77EALyO88GHOGlrQZLzG9hHw"/>
+<span class="font-body-main text-body-main">账号名</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">logout</span>
+</button>
+</div>
+</header>
+<!-- Page Content: Loading State -->
+<main class="flex-1 mt-[56px] p-page-margin overflow-y-auto">
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant p-card-padding">
+<!-- Toolbar Skeleton -->
+<div class="flex justify-between items-center mb-module-gap">
+<div class="flex gap-item-gap">
+<div class="h-8 w-32 rounded shimmer"></div>
+<div class="h-8 w-24 rounded shimmer"></div>
+</div>
+<div>
+<div class="h-8 w-28 rounded shimmer bg-primary-container/20"></div>
+</div>
+</div>
+<!-- Table Header (Static) -->
+<div class="grid grid-cols-12 gap-4 px-4 py-2 bg-[#f3f3f3] border-b border-outline-variant font-label-table text-label-table text-on-surface-variant">
+<div class="col-span-1">图片</div>
+<div class="col-span-3">商品名称</div>
+<div class="col-span-2">分类</div>
+<div class="col-span-2">价格</div>
+<div class="col-span-2">库存</div>
+<div class="col-span-2 text-right">操作</div>
+</div>
+<!-- Table Rows Skeleton -->
+<div class="flex flex-col">
+<!-- Row 1 -->
+<div class="grid grid-cols-12 gap-4 px-4 py-3 border-b border-outline-variant items-center">
+<div class="col-span-1"><div class="w-12 h-12 rounded shimmer"></div></div>
+<div class="col-span-3"><div class="h-4 w-3/4 rounded shimmer"></div></div>
+<div class="col-span-2"><div class="h-4 w-1/2 rounded shimmer"></div></div>
+<div class="col-span-2"><div class="h-4 w-1/2 rounded shimmer"></div></div>
+<div class="col-span-2"><div class="h-4 w-1/3 rounded shimmer"></div></div>
+<div class="col-span-2 flex justify-end gap-2">
+<div class="h-6 w-12 rounded shimmer"></div>
+<div class="h-6 w-12 rounded shimmer"></div>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="grid grid-cols-12 gap-4 px-4 py-3 border-b border-outline-variant items-center">
+<div class="col-span-1"><div class="w-12 h-12 rounded shimmer"></div></div>
+<div class="col-span-3"><div class="h-4 w-5/6 rounded shimmer"></div></div>
+<div class="col-span-2"><div class="h-4 w-2/3 rounded shimmer"></div></div>
+<div class="col-span-2"><div class="h-4 w-1/2 rounded shimmer"></div></div>
+<div class="col-span-2"><div class="h-4 w-1/4 rounded shimmer"></div></div>
+<div class="col-span-2 flex justify-end gap-2">
+<div class="h-6 w-12 rounded shimmer"></div>
+<div class="h-6 w-12 rounded shimmer"></div>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="grid grid-cols-12 gap-4 px-4 py-3 border-b border-outline-variant items-center">
+<div class="col-span-1"><div class="w-12 h-12 rounded shimmer"></div></div>
+<div class="col-span-3"><div class="h-4 w-4/5 rounded shimmer"></div></div>
+<div class="col-span-2"><div class="h-4 w-1/2 rounded shimmer"></div></div>
+<div class="col-span-2"><div class="h-4 w-2/3 rounded shimmer"></div></div>
+<div class="col-span-2"><div class="h-4 w-1/3 rounded shimmer"></div></div>
+<div class="col-span-2 flex justify-end gap-2">
+<div class="h-6 w-12 rounded shimmer"></div>
+<div class="h-6 w-12 rounded shimmer"></div>
+</div>
+</div>
+<!-- Row 4 -->
+<div class="grid grid-cols-12 gap-4 px-4 py-3 border-b border-outline-variant items-center">
+<div class="col-span-1"><div class="w-12 h-12 rounded shimmer"></div></div>
+<div class="col-span-3"><div class="h-4 w-3/4 rounded shimmer"></div></div>
+<div class="col-span-2"><div class="h-4 w-3/4 rounded shimmer"></div></div>
+<div class="col-span-2"><div class="h-4 w-1/2 rounded shimmer"></div></div>
+<div class="col-span-2"><div class="h-4 w-1/2 rounded shimmer"></div></div>
+<div class="col-span-2 flex justify-end gap-2">
+<div class="h-6 w-12 rounded shimmer"></div>
+<div class="h-6 w-12 rounded shimmer"></div>
+</div>
+</div>
+<!-- Row 5 -->
+<div class="grid grid-cols-12 gap-4 px-4 py-3 items-center">
+<div class="col-span-1"><div class="w-12 h-12 rounded shimmer"></div></div>
+<div class="col-span-3"><div class="h-4 w-full rounded shimmer"></div></div>
+<div class="col-span-2"><div class="h-4 w-1/2 rounded shimmer"></div></div>
+<div class="col-span-2"><div class="h-4 w-1/3 rounded shimmer"></div></div>
+<div class="col-span-2"><div class="h-4 w-1/4 rounded shimmer"></div></div>
+<div class="col-span-2 flex justify-end gap-2">
+<div class="h-6 w-12 rounded shimmer"></div>
+<div class="h-6 w-12 rounded shimmer"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

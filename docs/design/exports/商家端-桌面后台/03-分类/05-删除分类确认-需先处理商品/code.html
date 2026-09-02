@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>校园外卖商家后台 - 删除分类确认</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed": "#00210c",
+                        "surface-tint": "#ae3200",
+                        "on-background": "#181c22",
+                        "on-primary-fixed": "#3a0b00",
+                        "outline-variant": "#e4beb3",
+                        "secondary-container": "#fdaf1e",
+                        "surface-bright": "#f8f9ff",
+                        "on-primary-fixed-variant": "#852400",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "background": "#f8f9ff",
+                        "on-secondary-fixed-variant": "#624000",
+                        "on-tertiary-container": "#003316",
+                        "secondary-fixed": "#ffddb1",
+                        "surface-dim": "#d7dae2",
+                        "on-secondary-fixed": "#291800",
+                        "inverse-on-surface": "#eef1f9",
+                        "primary-fixed-dim": "#ffb59e",
+                        "tertiary-container": "#2da65d",
+                        "on-secondary-container": "#6a4600",
+                        "on-surface": "#181c22",
+                        "secondary": "#815600",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#ff5a1f",
+                        "on-tertiary-fixed-variant": "#005228",
+                        "surface-container-high": "#e5e8f0",
+                        "surface-container-highest": "#dfe2eb",
+                        "tertiary-fixed": "#86faa7",
+                        "primary-fixed": "#ffdbd0",
+                        "surface": "#f8f9ff",
+                        "outline": "#8f7067",
+                        "surface-container-low": "#f1f3fc",
+                        "primary": "#ae3200",
+                        "error-container": "#ffdad6",
+                        "inverse-surface": "#2d3137",
+                        "on-tertiary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-primary-container": "#541400",
+                        "tertiary": "#006d37",
+                        "on-surface-variant": "#5b4038",
+                        "tertiary-fixed-dim": "#6add8d",
+                        "inverse-primary": "#ffb59e",
+                        "surface-container": "#ebeef6",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#dfe2eb",
+                        "secondary-fixed-dim": "#ffba4b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "card-padding": "12px",
+                        "module-gap": "12px",
+                        "item-gap": "8px",
+                        "page-margin": "16px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "page-title": ["PingFang SC", "sans-serif"],
+                        "card-title": ["PingFang SC", "sans-serif"],
+                        "section-title": ["PingFang SC", "sans-serif"],
+                        "label-table": ["PingFang SC", "sans-serif"],
+                        "caption-muted": ["PingFang SC", "sans-serif"],
+                        "currency-display": ["PingFang SC", "sans-serif"],
+                        "body-main": ["PingFang SC", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "page-title": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "card-title": ["15px", { "lineHeight": "22px", "fontWeight": "600" }],
+                        "section-title": ["18px", { "lineHeight": "26px", "fontWeight": "700" }],
+                        "label-table": ["13px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "caption-muted": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "currency-display": ["15px", { "lineHeight": "22px", "fontWeight": "700" }],
+                        "body-main": ["15px", { "lineHeight": "22px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'PingFang SC', sans-serif; }
+    </style>
+</head>
+<body class="bg-background min-h-screen text-on-background relative overflow-hidden">
+<!-- Background Layer (Blurred & Dimmed by Overlay) -->
+<div class="fixed inset-0 z-0">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-[220px] flex flex-col py-4 bg-surface dark:bg-inverse-surface border-r border-outline-variant dark:border-outline z-20">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-primary-container flex items-center justify-center text-on-primary font-bold">M</div>
+<div>
+<h1 class="font-page-title text-page-title text-primary dark:text-primary-fixed leading-tight">校园外卖商家后台</h1>
+<p class="font-caption-muted text-caption-muted text-on-surface-variant">店铺管理端</p>
+</div>
+</div>
+<div class="flex flex-col flex-1 gap-1 px-3">
+<!-- 订单 -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="font-body-main text-body-main">订单</span>
+</a>
+<!-- 商品 -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-body-main text-body-main">商品</span>
+</a>
+<!-- 分类 (Active) -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 text-primary dark:text-primary-fixed bg-secondary-container dark:bg-on-secondary-fixed-variant font-bold border-r-4 border-primary" href="#">
+<span class="material-symbols-outlined" data-icon="category" data-weight="fill" style="font-variation-settings: 'FILL' 1;">category</span>
+<span class="font-body-main text-body-main">分类</span>
+</a>
+<!-- 店铺设置 -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-main text-body-main">店铺设置</span>
+</a>
+</div>
+<div class="mt-auto px-3 flex flex-col gap-1 border-t border-outline-variant pt-4">
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant opacity-60" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="font-caption-muted text-caption-muted">概览 (二期)</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant opacity-60" href="#">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="font-caption-muted text-caption-muted">消息 (二期)</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant opacity-60" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+<span class="font-caption-muted text-caption-muted">统计 (二期)</span>
+</a>
+</div>
+</nav>
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 h-[56px] left-[220px] bg-surface dark:bg-inverse-surface border-b border-outline-variant dark:border-outline flex justify-between items-center px-6 z-10">
+<div class="font-section-title text-section-title text-on-surface dark:text-inverse-on-surface">校园外卖商家后台</div>
+<div class="flex items-center gap-6">
+<span class="font-label-table text-label-table px-2 py-1 bg-tertiary-container/20 text-tertiary rounded text-sm font-medium">营业中</span>
+<div class="flex items-center gap-4 cursor-pointer transition-opacity active:opacity-80">
+<span class="font-body-main text-body-main text-on-surface-variant">账号名</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed" data-icon="logout">logout</span>
+</div>
+</div>
+</header>
+<!-- Main Content (Simulated Background) -->
+<main class="ml-[220px] mt-[56px] p-page-margin">
+<!-- Simulated Category Page Content -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/50 p-card-padding">
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-section-title text-section-title">分类管理</h2>
+<button class="bg-primary-container text-on-primary px-4 py-2 rounded font-body-main text-body-main flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                        新建分类
+                    </button>
+</div>
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-table text-label-table">
+<th class="py-3 px-4 font-medium rounded-l-lg">分类名称</th>
+<th class="py-3 px-4 font-medium">商品数量</th>
+<th class="py-3 px-4 font-medium">排序</th>
+<th class="py-3 px-4 font-medium rounded-r-lg text-right">操作</th>
+</tr>
+</thead>
+<tbody class="font-body-main text-body-main">
+<tr class="border-b border-outline-variant/30 hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3 px-4">热销爆款</td>
+<td class="py-3 px-4">6</td>
+<td class="py-3 px-4">1</td>
+<td class="py-3 px-4 text-right">
+<button class="text-primary hover:opacity-80 mr-3">编辑</button>
+<button class="text-error hover:opacity-80">删除</button>
+</td>
+</tr>
+<tr class="border-b border-outline-variant/30 hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3 px-4">主食套餐</td>
+<td class="py-3 px-4">12</td>
+<td class="py-3 px-4">2</td>
+<td class="py-3 px-4 text-right">
+<button class="text-primary hover:opacity-80 mr-3">编辑</button>
+<button class="text-error hover:opacity-80">删除</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</main>
+</div>
+<!-- Overlay & Danger Confirmation Dialog -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-on-background/40 backdrop-blur-[2px]">
+<!-- Dialog Card -->
+<div class="w-[420px] bg-surface-container-lowest rounded-[12px] shadow-xl p-6 flex flex-col gap-4 animate-[fadeIn_0.2s_ease-out]">
+<!-- Header -->
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-error text-[24px] mt-0.5" data-icon="error" data-weight="fill" style="font-variation-settings: 'FILL' 1;">error</span>
+<h3 class="font-section-title text-section-title text-on-surface">删除分类</h3>
+</div>
+<!-- Body -->
+<div class="pl-9 pr-2">
+<p class="font-body-main text-body-main text-on-surface-variant leading-relaxed">
+                    分类「热销爆款」下还有 6 个商品，删除前请先处理这些商品的归属。
+                </p>
+</div>
+<!-- Footer Actions -->
+<div class="mt-4 flex justify-end gap-3 pt-2">
+<!-- Cancel Button -->
+<button class="px-5 py-1.5 rounded bg-surface-container-lowest border border-outline-variant text-on-surface font-body-main text-body-main hover:border-primary transition-colors cursor-pointer">
+                    取 消
+                </button>
+<!-- Confirm Button (Disabled) -->
+<button class="px-5 py-1.5 rounded bg-surface-container-highest text-surface-dim font-body-main text-body-main cursor-not-allowed" disabled="">
+                    确 认
+                </button>
+</div>
+</div>
+</div>
+<style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
+</body></html>

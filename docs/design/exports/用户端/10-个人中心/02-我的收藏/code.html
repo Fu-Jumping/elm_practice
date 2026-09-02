@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>我的收藏 - 饿了么</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#351000",
+                        "tertiary-container": "#f46500",
+                        "on-background": "#1a1c1c",
+                        "border-light": "#E5E5E5",
+                        "on-surface-variant": "#5b4038",
+                        "surface-variant": "#e2e2e2",
+                        "surface-dim": "#dadada",
+                        "inverse-on-surface": "#f1f1f1",
+                        "inverse-surface": "#2f3131",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "secondary": "#5f5e5e",
+                        "on-primary-container": "#541400",
+                        "text-tertiary": "#999999",
+                        "text-secondary": "#666666",
+                        "surface-bright": "#f9f9f9",
+                        "primary-container": "#ff5a1f",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#ae3200",
+                        "surface-white": "#FFFFFF",
+                        "on-primary-fixed-variant": "#852400",
+                        "background": "#f9f9f9",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "primary": "#ae3200",
+                        "tertiary": "#a14000",
+                        "surface-container": "#eeeeee",
+                        "outline-variant": "#e4beb3",
+                        "on-primary-fixed": "#3a0b00",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#1a1c1c",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffdbcc",
+                        "primary-fixed-dim": "#ffb59e",
+                        "inverse-primary": "#ffb59e",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "on-tertiary-container": "#4d1b00",
+                        "on-primary": "#ffffff",
+                        "on-secondary-container": "#656464",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#e8e8e8",
+                        "surface-container-highest": "#e2e2e2",
+                        "outline": "#8f7067",
+                        "on-secondary-fixed-variant": "#474747",
+                        "primary-fixed": "#ffdbd0",
+                        "surface-container-low": "#f3f3f3",
+                        "secondary-fixed": "#e4e2e1",
+                        "secondary-container": "#e4e2e1",
+                        "surface": "#f9f9f9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "padding-card": "10px",
+                        "gutter": "8px",
+                        "margin-page": "12px",
+                        "base": "4px",
+                        "gap-module": "12px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Be Vietnam Pro", "sans-serif"],
+                        "label-md": ["Be Vietnam Pro", "sans-serif"],
+                        "headline-md": ["Be Vietnam Pro", "sans-serif"],
+                        "headline-lg": ["Be Vietnam Pro", "sans-serif"],
+                        "cta-button": ["Be Vietnam Pro", "sans-serif"],
+                        "body-md": ["Be Vietnam Pro", "sans-serif"],
+                        "label-sm": ["Be Vietnam Pro", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "cta-button": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #f9f9f9;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background antialiased min-h-screen pt-14 pb-16">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface border-b border-border-light flex justify-between items-center h-14 px-margin-page">
+<button aria-label="返回" class="text-on-surface hover:bg-surface-container-low transition-colors duration-200 active:opacity-80 p-2 -ml-2 rounded-full">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-lg text-headline-lg font-bold text-on-surface">我的收藏</h1>
+<div class="w-10"></div> <!-- Placeholder for alignment -->
+</header>
+<!-- Main Content: Favorites List -->
+<main class="max-w-2xl mx-auto space-y-gap-module py-margin-page">
+<!-- Merchant Card 1: KFC -->
+<article class="bg-surface-white p-padding-card flex gap-gutter hover:bg-surface-bright transition-colors duration-200 px-margin-page">
+<div class="w-20 h-20 shrink-0 bg-surface-container rounded-DEFAULT overflow-hidden">
+<img alt="肯德基门面" class="w-full h-full object-cover" data-alt="A brightly lit, modern fast-food restaurant storefront resembling KFC, featuring signature red and white branding. The image is taken during the day with clear, natural lighting, highlighting the clean and inviting exterior. The aesthetic is commercial, crisp, and aligned with a pragmatic, high-density food delivery app style, emphasizing reliability and quick service." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYKd_Em-EPj-9SNmPShZ6KP71revArD6tIxtcUFOGFOMyNmNQbkY2bOO5bHfXqHhxy8wxPeIIcG9eiO_iH_yc4MZlPqjqxOqxIxKscURqftM-Pbe4ekNVvaVMCb5FI8WrfsHEdwHhxRMdCh-_lgqVsLRlID1tLMB1zEDGgpH9hFX5jQPJem26_X9qfhNLvKBmRs88IeMbWrIXAUCCeyBlv5dH4S_VOaDlPIaUu2_nocPkTjSHO0vmSkN_C2d6ZG9Uh-qnPOQlQkC7r"/>
+</div>
+<div class="flex-1 min-w-0 flex flex-col justify-between">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface truncate">肯德基 (软件园店)</h2>
+<div class="flex items-center gap-base mt-1">
+<span class="font-body-md text-body-md text-primary-container font-semibold">4.8</span>
+<span class="font-label-md text-label-md text-text-secondary">月售 8000+</span>
+</div>
+</div>
+<div class="flex justify-between items-end mt-2">
+<div class="flex gap-base">
+<span class="px-1 py-0.5 border border-primary-fixed-dim text-primary font-label-sm text-label-sm rounded bg-primary-fixed/20">30减5</span>
+<span class="px-1 py-0.5 border border-outline-variant text-text-secondary font-label-sm text-label-sm rounded">满赠</span>
+</div>
+<div class="font-label-md text-label-md text-text-secondary text-right">
+                        30分钟 | 1.2km
+                    </div>
+</div>
+</div>
+</article>
+<!-- Merchant Card 2: McDonald's -->
+<article class="bg-surface-white p-padding-card flex gap-gutter hover:bg-surface-bright transition-colors duration-200 px-margin-page">
+<div class="w-20 h-20 shrink-0 bg-surface-container rounded-DEFAULT overflow-hidden">
+<img alt="麦当劳汉堡套餐" class="w-full h-full object-cover" data-alt="A highly appetizing close-up of a premium fast-food burger meal, reminiscent of McDonald's, featuring a juicy beef patty, fresh lettuce, and melted cheese, accompanied by golden crispy fries. The lighting is studio-quality, bright and even, highlighting the textures and colors of the food against a clean, neutral background. The visual style is commercial, appetizing, and fits perfectly within a modern food delivery interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiaL4GcBb-mldYp2quD_dOtyIcS_j5t-22rYtZenCucVT7s2Nj7qYimSTU-wkN4HIdEevo1_g7_Cczl8Wv-olPxplF2UYcismZOKriEhgabt-w4BEHKHc2AL92_6ibJRDpQmBA3P-NR4wRkdwalnr5EpnFKL6g8PXk3dNvw28_zz9WDohum6e30-96uoManyohTi8FkDBfjN3q_j2qAkrcqggJUNNooiOHqjckmiTUkNFUDkbuTKOUNroB1bDdDn2unkCttQDFLVvh"/>
+</div>
+<div class="flex-1 min-w-0 flex flex-col justify-between">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface truncate">麦当劳 (高新达广场店)</h2>
+<div class="flex items-center gap-base mt-1">
+<span class="font-body-md text-body-md text-primary-container font-semibold">4.7</span>
+<span class="font-label-md text-label-md text-text-secondary">月售 9000+</span>
+</div>
+</div>
+<div class="flex justify-between items-end mt-2">
+<div class="flex gap-base flex-wrap">
+<span class="px-1 py-0.5 border border-primary-fixed-dim text-primary font-label-sm text-label-sm rounded bg-primary-fixed/20">新客减10</span>
+<span class="px-1 py-0.5 border border-outline-variant text-text-secondary font-label-sm text-label-sm rounded">免配送费</span>
+</div>
+<div class="font-label-md text-label-md text-text-secondary text-right shrink-0 ml-2">
+                        25分钟 | 800m
+                    </div>
+</div>
+</div>
+</article>
+<!-- Merchant Card 3: Lao Wang's Shop -->
+<article class="bg-surface-white p-padding-card flex gap-gutter hover:bg-surface-bright transition-colors duration-200 px-margin-page">
+<div class="w-20 h-20 shrink-0 bg-surface-container rounded-DEFAULT overflow-hidden">
+<img alt="老王小店招牌菜" class="w-full h-full object-cover" data-alt="A rustic, authentic bowl of traditional Chinese noodles or stir-fry, representing a local mom-and-pop shop style meal. The dish is presented in a simple, clean ceramic bowl, steaming slightly, under warm, inviting indoor lighting. The setting feels local and trustworthy, with a pragmatic, unpretentious aesthetic suitable for a high-density, real-world food ordering platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtSANlL0zGDqyIM6qzi-K0Fe_Wq0OOeRylyNwcH73dstKvdOnCYP2terc2XR60grwDbI0s_bnHQann0sgtF0xGP5LJiD7coMKzQNo7Y88vBQNspFsn_gvTOIj7GIRmlKf1jUMMle0jtLLyJl-vLCCS6SiEbghTvPqnUxy_NPH0bx1ZAJ5vQ9qJu6IsbLbIAUp8pL7f6oIac-Qf3dx9X_CgV2hKB8w-3dJ17QUujmI6v9KEqgOPNlLHo2CdnfOL2guuZdr8QtJtk1-u"/>
+</div>
+<div class="flex-1 min-w-0 flex flex-col justify-between">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface truncate">老王小店 (正宗盖浇饭)</h2>
+<div class="flex items-center gap-base mt-1">
+<span class="font-body-md text-body-md text-primary-container font-semibold">4.9</span>
+<span class="font-label-md text-label-md text-text-secondary">月售 3000+</span>
+</div>
+</div>
+<div class="flex justify-between items-end mt-2">
+<div class="flex gap-base">
+<span class="px-1 py-0.5 border border-primary-fixed-dim text-primary font-label-sm text-label-sm rounded bg-primary-fixed/20">20减2</span>
+</div>
+<div class="font-label-md text-label-md text-text-secondary text-right">
+                        40分钟 | 2.5km
+                    </div>
+</div>
+</div>
+</article>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 bg-surface-white border-t border-border-light flex justify-around items-center h-16 pb-safe w-full">
+<!-- Home (Inactive) -->
+<a class="flex flex-col items-center justify-center text-secondary hover:bg-surface-container-low transition-colors duration-200 active:scale-95 flex-1 h-full" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">首页</span>
+</a>
+<!-- Messages (Inactive) -->
+<a class="flex flex-col items-center justify-center text-secondary hover:bg-surface-container-low transition-colors duration-200 active:scale-95 flex-1 h-full" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-label-sm text-label-sm">消息</span>
+</a>
+<!-- Orders (Inactive) -->
+<a class="flex flex-col items-center justify-center text-secondary hover:bg-surface-container-low transition-colors duration-200 active:scale-95 flex-1 h-full" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-sm text-label-sm">订单</span>
+</a>
+<!-- Profile (Active - Favorites is under Profile) -->
+<a class="flex flex-col items-center justify-center text-primary font-bold hover:bg-surface-container-low transition-colors duration-200 active:scale-95 flex-1 h-full" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-sm text-label-sm">我的</span>
+</a>
+</nav>
+</body></html>

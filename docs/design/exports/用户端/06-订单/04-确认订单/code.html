@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>确认订单 - CampusBites</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary": "#a14000",
+                      "secondary-container": "#e4e2e1",
+                      "surface-container-low": "#f3f3f3",
+                      "on-surface": "#1a1c1c",
+                      "surface-white": "#FFFFFF",
+                      "surface-container-highest": "#e2e2e2",
+                      "on-tertiary-fixed-variant": "#7b2f00",
+                      "inverse-on-surface": "#f1f1f1",
+                      "on-tertiary": "#ffffff",
+                      "surface": "#f9f9f9",
+                      "secondary": "#5f5e5e",
+                      "secondary-fixed": "#e4e2e1",
+                      "surface-bright": "#f9f9f9",
+                      "error": "#ba1a1a",
+                      "text-tertiary": "#999999",
+                      "on-primary-fixed-variant": "#852400",
+                      "inverse-surface": "#2f3131",
+                      "tertiary-fixed": "#ffdbcc",
+                      "on-error-container": "#93000a",
+                      "on-background": "#1a1c1c",
+                      "outline-variant": "#e4beb3",
+                      "on-secondary-fixed-variant": "#474747",
+                      "inverse-primary": "#ffb59e",
+                      "tertiary-container": "#f46500",
+                      "surface-container-high": "#e8e8e8",
+                      "on-secondary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "primary-fixed": "#ffdbd0",
+                      "on-tertiary-container": "#4d1b00",
+                      "primary-fixed-dim": "#ffb59e",
+                      "secondary-fixed-dim": "#c8c6c6",
+                      "on-primary-fixed": "#3a0b00",
+                      "surface-container": "#eeeeee",
+                      "primary": "#ae3200",
+                      "on-primary-container": "#541400",
+                      "on-surface-variant": "#5b4038",
+                      "border-light": "#E5E5E5",
+                      "on-secondary-container": "#656464",
+                      "surface-dim": "#dadada",
+                      "background": "#f9f9f9",
+                      "outline": "#8f7067",
+                      "tertiary-fixed-dim": "#ffb694",
+                      "text-secondary": "#666666",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-variant": "#e2e2e2",
+                      "surface-tint": "#ae3200",
+                      "on-secondary-fixed": "#1b1c1c",
+                      "on-tertiary-fixed": "#351000",
+                      "primary-container": "#ff5a1f",
+                      "on-error": "#ffffff",
+                      "error-container": "#ffdad6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "padding-card": "10px",
+                      "margin-page": "12px",
+                      "gap-module": "12px",
+                      "base": "4px",
+                      "gutter": "8px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["beVietnamPro", "sans-serif"],
+                      "headline-md": ["beVietnamPro", "sans-serif"],
+                      "body-md": ["beVietnamPro", "sans-serif"],
+                      "label-sm": ["beVietnamPro", "sans-serif"],
+                      "label-md": ["beVietnamPro", "sans-serif"],
+                      "cta-button": ["beVietnamPro", "sans-serif"],
+                      "body-lg": ["beVietnamPro", "sans-serif"]
+              },
+              "fontSize": {
+                      "headline-lg": ["20px", {"lineHeight": "28px", "fontWeight": "700"}],
+                      "headline-md": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "label-sm": ["10px", {"lineHeight": "14px", "fontWeight": "400"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                      "cta-button": ["16px", {"lineHeight": "20px", "fontWeight": "600"}],
+                      "body-lg": ["16px", {"lineHeight": "22px", "fontWeight": "500"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body { font-family: 'beVietnamPro', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased pb-[80px]">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 flex items-center justify-between px-margin-page h-14 w-full bg-surface dark:bg-on-surface-variant border-border-light dark:border-outline-variant flat no shadows transition-colors duration-200 active:opacity-70">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-secondary-container/50 dark:hover:bg-secondary-container/20 text-primary dark:text-primary-fixed">
+<span class="material-symbols-outlined" style='font-variation-settings: "FILL" 0;'>chevron_left</span>
+</button>
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">
+            确认订单
+        </div>
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-secondary-container/50 dark:hover:bg-secondary-container/20 text-primary dark:text-primary-fixed">
+<span class="material-symbols-outlined" style='font-variation-settings: "FILL" 0;'>help_outline</span>
+</button>
+</header>
+<main class="space-y-gap-module px-0">
+<!-- Address Selection -->
+<section class="bg-surface-white border-border-light py-6 px-margin-page flex items-center justify-between active:bg-secondary-container/30 transition-colors cursor-pointer w-full" style="border-width: 0px;"><div class="flex items-center justify-between w-full">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1; color: #FF5A1F;">location_on</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<h2 class="font-headline-lg text-headline-lg text-on-surface font-bold">12号楼 304室</h2>
+<span class="px-2 py-0.5 rounded-full text-[10px] font-bold" style="background-color: rgba(255, 90, 31, 0.1); color: #FF5A1F;">学校</span>
+</div>
+<p class="font-body-md text-body-md text-text-secondary">张同学 (先生) 138****5678</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-text-tertiary" style="font-variation-settings: 'FILL' 0;">chevron_right</span>
+</div></section>
+<!-- Delivery Info -->
+<section class="bg-surface-white border-border-light p-padding-card w-full px-margin-page" style="border-width: 0px;">
+<div class="flex items-center justify-between py-2 border-border-light">
+<div class="font-body-md text-body-md text-on-surface font-medium">送达时间</div>
+<div class="font-body-md text-body-md flex items-center gap-1 cursor-pointer">
+                    尽快送达 (预计 12:30)
+                    <span class="material-symbols-outlined text-[18px]" style='font-variation-settings: "FILL" 0;'>chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Order Items -->
+<section class="bg-surface-white border-border-light p-padding-card w-full px-margin-page" style="border-width: 0px;">
+<div class="flex items-center gap-2 mb-4 border-border-light pb-2">
+<span class="material-symbols-outlined text-[20px]" style='font-variation-settings: "FILL" 1;'>storefront</span>
+<h3 class="font-body-lg text-body-lg font-semibold text-on-surface">麦当劳 (校园店)</h3>
+</div>
+<!-- Item 1 -->
+<div class="flex items-start gap-3 py-3 border-border-light">
+<img alt="经典牛肉汉堡" class="w-16 h-16 rounded-lg object-cover bg-surface-container-low" data-alt="A close-up, high-quality photograph of a delicious classic beef burger. The burger features a juicy patty, fresh lettuce, and bright red tomato slices, all housed within a perfectly toasted sesame seed bun. The lighting is bright and appetizing, highlighting the textures of the ingredients. The setting suggests a clean, modern fast-food environment, fitting a high-density, utility-first food delivery UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUMfCgTE_kLn25pE6At6eLQg03HQ1Jo_4PJRkYe6NnZ-yVsSShJV95RxD52BKf-0xJhYoH1I2t9BD-otN-TDjJFsTbhl7O48_qkv4NBDCEBYi9CldAk6iAL6Uo_Ojh6E3iSxp-RxLMNLMOcLakSa_wW8M1D7ZCYB-QA72_Cbz5OlPtTXSS-5p100IBJjkjBtns-nGTmUNeq7RlLybRRvI0HZDbohilelcWQdxZnVzYLKtPgomhIQy0GSJHOyfOqqhWmL_fmttjbyU8"/>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h4 class="font-body-md text-body-md font-medium text-on-surface line-clamp-2">巨无霸汉堡套餐</h4>
+<span class="font-body-md text-body-md font-semibold text-on-surface" style="color: rgb(255, 90, 31);">¥ 38.00</span>
+</div>
+<p class="font-label-md text-label-md text-text-secondary mt-1">包含: 中杯可乐 x1, 中薯条 x1</p>
+<div class="mt-2 font-label-md text-label-md text-text-secondary">x1</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-start gap-3 py-3 border-border-light">
+<img alt="冰镇可乐" class="w-16 h-16 rounded-lg object-cover bg-surface-container-low" data-alt="A refreshing, crisp image of a glass filled with ice-cold cola. Condensation droplets cover the outside of the glass, emphasizing its cool temperature. The lighting is sharp, creating a bright, appealing look suitable for a modern food delivery app. The background is simple and unobtrusive, keeping the focus entirely on the beverage." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdVxGAI8fZDmG_8uP8TIMiLVSGD1oUksiVTPOGfZ_0pAIev0m6uqHfpeDNnUQJBBM5nm_rxztzZwAHtVLgP2vHStBDLUVKUy63LCPBteyHFddeAB4u9aJ_Sks6PLRDOOVaenXPc7XmclkncagsFUmrcW06ecEUtHiOt7B4P3_4DDbvTt4EFaGPVjEutKqvj5AlWO_knbjCEpp7PX4yzpDp6SdcmrdbLuVFU_zu6lc-THA2zGH2oz22D4dG9NWokZym8aOd_-EVzlT8"/>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h4 class="font-body-md text-body-md font-medium text-on-surface line-clamp-2">麦乐鸡块 (5块装)</h4>
+<span class="font-body-md text-body-md font-semibold text-on-surface" style="color: rgb(255, 90, 31);">¥ 12.00</span>
+</div>
+<p class="font-label-md text-label-md text-text-secondary mt-1">甜酸酱</p>
+<div class="mt-2 font-label-md text-label-md text-text-secondary">x1</div>
+</div>
+</div>
+<!-- Fees & Discounts -->
+<div class="pt-3 space-y-3">
+<div class="flex items-center justify-between">
+<span class="font-body-md text-body-md text-text-secondary">包装费</span>
+<span class="font-body-md text-body-md text-on-surface">¥ 2.00</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-md text-body-md text-text-secondary">配送费</span>
+<span class="font-body-md text-body-md text-on-surface">¥ 3.00</span>
+</div>
+<div class="flex items-center justify-between text-error">
+<div class="flex items-center gap-1">
+<span class="bg-error/10 text-error px-1 rounded text-[10px] border border-error/20">减</span>
+<span class="font-body-md text-body-md">店铺满减</span>
+</div>
+<span class="font-body-md text-body-md">- ¥ 5.00</span>
+</div>
+</div>
+<!-- Subtotal -->
+<div class="mt-4 pt-4 border-t border-border-light flex justify-between items-center">
+<span class="font-body-md text-body-md text-text-secondary"><span class="font-bold text-on-surface text-headline-md">合计</span> <span class="font-body-md text-body-md text-text-secondary ml-1">共 2 件商品</span></span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface" style="color: rgb(255, 90, 31);">¥ 50.00</span>
+</div>
+</section><section class="bg-surface-white border-border-light p-padding-card w-full px-margin-page mt-gap-module" style="border-width: 0px;"><div class="font-body-md text-body-md text-on-surface font-medium mb-3">支付方式</div><div class="space-y-4"><div class="flex items-center justify-between cursor-pointer"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-[#07C160]" style='font-variation-settings: "FILL" 1;'>payments</span><span class="font-body-md text-body-md text-on-surface">微信支付</span></div><div class="w-5 h-5 rounded-full border-2 flex items-center justify-center" style="border-color: #FF5A1F;"><div class="w-2.5 h-2.5 rounded-full" style="background-color: #FF5A1F;"></div></div></div><div class="flex items-center justify-between cursor-pointer"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-[#1677FF]" style='font-variation-settings: "FILL" 1;'>account_balance_wallet</span><span class="font-body-md text-body-md text-on-surface">支付宝</span></div><div class="w-5 h-5 rounded-full border-2 border-outline-variant"></div></div></div></section>
+<!-- Order Remarks -->
+<section class="bg-surface-white border-border-light p-padding-card w-full px-margin-page" style="border-width: 0px;">
+<div class="flex items-center justify-between py-2 cursor-pointer">
+<div class="font-body-md text-body-md text-on-surface font-medium">订单备注</div>
+<div class="font-body-md text-body-md text-text-tertiary flex items-center gap-1">
+                    口味、偏好等
+                    <span class="material-symbols-outlined text-[18px]" style='font-variation-settings: "FILL" 0;'>chevron_right</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Action Bar (Checkout) -->
+<div class="fixed bottom-0 left-0 w-full z-50 bg-surface-white border-border-light p-padding-card pb-safe flex items-center justify-between" style="border-width: 0;"><button class="w-full text-on-primary font-cta-button text-cta-button py-3.5 rounded-xl transition-colors active:opacity-90 shadow-lg shadow-primary/20" style="background-color: rgb(255, 90, 31);">去支付 ￥50.00</button></div>
+</body></html>
