@@ -1,0 +1,58 @@
+/**
+ * 设计令牌（单一来源）
+ * 转写自 docs/design/设计系统-用户端.md（Stitch 主题导出原文，2026-09-02 定稿）
+ * - 品牌橙 #ff5a1f 是界面主色与品牌强调的唯一样式来源（tokens.css 单点维护）
+ * - 语义红（error）仅用于错误、危险、未读、售罄
+ * - 设计系统明确弃用阴影：层级通过 surface 分层 + 1px 细边框表达
+ */
+:root {
+  /* ---- 品牌色 ---- */
+  --color-primary: #ff5a1f; /* 品牌橙：CTA、价格高亮、活跃状态 */
+  --color-on-primary-container: #541400; /* 品牌橙容器上的文字/图标 */
+  --color-tertiary: #f46500; /* 次级橙容器 */
+  --color-on-tertiary-container: #4d1b00;
+
+  /* ---- 背景 / 表面分层（Level 0 页面底 → Level 1 白卡） ---- */
+  --color-background: #f9f9f9;
+  --color-surface: #f9f9f9;
+  --color-surface-white: #ffffff;
+  --color-surface-container: #eeeeee;
+
+  /* ---- 文字（三级体系） ---- */
+  --color-text-primary: #1a1c1c; /* 主文字/标题 */
+  --color-text-secondary: #666666; /* 次要文字：描述与辅助数据 */
+  --color-text-tertiary: #999999; /* 三级弱化：距离、配送费、月售等 */
+
+  /* ---- 边框 ---- */
+  --color-border-light: #e5e5e5; /* 1px hairline：卡片描边、列表分隔线 */
+
+  /* ---- 语义色（仅错误/危险/未读/售罄） ---- */
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+
+  /* ---- 字体（beVietnamPro → Web 系统栈回退，不引入外部字体） ---- */
+  --font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei',
+    sans-serif;
+
+  /* 字号（设计系统 body 语义，px 经 postcss 转 vw） */
+  --font-headline-lg: 20px; /* 页面大标题 */
+  --font-headline-md: 18px; /* 商家名等 */
+  --font-body-lg: 16px; /* 商品标题/正文 */
+  --font-body-md: 14px;
+  --font-label-md: 12px; /* 次级信息 */
+  --font-label-sm: 10px;
+
+  /* ---- 间距（4px 基准） ---- */
+  --spacing-page: 12px; /* 页面左右边距 */
+  --spacing-module: 12px; /* 模块间距 */
+  --spacing-card: 10px; /* 卡片内边距 */
+  --spacing-gutter: 8px;
+
+  /* ---- 圆角（2–8px 阶梯；禁用胶囊，设计系统 Prohibited） ---- */
+  --radius-sm: 2px;
+  --radius-default: 4px; /* 输入框、标签等小元素 */
+  --radius-md: 6px;
+  --radius-lg: 8px; /* 商家卡、商品图容器 */
+  --radius-xl: 12px;
+}
