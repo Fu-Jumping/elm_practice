@@ -284,8 +284,8 @@ docs/                     PRD、SRS、契约、设计和测试记录
 | 实体 | 必要字段 | 约束 |
 | --- | --- | --- |
 | 用户 | `userId`、`account`、`passwordHash`、`nickname`、`createdAt` | `account` 唯一；仅存密码摘要 |
-| 商家 | `merchantId`、`account`、`passwordHash`、`storeId`、`createdAt` | `account` 唯一；必须绑定店铺 |
-| 店铺 | `storeId`、`name`、`description`、`image`、`rating`、`monthlySales`、`deliveryMinutes`、`startPrice`、`deliveryFee`、`status` | `status` 为 `OPEN/CLOSED/TEMPORARILY_CLOSED` |
+| 商家 | `merchantId`、`account`、`passwordHash`、`createdAt` | `account` 唯一；注册时自动创建绑定店铺 |
+| 店铺 | `storeId`、`merchantId`、`name`、`description`、`image`、`rating`、`monthlySales`、`deliveryMinutes`、`startPrice`、`deliveryFee`、`status` | `merchantId` 关联所属商家；`status` 为 `OPEN/CLOSED/TEMPORARILY_CLOSED` |
 | 分类 | `categoryId`、`storeId`、`name`、`sortOrder` | 同店铺 `name` 唯一 |
 | 商品 | `productId`、`storeId`、`categoryId`、`name`、`description`、`image`、`price`、`stock`、`onSale` | `price >= 0`、`stock >= 0` |
 | 地址 | `addressId`、`userId`、`contactName`、`contactSex`、`contactPhone`、`region`、`detail`、`label`、`isDefault` | 只能被所属用户访问 |
