@@ -193,8 +193,8 @@ const backendLayers = [
 // 数据库层次：9 张表
 const dbTables = [
   { name:'user', fields:[['userId','PK','BIGINT'],['account','','VARCHAR','唯一'],['passwordHash','','VARCHAR','仅存摘要'],['nickname','','VARCHAR'],['createdAt','','DATETIME']] },
-  { name:'merchant', fields:[['merchantId','PK','BIGINT'],['account','','VARCHAR','唯一'],['passwordHash','','VARCHAR'],['storeId','FK→store','BIGINT'],['createdAt','','DATETIME']] },
-  { name:'store', fields:[['storeId','PK','BIGINT'],['name','','VARCHAR'],['description','','TEXT'],['image','','VARCHAR'],['rating','','DECIMAL'],['monthlySales','','INT'],['deliveryMinutes','','INT'],['startPrice','','DECIMAL'],['deliveryFee','','DECIMAL'],['status','','ENUM','OPEN/CLOSED/TEMPORARILY_CLOSED']] },
+  { name:'merchant', fields:[['merchantId','PK','BIGINT'],['account','','VARCHAR','唯一'],['passwordHash','','VARCHAR'],['createdAt','','DATETIME']] },
+  { name:'store', fields:[['storeId','PK','BIGINT'],['merchantId','FK→merchant','BIGINT','所属商家'],['name','','VARCHAR'],['description','','TEXT'],['image','','VARCHAR'],['rating','','DECIMAL'],['monthlySales','','INT'],['deliveryMinutes','','INT'],['startPrice','','DECIMAL'],['deliveryFee','','DECIMAL'],['status','','ENUM','OPEN/CLOSED/TEMPORARILY_CLOSED']] },
   { name:'category', fields:[['categoryId','PK','BIGINT'],['storeId','FK→store','BIGINT'],['name','','VARCHAR','同店铺唯一'],['sortOrder','','INT']] },
   { name:'product', fields:[['productId','PK','BIGINT'],['storeId','FK→store','BIGINT'],['categoryId','FK→category','BIGINT'],['name','','VARCHAR'],['description','','TEXT'],['image','','VARCHAR'],['price','','DECIMAL','>=0'],['stock','','INT','>=0'],['onSale','','BOOLEAN']] },
   { name:'address', fields:[['addressId','PK','BIGINT'],['userId','FK→user','BIGINT'],['contactName','','VARCHAR'],['contactSex','','VARCHAR'],['contactPhone','','VARCHAR'],['region','','VARCHAR'],['detail','','VARCHAR'],['label','','VARCHAR'],['isDefault','','BOOLEAN','最多一个默认']] },
@@ -268,9 +268,10 @@ const erSource =
   USER ||--o{ ADDRESS : "拥有"
   USER ||--o{ CART_ITEM : "拥有"
   USER ||--o{ ORDER : "下单"
-  MERCHANT ||--|| STORE : "绑定"
+  MERCHANT ||--o{ STORE : "绑定"
   STORE ||--o{ CATEGORY : "包含"
   STORE ||--o{ PRODUCT : "拥有"
+  STORE ||--o{ ORDER : "接单"
   CATEGORY ||--o{ PRODUCT : "分类"
   ORDER ||--|{ ORDER_ITEM : "包含"
 
@@ -285,11 +286,11 @@ const erSource =
     bigint merchantId PK
     varchar account UK
     varchar passwordHash "仅存摘要"
-    bigint storeId FK
     datetime createdAt
   }
   STORE {
     bigint storeId PK
+    bigint merchantId FK "所属商家"
     varchar name
     text description
     varchar image
@@ -298,7 +299,7 @@ const erSource =
     int deliveryMinutes
     decimal startPrice
     decimal deliveryFee
-    varchar status "OPEN/CLOSED/TEMPORARILY_CLOSED"
+    varchar status "OPEN/CLOSED/TEMP"
   }
   CATEGORY {
     bigint categoryId PK
