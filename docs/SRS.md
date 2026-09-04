@@ -259,7 +259,7 @@ docs/                     PRD、SRS、契约、设计和测试记录
 | 实体 | 主要职责 | 关键关系 |
 | --- | --- | --- |
 | `user` | 用户账号和个人信息 | 一个用户有多个地址、购物车行和订单 |
-| `merchant` | 商家账号 | 一个商家绑定一个店铺 |
+| `merchant` | 商家账号 | 一个商家绑定多个店铺 |
 | `store` | 店铺信息和营业状态 | 一个店铺有多个分类、商品和订单 |
 | `category` | 店铺商品分类 | 一个分类有多个商品 |
 | `product` | 商品价格、库存和上下架 | 属于一个店铺和一个分类 |
@@ -270,7 +270,7 @@ docs/                     PRD、SRS、契约、设计和测试记录
 
 关系约束：
 
-- `merchant 1 : 1 store`
+- `merchant 1 : N store`
 - `store 1 : N category`
 - `store 1 : N product`
 - `category 1 : N product`
