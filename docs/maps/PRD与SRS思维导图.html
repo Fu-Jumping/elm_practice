@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRD 与 SRS 思维导图</title>
+<script>
+  window.markmap = {
+    autoLoader: {
+      manual: false
+    }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.16/dist/index.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    display: flex;
+    flex-direction: column;
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    background: #faf7f5;
+    color: #333;
+  }
+  header {
+    padding: 14px 20px 10px;
+    border-bottom: 1px solid #f0e2da;
+    background: #fff;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 18px;
+    color: #ff5a1f;
+  }
+  header p {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: #999;
+  }
+  .tabbar {
+    display: flex;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #fff;
+    border-bottom: 1px solid #f0e2da;
+  }
+  .tab {
+    border: 1px solid #ff5a1f;
+    background: #fff;
+    color: #ff5a1f;
+    font-size: 14px;
+    padding: 6px 22px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .tab.active {
+    background: #ff5a1f;
+    color: #fff;
+  }
+  main {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+  }
+  .map-pane {
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+  }
+  .map-pane.active { visibility: visible; }
+  .markmap {
+    width: 100%;
+    height: 100%;
+  }
+  .markmap svg {
+    width: 100%;
+    height: 100%;
+  }
+  #offline-tip {
+    display: none;
+    position: fixed;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    background: rgba(250, 247, 245, 0.96);
+    z-index: 10;
+    text-align: center;
+    padding: 24px;
+  }
+  #offline-tip .card {
+    max-width: 480px;
+    background: #fff;
+    border: 1px solid #f0cfc0;
+    border-radius: 10px;
+    padding: 24px 28px;
+    font-size: 14px;
+    line-height: 1.8;
+  }
+  #offline-tip .card strong { color: #ff5a1f; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>PRD 与 SRS 思维导图</h1>
+  <p>内容真源：docs/PRD.md（v1.0 课程基线）与 docs/SRS.md（v0.1 初稿）· 生成日期 2026-09-04 · 本导图为派生视图，需求口径以原文档为准</p>
+</header>
+
+<div class="tabbar">
+  <button class="tab" data-map="prd">PRD 产品需求文档</button>
+  <button class="tab" data-map="srs">SRS 软件需求规格说明</button>
+</div>
+
+<main>
+  <div class="map-pane active" data-map="prd">
+    <div class="markmap">
+      <script type="text/template">
+---
+markmap:
+  maxWidth: 280
+  initialExpandLevel: 2
+  colorFreezeLevel: 2
+---
+# PRD v1.0 外卖平台课程综合实践（课程基线）
+
+## 1 文档更新信息
+### 范围与工程基线
+- 唯一有效 PRD：v1.0（2026-09-02）
+- 旧内部版本 v4.2~v4.15 已弃用
+### 文档使用规则
+- PRD 只写产品范围与用户可见行为
+- 系统行为与验收条件归 SRS
+- RESTful 请求响应归接口契约
+
+## 2 产品背景
+### 行业与课题背景
+- 仿饿了么式点餐系统课程实践
+- 三周作品：需求→设计→编码→数据库→测试→部署→答辩
+### 需要先说清楚的地方
+- 课程结项不只看页面，还看过程证据
+### 为什么现在做
+- 2.4 七个问题 → 2.5 七条解决思路
+
+## 3 目标
+### 总目标
+- 前端+后端+数据库+联调+部署+材料完整对应
+- 六类基础能力真实可运行、可测试、可解释
+### G1 六类基础能力交付率 100%
+### G2 基础闭环可运行率 100%
+### G3 TDD 过程完整率 100%
+### G4 需求变更适配率 100%
+### G5 工程规范检查通过率 100%
+- RESTful、分层、统一错误响应、权限校验
+### G6 运行与交付材料覆盖率 100%
+- 当前状态：均待实现（以证据为准）
+
+## 4 解决方案说明
+### 角色与入口
+- 用户：移动 H5；商家：桌面后台 ≥1280px
+- 平台管理员：P2 待定
+### 系统架构与项目边界
+- 三端独立工程，RESTful 通信
+### 从零开发的仓库结构
+- frontend/user-h5：Vue3+Vite+Pinia+Axios
+- frontend/merchant-admin：React18+AntD5
+- backend：Java + MySQL/PostgreSQL
+### 数据模型边界
+### 用户端主流程
+- 注册登录→首页→商家详情→商品详情→加购
+- →购物车→确认订单→下单→订单查询
+### 商家端桌面后台
+- 注册即自动建店（初始 CLOSED）
+- 开店/关店/临时闭店、商品分类、订单
+### 跨端同步机制
+### 数据与接口策略
+- Session+Cookie 认证；/api/v1 RESTful
+### 视觉标准摘要
+- 主色 #ff5a1f 亮橙；exact 复刻设计稿
+### 当前完成状态
+
+## 5 产品结构图
+### 六层结构表
+
+## 6 产品功能 list
+### 6.1 范围与总表
+- P0：真实接口+数据库最小闭环
+- P1 已选扩展：商家订单推进跨端同步、模拟支付库存一致
+- P2：取消订单、配送管理、管理员、图片上传
+- 页面：用户端 P0 10页+扩展13页；商家端 P0 7页
+### 6.2 账号与角色 P0
+- 注册、登录、注销、个人信息
+- 演示账号 userA/userB（123456）
+### 6.3 首页与搜索 P0/P1
+- 定位、分类、推荐商家；搜索与结果页
+### 6.4 商家与商品 P0
+- 店铺列表/详情/营业状态
+- 分类栏+商品列表；商品详情
+### 6.5 购物车 P0
+- 按商家隔离；同商品行合并数量；增减删
+### 6.6 确认订单与支付 P0/P1
+- 地址、备注、金额
+- P1：模拟支付三页（支付/成功/失败）
+### 6.7 订单 P0/P1
+- 列表、详情、状态查询
+### 6.8 评价流程 P1
+### 6.9 地址管理 P0
+### 6.10 消息与联系商家 P1
+- 仅订单用户与该订单商家的会话
+### 6.11 用户资产 P1/P2
+- 收藏、会员权益、红包
+### 6.12 经营概览
+- 仅营业开关并入店铺设置，其余二期不做
+### 6.13 商家订单处理
+- 列表/详情为 P0 载体页
+- 状态推进（接单/出餐/完成）为已选 P1
+### 6.14 商品与分类 P0
+### 6.15 店铺设置 P0
+### 6.16 优惠配置：二期不做
+### 6.17 消息/评价/数据：二期不做
+### 6.18 后端与数据库边界（P0 联调）
+
+## 7 具体功能说明
+### 7.1 账号与角色
+### 7.2 首页与搜索
+### 7.3 商家详情与购物车
+### 7.4 确认订单与优惠计算
+- 实付 = 商品小计 + 打包费 ¥2.00
+- 打包费后端计价并随快照保存
+- 确认订单页不单列打包费行
+### 7.5 支付与支付反馈（本组扩展）
+### 7.6 订单状态规则与跨端同步（本组扩展）
+- 链：待支付(15min倒计时)→待接单→制作中→配送中→已完成
+- 状态只能顺序更新，防重复生效
+### 7.7 评价流程
+### 7.8 消息与联系商家
+### 7.9 地址管理
+### 7.10 用户资产
+### 7.11 商家端-订单处理
+### 7.12 商家端-商品与分类
+- 下架商品可删除；历史订单靠快照不受影响
+### 7.13 商家端-店铺设置与优惠配置
+### 7.14 商家端-评价回复与数据统计（二期不做）
+### 7.15 认证、角色与资源归属
+### 7.16 订单事务、库存与金额安全（本组扩展）
+- 校验：身份/地址归属/营业状态/购物车归属
+- 后端重查价格库存→统一顺序计价
+- 库存不足：返回具体商品，不建半成品订单
+- 单事务：订单头+明细快照+扣库存+清购物车
+- 任一步失败全回滚
+### 7.17 搜索、统计与加分模块实施边界
+### 7.18 测试、部署与交付要求
+- 前端 npm run build 通过（H5 移动视口 / 后台 ≥1280px）
+- 建表/种子脚本可重复执行
+- 联调必须关闭 Mock 回退
+- 三类证据：接口响应+页面结果+数据库变化
+### 产品流程
+- 泳道图；P0 下单主流程 5 步
+- 商家处理与跨端同步 5 步；评价消息流程
+### 原型说明
+- 统一规则 8 条：数据来源/加载/空态/错误分级/双重校验/同步/防重复/占位
+- 用户端 72 区原型逐区标注
+- 商家端 85 区红框逐区标注
+- P0 覆盖 15 类检查场景
+
+## 8 埋点方案
+### 结论：不接埋点 SDK
+### 12 类过程证据记录
+- 需求、测试、TDD、接口联调、数据库
+- 前后端构建、真实主链路、权限与错误、扩展模块
+- 页面检查、课程材料等
+- 无截图/日志/接口响应只能写"待验证"
+
+## 9 项目排期
+### 关键节点
+- 9/3 三端初始化+契约架构评审
+- 9/4 SRS 提交+失败测试先行
+- 9/5-9/6 周末冲刺
+- 9/7 晚 P0 全链路联调演练
+- 9/8（或顺延 9/9）中期验收
+- 9/15 功能冻结；9/15-16 匿名交叉验收
+- 9/17-18 最终验收；第 4 周材料归档
+### 明确不做项
+- 平台/电话/智能客服、骑手地图、退款真实资金
+- 积分体系、第三方真实支付、复杂 RBAC
+- 微服务、消息队列、分布式缓存
+### 演示数据
+- 5 家商家：m001 老王小店、m002 肯德基（主演示）
+- m003 麦当劳、m004 老胖烧烤、m005 元盛居火锅
+- 10 类点餐分类；种子账号仅演示不能替代验收
+      </script>
+    </div>
+  </div>
+
+  <div class="map-pane" data-map="srs">
+    <div class="markmap">
+      <script type="text/template">
+---
+markmap:
+  maxWidth: 280
+  initialExpandLevel: 2
+  colorFreezeLevel: 2
+---
+# SRS v0.1 软件需求规格说明（2026-09-03 初稿）
+
+## 0 效力、写作纪律与分工
+### 唯一需求源：docs/PRD.md
+- 不新增产品范围
+### 接口口径：后端接口契约
+- 只做模块映射与系统级约束
+### 设计口径：docs/design/**
+### 测试口径：TDD实施规划
+- 每条 P0 需求覆盖正常/缺参/未登录/越权/不存在/冲突
+### 真实性口径
+- 无真实证据只能标"规划/待验证"
+### 章节分工
+- §1-2 组长付赞平；§3-7 后端B林晨
+- §8 林晨主笔+王馨琪共创；终审组长
+
+## 1 引言
+### 1.1 编写目的
+- 四端同一实现口径（H5/后台/Java/DB）
+### 1.2 P0 范围（六类闭环）
+- 用户注册登录注销个人信息
+- 商家注册登录店铺开关
+- 浏览店铺分类商品；商家维护
+- 地址增删改查与默认地址
+- 购物车增删改查
+- 订单创建列表详情明细
+- P0 订单状态单一 PROCESSING
+### 1.3 不在本阶段范围
+- 客服/真实支付/骑手地图/复杂RBAC/微服务/退款资金
+### 1.4 术语
+- P0/P1、Mock、real、Session、快照、cartLineId
+### 1.6 版本记录
+- v0.1 2026-09-03 可评审初稿
+
+## 2 需求追踪矩阵（13 条 FR）
+### FR-ACC-01 用户注册
+- PRD 7.1 / 契约3.1 POST /users / TC-ACC-001~007
+### FR-ACC-02 用户会话
+- PRD 7.1 / login、logout、/me、PATCH /me / TC-ACC-008~012
+### FR-MER-01 商家注册开店
+- PRD 7.2 / POST /merchants / TC-MER-001~006
+### FR-MER-02 商家登录店铺维护
+- PRD 7.2、7.13 / 契约4.1 / TC-MER-007~012
+### FR-STO-01 用户浏览
+- PRD 7.3 / GET /stores/**、/products/{id} / TC-STO-001~008
+### FR-ADR-01 地址管理
+- PRD 7.5 / /me/addresses/** / TC-ADR-001~009
+### FR-CAT-01 分类管理
+- PRD 7.12 / /merchant/categories / TC-CAT-001~008
+### FR-PRD-01 商品管理
+- PRD 7.12 / /merchant/products / TC-PRD-001~014
+### FR-CART-01 购物车
+- PRD 7.4 / /cart、/cart/items / TC-CRT-001~010
+### FR-ORD-01 订单创建
+- PRD 7.6 / POST /orders / TC-ORD-001~012
+### FR-ORD-02 订单查询
+- PRD 7.6 / GET /orders/** / TC-ORD-013~020
+### FR-MORD-01 商家订单查询
+- PRD 7.16.2 / GET /merchant/orders/** / 9/4 首批失败测试
+### FR-PAY-01 模拟支付
+- PRD 7.7 / POST /orders/{id}/payment / P1 未纳入 P0
+
+## 3 总体描述
+### 3.1 角色与权限
+- 双 Session：user_session / merchant_session
+- 未登录 401；角色不匹配 403
+- 归属不匹配 404，不泄露资源存在
+- 不信任请求体 userId/merchantId/storeId
+### 3.2 系统上下文
+- H5(Vue3)→Spring Boot:8080→MySQL:3306；后台(React18)
+- 单仓库三目录
+### 3.3 运行环境
+- :5173 / :5174 / :8080 / :3306
+- 联调禁止 Mock 回退
+### 3.4 全局业务约束（10 条）
+- 1 /api/v1 前缀；商家 /api/v1/merchant
+- 2 成功 {code:0, message, data}
+- 3 空列表返回 data:[] 不是错误
+- 4 东八区 yyyy-MM-dd HH:mm:ss
+- 5 金额单位元、后端算、两位小数
+- 6 P0 实付 = 小计 + 打包费 2.00
+- 7 订单存商品/地址/金额快照+创建时间
+- 8 下单同事务：头+明细+快照+清购物车
+- 9 数量库存非负；下架/不足禁加购下单
+- 10 密码不入响应/日志/提交文件
+
+## 4 功能需求（13 条 FR）
+### 4.1 账号与角色
+#### FR-ACC-01 用户注册
+- 正常：合法注册成功；重复账号 409
+- 异常：缺参/格式错 400；重复提交不产生第二个账号
+#### FR-ACC-02 用户会话
+- 正常：登录写 user_session；GET /me；注销失效
+- 异常：账密错 401；未登录 401
+#### FR-MER-01 商家注册和登录
+- 注册同时建店初始 CLOSED；登录写 merchant_session
+- 重复 409；缺参 400；用户 Session 不能进商家接口
+### 4.2 店铺、分类和商品
+#### FR-STO-01 用户浏览
+- 关键词/分类/排序查询；无数据返回空数组
+- 下架商品不显示可购；关闭店铺禁入下单链路
+#### FR-MER-02 店铺设置
+- 只能改自己绑定店铺；改后用户端可见
+- 状态切换失败不得提前展示成功
+#### FR-CAT-01 分类管理
+- 同店铺名称唯一，重名 409
+- 删仍有商品的分类 409；非本店分类 404
+#### FR-PRD-01 商品管理
+- 删除只允许下架商品；售中删除 409
+- 越权/不存在 404；库存 0 显示售罄禁加购
+### 4.3 地址
+#### FR-ADR-01 地址管理
+- 最多一个默认；删默认后按契约重设最近一条
+- 他人地址 404；重复设默认不产生多个默认
+### 4.4 购物车
+#### FR-CART-01 购物车管理
+- 范围=用户+店铺+商品；同商品合并数量
+- 数量 0 删该行；非正数或超库存 400
+- 商品不存在/下架/不属于店铺 404 或 409
+### 4.5 基础订单
+#### FR-ORD-01 订单创建
+- 后端以当前购物车/商品/库存/店铺重算
+- 存订单头+三种快照；状态 PROCESSING
+- 成功后清空该用户该店铺购物车
+- 拒绝：空车/地址非本人/关店/下架/库存不足/不起送
+- 预期金额不一致不得覆盖后端计算
+- 事务失败时购物车和订单均保持原状
+#### FR-ORD-02 用户订单查询
+- 新订单入列表；详情含商品地址金额状态快照
+- 他人订单按安全规则 404；空列表返回 []
+#### FR-MORD-01 商家订单查询
+- 只查绑定店铺订单；用户访问 403
+- 他店订单不可见；非法筛选 400
+
+## 5 数据需求
+### 5.1 实体与关系（9 实体）
+- user、merchant、store、category、product
+- address、cart_item、order、order_item
+- merchant 1:1 store；store 1:N category/product
+- user 1:N address/cart_item/order；order 1:N order_item
+### 5.2 P0 数据字典
+- 用户：account 唯一；仅存 passwordHash
+- 店铺：status = OPEN/CLOSED/TEMPORARILY_CLOSED
+- 商品：price>=0、stock>=0、onSale
+- 订单：totalAmount = productSubtotal + packagingFee
+- 订单明细：productName/unitPrice 快照，不依赖当前值
+- 对外业务编号稳定；内部主键不暴露
+### 5.3 存储与事务
+- 建表/种子脚本可重复执行
+- 下单事务：校验→写订单快照→扣/锁库存→清购物车
+- 失败不留半个订单；统一 409/500 JSON
+
+## 6 接口需求
+### 6.1 总则
+- UTF-8+JSON；Set-Cookie 建 Session；前端带 credentials
+- 成功 2xx+code=0；错误 400/401/403/404/409/500
+- 服务端异常也必须返回 JSON，不能吐 HTML
+### 6.2 P0 接口分组（8 组）
+- 用户账号 3.1 / 店铺商品查询 3.2 / 地址 3.3
+- 购物车 3.4 / 用户订单 3.5
+- 商家账号店铺 4.1 / 商家分类商品 4.2 / 商家订单 5.1
+- 后端调整必须回写契约与 SRS，不允许只改前端
+### 6.3 一致性 5 条
+- 同字段两端含义一致；状态值不改名
+- 订单金额固定三项：商品合计/打包费/实付
+- P0 只用 PROCESSING；P1 状态不混入
+- 全操作做 Session 身份与归属检查
+- 重复操作幂等或明确 409
+
+## 7 非功能需求（NFR-01~10）
+### NFR-01 可维护性
+- 三端独立工程 + Controller/Service/DAO 分层 / 目录代码检查
+### NFR-02 可测试性
+- 先失败测试再实现 / Git 顺序+测试报告
+### NFR-03 安全
+- Session 识别角色、归属校验、密码不入日志 / 权限测试
+### NFR-04 一致性
+- 金额后端算；订单+购物车事务保护 / 接口测试+DB 记录
+### NFR-05 幂等性
+- 重复提交不产生重复账号/订单/扣减 / 重复请求测试
+### NFR-06 兼容性
+- 用户端移动视口；商家端 ≥1280px / 截图验证
+### NFR-07 性能
+- 本地可交互返回即可，无生产级 SLA / 手工联调记录
+### NFR-08 可部署性
+- 四件套独立启动；局域网手机可访问 / 构建启动记录
+### NFR-09 可追溯性
+- PRD/SRS/接口/测试/代码/日志互查 / 文档 Git 检查
+### NFR-10 可解释性
+- 每人讲清本人模块需求/接口/测试/数据表 / 答辩抽查
+
+## 8 测试与验收
+### 8.1 六层测试分层
+- 后端单元 / 后端接口 / 用户端 / 商家端
+- 集成联调 / 交叉验收
+### 8.2 首批失败测试（9/4）
+- 先覆盖异常，不是只写成功用例
+- 账号：格式/密码/重复注册/错误登录
+- 权限：未登录、跨角色、他人资源
+- 前提：店铺不存在关闭、商品下架库存不足
+- 商品分类：重名、删有商品分类、售中删除
+- 地址：非本人、无效字段、默认冲突
+- 购物车：非正数、超库存、跨店铺
+- 下单：空车、地址非法、金额篡改、重复提交
+- 商家订单：越权、非法筛选、不存在
+### 8.3 P0 主链路验收（8 步）
+- 登录→首页见 m002→进店看商品→加购改删
+- →选本人地址→创建订单（验状态/金额/快照）
+- →查订单列表详情→商家登录查本店订单
+### 通过门槛（5 条）
+- Mock 回退关闭，响应来自后端
+- 数据库有可解释记录
+- 正常+异常测试有输出，不能只展示截图
+- 失败无半成功数据；越权读不到他人数据
+- 局域网可访问；≥1280px 可操作
+### 8.4 证据清单
+- SRS/契约/架构图/后端代码/前端代码/联调记录/每日记录
+
+## 9 待确认事项（5 项）
+- Spring Boot / MyBatis vs JPA / MySQL 版本
+- 架构设计模块划分与 ER 图落点
+- P0 是否扣库存（契约与 PRD 决议优先）
+- 追踪矩阵测试编号与实际文件名对应
+- 服务器/数据库/局域网部署参数
+- 确认后同步 SRS/契约/测试/运行说明
+- 待确认不得写成已实现
+
+## 10 时间锚点
+- 9/3 初稿+契约冻结
+- 9/4 提交 SRS + 首批失败测试 + 三端开工
+- 9/5-6 冲刺；9/7 晚联调演练
+- 9/8~9/9 中期验收；9/15 功能冻结
+- 文档 TODO：§8.4/§9 建议移至 project 文档、§10 建议删除
+      </script>
+    </div>
+  </div>
+</main>
+
+<div id="offline-tip">
+  <div class="card">
+    <strong>导图脚本未能加载</strong><br>
+    本页面通过 CDN（jsdelivr）加载 markmap 渲染库，需要联网打开。<br>
+    请检查网络连接后刷新页面；或将 markdown 大纲部分替换为本地打包的 markmap 脚本。
+  </div>
+</div>
+
+<script>
+  (function () {
+    function activate(name) {
+      document.querySelectorAll('.map-pane').forEach(function (p) {
+        p.classList.toggle('active', p.dataset.map === name);
+      });
+      document.querySelectorAll('.tab').forEach(function (b) {
+        b.classList.toggle('active', b.dataset.map === name);
+      });
+      if (location.hash !== '#' + name) {
+        history.replaceState(null, '', '#' + name);
+      }
+    }
+    document.querySelectorAll('.tab').forEach(function (b) {
+      b.addEventListener('click', function () { activate(b.dataset.map); });
+    });
+    activate(location.hash === '#srs' ? 'srs' : 'prd');
+
+    // CDN 加载失败降级提示：加载完成 2.5s 后仍无 SVG 则显示
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        if (!document.querySelector('.markmap svg')) {
+          document.getElementById('offline-tip').style.display = 'flex';
+        }
+      }, 2500);
+    });
+  })();
+</script>
+
+</body>
+</html>
