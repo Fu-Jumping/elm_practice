@@ -1,9 +1,12 @@
 import {
   Alert,
   Badge,
+  Button,
   Card,
   Col,
   ConfigProvider,
+  Form,
+  Input,
   Layout,
   Row,
   Statistic,
@@ -11,6 +14,7 @@ import {
   Tag,
   Typography,
 } from 'antd'
+import { useState } from 'react'
 import './App.css'
 
 const { Header, Content, Sider } = Layout
@@ -46,6 +50,10 @@ const dataSource = [
 ]
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [account, setAccount] = useState('')
+  const [password, setPassword] = useState('')
+
   return (
     <ConfigProvider
       theme={{
@@ -86,6 +94,20 @@ function App() {
           </Header>
 
           <Content className="merchant-content">
+            <Card title={<h1>商家登录</h1>} className="merchant-login-card">
+              <Form layout="vertical" onFinish={() => setIsLoggedIn(true)}>
+                <Form.Item label="账号" name="account" required>
+                  <Input value={account} onChange={(event) => setAccount(event.target.value)} />
+                </Form.Item>
+                <Form.Item label="密码" name="password" required>
+                  <Input.Password value={password} onChange={(event) => setPassword(event.target.value)} />
+                </Form.Item>
+                <Button type="primary" htmlType="submit">
+                  {isLoggedIn ? '已登录' : '登录'}
+                </Button>
+              </Form>
+            </Card>
+
             <Alert
               type="info"
               showIcon
@@ -110,6 +132,26 @@ function App() {
 
             <Card title="最近订单" className="orders-card">
               <Table columns={columns} dataSource={dataSource} pagination={false} />
+            </Card>
+
+            <Card title="店铺设置" className="store-status-card">
+              <Button type="primary" htmlType="button" aria-label="保存营业状态">
+                保存营业状态
+              </Button>
+            </Card>
+
+            <Card title="商品管理" className="products-card">
+              <Button type="primary" htmlType="button" aria-label="新增商品">
+                新增商品
+              </Button>
+              <Form layout="vertical">
+                <Form.Item label="商品价格" name="productPrice">
+                  <Input type="number" />
+                </Form.Item>
+                <Form.Item label="商品库存" name="productStock">
+                  <Input type="number" />
+                </Form.Item>
+              </Form>
             </Card>
           </Content>
         </Layout>
