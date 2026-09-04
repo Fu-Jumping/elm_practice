@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SRS 三维视角演示</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root { --brand: #ff5a1f; --bggray: #faf7f5; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body { display: flex; flex-direction: column; font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; background: var(--bggray); color: #333; }
+  header { padding: 14px 20px 10px; border-bottom: 1px solid #f0e2da; background: #fff; }
+  header h1 { margin: 0; font-size: 18px; color: var(--brand); }
+  header p { margin: 6px 0 0; font-size: 12px; color: #999; }
+  .tabbar { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 20px; background: #fff; border-bottom: 1px solid #f0e2da; }
+  .tab { border: 1px solid var(--brand); background: #fff; color: var(--brand); font-size: 14px; padding: 6px 18px; border-radius: 999px; cursor: pointer; }
+  .tab.active { background: var(--brand); color: #fff; }
+  main { position: relative; flex: 1; min-height: 0; padding: 20px; overflow: auto; }
+  .pane { display: none; }
+  .pane.active { display: block; }
+  h2 { font-size: 16px; color: var(--brand); margin: 0 0 12px; }
+  .subtitle { font-size: 12px; color: #888; margin-bottom: 16px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .column { background: #fff; border: 1px solid #f0e2da; border-radius: 10px; padding: 16px; }
+  .column h3 { font-size: 15px; margin: 0 0 4px; color: #333; }
+  .column .role-tag { font-size: 11px; color: var(--brand); background: #fff1eb; border-radius: 4px; padding: 2px 8px; display: inline-block; margin-bottom: 10px; }
+  .card { border: 1px solid #eee; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; background: #fefcfb; }
+  .card .fr { font-weight: 700; color: var(--brand); font-size: 13px; }
+  .card .meta { font-size: 11px; color: #999; margin: 4px 0; }
+  .card .meta b { color: #666; font-weight: 600; }
+  .card .detail { margin-top: 8px; font-size: 12px; color: #555; line-height: 1.6; border-top: 1px dashed #eee; padding-top: 8px; display: none; }
+  .card.open .detail { display: block; }
+  .card .toggle { font-size: 11px; color: var(--brand); cursor: pointer; margin-top: 6px; user-select: none; }
+  .cards-wrap { display: flex; flex-direction: column; }
+  .layer-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .layer { background: #fff; border: 1px solid #f0e2da; border-radius: 10px; padding: 14px; }
+  .layer h3 { font-size: 14px; margin: 0 0 10px; color: var(--brand); }
+  .chip { background: #fff1eb; border: 1px solid #ffe0d2; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; font-size: 12px; }
+  .chip b { color: var(--brand); }
+  .chip .fr { font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; background: #fff; }
+  th, td { border: 1px solid #eee; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #fff1eb; color: var(--brand); font-weight: 600; }
+  .db-table { margin-bottom: 18px; }
+  .db-table h3 { font-size: 14px; margin: 0 0 6px; color: #333; }
+  .pk { color: var(--brand); font-weight: 700; }
+  .fk { color: #2b6cb0; font-weight: 600; }
+  .note { background: #fff8e6; border: 1px solid #f0e0b0; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #7a6a3a; margin: 12px 0; }
+  .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 14px; }
+  .flow .step { background: var(--brand); color: #fff; border-radius: 6px; padding: 5px 10px; }
+  .flow .arrow { color: #ccc; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SRS 三维视角演示</h1>
+  <p>内容真源：docs/SRS.md（v0.1 初稿）· 接口 / 后端 / 测试口径以 docs/backend/ 为准 · 生成日期 2026-09-04 · 本页为派生视图，需求口径以原文档为准</p>
+</header>
+
+<div class="tabbar">
+  <button class="tab active" data-pane="er">ER 实体关系图</button>
+  <button class="tab" data-pane="usage">使用侧视角</button>
+  <button class="tab" data-pane="backend">后端开发视角</button>
+  <button class="tab" data-pane="db">数据库层次</button>
+</div>
+
+<main>
+  <!-- ============ 1. ER 实体关系图 ============ -->
+  <div class="pane active" data-pane="er">
+    <h2>ER 实体关系图</h2>
+    <div class="subtitle">数据取值与约束见 SRS §5.1 / §5.2；PK=主键，FK=外键；本图与「数据库层次」页签口径一致。</div>
+    <div class="note">mermaid 渲染中，若空白请检查网络（CDN 加载）。</div>
+    <div id="er-container">正在渲染 ER 图…</div>
+    <pre id="er-source" style="display:none"></pre>
+  </div>
+
+  <!-- ============ 2. 使用侧视角 ============ -->
+  <div class="pane" data-pane="usage">
+    <h2>使用侧视角（消费者 / 商家）</h2>
+    <div class="subtitle">点击卡片标题下的「展开验收」查看正常 / 异常场景；需求映射取自 SRS §4 与追踪矩阵。</div>
+    <div class="grid2">
+      <!-- 消费者列 -->
+      <div class="column">
+        <span class="role-tag">消费者（用户端移动 H5）</span>
+        <h3>从浏览到下单</h3>
+        <div class="cards-wrap" id="user-cards"></div>
+      </div>
+      <!-- 商家列 -->
+      <div class="column">
+        <span class="role-tag">商家（桌面 Web 后台）</span>
+        <h3>开店到处理订单</h3>
+        <div class="cards-wrap" id="merchant-cards"></div>
+      </div>
+    </div>
+    <div class="note" style="margin-top:16px">
+      订单闭合关系：消费者创建订单（FR-ORD-01）→ 商家查看本店订单（FR-MORD-01）→ 订单状态流转（P1：接单/出餐/完成）。两条链路在订单实体上闭合。
+    </div>
+  </div>
+
+  <!-- ============ 3. 后端开发视角 ============ -->
+  <div class="pane" data-pane="backend">
+    <h2>后端开发视角（每个需求在哪一层被解决）</h2>
+    <div class="subtitle">按后端分层 Controller → Service → DAO → DB；P0 各 FR 需求的落点与职责标注。</div>
+    <div class="flow">
+      <span class="step">HTTP 请求 /api/v1</span><span class="arrow">→</span>
+      <span class="step">Controller 路由+鉴权+参数校验</span><span class="arrow">→</span>
+      <span class="step">Service 业务规则+金额/状态计算</span><span class="arrow">→</span>
+      <span class="step">DAO 数据访问+事务</span><span class="arrow">→</span>
+      <span class="step">DB 持久化</span>
+    </div>
+    <div class="layer-row" id="backend-layers"></div>
+    <div class="note">
+      <b>待确认项（SRS §9）：</b>Spring Boot / ORM（MyBatis 或 JPA）/ MySQL 版本、架构设计模块划分、P0 是否扣库存——实现前需回写 SRS、契约与测试。
+    </div>
+  </div>
+
+  <!-- ============ 4. 数据库层次 ============ -->
+  <div class="pane" data-pane="db">
+    <h2>数据库层次（表 + 主/外键 + 约束）</h2>
+    <div class="subtitle">数据字典落地为建表口径；PK=主键、FK=外键；关键业务约束已标注。这是 SRS §5 数据需求的表级视图。</div>
+    <div id="db-tables"></div>
+  </div>
+</main>
+
+<script type="text/javascript">
+// ================= 数据定义 =================
+// 使用侧视角：消费者
+const userFlows = [
+  { fr:'FR-ACC-01', name:'用户注册', prd:'PRD 7.1', api:'POST /users', tc:'TC-ACC-001~007',
+    ok:'合法账号注册成功；重复账号返回 409', err:'缺参/格式错 400；重复提交不产生第二个账号' },
+  { fr:'FR-ACC-02', name:'用户登录与会话', prd:'PRD 7.1', api:'/auth/login、/auth/logout、/me、PATCH /me', tc:'TC-ACC-008~012',
+    ok:'登录写 user_session；GET /me 返回当前用户；注销失效', err:'账密错 401；未登录 401' },
+  { fr:'FR-STO-01', name:'浏览店铺 / 商品', prd:'PRD 7.3', api:'GET /stores/**、GET /products/{id}', tc:'TC-STO-001~008',
+    ok:'关键词/分类/排序查询；无数据返回空数组', err:'非法参数 400；不存在店铺 404；关闭店铺禁入下单链路' },
+  { fr:'FR-ADR-01', name:'地址管理', prd:'PRD 7.5', api:'/me/addresses/**', tc:'TC-ADR-001~009',
+    ok:'地址字段完整；最多一个默认；删默认后按契约重设最近一条', err:'未登录 401；字段缺失/格式错 400；他人地址 404；重复设默认不产生多个默认' },
+  { fr:'FR-CART-01', name:'购物车', prd:'PRD 7.4', api:'/cart、/cart/items', tc:'TC-CRT-001~010',
+    ok:'范围=用户+店铺+商品；同商品合并数量；改后行价总价一致', err:'未登录 401；商品不存在/下架/跨店铺 404/409；数量非正数或超库存 400' },
+  { fr:'FR-ORD-01', name:'创建订单', prd:'PRD 7.6', api:'POST /orders', tc:'TC-ORD-001~012',
+    ok:'后端重算；存订单头+三快照；状态 PROCESSING；成功清购物车', err:'空车/地址非本人/关店/下架/库存不足/不起送拒绝；金额篡改不覆盖后端计算；事务失败保持原状' },
+  { fr:'FR-ORD-02', name:'订单查询', prd:'PRD 7.6', api:'GET /orders/**', tc:'TC-ORD-013~020',
+    ok:'新订单入列表；详情含商品/地址/金额/状态快照', err:'未登录 401；他人订单 404；空列表返回 []' },
+];
+
+// 使用侧视角：商家
+const merchantFlows = [
+  { fr:'FR-MER-01', name:'商家注册 / 登录', prd:'PRD 7.2', api:'POST /merchants、/merchant/auth/login', tc:'TC-MER-001~006',
+    ok:'注册同时自动创建绑定店铺，初始 CLOSED；登录写 merchant_session', err:'账号重复 409；缺参格式错 400；用户 Session 不能访问商家接口' },
+  { fr:'FR-MER-02', name:'店铺设置', prd:'PRD 7.2、7.13', api:'/merchant/store', tc:'TC-MER-007~012',
+    ok:'只可改自己绑定店铺；改后用户端可见', err:'未登录 401；角色不匹配 403；归属不符 404；字段非法 400；状态切换失败不得提前展示成功' },
+  { fr:'FR-CAT-01', name:'分类管理', prd:'PRD 7.12', api:'/merchant/categories', tc:'TC-CAT-001~008',
+    ok:'同店铺名称唯一；分类修改后商品归属可正确查询', err:'同名 409；删有商品分类 409；非本店分类 404' },
+  { fr:'FR-PRD-01', name:'商品管理', prd:'PRD 7.12', api:'/merchant/products', tc:'TC-PRD-001~014',
+    ok:'列表/详情/用户端查询字段一致；仅下架商品可删', err:'价格/库存/名称/分类非法 400；售中删除 409；越权不存在 404；库存 0 售罄禁加购' },
+  { fr:'FR-MORD-01', name:'商家订单查询', prd:'PRD 7.16.2', api:'GET /merchant/orders/**', tc:'9/4 首批失败测试',
+    ok:'只查绑定店铺订单；订单来自本店', err:'未登录 401；用户访问商家接口 403；他店订单不可见；非法筛选 400' },
+];
+
+// 后端开发视角：四层，每层放若干 FR 及其在该层的职责
+const backendLayers = [
+  { name:'Controller 层', desc:'路由 + 身份/角色鉴权 + 参数校验 + 统一错误码', items:[
+    { fr:'全局', what:'/api/v1 前缀、统一响应、Session（Cookie）识别角色、400/401/403/404/409/500 状态码' },
+    { fr:'FR-ACC-01/02', what:'注册登录路由、写 user_session、GET /me、注销' },
+    { fr:'FR-MER-01/02', what:'商家注册开店、merchant_session、店铺设置路由' },
+    { fr:'FR-STO-01', what:'店铺/商品查询路由、非法查询参数 400' },
+    { fr:'FR-ORD-01', what:'下单入口：校验身份、地址归属、营业状态、购物车归属' },
+    { fr:'FR-MORD-01', what:'商家订单路由：拒绝用户访问（403）' },
+  ]},
+  { name:'Service 层', desc:'业务规则 + 金额/状态计算 + 幂等', items:[
+    { fr:'FR-ORD-01', what:'后端重查价格/库存、统一顺序计价（小计+打包费2.00）、状态 PROCESSING、预期金额一致性检查' },
+    { fr:'FR-ORD-01/FR-CART-01', what:'数量/库存非负校验、超库存/下架禁加购、金额篡改不覆盖后端计算' },
+    { fr:'FR-CAT-01/FR-PRD-01', what:'分类唯一、删除有商品分类 409、仅下架商品可删' },
+    { fr:'FR-ADR-01', what:'默认地址唯一、删默认后重设最近一条、归属校验' },
+    { fr:'全局', what:'幂等：重复提交不产生重复账号/订单/扣减；订单金额以后端为准' },
+  ]},
+  { name:'DAO 层', desc:'数据访问 + 事务', items:[
+    { fr:'FR-ORD-01', what:'单事务：写订单头 + 明细快照 + 清空该用户该店铺购物车（任一步失败全回滚）' },
+    { fr:'FR-PRD-01', what:'商品/库存读写（P0 是否扣库存待确认）' },
+    { fr:'FR-ACC-01/FR-MER-01', what:'账号唯一性查重（重复 409）' },
+    { fr:'FR-ADR-01', what:'地址/默认地址持久化' },
+    { fr:'全局', what:'事务失败、异常退出、并发冲突不得留半条订单；统一 409/500 JSON' },
+  ]},
+  { name:'DB 层', desc:'存储 + 约束 + 可重复初始化', items:[
+    { fr:'数据字典', what:'user/merchant/store/category/product/address/cart_item/order/order_item 九表' },
+    { fr:'约束', what:'account 唯一、status 枚举、price/stock>=0、totalAmount=小计+打包费、仅存 passwordHash' },
+    { fr:'快照', what:'order 存地址快照；order_item 存商品名/单价快照，不依赖商品当前值' },
+    { fr:'初始化', what:'建表/种子脚本可重复执行或先清理后初始化' },
+  ]},
+];
+
+// 数据库层次：9 张表
+const dbTables = [
+  { name:'user', fields:[['userId','PK','BIGINT'],['account','','VARCHAR','唯一'],['passwordHash','','VARCHAR','仅存摘要'],['nickname','','VARCHAR'],['createdAt','','DATETIME']] },
+  { name:'merchant', fields:[['merchantId','PK','BIGINT'],['account','','VARCHAR','唯一'],['passwordHash','','VARCHAR'],['storeId','FK→store','BIGINT'],['createdAt','','DATETIME']] },
+  { name:'store', fields:[['storeId','PK','BIGINT'],['name','','VARCHAR'],['description','','TEXT'],['image','','VARCHAR'],['rating','','DECIMAL'],['monthlySales','','INT'],['deliveryMinutes','','INT'],['startPrice','','DECIMAL'],['deliveryFee','','DECIMAL'],['status','','ENUM','OPEN/CLOSED/TEMPORARILY_CLOSED']] },
+  { name:'category', fields:[['categoryId','PK','BIGINT'],['storeId','FK→store','BIGINT'],['name','','VARCHAR','同店铺唯一'],['sortOrder','','INT']] },
+  { name:'product', fields:[['productId','PK','BIGINT'],['storeId','FK→store','BIGINT'],['categoryId','FK→category','BIGINT'],['name','','VARCHAR'],['description','','TEXT'],['image','','VARCHAR'],['price','','DECIMAL','>=0'],['stock','','INT','>=0'],['onSale','','BOOLEAN']] },
+  { name:'address', fields:[['addressId','PK','BIGINT'],['userId','FK→user','BIGINT'],['contactName','','VARCHAR'],['contactSex','','VARCHAR'],['contactPhone','','VARCHAR'],['region','','VARCHAR'],['detail','','VARCHAR'],['label','','VARCHAR'],['isDefault','','BOOLEAN','最多一个默认']] },
+  { name:'cart_item', fields:[['cartLineId','PK','BIGINT'],['userId','FK→user','BIGINT'],['storeId','FK→store','BIGINT'],['productId','FK→product','BIGINT'],['quantity','','INT','>0；P0 同商品合并']] },
+  { name:'order', fields:[['orderId','PK','BIGINT'],['userId','FK→user','BIGINT'],['storeId','FK→store','BIGINT'],['status','','ENUM','PROCESSING(P0)'],['productSubtotal','','DECIMAL'],['packagingFee','','DECIMAL','固定2.00'],['totalAmount','','DECIMAL','=小计+打包费'],['addressSnapshot','','JSON','地址快照'],['createdAt','','DATETIME']] },
+  { name:'order_item', fields:[['orderItemId','PK','BIGINT'],['orderId','FK→order','BIGINT'],['productId','FK→product','BIGINT'],['productNameSnapshot','','VARCHAR','快照'],['unitPriceSnapshot','','DECIMAL','快照'],['quantity','','INT'],['lineAmount','','DECIMAL']] },
+];
+
+// ================= 渲染逻辑 =================
+const $ = (sel) => document.querySelector(sel);
+
+// 使用侧卡片
+function renderCards(containerId, flows) {
+  const wrap = $(containerId);
+  flows.forEach(f => {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML =
+      '<div class="fr">' + f.fr + ' · ' + f.name + '</div>' +
+      '<div class="meta"><b>PRD 来源</b>：' + f.prd + '　<b>接口</b>：' + f.api + '</div>' +
+      '<div class="meta"><b>测试</b>：' + f.tc + '</div>' +
+      '<div class="detail"><b>正常验收：</b>' + f.ok + '<br><b>异常验收：</b>' + f.err + '</div>' +
+      '<div class="toggle">展开验收 ▾</div>';
+    div.querySelector('.toggle').addEventListener('click', () => div.classList.toggle('open'));
+    wrap.appendChild(div);
+  });
+}
+renderCards('#user-cards', userFlows);
+renderCards('#merchant-cards', merchantFlows);
+
+// 后端分层
+function renderBackend() {
+  const wrap = $('#backend-layers');
+  backendLayers.forEach(layer => {
+    const col = document.createElement('div');
+    col.className = 'layer';
+    col.innerHTML = '<h3>' + layer.name + '</h3><div style="font-size:12px;color:#888;margin-bottom:10px">' + layer.desc + '</div>';
+    layer.items.forEach(it => {
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.innerHTML = '<span class="fr">' + it.fr + '</span>：' + it.what;
+      col.appendChild(chip);
+    });
+    wrap.appendChild(col);
+  });
+}
+renderBackend();
+
+// 数据库表格
+function renderDb() {
+  const wrap = $('#db-tables');
+  dbTables.forEach(tbl => {
+    const h = document.createElement('div');
+    h.className = 'db-table';
+    let rows = '<h3>表 <code>' + tbl.name + '</code></h3><table><thead><tr><th>字段</th><th>标记</th><th>类型</th><th>约束/说明</th></tr></thead><tbody>';
+    tbl.fields.forEach(f => {
+      const mark = f[1];
+      const cls = mark === 'PK' ? 'pk' : (mark.includes('FK') ? 'fk' : '');
+      rows += '<tr><td>' + f[0] + '</td><td class="' + cls + '">' + mark + '</td><td>' + f[2] + '</td><td>' + (f[3] || '') + '</td></tr>';
+    });
+    rows += '</tbody></table>';
+    h.innerHTML = rows;
+    wrap.appendChild(h);
+  });
+}
+renderDb();
+
+// ================= mermaid ER 图 =================
+const erSource =
+`erDiagram
+  USER ||--o{ ADDRESS : "拥有"
+  USER ||--o{ CART_ITEM : "拥有"
+  USER ||--o{ ORDER : "下单"
+  MERCHANT ||--|| STORE : "绑定"
+  STORE ||--o{ CATEGORY : "包含"
+  STORE ||--o{ PRODUCT : "拥有"
+  CATEGORY ||--o{ PRODUCT : "分类"
+  ORDER ||--|{ ORDER_ITEM : "包含"
+
+  USER {
+    bigint userId PK
+    varchar account UK
+    varchar passwordHash "仅存摘要"
+    varchar nickname
+    datetime createdAt
+  }
+  MERCHANT {
+    bigint merchantId PK
+    varchar account UK
+    varchar passwordHash "仅存摘要"
+    bigint storeId FK
+    datetime createdAt
+  }
+  STORE {
+    bigint storeId PK
+    varchar name
+    text description
+    varchar image
+    decimal rating
+    int monthlySales
+    int deliveryMinutes
+    decimal startPrice
+    decimal deliveryFee
+    varchar status "OPEN/CLOSED/TEMPORARILY_CLOSED"
+  }
+  CATEGORY {
+    bigint categoryId PK
+    bigint storeId FK
+    varchar name "同店铺唯一"
+    int sortOrder
+  }
+  PRODUCT {
+    bigint productId PK
+    bigint storeId FK
+    bigint categoryId FK
+    varchar name
+    text description
+    varchar image
+    decimal price ">=0"
+    int stock ">=0"
+    boolean onSale
+  }
+  ADDRESS {
+    bigint addressId PK
+    bigint userId FK
+    varchar contactName
+    varchar contactSex
+    varchar contactPhone
+    varchar region
+    varchar detail
+    varchar label
+    boolean isDefault "最多一个默认"
+  }
+  CART_ITEM {
+    bigint cartLineId PK
+    bigint userId FK
+    bigint storeId FK
+    bigint productId FK
+    int quantity ">0; P0合并"
+  }
+  ORDER {
+    bigint orderId PK
+    bigint userId FK
+    bigint storeId FK
+    varchar status "PROCESSING(P0)"
+    decimal productSubtotal
+    decimal packagingFee "固定2.00"
+    decimal totalAmount "=小计+打包费"
+    json addressSnapshot
+    datetime createdAt
+  }
+  ORDER_ITEM {
+    bigint orderItemId PK
+    bigint orderId FK
+    bigint productId FK
+    varchar productNameSnapshot "快照"
+    decimal unitPriceSnapshot "快照"
+    int quantity
+    decimal lineAmount
+  }`;
+
+document.getElementById('er-source').textContent = erSource;
+(async function renderEr() {
+  const container = document.getElementById('er-container');
+  if (typeof mermaid === 'undefined') { container.innerHTML = '<div class="note">mermaid CDN 未加载，请联网后刷新。</div>'; return; }
+  try {
+    mermaid.initialize({ startOnLoad: false, theme: 'default', er: { useMaxWidth: true } });
+    const { svg } = await mermaid.render('erDiagram1', erSource);
+    container.innerHTML = svg;
+  } catch (e) {
+    container.innerHTML = '<div class="note">ER 图渲染失败：' + e.message + '</div>';
+  }
+})();
+
+// ================= 页签切换 =================
+function activate(name) {
+  document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.dataset.pane === name));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.pane === name));
+  if (location.hash !== '#' + name) history.replaceState(null, '', '#' + name);
+}
+document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => activate(b.dataset.pane)));
+activate(location.hash.replace('#', '') || 'er');
+</script>
+</body>
+</html>
