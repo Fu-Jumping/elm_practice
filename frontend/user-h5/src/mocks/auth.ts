@@ -8,8 +8,26 @@ import type { MockHandler } from './index'
 import { fail, ok } from './index'
 
 const DEMO_USER: UserSummary = { account: '13800000001', nickname: '张同学' }
+/** 已注册账号集合（mock 内存态，代替后端的数据库查重）：预置演示账号 */
+const registeredAccounts = new Set<string>([DEMO_USER.account])
 
 export const authMocks: Record<string, MockHandler> = {
+    // 注册（契约 §3.1）：必填缺失 400；账号已存在 409；成功返回用户摘要（不含密码）
+  'POST /users': ({ data }) => {
+    const { account, password, nickname } = (data ?? {}) as {
+      account?: string
+      password?: string
+      nickname?: string
+    }
+    if (!account || !password || !nickname) {
+      return fail(400, 40000, '账号、密码和昵称不能为空')
+    }
+    if (registeredAccounts.has(account)) {
+      return fail(409, 40900, '账号已存在')
+    }
+    registeredAccounts.add(account)
+    return ok<UserSummary>({ account, nickname })
+  },
   // 登录：账号或密码错误 401；字段缺失 400（契约 §3.1 语义）
   'POST /auth/login': ({ data }) => {
     const { account, password } = (data ?? {}) as { account?: string; password?: string }

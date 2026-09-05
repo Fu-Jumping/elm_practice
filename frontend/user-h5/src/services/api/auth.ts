@@ -22,3 +22,12 @@ export function logout(): Promise<null> {
 export function me(): Promise<UserSummary> {
   return request<UserSummary>({ method: 'GET', url: endpoints.auth.me })
 }
+
+/** 注册：创建账号并返回用户摘要（契约 §3.1）；成功响应不含密码 */
+export function register(form: { account: string; password: string; nickname: string }): Promise<UserSummary> {
+  return request<UserSummary>({
+    method: 'POST',
+    url: endpoints.user.register,
+    data: form,
+  })
+}
