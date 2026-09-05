@@ -19,19 +19,43 @@ export type RegisterFormErrors = Partial<
 >
 
 /** 手机号校验：必填 + 11 位纯数字 */
-export function validateAccount(_account: string): string | null {
+export function validateAccount(account: string): string | null {
   // TODO(9/5 TDD)：实现手机号校验，测试见 __tests__/validators.spec.ts
-  throw new Error('validateAccount 待 9/5 TDD 实现')
+  //throw new Error('validateAccount 待 9/5 TDD 实现')
+  if (!account) return '手机号不能为空'
+  if (!/^\d{11}$/.test(account)) return '手机号格式错误'
+  return null
 }
 
 /** 密码校验：必填 + 6-20 位 */
-export function validatePassword(_password: string): string | null {
+export function validatePassword(password: string): string | null {
   // TODO(9/5 TDD)：实现密码校验，测试见 __tests__/validators.spec.ts
-  throw new Error('validatePassword 待 9/5 TDD 实现')
+  //throw new Error('validatePassword 待 9/5 TDD 实现')
+  if (!password) return '密码不能为空'
+  if (password.length < 6 || password.length > 20) return '密码长度须为 6-20 位'
+  return null
 }
 
 /** 注册表单校验：必填、两次密码一致、协议勾选（TC-ACC-009），纯函数不发请求 */
-export function validateRegisterForm(_form: RegisterForm): RegisterFormErrors {
+export function validateRegisterForm(form: RegisterForm): RegisterFormErrors {
   // TODO(9/5 TDD)：实现表单校验，测试见 __tests__/validators.spec.ts
-  throw new Error('validateRegisterForm 待 9/5 TDD 实现')
+  //throw new Error('validateRegisterForm 待 9/5 TDD 实现')
+  const errors: RegisterFormErrors = {}
+
+  const accountError = validateAccount(form.account)
+  if (accountError) errors.account = accountError
+
+  const passwordError = validatePassword(form.password)
+  if (passwordError) errors.password = passwordError
+
+  if (!form.confirmPassword) {
+    errors.confirmPassword = '请再次输入密码'
+  } else if (form.confirmPassword !== form.password) {
+    errors.confirmPassword = '两次输入的密码不一致'
+  }
+
+  if (!form.nickname) errors.nickname = '昵称不能为空'
+  if (!form.agreement) errors.agreement = '请先阅读并勾选协议'
+
+  return errors
 }

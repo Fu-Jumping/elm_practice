@@ -36,9 +36,10 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   /** 注册：创建账号并返回用户摘要；不建立会话（PRD 7.16.1：成功后返回登录页重新登录） */
-  async function register(_form: { account: string; password: string; nickname: string }): Promise<UserSummary> {
+  async function register(form: { account: string; password: string; nickname: string }): Promise<UserSummary> {
     // TODO(9/5 TDD)：实现注册链路（authApi.register + mock POST /users），测试见 E1-E3
-    throw new Error('register 待 9/5 TDD 实现')
+    //throw new Error('register 待 9/5 TDD 实现')
+    return authApi.register(form)
   }
 
   return { user, isLoggedIn, checkLogin, login, logout, register }
