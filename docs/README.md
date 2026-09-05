@@ -45,5 +45,5 @@
 | `docs/design/**` | 设计系统文档：`设计系统-用户端.md`、`设计系统-商家端.md`（Stitch 主题令牌与风格规则的正式定稿）；实现真源为 `docs/design/exports/**` 设计稿代码导出，`docs/prd-assets/**` 截图仅阅读与演示比对用 |
 | `docs/frontend/README.md` | 前端文档入口：商家端/用户端规划、技术选型、各端文档清单与注意事项 |
 | `docs/project/项目目录索引.md` | 项目目录职责和可修改边界 |
-| `docs/project/项目规则.md` | 工作过程规则、AI 使用点规则与长期约束台账（§5）；缺陷/阻塞记入当日 daily 记录 |
+| `docs/project/项目规则.md` | 工作过程规则、AI 使用点规则与长期约束台账（§5）；缺陷/阻塞以 raw/ 片段留痕，随次晨汇总进当日 daily 记录（2026-09-05 修订） |
 | `docs/frontend/UI复刻经验与执行约定.md` | 用户端 UI exact 复刻规则与流程（UI 修改前必读） |
