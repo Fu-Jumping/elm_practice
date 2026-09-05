@@ -65,3 +65,44 @@ describe('sessionStore 登录会话链路（mock 模式）', () => {
     expect(store.isLoggedIn).toBe(false)
   })
 })
+
+describe('sessionStore 注册链路（mock 模式）', () => {
+  let store: ReturnType<typeof useSessionStore>
+
+  beforeEach(() => {
+    // store 有状态（user），每条用例换全新 Pinia，仿 A 组写法
+    setActivePinia(createPinia())
+    store = useSessionStore()
+  })
+
+  it('E1 重复注册已存在账号 → BizError 409/40900，登录态不变（TC-ACC-005）', async () => {
+    await expect(
+      store.register({ account: '13800000001', password: '123456', nickname: '张同学' }),
+    ).rejects.toMatchObject({
+      name: 'BizError',
+      code: 40900,
+      status: 409,
+    })
+    expect(store.isLoggedIn).toBe(false)
+  })
+
+  it('E2 缺少昵称 → 后端 400 透传，不被吞掉（TC-ACC-008 镜像）', async () => {
+    await expect(
+      store.register({ account: '13900000000', password: '123456', nickname: '' }),
+    ).rejects.toMatchObject({
+      name: 'BizError',
+      code: 40000,
+      status: 400,
+    })
+    expect(store.isLoggedIn).toBe(false)
+  })
+
+  it('E3 注册成功 → 返回用户摘要，且不建立会话（PRD 7.16.1：成功返回登录页）', async () => {
+    // 第一行：const user = await store.register({ account: '13900000000', password: '123456', nickname: '李同学' })
+    // 断言 1：user 能 toMatchObject({ account: '13900000000', nickname: '李同学' })
+    // 断言 2：store.isLoggedIn 仍为 false ←←← 这行是 E3 的灵魂，别漏
+    const user = await store.register({ account: '13900000000', password: '123456', nickname: '李同学' })
+    expect(user).toMatchObject({ account: '13900000000', nickname: '李同学' })
+    expect(store.isLoggedIn).toBe(false)
+  })
+})
