@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { validateAccount, validatePassword, validateRegisterForm } from '../validators'
+import {
+  validateAccount,
+  validatePassword,
+  validateRegisterForm,
+  validateAddressForm,
+} from '../validators'
 
 // 用户端第二批 TDD 用例 C1–C7 / D1–D4（2026-09-05 用例清单由人拍板）
 // 依据：契约 §3.1、TC-ACC-002~006/008/009、PRD 7.16.1 注册表单验收列
@@ -83,6 +88,59 @@ describe('validateRegisterForm 表单校验（TC-ACC-009）', () => {
         confirmPassword: '123456',
         nickname: '张同学',
         agreement: true,
+      }),
+    ).toEqual({})
+  })
+})
+
+// 用户端第三批 TDD 用例 T19–T22（2026-09-07，用例口径来自 TDD 规划矩阵 + PRD 7.9，AI 辅助脚手架）
+// 依据：TC-ADR-002（联系人必填 / 电话非 11 位 / 地址缺失 → 400 的前端体验层）、契约 §3.3、PRD 7.9
+// 口径：字段对齐契约 §3.3（contactName/contactSex/contactPhone/region/detail）；
+// 性别为选择项（男/女）必有权值，不参与必填校验；前端校验不过不发请求，业务规则后端兜底
+describe('validateAddressForm 地址表单校验（TC-ADR-002 前端体验层）', () => {
+  it('T19 必填全空 → 联系人/电话/地区/详址四项逐项提示', () => {
+    expect(
+      validateAddressForm({ contactName: '', contactSex: '男', contactPhone: '', region: '', detail: '' }),
+    ).toEqual({
+      contactName: '联系人不能为空',
+      contactPhone: '手机号不能为空',
+      region: '所在地区不能为空',
+      detail: '详细地址不能为空',
+    })
+  })
+
+  it('T20 电话非 11 位 → 仅电话一项报格式错误', () => {
+    expect(
+      validateAddressForm({
+        contactName: '张同学',
+        contactSex: '女',
+        contactPhone: '1380000000',
+        region: '天津市津南区',
+        detail: '12号楼 304室',
+      }),
+    ).toEqual({ contactPhone: '手机号格式错误' })
+  })
+
+  it('T21 缺所在地区 → 仅地区一项报错（详址齐全不受牵连）', () => {
+    expect(
+      validateAddressForm({
+        contactName: '张同学',
+        contactSex: '男',
+        contactPhone: '13800000000',
+        region: '',
+        detail: '12号楼 304室',
+      }),
+    ).toEqual({ region: '所在地区不能为空' })
+  })
+
+  it('T22 全部合规 → 无任何错误', () => {
+    expect(
+      validateAddressForm({
+        contactName: '张同学',
+        contactSex: '女',
+        contactPhone: '13800000000',
+        region: '天津市津南区',
+        detail: '12号楼 304室',
       }),
     ).toEqual({})
   })
