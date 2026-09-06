@@ -36,3 +36,5 @@ playwright-report/
 Thumbs.db
 .idea/
 .vscode/
+# Local build/tool downloads
+.tools/
