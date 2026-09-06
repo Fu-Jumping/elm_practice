@@ -35,6 +35,13 @@ const router = createRouter({
           meta: { title: '首页', tab: true, priority: 'P0' },
         },
         {
+          // 商家详情：无底部导航（底部为购物车栏）；未登录可浏览
+          path: 'stores/:storeId',
+          name: 'store-detail',
+          component: () => import('@/views/user/StoreDetailView.vue'),
+          meta: { title: '商家详情', priority: 'P0' },
+        },
+        {
           path: 'messages',
           name: 'messages',
           component: () => import('@/views/user/PlaceholderView.vue'),

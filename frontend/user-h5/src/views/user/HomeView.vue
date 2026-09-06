@@ -1,13 +1,18 @@
 <script setup lang="ts">
 /**
  * 首页 exact 复刻（视觉真源：docs/design/exports/用户端/02-首页/02-首页-精细/首页-精细-项目化.svg，393×852）
- * 2026-09-06 静态视觉层转写（复刻约定 §3.2：先视觉后逻辑）；尺寸单位 px 由 postcss px-to-viewport(390) 转 vw
+ * 2026-09-06 静态视觉层转写 + 商家卡接 catalogStore（mock GET /stores）数据驱动；px 由 postcss px-to-viewport(390) 转 vw
  * 占位口径（PRD 7.16.1 + 精细版 README §2.3）：占位内容点击一律提示"暂未开放"，不进入功能范围
- * TODO(Step B 数据驱动)：商家卡换 catalogStore(GET /stores)；金额走 normalizers.formatMoney 两位小数（PRD 金额口径覆盖设计稿"15"写法）
  * TODO(口径待确认)：课程 10 类分类固定数据未在文档枚举，宫格文案暂用设计稿原文，待分类接口定稿替换
  */
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { toast } from '@/utils/toast'
+import StoreCover from '@/components/StoreCover.vue'
+import { useCatalogStore } from '@/stores/catalogStore'
+import { formatMoney } from '@/services/normalizers'
+import type { StoreSummary } from '@/services/api/types'
+import type { CSSProperties } from 'vue'
 
 const ASSETS = '/design-assets/首页-精细'
 
@@ -19,24 +24,32 @@ interface GridCell {
   placeholder?: boolean
 }
 
-interface CouponTag {
-  text: string
-  color: string
-  borderColor: string
+// 优惠标签样式按序循环（真源三款：金/橙/灰）；数据驱动后样式与文案解耦
+const TAG_STYLES: CSSProperties[] = [
+  { color: '#806c2e', borderColor: 'rgba(214, 195, 133, 1)' },
+  { color: 'var(--color-primary)', borderColor: 'rgba(255, 214, 199, 1)' },
+  { color: 'var(--color-text-secondary)', borderColor: 'rgba(204, 204, 204, 1)' },
+]
+
+function tagStyle(index: number): CSSProperties {
+  return TAG_STYLES[index % TAG_STYLES.length]!
 }
 
-interface MerchantCard {
-  id: string
-  ribbon: string
-  promoLabel: string
-  fansText: string
-  name: string
-  rating: string
-  monthlySales: string
-  deliveryMinutes: string
-  distance: string
-  tags: CouponTag[]
-  products: { name: string; image: string }[]
+const catalogStore = useCatalogStore()
+const router = useRouter()
+
+// 卡片 ✕ 关闭：本地收起（演示态）；PRD 未定义关闭口径，仅视图态隐藏不删数据
+const dismissedCardIds = ref<string[]>([])
+const visibleCards = computed(() =>
+  catalogStore.stores.filter((store) => !dismissedCardIds.value.includes(store.storeId)),
+)
+
+onMounted(() => {
+  void catalogStore.fetchStores()
+})
+
+function retryStores(): void {
+  void catalogStore.fetchStores()
 }
 
 // 分类宫格 3 行 × 5 列；行 1 大图标 56px，行 2/3 小图标 36px；占位清单见精细版 README §2.3
@@ -72,34 +85,15 @@ const filterTags = [
   { key: 'coupon', label: '无门槛红包', active: false },
 ]
 
-// 商家卡静态 fixtures（真源 LINLEE 卡 ×2；优惠券标签/距离为契约外展示字段，Step B 接数据时同步标注）
-const merchantCards: MerchantCard[] = Array.from({ length: 2 }, (_, i) => ({
-  id: `linlee-${i + 1}`,
-  ribbon: '优享大牌',
-  promoLabel: '人气推荐',
-  fansText: '近30日8139人逛过',
-  name: 'LINLEE林里·手打柠檬茶…',
-  rating: '5.0',
-  monthlySales: '月售2000+',
-  deliveryMinutes: '30分钟',
-  distance: '2.7km',
-  tags: [
-    { text: '8元无门槛', color: '#806c2e', borderColor: 'rgba(214, 195, 133, 1)' },
-    { text: '36减1|58减4', color: 'var(--color-primary)', borderColor: 'rgba(255, 214, 199, 1)' },
-    { text: '食无忧', color: 'var(--color-text-secondary)', borderColor: 'rgba(204, 204, 204, 1)' },
-  ],
-  products: [
-    { name: '白葡萄柠檬茶', image: `${ASSETS}/product-thumb-1.png` },
-    { name: '西瓜冰柠茶', image: `${ASSETS}/product-thumb-2.png` },
-    { name: '黄皮冰柠茶', image: `${ASSETS}/product-thumb-3.png` },
-  ],
-}))
-
-// 卡片 ✕ 关闭：本地收起（演示态）；Step B 接数据后口径不变
-const dismissedCardIds = ref<string[]>([])
+// 卡片 ✕ 关闭走 dismissedCardIds（见上方 computed）
 
 function onPlaceholderClick(): void {
   toast('暂未开放')
+}
+
+// PRD 商家卡行：点击商家卡携带 storeId 进入商家详情
+function onOpenStore(storeId: string): void {
+  void router.push({ name: 'store-detail', params: { storeId } })
 }
 
 // P0 分类商家列表未实现：真实栏目与占位栏目点击均提示（PRD 搜索框行同口径）
@@ -108,8 +102,8 @@ function onCellClick(cell: GridCell): void {
   toast('暂未开放')
 }
 
-function onCloseCard(cardId: string): void {
-  dismissedCardIds.value.push(cardId)
+function onCloseCard(storeId: string): void {
+  dismissedCardIds.value.push(storeId)
 }
 </script>
 
@@ -244,67 +238,109 @@ function onCloseCard(cardId: string): void {
       </span>
     </section>
 
-    <!-- 商家卡列表（Step B 换 GET /stores 数据驱动；设计稿两卡同构） -->
+    <!-- 商家卡列表（数据驱动：catalogStore → mock GET /stores；PRD 商家卡行三态口径） -->
     <section class="merchant-list" data-testid="merchant-list">
-      <article
-        v-for="card in merchantCards"
-        v-show="!dismissedCardIds.includes(card.id)"
-        :key="card.id"
-        class="merchant-card"
-        @click="onPlaceholderClick"
+      <!-- 加载占位（PRD：首次加载显示卡片占位） -->
+      <template v-if="catalogStore.loading">
+        <div
+          v-for="i in 2"
+          :key="`skeleton-${i}`"
+          class="merchant-card merchant-card--skeleton"
+          data-testid="merchant-skeleton"
+        >
+          <div class="skeleton-block skeleton-cover" />
+          <div class="skeleton-lines">
+            <div class="skeleton-block skeleton-line" />
+            <div class="skeleton-block skeleton-line skeleton-line--short" />
+          </div>
+        </div>
+      </template>
+      <!-- 空态（PRD：空数组显示"暂无商家"） -->
+      <div
+        v-else-if="!catalogStore.stores.length && !catalogStore.error"
+        class="merchant-empty"
+        data-testid="merchant-empty"
       >
-        <div class="merchant-cover">
-          <img class="merchant-cover-img" :src="`${ASSETS}/merchant-cover.png`" alt="" />
-          <span class="merchant-ribbon">
-            {{ card.ribbon }}
-            <svg class="merchant-ribbon-fold" viewBox="0 0 4.5 2" aria-hidden="true">
-              <path d="M0 0L4.5 0L2.25 2Z" fill="#4f4219" />
-            </svg>
-          </span>
-          <p class="merchant-promo">{{ card.promoLabel }}</p>
-          <p class="merchant-fans">{{ card.fansText }}</p>
-        </div>
-        <div class="merchant-body">
-          <div class="merchant-head">
-            <h3 class="merchant-name">{{ card.name }}</h3>
-            <img
-              class="merchant-close"
-              :src="`${ASSETS}/merchant-card-close.png`"
-              alt="关闭"
-              @click.stop="onCloseCard(card.id)"
-            />
-          </div>
-          <div class="merchant-rating-row">
-            <span class="merchant-score">{{ card.rating }}</span>
-            <span class="merchant-score-unit">分</span>
-            <span class="merchant-sales">{{ card.monthlySales }}</span>
-            <span class="merchant-meta">{{ card.deliveryMinutes }}</span>
-            <span class="merchant-meta merchant-meta--distance">{{ card.distance }}</span>
-          </div>
-          <div class="merchant-tags">
-            <span
-              v-for="tag in card.tags"
-              :key="tag.text"
-              class="merchant-tag"
-              :style="{ color: tag.color, borderColor: tag.borderColor }"
-            >
-              {{ tag.text }}
+        暂无商家
+      </div>
+      <!-- 错误态：请求失败保留提示并提供重试 -->
+      <div v-else-if="catalogStore.error" class="merchant-empty" data-testid="merchant-error">
+        {{ catalogStore.error }}
+        <button class="merchant-retry" type="button" @click="retryStores">重试</button>
+      </div>
+      <!-- 卡片（关闭的店铺仅视图态隐藏） -->
+      <template v-else>
+        <article
+          v-for="store in visibleCards"
+          :key="store.storeId"
+          class="merchant-card"
+          @click="onOpenStore(store.storeId)"
+        >
+          <div class="merchant-cover">
+            <StoreCover class="merchant-cover-img" :name="store.name" :image="store.image" />
+            <span class="merchant-ribbon">
+              优享大牌
+              <svg class="merchant-ribbon-fold" viewBox="0 0 4.5 2" aria-hidden="true">
+                <path d="M0 0L4.5 0L2.25 2Z" fill="#4f4219" />
+              </svg>
             </span>
+            <!-- 占位文案（精细版 README §2.3），不绑定真实数据 -->
+            <p class="merchant-promo">人气推荐</p>
+            <p class="merchant-fans">近30日8139人逛过</p>
           </div>
-          <div class="merchant-products">
-            <div v-for="product in card.products" :key="product.name" class="product-cell">
-              <img class="product-img" :src="product.image" :alt="product.name" />
-              <p class="product-name">{{ product.name }}</p>
-              <p class="product-price">
-                <span class="product-price-symbol">￥</span>
-                <span class="product-price-int">15</span>
-                <span class="product-price-est">预估价</span>
-              </p>
+          <div class="merchant-body">
+            <div class="merchant-head">
+              <h3 class="merchant-name">{{ store.name }}</h3>
+              <img
+                class="merchant-close"
+                :src="`${ASSETS}/merchant-card-close.png`"
+                alt="关闭"
+                @click.stop="onCloseCard(store.storeId)"
+              />
             </div>
-            <span class="product-fade" aria-hidden="true" />
+            <div class="merchant-rating-row">
+              <span class="merchant-score">{{ store.rating.toFixed(1) }}</span>
+              <span class="merchant-score-unit">分</span>
+              <span class="merchant-sales">月售{{ store.monthlySales }}+</span>
+              <span class="merchant-meta">{{ store.deliveryMinutes }}分钟</span>
+              <span
+                v-if="store.distanceText"
+                class="merchant-meta merchant-meta--distance"
+              >
+                {{ store.distanceText }}
+              </span>
+            </div>
+            <!-- 优惠标签：接口明确返回时才展示（PRD 商家卡行） -->
+            <div v-if="store.couponTags?.length" class="merchant-tags">
+              <span
+                v-for="(tag, tagIndex) in store.couponTags"
+                :key="tag"
+                class="merchant-tag"
+                :style="tagStyle(tagIndex)"
+              >
+                {{ tag }}
+              </span>
+            </div>
+            <!-- 商品预览：来自商品接口（mock 演示期由列表内嵌），价格两位小数，不参与计价 -->
+            <div v-if="store.previewProducts?.length" class="merchant-products">
+              <div
+                v-for="product in store.previewProducts"
+                :key="product.name"
+                class="product-cell"
+              >
+                <img class="product-img" :src="product.image" :alt="product.name" />
+                <p class="product-name">{{ product.name }}</p>
+                <p class="product-price">
+                  <span class="product-price-symbol">￥</span>
+                  <span class="product-price-int">{{ formatMoney(product.price) }}</span>
+                  <span class="product-price-est">预估价</span>
+                </p>
+              </div>
+              <span class="product-fade" aria-hidden="true" />
+            </div>
           </div>
-        </div>
-      </article>
+        </article>
+      </template>
     </section>
   </div>
 </template>
@@ -859,5 +895,51 @@ function onCloseCard(cardId: string): void {
   width: 39px;
   background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, #ffffff 68%);
   pointer-events: none;
+}
+
+/* ---- 商家卡三态：骨架 / 空态 / 错误重试 ---- */
+.merchant-card--skeleton {
+  cursor: default;
+}
+
+.skeleton-block {
+  background: var(--color-surface-container);
+  border-radius: var(--radius-default);
+}
+
+.skeleton-cover {
+  width: 112px;
+  height: 186px;
+  flex: none;
+}
+
+.skeleton-lines {
+  flex: 1;
+  padding-top: 4px;
+}
+
+.skeleton-line {
+  width: 60%;
+  height: 16px;
+}
+
+.skeleton-line--short {
+  width: 40%;
+  margin-top: 10px;
+}
+
+.merchant-empty {
+  padding: 32px 0;
+  border-radius: 8px;
+  background: var(--color-surface-white);
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.merchant-retry {
+  margin-left: 8px;
+  color: var(--color-primary);
+  cursor: pointer;
 }
 </style>

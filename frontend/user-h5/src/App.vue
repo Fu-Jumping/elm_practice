@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+import ToastHost from '@/components/ToastHost.vue'
 </script>
 
 <template>
@@ -9,4 +10,6 @@ import { RouterView } from 'vue-router'
       <component :is="Component" />
     </Transition>
   </RouterView>
+  <!-- 全局轻提示：占位点击/请求错误统一经 utils/toast 展示 -->
+  <ToastHost />
 </template>

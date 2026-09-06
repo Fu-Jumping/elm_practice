@@ -1,0 +1,70 @@
+/**
+ * 购物车 store（架构约定 §3.4，按店铺隔离）：行列表 + 数量/合计派生
+ * 加购成功后重查购物车，保证数量/合计与后端口径一致
+ * TODO(购物车弹层任务)：数量步进（PATCH，减到 0 改 DELETE）接入后补 changeQuantity/removeLine
+ */
+import { computed, ref } from 'vue'
+import { defineStore } from 'pinia'
+import { cartApi } from '@/services/api'
+import type { CartLine } from '@/services/api/types'
+
+export const useCartStore = defineStore('cart', () => {
+  const lines = ref<CartLine[]>([])
+  const loading = ref(false)
+  const error = ref('')
+
+  /** 购物车商品总件数（PRD 购物车栏：商品数） */
+  const totalCount = computed(() => lines.value.reduce((sum, line) => sum + line.quantity, 0))
+
+  /** 合计金额 = Σ 单价 × 数量（两位小数展示在视图层走 formatMoney） */
+  const totalAmount = computed(() => lines.value.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0))
+
+  /** 加购进行中的商品（XA-05：前端禁用只发一次请求，防连点被防重拦截器取消） */
+  const addingProductIds = ref<Set<string>>(new Set())
+
+  function isAdding(productId: string): boolean {
+    return addingProductIds.value.has(productId)
+  }
+
+  async function fetchCart(storeId: string): Promise<void> {
+    loading.value = true
+    error.value = ''
+    try {
+      lines.value = await cartApi.getCart(storeId)
+    } catch (err) {
+      // 被防重拦截器取消的旧请求静默返回，不清空已有购物车行
+      if ((err as { code?: string }).code === 'ERR_CANCELED') return
+      lines.value = []
+      error.value = err instanceof Error ? err.message : '加载失败'
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function addItem(
+    storeId: string,
+    productId: string,
+    quantity = 1,
+  ): Promise<boolean> {
+    // XA-05 防重复提交：同商品加购进行中直接忽略后续点击
+    if (addingProductIds.value.has(productId)) return false
+    addingProductIds.value.add(productId)
+    try {
+      const line = await cartApi.addCartItem({ storeId, productId, quantity })
+      // 成功后本地 upsert 响应行（mock/后端均返回合并后的行），不再逐次 GET 重查
+      const index = lines.value.findIndex((existing) => existing.cartLineId === line.cartLineId)
+      if (index >= 0) lines.value.splice(index, 1, line)
+      else lines.value.push(line)
+      return true
+    } catch (err) {
+      if ((err as { code?: string }).code === 'ERR_CANCELED') return false
+      // 失败原因（售罄/超库存/未登录等）由 http 层统一 toast；视图不重复提示
+      error.value = err instanceof Error ? err.message : '加购失败'
+      return false
+    } finally {
+      addingProductIds.value.delete(productId)
+    }
+  }
+
+  return { lines, loading, error, totalCount, totalAmount, isAdding, fetchCart, addItem }
+})

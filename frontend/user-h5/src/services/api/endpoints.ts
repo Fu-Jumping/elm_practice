@@ -17,5 +17,10 @@ export const endpoints = {
     categories: (storeId: string) => `/stores/${storeId}/categories`,
     products: (storeId: string) => `/stores/${storeId}/products`,
   },
-  // TODO(9/4 起)：address 地址簿 /me/addresses、cart 购物车 /cart、order 订单 /orders
+  cart: {
+    list: '/cart',
+    add: '/cart/items',
+    // TODO(购物车弹层任务)：PATCH/DELETE /cart/items/{cartLineId} 届时接入
+  },
+  // TODO(9/5 起)：address 地址簿 /me/addresses、order 订单 /orders
 } as const

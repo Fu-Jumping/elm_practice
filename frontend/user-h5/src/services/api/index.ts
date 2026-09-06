@@ -4,3 +4,4 @@
  */
 export * as authApi from './auth'
 export * as storeApi from './store'
+export * as cartApi from './cart'
