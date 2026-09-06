@@ -17,7 +17,8 @@ import { onToast } from '@/utils/toast'
  * T15 加购后购物车栏数量/合计刷新；同商品合并数量
  * T16 店铺休息：提示可见，加购/结算禁用
  * T17 评价 Tab 占位："评价功能暂未开放"，不请求评价接口（P1 未选定）
- * T18 去结算：未登录跳登录带 redirect；已登录且购物车非空 → 确认订单未实现提示
+ * T18 去结算：未登录跳登录带 redirect；已登录且购物车非空 → 进入确认订单页（9/7 口径演进：
+ *     确认订单页落地后替换原"确认订单暂未开放"弱提示，见 raw/2026-09-07）
  */
 describe('StoreDetailView（商家详情页 P0）', () => {
   const messages: string[] = []
@@ -40,6 +41,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
       routes: [
         { path: '/', name: 'home', component: { template: '<div />' } },
         { path: '/stores/:storeId', name: 'store-detail', component: StoreDetailView },
+        { path: '/orders/confirm', name: 'order-confirm', component: { template: '<div />' } },
         { path: '/login', name: 'login', component: { template: '<div />' } },
       ],
     })
@@ -176,7 +178,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     )
   })
 
-  it('T18 去结算：未登录跳登录带 redirect；已登录且购物车非空提示确认订单未实现', async () => {
+  it('T18 去结算：未登录跳登录带 redirect；已登录且购物车非空进入确认订单页', async () => {
     // 用 m003 隔离购物车状态（cart mock 为模块级内存态，避免与 T15 的 m002 购物车耦合）
     const { wrapper, router } = await mountDetail('/stores/m003')
     await vi.waitFor(
@@ -203,6 +205,8 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     )
     await wrapper.find('[data-testid="checkout-btn"]').trigger('click')
     await flushPromises()
-    expect(messages).toContain('确认订单暂未开放')
+    // 9/7 口径演进：确认订单页落地，替换原"确认订单暂未开放"弱提示，进入确认订单并携带商家编号
+    expect(router.currentRoute.value.name).toBe('order-confirm')
+    expect(router.currentRoute.value.query.storeId).toBe('m003')
   })
 })

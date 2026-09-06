@@ -97,3 +97,33 @@ export interface StoreListParams {
   categoryId?: string
   sort?: '综合' | '销量' | '距离'
 }
+
+/**
+ * 收货地址（契约 §3.3：addressId/contactName/contactSex/contactPhone/region/detail/label/isDefault）
+ * 查询只返回当前用户地址；删除默认地址由后端自动改派默认
+ */
+export interface Address {
+  addressId: string
+  contactName: string
+  contactSex: '男' | '女'
+  contactPhone: string
+  region: string
+  detail: string
+  label?: string
+  isDefault: boolean
+}
+
+/** 创建订单请求（契约 §3.5）：expectedTotal 仅作一致性提示，金额以后端计价为准 */
+export interface CreateOrderPayload {
+  storeId: string
+  addressId: string
+  remark?: string
+  expectedTotal?: number
+}
+
+/** 创建订单响应（P0 最小集）：订单号 + 后端计价实付金额（商品小计 + 打包费 2.00） */
+export interface OrderCreated {
+  orderId: string
+  /** 后端计价实付金额（TC-ORD-021：实付 = 商品小计 + packagingFee 2.00，演示口径） */
+  payableAmount: number
+}

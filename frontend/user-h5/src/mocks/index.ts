@@ -7,6 +7,8 @@ import type { ApiResponse } from '@/services/api/types'
 import { authMocks } from './auth'
 import { storeMocks } from './store'
 import { cartMocks } from './cart'
+import { addressMocks } from './address'
+import { orderMocks } from './order'
 
 export interface MockResponse<T = unknown> {
   status: number
@@ -27,6 +29,8 @@ const handlers = new Map<string, MockHandler>([
   ...Object.entries(authMocks),
   ...Object.entries(storeMocks),
   ...Object.entries(cartMocks),
+  ...Object.entries(addressMocks),
+  ...Object.entries(orderMocks),
 ])
 
 /** HTTP 层成功/失败包装（与契约响应结构一致） */
