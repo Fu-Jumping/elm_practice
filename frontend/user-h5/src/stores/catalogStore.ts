@@ -5,12 +5,57 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { storeApi } from '@/services/api'
-import type { StoreListParams, StoreSummary } from '@/services/api/types'
+import type { Product, StoreCategory, StoreListParams, StoreSummary } from '@/services/api/types'
 
 export const useCatalogStore = defineStore('catalog', () => {
   const stores = ref<StoreSummary[]>([])
   const loading = ref(false)
   const error = ref('')
+
+  // ---- 店铺详情域（商家详情页）：详情 + 分类 + 商品 ----
+  const storeDetail = ref<StoreSummary | null>(null)
+  const detailLoading = ref(false)
+  /** 详情错误：含 BizError 状态码，404 视为商家不存在 */
+  const detailError = ref<{ message: string; status: number } | null>(null)
+  const categories = ref<StoreCategory[]>([])
+  const products = ref<Product[]>([])
+  const productsLoading = ref(false)
+
+  async function fetchStoreDetail(storeId: string): Promise<void> {
+    detailLoading.value = true
+    detailError.value = null
+    try {
+      storeDetail.value = await storeApi.getStoreDetail(storeId)
+    } catch (err) {
+      storeDetail.value = null
+      const status = (err as { status?: number }).status ?? 0
+      detailError.value = {
+        message: err instanceof Error ? err.message : '加载失败',
+        status,
+      }
+    } finally {
+      detailLoading.value = false
+    }
+  }
+
+  async function fetchStoreCategories(storeId: string): Promise<void> {
+    try {
+      categories.value = await storeApi.getStoreCategories(storeId)
+    } catch {
+      categories.value = []
+    }
+  }
+
+  async function fetchStoreProducts(storeId: string): Promise<void> {
+    productsLoading.value = true
+    try {
+      products.value = await storeApi.getStoreProducts(storeId)
+    } catch {
+      products.value = []
+    } finally {
+      productsLoading.value = false
+    }
+  }
 
   async function fetchStores(params?: StoreListParams): Promise<void> {
     loading.value = true
@@ -26,5 +71,19 @@ export const useCatalogStore = defineStore('catalog', () => {
     }
   }
 
-  return { stores, loading, error, fetchStores }
+  return {
+    stores,
+    loading,
+    error,
+    fetchStores,
+    storeDetail,
+    detailLoading,
+    detailError,
+    categories,
+    products,
+    productsLoading,
+    fetchStoreDetail,
+    fetchStoreCategories,
+    fetchStoreProducts,
+  }
 })

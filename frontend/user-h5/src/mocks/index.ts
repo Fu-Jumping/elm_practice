@@ -6,6 +6,7 @@
 import type { ApiResponse } from '@/services/api/types'
 import { authMocks } from './auth'
 import { storeMocks } from './store'
+import { cartMocks } from './cart'
 
 export interface MockResponse<T = unknown> {
   status: number
@@ -25,6 +26,7 @@ export type MockHandler = (ctx: MockContext) => MockResponse | Promise<MockRespo
 const handlers = new Map<string, MockHandler>([
   ...Object.entries(authMocks),
   ...Object.entries(storeMocks),
+  ...Object.entries(cartMocks),
 ])
 
 /** HTTP 层成功/失败包装（与契约响应结构一致） */
