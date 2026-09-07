@@ -194,4 +194,39 @@ describe('ConfirmOrderView（确认订单页 P0）', () => {
     expect(wrapper.find('[data-testid="submit-block-tip"]').text()).toContain('11')
     expect(wrapper.find('[data-testid="submit-order-btn"]').attributes('disabled')).toBeDefined()
   })
+
+  // T59 地址选择回填（2026-09-07 第三批，PRD 873 行：返回确认订单时把选择结果回填，不直接创建订单）
+  it('T59 query.addressId 优先于默认地址回填；点地址卡进列表选择模式', async () => {
+    const pinia = bootstrapPinia()
+    const session = useSessionStore()
+    session.user = { account: '13800000001', nickname: '张同学' }
+    const cart = useCartStore()
+    await cart.addItem('m002', 'p101', 2)
+    await vi.waitFor(() => expect(cart.lines).toHaveLength(1), { timeout: 2000 })
+    // 地址列表追加 da002（非默认），选择模式回传 da002
+    addressMockState.push({
+      addressId: 'da002',
+      contactName: '李同学',
+      contactSex: '女',
+      contactPhone: '13900000000',
+      region: '天津大学北洋园校区',
+      detail: '11号楼 502室',
+      label: '家',
+      isDefault: false,
+    })
+    const { wrapper, router } = await mountConfirm({ storeId: 'm002', addressId: 'da002' }, pinia)
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="address-card"]').text()).toContain('李同学'),
+      { timeout: 2000 },
+    )
+    // 回填的是所选地址而非默认地址（da001 张同学）
+    expect(wrapper.find('[data-testid="address-card"]').text()).toContain('11号楼 502室')
+    expect(wrapper.find('[data-testid="address-card"]').text()).not.toContain('12号楼 304室')
+    // 点地址卡 → 进入地址列表选择模式（携带 select 与 storeId，不直接创建订单）
+    await wrapper.find('[data-testid="address-card"]').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('address-list')
+    expect(router.currentRoute.value.query.select).toBe('1')
+    expect(router.currentRoute.value.query.storeId).toBe('m002')
+  })
 })
