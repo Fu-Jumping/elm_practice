@@ -239,9 +239,17 @@ function goBack(): void {
           {{ blockReason }}
         </p>
         <div class="co-payable-row">
-          <span class="co-payable">
-            实付 <strong data-testid="payable-amount">¥{{ payable }}</strong>
-          </span>
+          <div class="co-amount-detail">
+            <p class="co-amount-line" data-testid="amount-items-total">
+              商品小计 ¥{{ formatMoney(cartStore.totalAmount) }}
+            </p>
+            <p class="co-amount-line" data-testid="amount-packaging">
+              打包费 ¥{{ formatMoney(PACKAGING_FEE) }}
+            </p>
+            <p class="co-payable">
+              实付 <strong data-testid="payable-amount">¥{{ payable }}</strong>
+            </p>
+          </div>
           <button
             class="co-submit"
             type="button"
@@ -514,6 +522,18 @@ function goBack(): void {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.co-amount-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.co-amount-line {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
 }
 
 .co-payable {

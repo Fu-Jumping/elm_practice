@@ -18,6 +18,6 @@ describe('scrollBehavior 路由滚动行为', () => {
   })
 
   it('T66 普通跳转（无 savedPosition）→ 回到顶部', () => {
-    expect(scrollBehavior(to as never, from as never, undefined)).toEqual({ top: 0 })
+    expect(scrollBehavior(to as never, from as never, null)).toEqual({ top: 0 })
   })
 })
