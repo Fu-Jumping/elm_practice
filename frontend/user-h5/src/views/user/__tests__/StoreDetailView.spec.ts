@@ -315,4 +315,23 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     await flushPromises()
     expect(wrapper.find('[data-testid="cart-popup"]').exists()).toBe(false)
   })
+
+  it('T63 跨商家隔离提示：A 店有商品进 B 店时提示独立结算（TC-CRT-012）', async () => {
+    // 口径：购物车按"当前用户+店铺"隔离（契约 §3.4）；A 店商品保留不合并，进 B 店时提示
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const session = useSessionStore()
+    session.user = { account: '13800000001', nickname: '张同学' }
+    const cart = useCartStore()
+    // A 店（m002）加购 2 件
+    await cart.fetchCart('m002')
+    await cart.addItem('m002', 'p101', 2)
+    await vi.waitFor(() => expect(cart.lines).toHaveLength(1), { timeout: 2000 })
+    // 进入 B 店（m003）详情 → 触发跨店提示（A 店商品保留，B 店独立结算）
+    await mountDetail('/stores/m003', pinia)
+    await vi.waitFor(
+      () => expect(messages.some((m) => m.includes('独立结算') || m.includes('保留'))).toBe(true),
+      { timeout: 2000 },
+    )
+  })
 })

@@ -25,6 +25,18 @@ export const useCartStore = defineStore('cart', () => {
   /** 步进进行中的行（XA-05 同款：步进请求期间按钮禁用，防连点） */
   const steppingLineIds = ref<Set<string>>(new Set())
 
+  /** 当前购物车所属店铺（TC-CRT-012 跨店提示检测用） */
+  const currentCartStoreId = ref('')
+  /** 跨店提示（待视图消费：A 店有商品时进入 B 店，提示独立结算） */
+  const crossStoreHint = ref('')
+
+  /** 取走并清空跨店提示（消费型读取，防重复提示） */
+  function takeCrossStoreHint(): string {
+    const hint = crossStoreHint.value
+    crossStoreHint.value = ''
+    return hint
+  }
+
   function isAdding(productId: string): boolean {
     return addingProductIds.value.has(productId)
   }
@@ -36,8 +48,15 @@ export const useCartStore = defineStore('cart', () => {
   async function fetchCart(storeId: string): Promise<void> {
     loading.value = true
     error.value = ''
+    const prevStoreId = currentCartStoreId.value
+    const prevCount = totalCount.value
     try {
       lines.value = await cartApi.getCart(storeId)
+      // TC-CRT-012：A 店有商品时进入 B 店 → 记录提示（A 店商品保留，B 店独立结算）
+      if (prevCount > 0 && prevStoreId && prevStoreId !== storeId) {
+        crossStoreHint.value = prevStoreId
+      }
+      currentCartStoreId.value = storeId
     } catch (err) {
       // 被防重拦截器取消的旧请求静默返回，不清空已有购物车行
       if ((err as { code?: string }).code === 'ERR_CANCELED') return
@@ -123,6 +142,7 @@ export const useCartStore = defineStore('cart', () => {
     totalAmount,
     isAdding,
     isStepping,
+    takeCrossStoreHint,
     fetchCart,
     addItem,
     decrementLine,

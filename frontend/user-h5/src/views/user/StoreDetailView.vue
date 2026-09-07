@@ -75,11 +75,14 @@ watch(
   },
 )
 
-onMounted(() => {
+onMounted(async () => {
   void catalogStore.fetchStoreDetail(storeId)
   void catalogStore.fetchStoreCategories(storeId)
   void catalogStore.fetchStoreProducts(storeId)
-  void cartStore.fetchCart(storeId)
+  await cartStore.fetchCart(storeId)
+  // TC-CRT-012：A 店有商品进 B 店 → 提示购物车按店独立保留
+  const hint = cartStore.takeCrossStoreHint()
+  if (hint) toast('已为您保留原店铺购物车，本店商品独立结算')
 })
 
 const isMissing = computed(() => catalogStore.detailError?.status === 404)
