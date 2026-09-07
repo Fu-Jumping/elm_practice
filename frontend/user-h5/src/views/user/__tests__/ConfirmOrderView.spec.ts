@@ -12,7 +12,7 @@ import { clearMockCart } from '@/mocks/cart'
 /**
  * 确认订单页 P0 行为测试 T26–T30（2026-09-07，用例口径来自 TDD 规划矩阵 + PRD 7.4/7.16，AI 辅助脚手架）
  * 依据：PRD 7.4 确认订单与优惠计算、PRD 7.16 确认订单页三行、契约 §3.3/§3.5、TC-ADR-006、TC-ORD-011
- * T26 页面渲染：默认地址卡 + 购物车商品行 + 实付金额行（含打包费，不单列打包费行）+ 去支付可用
+ * T26 页面渲染：默认地址卡 + 购物车商品行 + 金额明细（商品小计/打包费/实付，2026-09-07 口径演进：原 9/1 决议不单列打包费行导致金额构成不可见，负责人决定展示明细）+ 去支付可用
  * T27 未登录进入 → 跳登录带 redirect（PRD：未登录转登录）
  * T28 无地址 → 去支付禁用 + 引导提示（PRD：地址不存在时引导新增）
  * T29 填备注提交成功 → 只走一次创建订单 → 该店购物车清空 + 跳订单列表 + 成功提示
@@ -101,12 +101,13 @@ describe('ConfirmOrderView（确认订单页 P0）', () => {
     const items = wrapper.find('[data-testid="order-items"]')
     expect(items.text()).toContain('19.50')
     expect(items.text()).toContain('2')
-    // 实付金额：39.00 + 2.00 打包费 = 41.00；不出现"打包费"独立行（PRD 7.4 评审决议）
+    // 金额明细三行（2026-09-07 口径演进）：商品小计 39.00 + 打包费 2.00 = 实付 41.00
     await vi.waitFor(
-      () => expect(wrapper.find('[data-testid="payable-amount"]').text()).toContain('41.00'),
+      () => expect(wrapper.find('[data-testid="amount-items-total"]').text()).toContain('39.00'),
       { timeout: 2000 },
     )
-    expect(wrapper.text()).not.toContain('打包费')
+    expect(wrapper.find('[data-testid="amount-packaging"]').text()).toContain('2.00')
+    expect(wrapper.find('[data-testid="payable-amount"]').text()).toContain('41.00')
     // 检查通过 → 去支付可用
     expect(wrapper.find('[data-testid="submit-order-btn"]').attributes('disabled')).toBeUndefined()
   })
