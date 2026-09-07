@@ -14,6 +14,8 @@ build/
 *.log
 tmp/
 .uploads/
+!.env.example
+!.env.development
 
 # 参考导出与工具目录（不入库）
 .figma/
@@ -38,3 +40,4 @@ Thumbs.db
 .vscode/
 # Local build/tool downloads
 .tools/
+.repo_memory/

@@ -1,0 +1,99 @@
+.merchant-layout {
+  min-height: 100vh;
+  background: #f5f7fb;
+}
+
+.merchant-sider {
+  background: #fff;
+  border-right: 1px solid #f0f0f0;
+  padding: 20px 16px;
+}
+
+.brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 8px 18px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 16px;
+}
+
+.brand-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ff8a5b, #ff5a1f);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.brand-title {
+  margin: 0 !important;
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  color: rgba(0, 0, 0, 0.65);
+  font-weight: 500;
+}
+
+.nav-item.active {
+  background: rgba(255, 90, 31, 0.08);
+  color: #ff5a1f;
+}
+
+.merchant-header {
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.merchant-content {
+  padding: 24px;
+}
+
+.status-alert {
+  margin-bottom: 20px;
+}
+
+.stats-row {
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  border-radius: 14px;
+  box-shadow: none;
+}
+
+.orders-card {
+  border-radius: 14px;
+}
+
+@media (max-width: 980px) {
+  .merchant-sider {
+    width: 100% !important;
+    max-width: 100%;
+    min-width: 100%;
+  }
+
+  .merchant-layout {
+    display: block;
+  }
+}
