@@ -22,6 +22,7 @@
 | 文档 | 用途 |
 | --- | --- |
 | `docs/backend/README.md` | 后端文档工作入口：契约接手与归属、架构设计怎么写、SRS 认领、TDD 与 Git 纪律 |
+| `docs/backend/架构设计.md` | 后端 A 架构 v1.0：分层、下单数据流、实体约束、Session 安全边界和 SQL 落点 |
 | `docs/backend/后端接口契约.md` | RESTful 接口唯一契约（草案：组长起草总规则与资源清单，后端确认扩充字段与错误码） |
 | `docs/backend/后端任务分配与联调清单.md` | 后端线里程碑 deadline、P0 交付顺序与联调 Checklist（内部任务拆分由后端自建） |
 | `docs/backend/后端联调验收用例.md` | P0 场景清单与固定演示数据（接口级用例由测试联调同学从契约生成，落位 `docs/testing/**`） |
