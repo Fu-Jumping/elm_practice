@@ -43,8 +43,36 @@ const payable = computed(() =>
   payableAmountText({ itemsTotal: cartStore.totalAmount, packagingFee: PACKAGING_FEE }),
 )
 
+/** 店铺休息（CLOSED/TEMPORARILY_CLOSED 均不可下单，TC-ORD-006 前端侧） */
+const storeClosed = computed(() => {
+  const status = catalogStore.storeDetail?.status
+  return status === 'CLOSED' || status === 'TEMPORARILY_CLOSED'
+})
+
+/** 起送金额差额（TC-ORD-009 前端侧）：商品小计不足起送价时返回差额 */
+const belowMinimumDelta = computed(() => {
+  const start = catalogStore.storeDetail?.startPrice ?? 0
+  const delta = start - cartStore.totalAmount
+  return delta > 0 ? delta : 0
+})
+
+/** 提交阻断原因（PRD 851 行：禁止提交并说明原因；关店优先于起送） */
+const blockReason = computed(() => {
+  if (storeClosed.value) return '商家休息中，暂不能下单'
+  const delta = belowMinimumDelta.value
+  if (delta > 0) {
+    return `还差 ¥${formatMoney(delta)} 起送（满 ¥${formatMoney(catalogStore.storeDetail?.startPrice ?? 0)} 可下单）`
+  }
+  return ''
+})
+
 const submitDisabled = computed(
-  () => submitting.value || !defaultAddress.value || cartStore.lines.length === 0,
+  () =>
+    submitting.value ||
+    !defaultAddress.value ||
+    cartStore.lines.length === 0 ||
+    storeClosed.value ||
+    belowMinimumDelta.value > 0,
 )
 
 onMounted(async () => {
@@ -192,18 +220,25 @@ function goBack(): void {
 
     <!-- 底部结算栏（设计稿：全宽橙色去支付；实付含打包费） -->
     <footer class="co-settle">
-      <div class="co-payable">
-        实付 <strong data-testid="payable-amount">¥{{ payable }}</strong>
+      <div class="co-settle-main">
+        <p v-if="blockReason" class="co-block-tip" data-testid="submit-block-tip">
+          {{ blockReason }}
+        </p>
+        <div class="co-payable-row">
+          <span class="co-payable">
+            实付 <strong data-testid="payable-amount">¥{{ payable }}</strong>
+          </span>
+          <button
+            class="co-submit"
+            type="button"
+            data-testid="submit-order-btn"
+            :disabled="submitDisabled"
+            @click="submitOrder"
+          >
+            {{ submitting ? '提交中' : '去支付' }}
+          </button>
+        </div>
       </div>
-      <button
-        class="co-submit"
-        type="button"
-        data-testid="submit-order-btn"
-        :disabled="submitDisabled"
-        @click="submitOrder"
-      >
-        {{ submitting ? '提交中' : '去支付' }}
-      </button>
     </footer>
   </div>
 </template>
@@ -443,13 +478,28 @@ function goBack(): void {
   right: 0;
   bottom: 0;
   z-index: 20;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  background: #fff;
+  border-top: 1px solid #e5e5e5;
+}
+
+.co-settle-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.co-block-tip {
+  margin: 0;
+  font-size: 12px;
+  color: #ba1a1a;
+}
+
+.co-payable-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px;
-  background: #fff;
-  border-top: 1px solid #e5e5e5;
 }
 
 .co-payable {

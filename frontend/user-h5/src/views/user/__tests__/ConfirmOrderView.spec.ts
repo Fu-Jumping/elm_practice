@@ -158,4 +158,40 @@ describe('ConfirmOrderView（确认订单页 P0）', () => {
     await flushPromises()
     expect(router.currentRoute.value.name).toBe('home')
   })
+
+  // T56-T57 提交前置校验（2026-09-07 第三批，TC-ORD-006/009 前端侧 + PRD 851 行：
+  // 购物车为空、商家关闭、最低起送金额不满足时禁止提交并说明原因）
+  it('T56 店铺休息 → 提交禁用并说明原因（TC-ORD-006 前端侧）', async () => {
+    const pinia = bootstrapPinia()
+    const session = useSessionStore()
+    session.user = { account: '13800000001', nickname: '张同学' }
+    const cart = useCartStore()
+    // m004 老胖烧烤 CLOSED；加购 2 份羊肉串（56 ≥ 起送 30）隔离起送因素
+    await cart.addItem('m004', 'p206', 2)
+    await vi.waitFor(() => expect(cart.lines).toHaveLength(1), { timeout: 2000 })
+    const { wrapper } = await mountConfirm({ storeId: 'm004' }, pinia)
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="submit-block-tip"]').exists()).toBe(true),
+      { timeout: 2000 },
+    )
+    expect(wrapper.find('[data-testid="submit-block-tip"]').text()).toContain('休息')
+    expect(wrapper.find('[data-testid="submit-order-btn"]').attributes('disabled')).toBeDefined()
+  })
+
+  it('T57 起送金额不满足 → 提交禁用并提示差多少（TC-ORD-009 前端侧）', async () => {
+    const pinia = bootstrapPinia()
+    const session = useSessionStore()
+    session.user = { account: '13800000001', nickname: '张同学' }
+    const cart = useCartStore()
+    // m002 起送 20；加购 1 份九珍果汁（9 < 20）
+    await cart.addItem('m002', 'p105', 1)
+    await vi.waitFor(() => expect(cart.lines).toHaveLength(1), { timeout: 2000 })
+    const { wrapper } = await mountConfirm({ storeId: 'm002' }, pinia)
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="submit-block-tip"]').exists()).toBe(true),
+      { timeout: 2000 },
+    )
+    expect(wrapper.find('[data-testid="submit-block-tip"]').text()).toContain('11')
+    expect(wrapper.find('[data-testid="submit-order-btn"]').attributes('disabled')).toBeDefined()
+  })
 })
