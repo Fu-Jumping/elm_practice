@@ -65,6 +65,8 @@ export interface Product {
   categoryId: string
   name: string
   description?: string
+  /** 商品图片（后端返回；空串/缺失时前端显示占位图，PRD） */
+  image?: string
   price: number
   stock: number
   onSale: boolean
