@@ -851,6 +851,7 @@ function onCloseCard(storeId: string): void {
   width: 72px;
   height: 72px;
   border-radius: 4px;
+  object-fit: cover;
 }
 
 .product-name {

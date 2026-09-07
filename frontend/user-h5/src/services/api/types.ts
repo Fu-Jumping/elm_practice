@@ -65,6 +65,8 @@ export interface Product {
   categoryId: string
   name: string
   description?: string
+  /** 商品图 URL（契约 §3.2；后端种子数据回填，缺失时前端回退占位图） */
+  image?: string
   price: number
   stock: number
   onSale: boolean

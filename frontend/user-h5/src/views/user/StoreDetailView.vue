@@ -272,7 +272,7 @@ function onCheckout(): void {
             :class="{ 'product-item--soldout': isSoldOut(product) }"
             :data-testid="`product-item-${product.productId}`"
           >
-            <img class="product-img" :src="PRODUCT_PLACEHOLDER" :alt="product.name" />
+            <img class="product-img" :src="product.image ?? PRODUCT_PLACEHOLDER" :alt="product.name" />
             <div class="product-info">
               <h3 class="product-name">{{ product.name }}</h3>
               <p v-if="product.description" class="product-desc">{{ product.description }}</p>

@@ -8,10 +8,9 @@ import type { Product, StoreCategory, StoreSummary } from '@/services/api/types'
 import type { MockHandler } from './index'
 import { ok } from './index'
 
-// 商品预览缩略图（素材清单 docs/frontend/首页复刻素材清单.md；门店封面 9/6 起走渐变占位，不设 image 字段）
-const THUMB_1 = '/design-assets/首页-精细/product-thumb-1.png'
-const THUMB_2 = '/design-assets/首页-精细/product-thumb-2.png'
-const THUMB_3 = '/design-assets/首页-精细/product-thumb-3.png'
+// 演示图片素材（2026-09-07 图片素材包：public/demo-images/ 静态伺服，URL 口径 /demo-images/*；
+// 文件↔店铺/商品对照与后端 seed 接入说明见 docs/backend/演示图片素材清单.md）
+const IMG = '/demo-images'
 
 // TODO(契约缺口)：distanceText/couponTags/previewProducts 为 mock-only 展示字段（见 types.ts 注）；
 // m003 刻意缺配，供"字段缺失整块隐藏"用例（T8）与降级路径验证
@@ -20,6 +19,7 @@ const STORES: StoreSummary[] = [
     storeId: 'm001',
     name: '老王小店',
     description: '家常小炒 · 经济实惠',
+    image: `${IMG}/store-m001.jpg`,
     rating: 4.6,
     monthlySales: 1200,
     deliveryMinutes: 30,
@@ -29,15 +29,16 @@ const STORES: StoreSummary[] = [
     distanceText: '1.8km',
     couponTags: ['满30减8', '36减1|58减4', '食无忧'],
     previewProducts: [
-      { name: '白葡萄柠檬茶', image: THUMB_1, price: 12 },
-      { name: '西瓜冰柠茶', image: THUMB_2, price: 12 },
-      { name: '黄皮冰柠茶', image: THUMB_3, price: 12 },
+      { name: '白葡萄柠檬茶', image: `${IMG}/product-m001-01.jpg`, price: 12 },
+      { name: '西瓜冰柠茶', image: `${IMG}/product-m001-02.jpg`, price: 12 },
+      { name: '黄皮冰柠茶', image: `${IMG}/product-m001-03.jpg`, price: 12 },
     ],
   },
   {
     storeId: 'm002',
     name: '肯德基宅急送',
     description: '炸鸡汉堡 · 外卖到家',
+    image: `${IMG}/store-m002.jpg`,
     rating: 4.8,
     monthlySales: 3500,
     deliveryMinutes: 25,
@@ -47,14 +48,15 @@ const STORES: StoreSummary[] = [
     distanceText: '2.4km',
     couponTags: ['满50减10'],
     previewProducts: [
-      { name: '香辣鸡腿堡', image: THUMB_2, price: 19.5 },
-      { name: '九珍果汁', image: THUMB_1, price: 9 },
+      { name: '香辣鸡腿堡', image: `${IMG}/product-m002-01.jpg`, price: 19.5 },
+      { name: '九珍果汁', image: `${IMG}/product-m002-05.jpg`, price: 9 },
     ],
   },
   {
     storeId: 'm003',
     name: '麦当劳',
     description: '经典快餐 · 随时开吃',
+    image: `${IMG}/store-m003.jpg`,
     rating: 4.7,
     monthlySales: 2800,
     deliveryMinutes: 25,
@@ -64,14 +66,15 @@ const STORES: StoreSummary[] = [
     // 缺配 couponTags：优惠标签未返回时整块隐藏（T8 降级口径；现实合理——该店无优惠活动）
     distanceText: '2.9km',
     previewProducts: [
-      { name: '巨无霸', image: THUMB_2, price: 25.5 },
-      { name: '麦乐鸡（5块）', image: THUMB_1, price: 11 },
+      { name: '巨无霸', image: `${IMG}/product-m003-01.jpg`, price: 25.5 },
+      { name: '麦乐鸡（5块）', image: `${IMG}/product-m003-02.jpg`, price: 11 },
     ],
   },
   {
     storeId: 'm004',
     name: '老胖烧烤',
     description: '深夜食堂 · 现烤现送',
+    image: `${IMG}/store-m004.jpg`,
     rating: 4.5,
     monthlySales: 800,
     deliveryMinutes: 40,
@@ -81,14 +84,15 @@ const STORES: StoreSummary[] = [
     distanceText: '3.6km',
     couponTags: ['满88减20'],
     previewProducts: [
-      { name: '羊肉串（10串）', image: THUMB_3, price: 28 },
-      { name: '烤茄子', image: THUMB_2, price: 10 },
+      { name: '羊肉串（10串）', image: `${IMG}/product-m004-01.jpg`, price: 28 },
+      { name: '烤茄子', image: `${IMG}/product-m004-02.jpg`, price: 10 },
     ],
   },
   {
     storeId: 'm005',
     name: '元盛居火锅',
     description: '铜锅涮肉 · 宅家开涮',
+    image: `${IMG}/store-m005.jpg`,
     rating: 4.9,
     monthlySales: 950,
     deliveryMinutes: 45,
@@ -98,8 +102,8 @@ const STORES: StoreSummary[] = [
     distanceText: '4.2km',
     couponTags: ['新客减15', '食无忧'],
     previewProducts: [
-      { name: '精品肥牛', image: THUMB_2, price: 39 },
-      { name: '手切鲜羊肉', image: THUMB_1, price: 46 },
+      { name: '精品肥牛', image: `${IMG}/product-m005-01.jpg`, price: 39 },
+      { name: '手切鲜羊肉', image: `${IMG}/product-m005-02.jpg`, price: 46 },
     ],
   },
 ]
@@ -118,6 +122,7 @@ const PRODUCTS_M002: Product[] = [
     categoryId: 'c101',
     name: '香辣鸡腿堡',
     description: '招牌汉堡，香辣多汁',
+    image: `${IMG}/product-m002-01.jpg`,
     price: 19.5,
     stock: 100,
     onSale: true,
@@ -128,6 +133,7 @@ const PRODUCTS_M002: Product[] = [
     categoryId: 'c101',
     name: '劲脆鸡腿堡',
     description: '外酥里嫩，经典之选',
+    image: `${IMG}/product-m002-02.jpg`,
     price: 19.5,
     stock: 100,
     onSale: true,
@@ -137,6 +143,7 @@ const PRODUCTS_M002: Product[] = [
     storeId: 'm002',
     categoryId: 'c101',
     name: '老北京鸡肉卷',
+    image: `${IMG}/product-m002-03.jpg`,
     price: 17,
     stock: 80,
     onSale: true,
@@ -146,6 +153,7 @@ const PRODUCTS_M002: Product[] = [
     storeId: 'm002',
     categoryId: 'c102',
     name: '黄金鸡块（5块）',
+    image: `${IMG}/product-m002-04.jpg`,
     price: 11.5,
     stock: 120,
     onSale: true,
@@ -155,6 +163,7 @@ const PRODUCTS_M002: Product[] = [
     storeId: 'm002',
     categoryId: 'c103',
     name: '九珍果汁',
+    image: `${IMG}/product-m002-05.jpg`,
     price: 9,
     stock: 150,
     onSale: true,
@@ -165,6 +174,7 @@ const PRODUCTS_M002: Product[] = [
     categoryId: 'c101',
     name: '热辣香骨鸡（5块）',
     description: '销量冠军，售完即止',
+    image: `${IMG}/product-m002-06.jpg`,
     price: 13.9,
     stock: 0,
     onSale: true,
@@ -178,15 +188,15 @@ const CATEGORIES_GENERIC: StoreCategory[] = [
 ]
 
 const PRODUCTS_GENERIC: Product[] = [
-  { productId: 'p201', storeId: 'm001', categoryId: 'c201', name: '家常豆腐', description: '下饭神器', price: 12, stock: 50, onSale: true, monthlySalesText: '月售300+', goodRateText: '好评率96%' },
-  { productId: 'p202', storeId: 'm001', categoryId: 'c201', name: '鱼香肉丝', price: 15, stock: 40, onSale: true, monthlySalesText: '月售260+', goodRateText: '好评率95%' },
-  { productId: 'p203', storeId: 'm001', categoryId: 'c202', name: '米饭', price: 2, stock: 100, onSale: true },
-  { productId: 'p204', storeId: 'm003', categoryId: 'c201', name: '巨无霸', description: '经典双层牛肉', price: 25.5, stock: 60, onSale: true, monthlySalesText: '月售1800+', goodRateText: '好评率97%' },
-  { productId: 'p205', storeId: 'm003', categoryId: 'c202', name: '薯条（大）', price: 11, stock: 80, onSale: true },
-  { productId: 'p206', storeId: 'm004', categoryId: 'c201', name: '羊肉串（10串）', description: '现烤现送', price: 28, stock: 30, onSale: true, monthlySalesText: '月售500+', goodRateText: '好评率94%' },
-  { productId: 'p207', storeId: 'm004', categoryId: 'c202', name: '烤茄子', price: 10, stock: 20, onSale: true },
-  { productId: 'p208', storeId: 'm005', categoryId: 'c201', name: '精品肥牛', price: 39, stock: 25, onSale: true, monthlySalesText: '月售400+', goodRateText: '好评率98%' },
-  { productId: 'p209', storeId: 'm005', categoryId: 'c202', name: '手切鲜羊肉', price: 46, stock: 18, onSale: true },
+  { productId: 'p201', storeId: 'm001', categoryId: 'c201', name: '家常豆腐', description: '下饭神器', image: `${IMG}/product-m001-04.jpg`, price: 12, stock: 50, onSale: true, monthlySalesText: '月售300+', goodRateText: '好评率96%' },
+  { productId: 'p202', storeId: 'm001', categoryId: 'c201', name: '鱼香肉丝', image: `${IMG}/product-m001-05.jpg`, price: 15, stock: 40, onSale: true, monthlySalesText: '月售260+', goodRateText: '好评率95%' },
+  { productId: 'p203', storeId: 'm001', categoryId: 'c202', name: '米饭', image: `${IMG}/product-m001-06.jpg`, price: 2, stock: 100, onSale: true },
+  { productId: 'p204', storeId: 'm003', categoryId: 'c201', name: '巨无霸', description: '经典双层牛肉', image: `${IMG}/product-m003-01.jpg`, price: 25.5, stock: 60, onSale: true, monthlySalesText: '月售1800+', goodRateText: '好评率97%' },
+  { productId: 'p205', storeId: 'm003', categoryId: 'c202', name: '薯条（大）', image: `${IMG}/product-m003-03.jpg`, price: 11, stock: 80, onSale: true },
+  { productId: 'p206', storeId: 'm004', categoryId: 'c201', name: '羊肉串（10串）', description: '现烤现送', image: `${IMG}/product-m004-01.jpg`, price: 28, stock: 30, onSale: true, monthlySalesText: '月售500+', goodRateText: '好评率94%' },
+  { productId: 'p207', storeId: 'm004', categoryId: 'c202', name: '烤茄子', image: `${IMG}/product-m004-02.jpg`, price: 10, stock: 20, onSale: true },
+  { productId: 'p208', storeId: 'm005', categoryId: 'c201', name: '精品肥牛', image: `${IMG}/product-m005-01.jpg`, price: 39, stock: 25, onSale: true, monthlySalesText: '月售400+', goodRateText: '好评率98%' },
+  { productId: 'p209', storeId: 'm005', categoryId: 'c202', name: '手切鲜羊肉', image: `${IMG}/product-m005-02.jpg`, price: 46, stock: 18, onSale: true },
 ]
 
 // 给非 m002 商品挂分类（按 storeId 生成所属分类集合）
