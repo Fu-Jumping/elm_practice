@@ -35,8 +35,10 @@ public final class Domain {
         public String createdAt;
         public Merchant(String id, String account, String passwordHash, String storeId, String phone, String createdAt) {
             this.id = id; this.account = account; this.passwordHash = passwordHash;
-            this.storeId = storeId; this.phone = phone; this.createdAt = createdAt;
+            this.storeId = storeId; this.phone = phone;
+            this.createdAt = createdAt;
         }
+        public Merchant() {}
     }
     public static final class Store {
         public String id, name, description, image, merchantId;
@@ -51,6 +53,7 @@ public final class Domain {
             this.monthlySales=monthlySales; this.deliveryMinutes=deliveryMinutes; this.startPrice=startPrice;
             this.deliveryFee=deliveryFee; this.status=status; this.merchantId=merchantId;
         }
+        public Store() {}
     }
     public static final class Category {
         public String id, storeId, name;
@@ -58,6 +61,7 @@ public final class Domain {
         public Category(String id, String storeId, String name, int sortOrder) {
             this.id=id; this.storeId=storeId; this.name=name; this.sortOrder=sortOrder;
         }
+        public Category() {}
     }
     public static final class Product {
         public String id, storeId, categoryId, name, description, image;
@@ -70,6 +74,7 @@ public final class Domain {
             this.description=description; this.image=image; this.price=price; this.stock=stock;
             this.onSale=onSale; this.sales=sales;
         }
+        public Product() {}
     }
     public static final class Address {
         public String id, userId, contactName, contactSex, contactPhone, region, detail, label;
@@ -80,6 +85,11 @@ public final class Domain {
             this.id=id; this.userId=userId; this.contactName=contactName; this.contactSex=contactSex;
             this.contactPhone=contactPhone; this.region=region; this.detail=detail; this.label=label;
             this.isDefault=isDefault; this.updatedAt=updatedAt;
+        }
+        public Address() {}
+        /** 订单地址快照的防御性拷贝（原 InMemoryRepository.copyAddress 口径）。 */
+        public Address copy() {
+            return new Address(id, userId, contactName, contactSex, contactPhone, region, detail, label, isDefault, updatedAt);
         }
     }
     public static final class CartLine {
@@ -92,6 +102,7 @@ public final class Domain {
             this.id=id; this.userId=userId; this.storeId=storeId; this.productId=productId;
             this.quantity=quantity; this.unitPrice=unitPrice; this.updatedAt=updatedAt;
         }
+        public CartLine() {}
     }
     public static final class Order {
         public String id, userId, storeId, addressId, remark, createdAt, paidAt;
@@ -108,6 +119,7 @@ public final class Domain {
             this.packagingFee=packagingFee; this.total=total; this.addressSnapshot=addressSnapshot;
             this.idempotencyKey=idempotencyKey;
         }
+        public Order() {}
     }
     public static final class OrderItem {
         public String productId, name, image, categoryId;
@@ -119,6 +131,7 @@ public final class Domain {
             this.unitPrice=unitPrice; this.quantity=quantity;
             this.subtotal=unitPrice.multiply(BigDecimal.valueOf(quantity)).setScale(2);
         }
+        public OrderItem() {}
     }
     public static final class Review {
         public String id, orderId, storeId, userId, content, reply, createdAt, repliedAt;
@@ -128,6 +141,7 @@ public final class Domain {
             this.id=id; this.orderId=orderId; this.storeId=storeId; this.userId=userId;
             this.content=content; this.rating=rating; this.createdAt=createdAt;
         }
+        public Review() {}
     }
     public static final class Conversation {
         public String id, orderId, userId, merchantId;
@@ -136,11 +150,13 @@ public final class Domain {
         public Conversation(String id, String orderId, String userId, String merchantId) {
             this.id=id; this.orderId=orderId; this.userId=userId; this.merchantId=merchantId;
         }
+        public Conversation() {}
     }
     public static final class Message {
         public String id, senderId, senderRole, content, createdAt;
         public Message(String id, String senderId, String senderRole, String content, String createdAt) {
             this.id=id; this.senderId=senderId; this.senderRole=senderRole; this.content=content; this.createdAt=createdAt;
         }
+        public Message() {}
     }
 }

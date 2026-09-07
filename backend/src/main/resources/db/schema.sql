@@ -1,3 +1,5 @@
+-- 应用启动时由 DatabaseInitializer 自动执行（CREATE IF NOT EXISTS 幂等）。
+-- 注意：本文件与 backend/database/schema/schema.sql 保持同步，修改需同步两处。
 CREATE TABLE IF NOT EXISTS users (
   user_id VARCHAR(32) PRIMARY KEY, account VARCHAR(64) NOT NULL UNIQUE,
   password_hash VARCHAR(128) NOT NULL, nickname VARCHAR(80) NOT NULL, created_at TIMESTAMP NOT NULL
@@ -46,7 +48,6 @@ CREATE TABLE IF NOT EXISTS order_items (
   PRIMARY KEY(order_id,product_id)
 );
 -- 以下 5 张表为 MyBatis 持久化接入新增（评价、会话、消息、店铺促销、应用侧 ID 序列）。
--- 注意：本文件与 backend/src/main/resources/db/schema.sql 保持同步，修改需同步两处。
 CREATE TABLE IF NOT EXISTS reviews (
   review_id VARCHAR(32) PRIMARY KEY, order_id VARCHAR(32) NOT NULL UNIQUE,
   store_id VARCHAR(32) NOT NULL, user_id VARCHAR(32) NOT NULL,
