@@ -27,6 +27,8 @@ export const useCatalogStore = defineStore('catalog', () => {
     try {
       storeDetail.value = await storeApi.getStoreDetail(storeId)
     } catch (err) {
+      // 被防重拦截器取消的旧请求静默返回，不清空已有数据（2026-09-07 竞态修复：快速切换店铺商品被清空）
+      if ((err as { code?: string }).code === 'ERR_CANCELED') return
       storeDetail.value = null
       const status = (err as { status?: number }).status ?? 0
       detailError.value = {
@@ -41,7 +43,9 @@ export const useCatalogStore = defineStore('catalog', () => {
   async function fetchStoreCategories(storeId: string): Promise<void> {
     try {
       categories.value = await storeApi.getStoreCategories(storeId)
-    } catch {
+    } catch (err) {
+      // 被取消的旧请求静默返回，不清空已有分类（竞态修复同上）
+      if ((err as { code?: string }).code === 'ERR_CANCELED') return
       categories.value = []
     }
   }
@@ -50,7 +54,9 @@ export const useCatalogStore = defineStore('catalog', () => {
     productsLoading.value = true
     try {
       products.value = await storeApi.getStoreProducts(storeId)
-    } catch {
+    } catch (err) {
+      // 被取消的旧请求静默返回，不清空已有商品（竞态修复：快速切换店铺商品被清空）
+      if ((err as { code?: string }).code === 'ERR_CANCELED') return
       products.value = []
     } finally {
       productsLoading.value = false
