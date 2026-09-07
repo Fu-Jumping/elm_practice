@@ -3,6 +3,7 @@
  * 单测必测对象（TDD 规划 §4.2）；缺字段给确定默认值，禁止多键名试探式解包
  * 本文件 9/4 起按 TDD 实现（测试场景由人设计，AI 只辅助脚手架）
  */
+import type { OrderDetail, OrderRecord, OrderSummary } from '@/services/api/types'
 
 /** 金额：后端返回数字元，展示保留两位小数（契约：金额后端保留两位小数） */
 export function formatMoney(amount: number): string {
@@ -28,6 +29,10 @@ export function formatTime(input: string | number | Date): string {
 /** 状态枚举 → 文案映射（如订单状态），值对齐契约枚举，禁止页面散落魔法数字 */
 const STATUS_TEXT_MAP: Record<string, string> = {
   PROCESSING: '进行中',
+  // 后端已实现支付扩展状态机（联调实测 2026-09-07）：创建订单即进入待支付
+  PENDING_PAYMENT: '待支付',
+  // 后端种子数据含已完成状态订单（联调实测 2026-09-07）
+  COMPLETED: '已完成',
 }
 
 export function statusText(status: string): string {
@@ -61,4 +66,49 @@ export function payableAmountText(input: PayableAmountInput): string {
     return (itemsTotal + fee).toFixed(2)
   }
   return '0.00'
+}
+
+/**
+ * 订单记录归一化（2026-09-07 联调对齐）：后端 GET /orders 实际形状（扁平金额字段、
+ * address 对象、无 storeName）→ 前端视图模型（OrderSummary/OrderDetail）
+ * 架构约定 §3.3：归一化唯一出口；缺字段给确定默认值，禁止 undefined 上屏
+ */
+function toFiniteNumber(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : 0
+}
+
+/** 扁平金额字段 → 三件套视图模型（itemSubtotal/total → itemsTotal/payableAmount） */
+export function normalizeOrderSummary(raw: OrderRecord): OrderSummary {
+  return {
+    orderId: raw.orderId,
+    status: raw.status,
+    storeId: raw.storeId,
+    storeName: '',
+    amounts: {
+      itemsTotal: toFiniteNumber(raw.itemSubtotal),
+      packagingFee: toFiniteNumber(raw.packagingFee),
+      payableAmount: toFiniteNumber(raw.total),
+    },
+    createdAt: raw.createdAt,
+  }
+}
+
+/** 详情：补明细快照与地址快照映射（无字段时空数组/空快照兜底） */
+export function normalizeOrderDetail(raw: OrderRecord): OrderDetail {
+  return {
+    ...normalizeOrderSummary(raw),
+    remark: raw.remark ?? '',
+    items: (raw.items ?? []).map((item) => ({
+      productId: item.productId,
+      name: item.name,
+      unitPrice: toFiniteNumber(item.unitPrice),
+      quantity: item.quantity,
+    })),
+    addressSnapshot: {
+      contactName: raw.address?.contactName ?? '',
+      contactPhone: raw.address?.contactPhone ?? '',
+      region: raw.address?.region ?? '',
+      detail: raw.address?.detail ?? '',
+    },
+  }
 }

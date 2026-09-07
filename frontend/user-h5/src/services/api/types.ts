@@ -128,17 +128,59 @@ export interface OrderCreated {
   payableAmount: number
 }
 
-/** 订单状态（契约 §3.5：基础 P0 仅 PROCESSING；P1 扩展状态以契约/SRS 固化后回填） */
-export type OrderStatus = 'PROCESSING'
+/** 订单状态（契约 §3.5：基础 P0 仅 PROCESSING；后端已实现支付扩展状态机，见 PENDING_PAYMENT） */
+export type OrderStatus = 'PROCESSING' | 'PENDING_PAYMENT'
 
-/** 金额快照三件套（TC-ORD-022：实付 = 商品小计 + packagingFee，由后端计价并随订单保存） */
+/**
+ * 订单记录（后端 GET /orders 实际形状，2026-09-07 联调对齐）
+ * 后端为扁平金额字段且无 storeName：前端经 normalizers（normalizeOrderSummary/Detail）
+ * 归一为视图模型 OrderSummary/OrderDetail，页面不直接消费本类型
+ */
+export interface OrderRecordItem {
+  productId: string
+  name: string
+  image?: string
+  unitPrice: number
+  quantity: number
+  subtotal: number
+}
+
+export interface OrderAddressRecord {
+  addressId: string
+  contactName: string
+  contactSex: string
+  contactPhone: string
+  region: string
+  detail: string
+  label?: string
+  isDefault: boolean
+  updatedAt?: string
+}
+
+export interface OrderRecord {
+  orderId: string
+  userId?: string
+  storeId: string
+  addressId?: string
+  remark: string
+  status: string
+  createdAt: string
+  itemSubtotal: number
+  packagingFee: number
+  total: number
+  paidAt?: string | null
+  address?: OrderAddressRecord
+  items?: OrderRecordItem[]
+}
+
+/** 金额快照三件套（TC-ORD-022：实付 = 商品小计 + packagingFee，视图模型） */
 export interface OrderAmounts {
   itemsTotal: number
   packagingFee: number
   payableAmount: number
 }
 
-/** 商品明细快照（TC-ORD-002：下单时快照，不跟随商品改价） */
+/** 商品明细快照（TC-ORD-002：下单时快照，不跟随商品改价；视图模型） */
 export interface OrderItemSnapshot {
   productId: string
   name: string
@@ -146,7 +188,7 @@ export interface OrderItemSnapshot {
   quantity: number
 }
 
-/** 地址快照（TC-ORD-002：收货信息来自下单时地址快照） */
+/** 地址快照（TC-ORD-002：收货信息来自下单时地址快照；视图模型） */
 export interface AddressSnapshot {
   contactName: string
   contactPhone: string
@@ -154,17 +196,17 @@ export interface AddressSnapshot {
   detail: string
 }
 
-/** 订单摘要（GET /orders 列表项，按创建时间倒序，TC-ORD-013） */
+/** 订单摘要视图模型（normalizeOrderSummary 输出；店名由页面按 storeId 映射） */
 export interface OrderSummary {
   orderId: string
-  status: OrderStatus
+  status: string
   storeId: string
   storeName: string
   amounts: OrderAmounts
   createdAt: string
 }
 
-/** 订单详情（GET /orders/{orderId}，明细含在详情中，TC-ORD-016） */
+/** 订单详情视图模型（normalizeOrderDetail 输出；明细含在详情中，TC-ORD-016） */
 export interface OrderDetail extends OrderSummary {
   remark: string
   items: OrderItemSnapshot[]
