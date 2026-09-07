@@ -42,7 +42,7 @@ describe('AddressListView（地址列表页 P0）', () => {
     isDefault: false,
   }
 
-  async function mountList() {
+  async function mountList(path = '/addresses') {
     setActivePinia(pinia)
     const router = createRouter({
       history: createMemoryHistory(),
@@ -52,9 +52,10 @@ describe('AddressListView（地址列表页 P0）', () => {
         { path: '/addresses', name: 'address-list', component: AddressListView },
         { path: '/addresses/new', name: 'address-new', component: { template: '<div />' } },
         { path: '/addresses/:addressId/edit', name: 'address-edit', component: { template: '<div />' } },
+        { path: '/orders/confirm', name: 'order-confirm', component: { template: '<div />' } },
       ],
     })
-    await router.push('/addresses')
+    await router.push(path)
     await router.isReady()
     const wrapper = mount(AddressListView, { global: { plugins: [pinia, router] } })
     return { wrapper, router }
@@ -135,5 +136,34 @@ describe('AddressListView（地址列表页 P0）', () => {
     )
     expect(wrapper.find('[data-testid="address-card-da001"]').exists()).toBe(false)
     expect(confirmSpy).toHaveBeenCalled()
+  })
+
+  // T58 地址选择回填（2026-09-07 第三批，PRD 873 行：确认订单场景点击地址卡选中并返回，
+  // 管理场景仍进入编辑；回填不直接创建订单）
+  it('T58 选择模式（query.select）：点击地址卡回传所选地址并返回确认订单；管理场景仍进编辑', async () => {
+    login()
+    addressMockState.push({ ...SECOND })
+    // 选择模式：从确认订单进入
+    const { wrapper, router } = await mountList('/addresses?select=1&storeId=m002')
+    await vi.waitFor(
+      () => expect(wrapper.findAll('[data-testid="address-card"]').length).toBe(2),
+      { timeout: 2000 },
+    )
+    await wrapper.find('[data-testid="address-card-da002"]').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('order-confirm')
+    expect(router.currentRoute.value.query.addressId).toBe('da002')
+    expect(router.currentRoute.value.query.storeId).toBe('m002')
+
+    // 对照：管理场景（无 select 标记）点击地址卡仍进入编辑
+    const mgmt = await mountList('/addresses')
+    await vi.waitFor(
+      () => expect(mgmt.wrapper.findAll('[data-testid="address-card"]').length).toBe(2),
+      { timeout: 2000 },
+    )
+    await mgmt.wrapper.find('[data-testid="address-card-da002"]').trigger('click')
+    await flushPromises()
+    expect(mgmt.router.currentRoute.value.name).toBe('address-edit')
+    expect(mgmt.router.currentRoute.value.params.addressId).toBe('da002')
   })
 })
