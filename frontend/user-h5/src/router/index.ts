@@ -87,10 +87,11 @@ const router = createRouter({
           meta: { title: '订单', tab: true, auth: true, priority: 'P0' },
         },
         {
+          // 我的：PRD 862 列"未登录显示去登录"——页面内处理引导，不设路由守卫（2026-09-07 口径）
           path: 'mine',
           name: 'mine',
-          component: () => import('@/views/user/PlaceholderView.vue'),
-          meta: { title: '我的', tab: true, auth: true, priority: 'P0' },
+          component: () => import('@/views/user/MineView.vue'),
+          meta: { title: '我的', tab: true, priority: 'P0' },
         },
       ],
     },

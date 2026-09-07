@@ -17,11 +17,10 @@ import { formatMoney, statusText } from '@/services/normalizers'
 import type { CartLine, Product } from '@/services/api/types'
 import { toast } from '@/utils/toast'
 import StoreCover from '@/components/StoreCover.vue'
+import { productImageSrc, storeImageSrc } from '@/utils/demoImages'
 
 const ASSETS = '/design-assets/首页-精细'
 /** 商品图契约暂无图片字段：用固定素材占位（PRD：图片为空显示占位图） */
-const PRODUCT_PLACEHOLDER = `${ASSETS}/product-thumb-1.png`
-
 const route = useRoute()
 const router = useRouter()
 const catalogStore = useCatalogStore()
@@ -202,11 +201,11 @@ function onCheckout(): void {
     <template v-else-if="store">
       <!-- 商家信息横幅（名称/评分/月售/时长/起送/配送来自详情接口；促销标签接口返回才展示） -->
       <section class="store-banner" data-testid="store-banner">
-        <StoreCover class="banner-img" :name="store.name" :image="store.image" />
+        <StoreCover class="banner-img" :name="store.name" :image="storeImageSrc(storeId, store.image)" />
         <div class="store-info">
           <div class="store-logo-row">
             <span class="store-logo-box">
-              <StoreCover class="store-logo" :name="store.name" :image="store.image" />
+              <StoreCover class="store-logo" :name="store.name" :image="storeImageSrc(storeId, store.image)" />
             </span>
             <h1 class="store-name">{{ store.name }}</h1>
           </div>
@@ -304,7 +303,7 @@ function onCheckout(): void {
             :class="{ 'product-item--soldout': isSoldOut(product) }"
             :data-testid="`product-item-${product.productId}`"
           >
-            <img class="product-img" :src="PRODUCT_PLACEHOLDER" :alt="product.name" />
+            <img class="product-img" :src="productImageSrc(product.productId, product.image)" :alt="product.name" />
             <div class="product-info">
               <h3 class="product-name">{{ product.name }}</h3>
               <p v-if="product.description" class="product-desc">{{ product.description }}</p>

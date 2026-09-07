@@ -114,9 +114,9 @@ describe('HomeView（首页 P0）', () => {
     const kfc = wrapper.findAll('.merchant-card').find((c) => c.text().includes('肯德基'))!
     await vi.waitFor(() => expect(kfc.text()).toContain('香辣鸡腿堡'), { timeout: 2000 })
     expect(kfc.findAll('.product-cell')).toHaveLength(3)
-    // 商品接口图片为空 → 占位图（PRD：图片为空显示占位图）
+    // 商品图接入演示素材（2026-09-07：mock 商品 image 指向 /demo-images；接口空时兜底链见 utils/demoImages）
     const firstImg = kfc.find('.product-img')
-    expect(firstImg.attributes('src')).toContain('product-thumb')
+    expect(firstImg.attributes('src')).toContain('/demo-images/product-m002-01.jpg')
     // 空态兜底：无商品也不出现 undefined
     expect(wrapper.text()).not.toContain('undefined')
   })

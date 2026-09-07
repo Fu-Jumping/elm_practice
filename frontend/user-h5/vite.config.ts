@@ -28,6 +28,9 @@ export default defineConfig({
         target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
+      // 演示图片由前端 public/demo-images 伺服（同源，无需代理）。
+      // 原计划代理转发后端伺服（口径 b），实测 404：后端 application.properties 关闭了
+      // 静态资源映射（add-mappings=false，API-only 设计）——后端若开启可恢复代理（2026-09-07 留痕）
     },
   },
   css: {
