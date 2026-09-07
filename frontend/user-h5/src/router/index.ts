@@ -49,6 +49,32 @@ const router = createRouter({
           meta: { title: '确认订单', priority: 'P0' },
         },
         {
+          // 订单详情：参数为订单号；明细含在详情（P0）
+          path: 'orders/:orderId',
+          name: 'order-detail',
+          component: () => import('@/views/user/OrderDetailView.vue'),
+          meta: { title: '订单详情', priority: 'P0' },
+        },
+        {
+          // 地址管理：列表（管理场景点击进入编辑；确认订单选择回填待第三批）
+          path: 'addresses',
+          name: 'address-list',
+          component: () => import('@/views/user/AddressListView.vue'),
+          meta: { title: '收货地址', priority: 'P0' },
+        },
+        {
+          path: 'addresses/new',
+          name: 'address-new',
+          component: () => import('@/views/user/AddressEditView.vue'),
+          meta: { title: '新增地址', priority: 'P0' },
+        },
+        {
+          path: 'addresses/:addressId/edit',
+          name: 'address-edit',
+          component: () => import('@/views/user/AddressEditView.vue'),
+          meta: { title: '编辑地址', priority: 'P0' },
+        },
+        {
           path: 'messages',
           name: 'messages',
           component: () => import('@/views/user/PlaceholderView.vue'),
@@ -57,7 +83,7 @@ const router = createRouter({
         {
           path: 'orders',
           name: 'orders',
-          component: () => import('@/views/user/PlaceholderView.vue'),
+          component: () => import('@/views/user/OrderListView.vue'),
           meta: { title: '订单', tab: true, auth: true, priority: 'P0' },
         },
         {

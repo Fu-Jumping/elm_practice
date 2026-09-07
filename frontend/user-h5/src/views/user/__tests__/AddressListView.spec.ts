@@ -16,10 +16,14 @@ import { ADDRESS_SEED, addressMockState } from '@/mocks/address'
  */
 describe('AddressListView（地址列表页 P0）', () => {
   let offToast: (() => void) | undefined
+  let pinia: ReturnType<typeof createPinia>
 
   beforeEach(() => {
     offToast = undefined
     addressMockState.splice(0, addressMockState.length, ...ADDRESS_SEED.map((item) => ({ ...item })))
+    // 每条用例独立 pinia 并先激活：login() 与视图共用同一实例
+    pinia = createPinia()
+    setActivePinia(pinia)
   })
 
   afterEach(() => {
@@ -38,15 +42,8 @@ describe('AddressListView（地址列表页 P0）', () => {
     isDefault: false,
   }
 
-  function bootstrapPinia() {
-    const pinia = createPinia()
+  async function mountList() {
     setActivePinia(pinia)
-    return pinia
-  }
-
-  async function mountList(pinia?: ReturnType<typeof createPinia>) {
-    const p = pinia ?? bootstrapPinia()
-    setActivePinia(p)
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [
@@ -59,7 +56,7 @@ describe('AddressListView（地址列表页 P0）', () => {
     })
     await router.push('/addresses')
     await router.isReady()
-    const wrapper = mount(AddressListView, { global: { plugins: [p, router] } })
+    const wrapper = mount(AddressListView, { global: { plugins: [pinia, router] } })
     return { wrapper, router }
   }
 

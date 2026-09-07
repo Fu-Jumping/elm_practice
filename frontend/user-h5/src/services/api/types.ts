@@ -127,3 +127,46 @@ export interface OrderCreated {
   /** 后端计价实付金额（TC-ORD-021：实付 = 商品小计 + packagingFee 2.00，演示口径） */
   payableAmount: number
 }
+
+/** 订单状态（契约 §3.5：基础 P0 仅 PROCESSING；P1 扩展状态以契约/SRS 固化后回填） */
+export type OrderStatus = 'PROCESSING'
+
+/** 金额快照三件套（TC-ORD-022：实付 = 商品小计 + packagingFee，由后端计价并随订单保存） */
+export interface OrderAmounts {
+  itemsTotal: number
+  packagingFee: number
+  payableAmount: number
+}
+
+/** 商品明细快照（TC-ORD-002：下单时快照，不跟随商品改价） */
+export interface OrderItemSnapshot {
+  productId: string
+  name: string
+  unitPrice: number
+  quantity: number
+}
+
+/** 地址快照（TC-ORD-002：收货信息来自下单时地址快照） */
+export interface AddressSnapshot {
+  contactName: string
+  contactPhone: string
+  region: string
+  detail: string
+}
+
+/** 订单摘要（GET /orders 列表项，按创建时间倒序，TC-ORD-013） */
+export interface OrderSummary {
+  orderId: string
+  status: OrderStatus
+  storeId: string
+  storeName: string
+  amounts: OrderAmounts
+  createdAt: string
+}
+
+/** 订单详情（GET /orders/{orderId}，明细含在详情中，TC-ORD-016） */
+export interface OrderDetail extends OrderSummary {
+  remark: string
+  items: OrderItemSnapshot[]
+  addressSnapshot: AddressSnapshot
+}

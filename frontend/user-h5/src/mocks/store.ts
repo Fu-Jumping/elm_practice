@@ -213,6 +213,11 @@ export function findMockProduct(productId: string): Product | undefined {
   return ALL_PRODUCTS.find((p) => p.productId === productId)
 }
 
+/** mock 内部店铺查找（订单快照店铺名用） */
+export function findMockStore(storeId: string): StoreSummary | undefined {
+  return STORES.find((s) => s.storeId === storeId)
+}
+
 /** 注册表：key = `METHOD path` */
 export const storeMocks: Record<string, MockHandler> = {
   // 列表：暂无 keyword/categoryId/sort 过滤行为，全量返回（后续按验收用例补）

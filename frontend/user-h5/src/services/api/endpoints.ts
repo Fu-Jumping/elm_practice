@@ -22,14 +22,16 @@ export const endpoints = {
     add: '/cart/items',
     // TODO(购物车弹层任务)：PATCH/DELETE /cart/items/{cartLineId} 届时接入
   },
-  // 地址簿（契约 §3.3）：GET 列表 / POST 新增；PATCH/DELETE/{addressId} 待地址管理页任务接入
+  // 地址簿（契约 §3.3）：列表/新增/单查/修改/删除
   address: {
     list: '/me/addresses',
     add: '/me/addresses',
+    byId: (addressId: string) => `/me/addresses/${addressId}`,
   },
-  // 订单（契约 §3.5）：POST 创建 / GET 列表 / GET 详情；明细含在详情（P0）
+  // 订单（契约 §3.5）：POST 创建 / GET 列表 / GET 详情（明细含在详情，P0）
   order: {
     create: '/orders',
     list: '/orders',
+    detail: (orderId: string) => `/orders/${orderId}`,
   },
 } as const
