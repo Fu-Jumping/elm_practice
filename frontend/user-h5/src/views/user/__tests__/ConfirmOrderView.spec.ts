@@ -49,6 +49,7 @@ describe('ConfirmOrderView（确认订单页 P0）', () => {
         { path: '/stores/:storeId', name: 'store-detail', component: { template: '<div />' } },
         { path: '/login', name: 'login', component: { template: '<div />' } },
         { path: '/orders', name: 'orders', component: { template: '<div />' } },
+        { path: '/addresses', name: 'address-list', component: { template: '<div />' } },
         { path: '/orders/confirm', name: 'order-confirm', component: ConfirmOrderView },
       ],
     })
