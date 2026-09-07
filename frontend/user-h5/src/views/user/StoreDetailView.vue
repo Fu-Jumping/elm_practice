@@ -14,7 +14,7 @@ import { useCatalogStore } from '@/stores/catalogStore'
 import { useCartStore } from '@/stores/cartStore'
 import { useSessionStore } from '@/stores/sessionStore'
 import { formatMoney, statusText } from '@/services/normalizers'
-import type { Product } from '@/services/api/types'
+import type { CartLine, Product } from '@/services/api/types'
 import { toast } from '@/utils/toast'
 import StoreCover from '@/components/StoreCover.vue'
 
@@ -120,7 +120,32 @@ async function onAdd(product: Product): Promise<void> {
     void router.push({ name: 'login', query: { redirect: route.fullPath } })
     return
   }
-  await cartStore.addItem(storeId, product.productId)
+  // 已加购 → 步进 +1（PATCH）；未加购 → 加购 1 件（POST，同商品合并由后端保证）
+  const line = lineOf(product.productId)
+  if (line) await cartStore.incrementLine(line.cartLineId)
+  else await cartStore.addItem(storeId, product.productId)
+}
+
+/** 步进 -（T49）：减 1；减到 0 由 cartStore 转删除请求（契约 §3.4） */
+async function onDecrement(product: Product): Promise<void> {
+  const line = lineOf(product.productId)
+  if (line) await cartStore.decrementLine(line.cartLineId)
+}
+
+/** 购物车行查询（步进器渲染与定位用） */
+function lineOf(productId: string): CartLine | undefined {
+  return cartStore.lines.find((line) => line.productId === productId)
+}
+
+function qtyOf(productId: string): number {
+  return lineOf(productId)?.quantity ?? 0
+}
+
+/** 购物车弹层（T50，PRD：点击购物车栏展开弹层） */
+const cartPopupOpen = ref(false)
+
+function toggleCartPopup(): void {
+  cartPopupOpen.value = !cartPopupOpen.value
 }
 
 /** 去结算校验顺序：登录 → 购物车非空 → 店铺营业（PRD 点餐内容区行） */
@@ -292,7 +317,38 @@ function onCheckout(): void {
                   <span class="price-symbol">¥</span>
                   <span class="price-int">{{ formatMoney(product.price) }}</span>
                 </span>
+                <!-- 行内步进器（T47-T49）：已加购显示 "- 数量 +"，未加购仅 + 按钮 -->
+                <span v-if="qtyOf(product.productId) > 0" class="product-stepper">
+                  <button
+                    class="stepper-btn"
+                    type="button"
+                    :data-testid="`minus-btn-${product.productId}`"
+                    :disabled="cartStore.isStepping(lineOf(product.productId)?.cartLineId ?? '')"
+                    aria-label="减少数量"
+                    @click="onDecrement(product)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+                    </svg>
+                  </button>
+                  <span class="stepper-qty" :data-testid="`product-qty-${product.productId}`">
+                    {{ qtyOf(product.productId) }}
+                  </span>
+                  <button
+                    class="stepper-btn stepper-btn--add"
+                    type="button"
+                    :data-testid="`add-btn-${product.productId}`"
+                    :disabled="isClosed || isSoldOut(product) || cartStore.isAdding(product.productId)"
+                    :aria-label="`增加数量 ${product.name}`"
+                    @click="onAdd(product)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+                    </svg>
+                  </button>
+                </span>
                 <button
+                  v-else
                   class="product-add"
                   type="button"
                   :data-testid="`add-btn-${product.productId}`"
@@ -315,13 +371,12 @@ function onCheckout(): void {
       </div>
 
       <!-- 底部购物车栏（PRD：商品数/合计来自购物车接口；店铺休息结算禁用） -->
-      <div class="cart-bar" data-testid="cart-bar">
+      <div class="cart-bar" data-testid="cart-bar" @click="toggleCartPopup">
         <button
           class="cart-icon-btn"
           type="button"
           :disabled="isClosed"
           aria-label="购物车"
-          @click="onPlaceholderClick"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path
@@ -350,11 +405,71 @@ function onCheckout(): void {
           type="button"
           data-testid="checkout-btn"
           :disabled="isClosed"
-          @click="onCheckout"
+          @click.stop="onCheckout"
         >
           去结算
         </button>
       </div>
+
+      <!-- 购物车弹层（T50，PRD：点击购物车栏展开；行内步进器可增减，减到 0 移除） -->
+      <template v-if="cartPopupOpen">
+        <div class="cart-popup-mask" data-testid="cart-popup-mask" @click="toggleCartPopup" />
+        <section class="cart-popup" data-testid="cart-popup" role="dialog" aria-label="购物车">
+          <header class="cart-popup-head">
+            <span class="cart-popup-title">购物车</span>
+            <button
+              class="cart-popup-close"
+              type="button"
+              data-testid="cart-popup-close"
+              aria-label="收起购物车"
+              @click="toggleCartPopup"
+            >
+              收起
+            </button>
+          </header>
+          <ul class="cart-popup-list">
+            <li
+              v-for="line in cartStore.lines"
+              :key="line.cartLineId"
+              class="cart-popup-item"
+              data-testid="cart-popup-item"
+            >
+              <span class="cart-popup-name">{{ line.name }}</span>
+              <span class="cart-popup-price">¥{{ formatMoney(line.unitPrice) }}</span>
+              <span class="product-stepper">
+                <button
+                  class="stepper-btn"
+                  type="button"
+                  :data-testid="`popup-minus-${line.cartLineId}`"
+                  :disabled="cartStore.isStepping(line.cartLineId)"
+                  aria-label="减少数量"
+                  @click="cartStore.decrementLine(line.cartLineId)"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+                  </svg>
+                </button>
+                <span class="stepper-qty">{{ line.quantity }}</span>
+                <button
+                  class="stepper-btn stepper-btn--add"
+                  type="button"
+                  :data-testid="`popup-plus-${line.cartLineId}`"
+                  :disabled="cartStore.isStepping(line.cartLineId)"
+                  aria-label="增加数量"
+                  @click="cartStore.incrementLine(line.cartLineId)"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+                  </svg>
+                </button>
+              </span>
+            </li>
+          </ul>
+          <p class="cart-popup-total" data-testid="cart-popup-total">
+            合计：¥{{ formatMoney(cartStore.totalAmount) }}
+          </p>
+        </section>
+      </template>
     </template>
   </div>
 </template>
@@ -706,6 +821,123 @@ function onCheckout(): void {
   background: var(--color-primary);
   color: var(--color-surface-white);
   cursor: pointer;
+}
+
+/* 行内步进器（T47-T49）：- 数量 + */
+.product-stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.stepper-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-surface-white);
+  cursor: pointer;
+}
+
+.stepper-btn:disabled {
+  opacity: 0.5;
+}
+
+.stepper-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.stepper-qty {
+  min-width: 18px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-on-surface);
+}
+
+/* 购物车弹层（T50） */
+.cart-popup-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.cart-popup {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  z-index: 40;
+  background: #fff;
+  border-radius: 12px 12px 0 0;
+  padding: 12px;
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.cart-popup-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f3f3f3;
+}
+
+.cart-popup-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1c1c;
+}
+
+.cart-popup-close {
+  border: none;
+  background: none;
+  color: #999;
+  font-size: 13px;
+}
+
+.cart-popup-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.cart-popup-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.cart-popup-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  color: #1a1c1c;
+}
+
+.cart-popup-price {
+  font-size: 13px;
+  color: #ff5a1f;
+  font-weight: 600;
+}
+
+.cart-popup-total {
+  margin: 8px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid #f3f3f3;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ff5a1f;
 }
 
 .product-add:disabled {

@@ -10,11 +10,14 @@ import { useRouter } from 'vue-router'
 import { toast } from '@/utils/toast'
 import StoreCover from '@/components/StoreCover.vue'
 import { useCatalogStore } from '@/stores/catalogStore'
+import { storeApi } from '@/services/api'
 import { formatMoney } from '@/services/normalizers'
-import type { StoreSummary } from '@/services/api/types'
+import type { StorePreviewProduct, StoreSummary } from '@/services/api/types'
 import type { CSSProperties } from 'vue'
 
 const ASSETS = '/design-assets/首页-精细'
+/** 商品接口无图片字段/图片为空时使用占位图（PRD：图片为空显示占位图） */
+const PRODUCT_PLACEHOLDER = `${ASSETS}/product-thumb-1.png`
 
 interface GridCell {
   key: string
@@ -44,12 +47,45 @@ const visibleCards = computed(() =>
   catalogStore.stores.filter((store) => !dismissedCardIds.value.includes(store.storeId)),
 )
 
+// 商品预览聚合（T46，PRD 7.16.1：预览来自商家商品接口）：/stores 未返回 previewProducts
+// 时从各店商品接口取前 3 个；字段已有则直接用（后端将来补字段时零改动切换）
+const storePreviews = ref<Record<string, StorePreviewProduct[]>>({})
+
+function previewsFor(store: StoreSummary): StorePreviewProduct[] {
+  if (store.previewProducts?.length) return store.previewProducts
+  return storePreviews.value[store.storeId] ?? []
+}
+
+/** 聚合各店商品前 3 个为预览；失败静默（预览块隐藏，不阻塞商家卡渲染） */
+async function aggregatePreviews(stores: StoreSummary[]): Promise<void> {
+  await Promise.all(
+    stores
+      .filter((store) => !store.previewProducts?.length)
+      .map(async (store) => {
+        try {
+          const products = await storeApi.getStoreProducts(store.storeId)
+          storePreviews.value[store.storeId] = products.slice(0, 3).map((p) => ({
+            name: p.name,
+            image: p.image || PRODUCT_PLACEHOLDER,
+            price: p.price,
+          }))
+        } catch {
+          // 单店聚合失败仅隐藏该店预览
+        }
+      }),
+  )
+}
+
 onMounted(() => {
-  void catalogStore.fetchStores()
+  void catalogStore.fetchStores().then(() => {
+    void aggregatePreviews(catalogStore.stores)
+  })
 })
 
 function retryStores(): void {
-  void catalogStore.fetchStores()
+  void catalogStore.fetchStores().then(() => {
+    void aggregatePreviews(catalogStore.stores)
+  })
 }
 
 // 分类宫格 3 行 × 5 列；行 1 大图标 56px，行 2/3 小图标 36px；占位清单见精细版 README §2.3
@@ -321,10 +357,10 @@ function onCloseCard(storeId: string): void {
                 {{ tag }}
               </span>
             </div>
-            <!-- 商品预览：来自商品接口（mock 演示期由列表内嵌），价格两位小数，不参与计价 -->
-            <div v-if="store.previewProducts?.length" class="merchant-products">
+            <!-- 商品预览：来自商品接口聚合（PRD 7.16.1），价格两位小数，不参与计价 -->
+            <div v-if="previewsFor(store).length" class="merchant-products">
               <div
-                v-for="product in store.previewProducts"
+                v-for="product in previewsFor(store)"
                 :key="product.name"
                 class="product-cell"
               >
