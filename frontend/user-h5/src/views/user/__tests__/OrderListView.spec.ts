@@ -50,13 +50,13 @@ describe('OrderListView（订单列表页 P0）', () => {
       { timeout: 2000 },
     )
     const cards = wrapper.findAll('[data-testid="order-card"]')
-    // 最新在前（o0002 麦当劳 27.50）
-    expect(cards[0]!.text()).toContain('麦当劳')
+    // 最新在前（o0002 麦当劳 27.50）；店名来自店铺列表映射（异步），等映射就绪
+    await vi.waitFor(() => expect(cards[0]!.text()).toContain('麦当劳'), { timeout: 2000 })
     expect(cards[0]!.text()).toContain('进行中')
     expect(cards[0]!.text()).toContain('27.50')
     expect(cards[0]!.text()).toContain('2026-09-07 11:30:00')
     // 第二笔（o0001 肯德基宅急送 41.00）
-    expect(cards[1]!.text()).toContain('肯德基宅急送')
+    await vi.waitFor(() => expect(cards[1]!.text()).toContain('肯德基宅急送'), { timeout: 2000 })
     expect(cards[1]!.text()).toContain('41.00')
   })
 

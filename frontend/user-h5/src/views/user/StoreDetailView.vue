@@ -113,6 +113,13 @@ function isSoldOut(product: Product): boolean {
 
 async function onAdd(product: Product): Promise<void> {
   if (isClosed.value || isSoldOut(product)) return
+  // 加购需登录（后端 401 口径）：未登录引导登录并回跳商家详情，不静默失败
+  // （PRD 校验顺序"登录先行"；9/7 联调修正，用例 T45）
+  if (!sessionStore.isLoggedIn) {
+    toast('请先登录')
+    void router.push({ name: 'login', query: { redirect: route.fullPath } })
+    return
+  }
   await cartStore.addItem(storeId, product.productId)
 }
 

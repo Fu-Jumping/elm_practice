@@ -37,28 +37,27 @@ describe('订单查询 mock（契约 §3.5 后端替身行为）', () => {
     expect(none.payload.data).toEqual([])
   })
 
-  it('M10 订单详情含商品明细与金额三件套；不存在 → 404（TC-ORD-015/016/022）', async () => {
+  it('M10 订单详情含商品明细与金额快照；不存在 → 404（TC-ORD-015/016/022）', async () => {
     const res = await mockDispatch({ method: 'GET', url: '/orders/o0002' })
     expect(res.status).toBe(200)
     const order = res.payload.data as Record<string, unknown>
     expect(order.orderId).toBe('o0002')
     expect(order.status).toBe('PROCESSING')
 
-    // 商品明细快照（不跟随改价）
+    // 商品明细快照（不跟随改价；形状对齐真实后端：含 unitPrice/subtotal）
     const items = order.items as Array<Record<string, unknown>>
     expect(items).toHaveLength(1)
     expect(items[0]!.name).toBe('巨无霸')
     expect(items[0]!.unitPrice).toBe(25.5)
     expect(items[0]!.quantity).toBe(1)
 
-    // 金额快照三件套：实付 = 商品小计 + packagingFee（TC-ORD-022）
-    const amounts = order.amounts as Record<string, number>
-    expect(amounts.itemsTotal).toBe(25.5)
-    expect(amounts.packagingFee).toBe(2)
-    expect(amounts.payableAmount).toBe(27.5)
+    // 金额快照（扁平字段，2026-09-07 对齐真实后端形状）：total = itemSubtotal + packagingFee（TC-ORD-022）
+    expect(order.itemSubtotal).toBe(25.5)
+    expect(order.packagingFee).toBe(2)
+    expect(order.total).toBe(27.5)
 
-    // 地址快照（收货信息来自下单时快照）
-    const address = order.addressSnapshot as Record<string, unknown>
+    // 地址快照（address 对象，收货信息来自下单时快照）
+    const address = order.address as Record<string, unknown>
     expect(address.contactName).toBe('张同学')
     expect(address.detail).toContain('304室')
 

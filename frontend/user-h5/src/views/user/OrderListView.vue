@@ -7,29 +7,41 @@
  * - 空结果显示空态；点击卡片进入订单详情；回到列表重新请求，不沿用过期列表
  * TODO(第三批 TDD)：待支付去支付/已完成再来一单等状态操作（P1 扩展实施后）
  */
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { orderApi } from '@/services/api'
-import { formatMoney, formatTime, statusText } from '@/services/normalizers'
+import { formatMoney, formatTime, normalizeOrderSummary, statusText } from '@/services/normalizers'
+import { useCatalogStore } from '@/stores/catalogStore'
 import { useSessionStore } from '@/stores/sessionStore'
 import type { OrderSummary } from '@/services/api/types'
 
 const router = useRouter()
+const catalogStore = useCatalogStore()
 const sessionStore = useSessionStore()
 
 const orders = ref<OrderSummary[]>([])
 const loading = ref(false)
 
+/** 店名映射（后端订单记录无 storeName：按 storeId 从店铺列表映射，缺口见联调问题清单） */
+const storeNameMap = computed(() => new Map(catalogStore.stores.map((s) => [s.storeId, s.name])))
+
+function displayName(order: OrderSummary): string {
+  return storeNameMap.value.get(order.storeId) ?? order.storeId
+}
+
 onMounted(async () => {
   // 路由 meta.auth 已拦截未登录；页面内兜底探活（刷新恢复会话）
   if (!sessionStore.isLoggedIn) await sessionStore.checkLogin()
+  // 店铺列表供店名映射（失败不阻塞订单渲染，降级显示 storeId）
+  void catalogStore.fetchStores().catch(() => undefined)
   await refresh()
 })
 
 async function refresh(): Promise<void> {
   loading.value = true
   try {
-    orders.value = await orderApi.listOrders()
+    const records = await orderApi.listOrders()
+    orders.value = records.map(normalizeOrderSummary)
   } catch {
     orders.value = []
   } finally {
@@ -59,7 +71,7 @@ function goDetail(order: OrderSummary): void {
           @click="goDetail(order)"
         >
           <div class="ol-store-row">
-            <span class="ol-store">{{ order.storeName }}</span>
+            <span class="ol-store">{{ displayName(order) }}</span>
             <span class="ol-status">{{ statusText(order.status) }}</span>
           </div>
           <div class="ol-meta-row">

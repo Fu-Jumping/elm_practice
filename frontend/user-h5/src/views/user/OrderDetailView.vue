@@ -12,11 +12,13 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { orderApi } from '@/services/api'
-import { formatMoney, formatTime, statusText } from '@/services/normalizers'
+import { formatMoney, formatTime, normalizeOrderDetail, statusText } from '@/services/normalizers'
+import { useCatalogStore } from '@/stores/catalogStore'
 import type { OrderDetail } from '@/services/api/types'
 
 const route = useRoute()
 const router = useRouter()
+const catalogStore = useCatalogStore()
 
 const orderId = typeof route.params.orderId === 'string' ? route.params.orderId : ''
 const order = ref<OrderDetail | null>(null)
@@ -32,7 +34,10 @@ onMounted(async () => {
     return
   }
   try {
-    order.value = await orderApi.getOrder(orderId)
+    const record = await orderApi.getOrder(orderId)
+    order.value = normalizeOrderDetail(record)
+    // 店名映射（后端订单记录无 storeName：经店铺详情接口取，失败降级 storeId）
+    void catalogStore.fetchStoreDetail(order.value.storeId).catch(() => undefined)
   } catch {
     // 订单不存在/无权限（TC-ORD-015，http 层已 toast）：提示并返回列表
     missing.value = true
@@ -89,7 +94,7 @@ function goBack(): void {
         </section>
 
         <section class="od-card">
-          <div class="od-section-title">{{ order.storeName }}</div>
+          <div class="od-section-title">{{ catalogStore.storeDetail?.name ?? order.storeId }}</div>
           <div v-for="item in order.items" :key="item.productId" class="od-item">
             <span class="od-item-name">{{ item.name }}</span>
             <span class="od-item-price">¥{{ formatMoney(item.unitPrice) }}</span>
