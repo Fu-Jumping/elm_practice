@@ -24,7 +24,8 @@ export interface MockContext {
 
 export type MockHandler = (ctx: MockContext) => MockResponse | Promise<MockResponse>
 
-/** key 格式：`METHOD path`（path 不含 /api/v1 前缀，与 endpoints.ts 保持一致） */
+/** key 格式：`METHOD path`（path 不含 /api/v1 前缀，与 endpoints.ts 保持一致）；
+ *  支持 `:param` 动态路径段（如 'GET /orders/:orderId'），精确匹配优先 */
 const handlers = new Map<string, MockHandler>([
   ...Object.entries(authMocks),
   ...Object.entries(storeMocks),
@@ -32,6 +33,34 @@ const handlers = new Map<string, MockHandler>([
   ...Object.entries(addressMocks),
   ...Object.entries(orderMocks),
 ])
+
+/** 动态路径注册表：含 `:param` 段的 key 在加载期拆解为分段模板，请求期逐段比对 */
+const dynamicHandlers = [...handlers.keys()]
+  .filter((key) => key.includes(':'))
+  .map((key) => {
+    const [method, ...segments] = key.split(' ')
+    return { method, segments: segments[0]!.split('/').filter(Boolean), key }
+  })
+
+function findHandler(method: string, path: string): MockHandler | undefined {
+  const exact = handlers.get(`${method} ${path}`)
+  if (exact) return exact
+  const pathSegments = path.split('/').filter(Boolean)
+  for (const dyn of dynamicHandlers) {
+    if (dyn.method !== method || dyn.segments.length !== pathSegments.length) continue
+    const pathParams: Record<string, string> = {}
+    let matched = true
+    dyn.segments.forEach((seg, i) => {
+      if (seg.startsWith(':')) pathParams[seg.slice(1)] = decodeURIComponent(pathSegments[i]!)
+      else if (seg !== pathSegments[i]) matched = false
+    })
+    if (!matched) continue
+    // 路径参数并入 ctx.params（与查询参数同通道，键名不冲突）
+    const handler = handlers.get(dyn.key)!
+    return (ctx) => handler({ ...ctx, params: { ...pathParams, ...ctx.params } })
+  }
+  return undefined
+}
 
 /** HTTP 层成功/失败包装（与契约响应结构一致） */
 export function ok<T>(data: T): MockResponse<T> {
@@ -54,7 +83,7 @@ export async function mockDispatch(config: {
 }): Promise<MockResponse> {
   const method = (config.method ?? 'get').toUpperCase()
   const path = config.url ?? ''
-  const handler = handlers.get(`${method} ${path}`)
+  const handler = findHandler(method, path)
 
   // 模拟网络延迟 200–500ms（mock 离线可跑，不依赖外部服务）
   await delay(200 + Math.random() * 300)
