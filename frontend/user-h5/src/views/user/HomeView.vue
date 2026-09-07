@@ -12,12 +12,11 @@ import StoreCover from '@/components/StoreCover.vue'
 import { useCatalogStore } from '@/stores/catalogStore'
 import { storeApi } from '@/services/api'
 import { formatMoney } from '@/services/normalizers'
+import { productImageSrc } from '@/utils/demoImages'
 import type { StorePreviewProduct, StoreSummary } from '@/services/api/types'
 import type { CSSProperties } from 'vue'
 
 const ASSETS = '/design-assets/首页-精细'
-/** 商品接口无图片字段/图片为空时使用占位图（PRD：图片为空显示占位图） */
-const PRODUCT_PLACEHOLDER = `${ASSETS}/product-thumb-1.png`
 
 interface GridCell {
   key: string
@@ -66,7 +65,7 @@ async function aggregatePreviews(stores: StoreSummary[]): Promise<void> {
           const products = await storeApi.getStoreProducts(store.storeId)
           storePreviews.value[store.storeId] = products.slice(0, 3).map((p) => ({
             name: p.name,
-            image: p.image || PRODUCT_PLACEHOLDER,
+            image: productImageSrc(p.productId, p.image),
             price: p.price,
           }))
         } catch {

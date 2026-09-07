@@ -56,7 +56,13 @@ async function onLogout(): Promise<void> {
     <!-- 已登录：用户信息 + 菜单 -->
     <template v-else>
       <section class="mn-profile">
-        <span class="mn-avatar" aria-hidden="true">
+        <img
+          v-if="sessionStore.user?.avatar"
+          class="mn-avatar-img"
+          :src="sessionStore.user.avatar"
+          alt="头像"
+        />
+        <span v-else class="mn-avatar" aria-hidden="true">
           {{ sessionStore.user?.nickname?.slice(0, 1) ?? '客' }}
         </span>
         <div class="mn-user">
@@ -144,6 +150,13 @@ async function onLogout(): Promise<void> {
   padding: 16px;
   background: #fff;
   border-radius: 8px;
+}
+
+.mn-avatar-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .mn-avatar {

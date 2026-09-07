@@ -7,7 +7,11 @@ import type { UserSummary } from '@/services/api/types'
 import type { MockHandler } from './index'
 import { fail, ok } from './index'
 
-const DEMO_USER: UserSummary = { account: '13800000001', nickname: '张同学' }
+const DEMO_USER: UserSummary = {
+  account: '13800000001',
+  nickname: '张同学',
+  avatar: '/demo-images/avatar-default.png',
+}
 /** 已注册账号集合（mock 内存态，代替后端的数据库查重）：预置演示账号 */
 const registeredAccounts = new Set<string>([DEMO_USER.account])
 
