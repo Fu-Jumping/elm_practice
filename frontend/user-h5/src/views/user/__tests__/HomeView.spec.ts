@@ -5,6 +5,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import HomeView from '../HomeView.vue'
 import { onToast } from '@/utils/toast'
 import { useCatalogStore } from '@/stores/catalogStore'
+import { useSessionStore } from '@/stores/sessionStore'
 import { ADDRESS_SEED, addressMockState } from '@/mocks/address'
 
 /** T60-T62 用定位跳转：自建 router 并暴露实例供断言 */
