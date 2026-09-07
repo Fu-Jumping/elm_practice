@@ -19,8 +19,16 @@ export default defineConfig({
     },
   },
   server: {
-    // 固定端口（架构约定 §5：5173 / 5174），契约 CORS 已放行
+    // 固定端口（架构约定 §5：5173 / 5174）
     port: 5173,
+    // 联调代理（9/7）：/api 同源转发后端——绕开 CORS 与 Cookie 域限制，
+    // 手机经局域网 IP 访问 dev server 时接口同源可用（配合 VITE_API_BASE_URL=/api/v1）
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8080',
+        changeOrigin: true,
+      },
+    },
   },
   css: {
     postcss: {
