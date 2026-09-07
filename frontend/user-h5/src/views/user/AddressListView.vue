@@ -19,6 +19,10 @@ const route = useRoute()
 const router = useRouter()
 const sessionStore = useSessionStore()
 
+/** 选择模式（确认订单场景，PRD 873：点击地址卡选中并返回，不直接创建订单） */
+const selectMode = computed(() => route.query.select === '1')
+const returnStoreId = typeof route.query.storeId === 'string' ? route.query.storeId : ''
+
 const addresses = ref<Address[]>([])
 const loaded = ref(false)
 
@@ -68,7 +72,15 @@ async function remove(address: Address): Promise<void> {
   }
 }
 
-function goEdit(address: Address): void {
+function onCardClick(address: Address): void {
+  // 确认订单场景：选中并返回（回传 addressId）；管理场景：进入编辑
+  if (selectMode.value) {
+    void router.replace({
+      name: 'order-confirm',
+      query: { storeId: returnStoreId, addressId: address.addressId },
+    })
+    return
+  }
   void router.push({ name: 'address-edit', params: { addressId: address.addressId } })
 }
 
@@ -110,7 +122,7 @@ function goBack(): void {
           class="al-card"
           data-testid="address-card"
           :data-testid-card-id="address.addressId"
-          @click="goEdit(address)"
+          @click="onCardClick(address)"
         >
           <div class="al-card-main" :data-testid="`address-card-${address.addressId}`">
             <div class="al-contact">

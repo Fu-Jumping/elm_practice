@@ -35,7 +35,21 @@ const addresses = ref<Address[]>([])
 const loaded = ref(false)
 const submitting = ref(false)
 
-const defaultAddress = computed(() => addresses.value.find((item) => item.isDefault) ?? null)
+const selectedAddressId =
+  typeof route.query.addressId === 'string' ? route.query.addressId : ''
+
+/** 地址选择回填（PRD 873）：query.addressId（地址列表选择返回）优先，否则默认地址 */
+const defaultAddress = computed(() => {
+  const bySelected = selectedAddressId
+    ? addresses.value.find((item) => item.addressId === selectedAddressId)
+    : undefined
+  return bySelected ?? addresses.value.find((item) => item.isDefault) ?? null
+})
+
+/** 点地址卡 → 地址列表选择模式（携带 select 与 storeId，不直接创建订单） */
+function pickAddress(): void {
+  void router.push({ name: 'address-list', query: { select: '1', storeId } })
+}
 const storeName = computed(() => catalogStore.storeDetail?.name ?? '')
 
 /** 实付金额展示：商品小计 + 打包费（PRD 7.4 决议；后端计价为准，TC-ORD-011） */
@@ -155,7 +169,7 @@ function goBack(): void {
 
     <main class="co-main">
       <!-- 地址卡（设计稿：地址/标签/联系人/电话；默认选中默认地址） -->
-      <section v-if="defaultAddress" class="co-card co-address" data-testid="address-card">
+      <section v-if="defaultAddress" class="co-card co-address" data-testid="address-card" role="button" @click="pickAddress">
         <div class="co-address-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24">
             <path
