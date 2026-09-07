@@ -6,6 +6,7 @@ import StoreDetailView from '../StoreDetailView.vue'
 import { useSessionStore } from '@/stores/sessionStore'
 import { useCartStore } from '@/stores/cartStore'
 import { onToast } from '@/utils/toast'
+import { clearMockCart } from '@/mocks/cart'
 
 /**
  * 商家详情页 P0 行为测试（2026-09-06 负责人拍板清单 T11-T18）
@@ -29,15 +30,21 @@ describe('StoreDetailView（商家详情页 P0）', () => {
   beforeEach(() => {
     messages.length = 0
     offToast = onToast((message) => messages.push(message))
+    // 购物车 mock 为模块级内存态：每条用例清空，隔离跨用例数量累加（同 ConfirmOrderView.spec）
+    clearMockCart('m002')
+    clearMockCart('m003')
   })
 
   afterEach(() => {
     offToast?.()
   })
 
-  async function mountDetail(path = '/stores/m002') {
-    const pinia = createPinia()
-    setActivePinia(pinia)
+  async function mountDetail(
+    path = '/stores/m002',
+    pinia: ReturnType<typeof createPinia> | undefined = undefined,
+  ) {
+    const p = pinia ?? createPinia()
+    setActivePinia(p)
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [
@@ -49,7 +56,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     })
     await router.push(path)
     await router.isReady()
-    const wrapper = mount(StoreDetailView, { global: { plugins: [pinia, router] } })
+    const wrapper = mount(StoreDetailView, { global: { plugins: [p, router] } })
     return { wrapper, router }
   }
 
@@ -229,5 +236,83 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     // 9/7 口径演进：确认订单页落地，替换原"确认订单暂未开放"弱提示，进入确认订单并携带商家编号
     expect(router.currentRoute.value.name).toBe('order-confirm')
     expect(router.currentRoute.value.query.storeId).toBe('m003')
+  })
+
+  // T47-T50 购物车弹层与商品行步进器（2026-09-07 第三批，PRD 7.16.1 商家详情页行 + 契约 §3.4，
+  // AI 设计落地沿用 1359 追认框架）：行内步进器 "- 数量 +"、减到 0 转删除、购物车栏点击展开弹层
+  async function loginAndAdd(storeId: string, productId: string, times = 1) {
+    // 先建并激活 pinia：登录态与视图共用同一实例（同 ConfirmOrderView.spec 骨架）
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const session = useSessionStore()
+    session.user = { account: '13800000001', nickname: '张同学' }
+    const { wrapper, router } = await mountDetail(`/stores/${storeId}`, pinia)
+    await vi.waitFor(
+      () => expect(wrapper.find(`[data-testid="add-btn-${productId}"]`).exists()).toBe(true),
+      { timeout: 2000 },
+    )
+    for (let i = 0; i < times; i++) {
+      await wrapper.find(`[data-testid="add-btn-${productId}"]`).trigger('click')
+      await vi.waitFor(
+        () =>
+          expect(
+            Number(wrapper.find(`[data-testid="product-qty-${productId}"]`).text() || '0'),
+          ).toBe(i + 1),
+        { timeout: 2000 },
+      )
+    }
+    return { wrapper, router }
+  }
+
+  it('T47 已加购商品显示行内步进器 "- 数量 +"，未加购商品仅有 + 按钮', async () => {
+    const { wrapper } = await loginAndAdd('m002', 'p101', 2)
+    expect(wrapper.find('[data-testid="minus-btn-p101"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="product-qty-p101"]').text()).toBe('2')
+    // 未加购的 p102 仍是纯 + 态
+    expect(wrapper.find('[data-testid="minus-btn-p102"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="add-btn-p102"]').exists()).toBe(true)
+  })
+
+  it('T48 步进器 + 数量加一并同步购物车栏（TC-CRT-004）', async () => {
+    const { wrapper } = await loginAndAdd('m002', 'p101', 1)
+    await wrapper.find('[data-testid="add-btn-p101"]').trigger('click')
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="product-qty-p101"]').text()).toBe('2'),
+      { timeout: 2000 },
+    )
+    expect(wrapper.find('[data-testid="cart-bar-count"]').text()).toBe('2')
+  })
+
+  it('T49 步进器 - 减到 0 转删除：步进器消失、购物车栏清零（TC-CRT-005/006）', async () => {
+    const { wrapper } = await loginAndAdd('m002', 'p101', 2)
+    await wrapper.find('[data-testid="minus-btn-p101"]').trigger('click')
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="product-qty-p101"]').text()).toBe('1'),
+      { timeout: 2000 },
+    )
+    await wrapper.find('[data-testid="minus-btn-p101"]').trigger('click')
+    // 减到 0：前端转 DELETE 移除该行，商品行回到 + 态
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="minus-btn-p101"]').exists()).toBe(false),
+      { timeout: 2000 },
+    )
+    expect(wrapper.find('[data-testid="cart-bar-count"]').exists()).toBe(false)
+  })
+
+  it('T50 点击购物车栏展开弹层：商品行与合计可见，可关闭（PRD 购物车弹层行）', async () => {
+    const { wrapper } = await loginAndAdd('m002', 'p101', 2)
+    await wrapper.find('[data-testid="cart-bar"]').trigger('click')
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="cart-popup"]').exists()).toBe(true),
+      { timeout: 2000 },
+    )
+    const popup = wrapper.find('[data-testid="cart-popup"]')
+    expect(popup.text()).toContain('香辣鸡腿堡')
+    expect(popup.text()).toContain('39.00')
+    expect(popup.findAll('[data-testid="cart-popup-item"]').length).toBe(1)
+    // 关闭弹层
+    await wrapper.find('[data-testid="cart-popup-close"]').trigger('click')
+    await flushPromises()
+    expect(wrapper.find('[data-testid="cart-popup"]').exists()).toBe(false)
   })
 })
