@@ -68,4 +68,40 @@ export const cartMocks: Record<string, MockHandler> = {
     cartByStore.set(storeId, lines)
     return ok<CartLine>({ ...line })
   },
+
+  // 数量步进（契约 §3.4：数量必须大于 0，减到 0 由前端改为 DELETE；对齐后端 PATCH /cart/items/{id}）
+  'PATCH /cart/items/:cartLineId': ({ params, data }) => {
+    const { quantity } = (data ?? {}) as { quantity?: number }
+    if (!quantity || quantity <= 0) {
+      return fail(400, 40000, '数量必须大于 0')
+    }
+    const line = findLine(String(params?.cartLineId ?? ''))
+    if (!line) return fail(404, 40400, '购物车行不存在')
+    const product = findMockProduct(line.productId)
+    if (product && quantity > product.stock) {
+      return fail(409, 40902, '超出库存')
+    }
+    line.quantity = quantity
+    return ok<CartLine>({ ...line })
+  },
+
+  'DELETE /cart/items/:cartLineId': ({ params }) => {
+    for (const [storeId, lines] of cartByStore) {
+      const index = lines.findIndex((line) => line.cartLineId === params?.cartLineId)
+      if (index >= 0) {
+        lines.splice(index, 1)
+        return ok(null)
+      }
+    }
+    return fail(404, 40400, '购物车行不存在')
+  },
+}
+
+/** 按行 ID 查找购物车行（跨店内存态定位，改/删共用） */
+function findLine(cartLineId: string): CartLine | undefined {
+  for (const lines of cartByStore.values()) {
+    const line = lines.find((item) => item.cartLineId === cartLineId)
+    if (line) return line
+  }
+  return undefined
 }

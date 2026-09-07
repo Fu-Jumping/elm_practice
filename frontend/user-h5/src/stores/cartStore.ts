@@ -22,8 +22,15 @@ export const useCartStore = defineStore('cart', () => {
   /** 加购进行中的商品（XA-05：前端禁用只发一次请求，防连点被防重拦截器取消） */
   const addingProductIds = ref<Set<string>>(new Set())
 
+  /** 步进进行中的行（XA-05 同款：步进请求期间按钮禁用，防连点） */
+  const steppingLineIds = ref<Set<string>>(new Set())
+
   function isAdding(productId: string): boolean {
     return addingProductIds.value.has(productId)
+  }
+
+  function isStepping(cartLineId: string): boolean {
+    return steppingLineIds.value.has(cartLineId)
   }
 
   async function fetchCart(storeId: string): Promise<void> {
@@ -66,5 +73,59 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
-  return { lines, loading, error, totalCount, totalAmount, isAdding, fetchCart, addItem }
+  /** 步进 -：数量减 1；减到 0 转删除请求（契约 §3.4：前端减到 0 改 DELETE，TC-CRT-005/006） */
+  async function decrementLine(cartLineId: string): Promise<void> {
+    if (steppingLineIds.value.has(cartLineId)) return
+    const line = lines.value.find((item) => item.cartLineId === cartLineId)
+    if (!line) return
+    steppingLineIds.value.add(cartLineId)
+    try {
+      if (line.quantity <= 1) {
+        await cartApi.deleteCartItem(cartLineId)
+        lines.value = lines.value.filter((item) => item.cartLineId !== cartLineId)
+      } else {
+        const updated = await cartApi.patchCartItem(cartLineId, line.quantity - 1)
+        const index = lines.value.findIndex((item) => item.cartLineId === cartLineId)
+        if (index >= 0) lines.value.splice(index, 1, updated)
+      }
+    } catch (err) {
+      if ((err as { code?: string }).code === 'ERR_CANCELED') return
+      // 失败保留原数量（http 层已 toast）
+      error.value = err instanceof Error ? err.message : '修改数量失败'
+    } finally {
+      steppingLineIds.value.delete(cartLineId)
+    }
+  }
+
+  /** 步进 +：数量加 1（PATCH；XA-05 同款防重） */
+  async function incrementLine(cartLineId: string): Promise<void> {
+    if (steppingLineIds.value.has(cartLineId)) return
+    const line = lines.value.find((item) => item.cartLineId === cartLineId)
+    if (!line) return
+    steppingLineIds.value.add(cartLineId)
+    try {
+      const updated = await cartApi.patchCartItem(cartLineId, line.quantity + 1)
+      const index = lines.value.findIndex((item) => item.cartLineId === cartLineId)
+      if (index >= 0) lines.value.splice(index, 1, updated)
+    } catch (err) {
+      if ((err as { code?: string }).code === 'ERR_CANCELED') return
+      error.value = err instanceof Error ? err.message : '修改数量失败'
+    } finally {
+      steppingLineIds.value.delete(cartLineId)
+    }
+  }
+
+  return {
+    lines,
+    loading,
+    error,
+    totalCount,
+    totalAmount,
+    isAdding,
+    isStepping,
+    fetchCart,
+    addItem,
+    decrementLine,
+    incrementLine,
+  }
 })

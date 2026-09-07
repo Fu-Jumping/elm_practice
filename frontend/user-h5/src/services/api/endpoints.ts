@@ -20,7 +20,7 @@ export const endpoints = {
   cart: {
     list: '/cart',
     add: '/cart/items',
-    // TODO(购物车弹层任务)：PATCH/DELETE /cart/items/{cartLineId} 届时接入
+    byId: (cartLineId: string) => `/cart/items/${cartLineId}`,
   },
   // 地址簿（契约 §3.3）：列表/新增/单查/修改/删除
   address: {
