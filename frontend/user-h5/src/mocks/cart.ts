@@ -11,6 +11,16 @@ import { findMockProduct } from './store'
 const cartByStore = new Map<string, CartLine[]>()
 let lineSeq = 1
 
+/** 清空指定店铺购物车（订单域 mock 创建成功后调用，对齐 TC-ORD-003：事务成功后清空该店购物车） */
+export function clearMockCart(storeId: string): void {
+  cartByStore.delete(storeId)
+}
+
+/** 只读快照（订单域 mock 计价用：后端重读购物车行价格与数量，TC-ORD-013） */
+export function getMockCartSnapshot(storeId: string): CartLine[] {
+  return (cartByStore.get(storeId) ?? []).map((line) => ({ ...line }))
+}
+
 export const cartMocks: Record<string, MockHandler> = {
   'GET /cart': ({ params }) => {
     const storeId = String(params?.storeId ?? '')

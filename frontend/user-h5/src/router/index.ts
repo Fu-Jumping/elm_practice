@@ -42,6 +42,13 @@ const router = createRouter({
           meta: { title: '商家详情', priority: 'P0' },
         },
         {
+          // 确认订单：query 携带 storeId（PRD 顶部栏行：参数缺失返回商家列表）；页面内做登录校验
+          path: 'orders/confirm',
+          name: 'order-confirm',
+          component: () => import('@/views/user/ConfirmOrderView.vue'),
+          meta: { title: '确认订单', priority: 'P0' },
+        },
+        {
           path: 'messages',
           name: 'messages',
           component: () => import('@/views/user/PlaceholderView.vue'),

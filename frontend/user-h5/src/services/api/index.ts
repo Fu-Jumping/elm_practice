@@ -5,3 +5,5 @@
 export * as authApi from './auth'
 export * as storeApi from './store'
 export * as cartApi from './cart'
+export * as addressApi from './address'
+export * as orderApi from './order'

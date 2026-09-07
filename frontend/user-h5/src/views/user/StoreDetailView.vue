@@ -126,8 +126,8 @@ function onCheckout(): void {
     toast('请先加入商品')
     return
   }
-  // 确认订单页 9/7 实现；营业校验届时以后端结果为准
-  toast('确认订单暂未开放')
+  // 确认订单页 9/7 落地：校验通过进入确认订单，携带商家编号（PRD 顶部栏行）
+  void router.push({ name: 'order-confirm', query: { storeId } })
 }
 </script>
 
