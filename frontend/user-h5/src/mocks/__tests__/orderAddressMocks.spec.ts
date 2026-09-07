@@ -60,8 +60,10 @@ describe('地址/订单 mock（契约 §3.3/§3.5 后端替身行为）', () => 
     expect(res.status).toBe(200)
     const order = res.payload.data as Record<string, unknown>
     expect(String(order.orderId)).toBeTruthy()
-    // 后端重读购物车计价，实付 = 小计 + 打包费（前端 expectedTotal 仅提示）
-    expect(order.payableAmount).toBe(41)
+    // 后端重读购物车计价，实付 = 小计 + 打包费（扁平字段 total，2026-09-07 对齐真实后端形状）
+    expect(order.total).toBe(41)
+    expect(order.itemSubtotal).toBe(39)
+    expect(order.packagingFee).toBe(2)
 
     // 事务成功后清空该用户该店购物车（TC-ORD-003）
     const cart = await mockDispatch({

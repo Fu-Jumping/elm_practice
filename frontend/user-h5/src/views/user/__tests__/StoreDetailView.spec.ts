@@ -19,6 +19,8 @@ import { onToast } from '@/utils/toast'
  * T17 评价 Tab 占位："评价功能暂未开放"，不请求评价接口（P1 未选定）
  * T18 去结算：未登录跳登录带 redirect；已登录且购物车非空 → 进入确认订单页（9/7 口径演进：
  *     确认订单页落地后替换原"确认订单暂未开放"弱提示，见 raw/2026-09-07）
+ * T45 未登录点加购 → 引导登录并带 redirect，不静默失败（9/7 联调补，加购需登录口径；
+ *     T15 同步演进为登录态加购）
  */
 describe('StoreDetailView（商家详情页 P0）', () => {
   const messages: string[] = []
@@ -127,8 +129,27 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     expect(soldOut.find('[data-testid="add-btn-p106"]').attributes('disabled')).toBeDefined()
   })
 
+  it('T45 未登录点加购 → 引导登录并带 redirect，不静默失败（9/7 联调补）', async () => {
+    // 口径：加购需登录（后端 401），前端按 PRD 校验顺序"登录先行"引导；公开页 401 静默仅适用于浏览
+    const { wrapper, router } = await mountDetail('/stores/m002')
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="add-btn-p101"]').exists()).toBe(true),
+      { timeout: 2000 },
+    )
+    await wrapper.find('[data-testid="add-btn-p101"]').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('login')
+    expect(String(router.currentRoute.value.query.redirect)).toContain('/stores/m002')
+    // 未登录不产生加购数据
+    const cart = useCartStore()
+    expect(cart.lines).toHaveLength(0)
+  })
+
   it('T15 加购后购物车栏数量与合计刷新，同商品合并为单行', async () => {
     const { wrapper } = await mountDetail('/stores/m002')
+    // 9/7 口径演进：加购需登录（T45），登录态由内存会话承载
+    const session = useSessionStore()
+    session.user = { account: '13800000001', nickname: '张同学' }
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="add-btn-p101"]').exists()).toBe(true),
       { timeout: 2000 },

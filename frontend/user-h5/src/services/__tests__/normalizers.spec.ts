@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 // 从测试工具箱里取出三样工具：分组(describe)、断言(expect)、用例(it)
-import { formatMoney, formatTime, statusText, payableAmountText } from '../normalizers'
+import {
+  formatMoney,
+  formatTime,
+  statusText,
+  payableAmountText,
+  normalizeOrderSummary,
+  normalizeOrderDetail,
+} from '../normalizers'
+import type { OrderRecord } from '../api/types'
 // 把被测函数引进来。'../normalizers' 是相对路径：测试文件在 __tests__ 里，往上一层就是它
 describe('formatMoney 金额格式化', () => {
   // 这一组都在测金额格式化
@@ -49,5 +57,102 @@ describe('payableAmountText 实付金额展示（TC-ORD-011/021 展示侧）', (
 
   it('T25 全部缺失 → 返回 0.00，不产生 undefined/NaN（TC-ADR-006 前端侧同款兜底）', () => {
     expect(payableAmountText({})).toBe('0.00')
+  })
+})
+
+// 订单记录归一化 N1–N3 + B6（2026-09-07 联调补，AI 设计落地、负责人已追认框架）
+// 依据：真实后端 GET /orders 实际形状（扁平金额字段 itemSubtotal/packagingFee/total、
+// address 对象、items 明细、无 storeName）与前端视图模型（嵌套 amounts 三件套）的差异归一；
+// 架构约定 §3.3：后端字段 → 页面字段归一化的唯一出口是 normalizers，缺字段给确定默认值
+const REAL_ORDER_RECORD: OrderRecord = {
+  orderId: 'o1005',
+  userId: 'u001',
+  storeId: 'm002',
+  addressId: 'da001',
+  remark: 'less spicy',
+  status: 'PENDING_PAYMENT',
+  createdAt: '2026-09-07 13:25:04',
+  itemSubtotal: 58.0,
+  packagingFee: 2.0,
+  total: 60.0,
+  paidAt: null,
+  address: {
+    addressId: 'da001',
+    contactName: '张同学',
+    contactSex: '先生',
+    contactPhone: '13800000001',
+    region: '天津大学软件园校区',
+    detail: '12号楼 304室',
+    label: '学校',
+    isDefault: true,
+  },
+  items: [
+    { productId: 'p101', name: '吮指原味鸡', image: '', unitPrice: 29.0, quantity: 2, subtotal: 58.0 },
+  ],
+}
+
+describe('statusText 支付扩展状态（契约 §3.5 P1 扩展，后端已实现）', () => {
+  it('B6 PENDING_PAYMENT → 待支付（避免列表出现英文原文）', () => {
+    expect(statusText('PENDING_PAYMENT')).toBe('待支付')
+  })
+
+  it('B7 COMPLETED → 已完成（后端种子含已完成订单，联调实测）', () => {
+    expect(statusText('COMPLETED')).toBe('已完成')
+  })
+})
+
+describe('normalizeOrderSummary 订单记录 → 视图模型', () => {
+  it('N1 扁平金额字段归一为三件套并满足实付=小计+打包费（TC-ORD-022）', () => {
+    const view = normalizeOrderSummary(REAL_ORDER_RECORD)
+    expect(view.orderId).toBe('o1005')
+    expect(view.status).toBe('PENDING_PAYMENT')
+    expect(view.storeId).toBe('m002')
+    expect(view.amounts).toEqual({ itemsTotal: 58, packagingFee: 2, payableAmount: 60 })
+    expect(view.createdAt).toBe('2026-09-07 13:25:04')
+  })
+
+  it('N2 金额字段缺失 → 三件套兜底 0，不产生 undefined/NaN（缺字段确定性默认值约定）', () => {
+    const view = normalizeOrderSummary({
+      orderId: 'o0000',
+      storeId: 'm001',
+      status: 'PROCESSING',
+      createdAt: '2026-09-07 00:00:00',
+      remark: '',
+      itemSubtotal: undefined as unknown as number,
+      packagingFee: undefined as unknown as number,
+      total: undefined as unknown as number,
+    })
+    expect(view.amounts).toEqual({ itemsTotal: 0, packagingFee: 0, payableAmount: 0 })
+  })
+})
+
+describe('normalizeOrderDetail 订单详情归一（含明细与地址快照）', () => {
+  it('N3 items 映射为明细快照、address 映射为地址快照（TC-ORD-002/016）', () => {
+    const view = normalizeOrderDetail(REAL_ORDER_RECORD)
+    expect(view.remark).toBe('less spicy')
+    expect(view.items).toEqual([
+      { productId: 'p101', name: '吮指原味鸡', unitPrice: 29, quantity: 2 },
+    ])
+    expect(view.addressSnapshot).toEqual({
+      contactName: '张同学',
+      contactPhone: '13800000001',
+      region: '天津大学软件园校区',
+      detail: '12号楼 304室',
+    })
+  })
+
+  it('N3b 无 address/items 字段 → 空数组与空快照，不产生 undefined', () => {
+    const view = normalizeOrderDetail({
+      orderId: 'o0000',
+      storeId: 'm001',
+      status: 'PROCESSING',
+      createdAt: '2026-09-07 00:00:00',
+      remark: '',
+      itemSubtotal: 10,
+      packagingFee: 2,
+      total: 12,
+    })
+    expect(view.items).toEqual([])
+    expect(view.addressSnapshot).toEqual({ contactName: '', contactPhone: '', region: '', detail: '' })
   })
 })
