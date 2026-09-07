@@ -10,6 +10,8 @@ import { useRouter } from 'vue-router'
 import { toast } from '@/utils/toast'
 import StoreCover from '@/components/StoreCover.vue'
 import { useCatalogStore } from '@/stores/catalogStore'
+import { useSessionStore } from '@/stores/sessionStore'
+import { addressApi } from '@/services/api'
 import { storeApi } from '@/services/api'
 import { formatMoney } from '@/services/normalizers'
 import { productImageSrc } from '@/utils/demoImages'
@@ -38,6 +40,7 @@ function tagStyle(index: number): CSSProperties {
 }
 
 const catalogStore = useCatalogStore()
+const sessionStore = useSessionStore()
 const router = useRouter()
 
 // 卡片 ✕ 关闭：本地收起（演示态）；PRD 未定义关闭口径，仅视图态隐藏不删数据
@@ -45,6 +48,28 @@ const dismissedCardIds = ref<string[]>([])
 const visibleCards = computed(() =>
   catalogStore.stores.filter((store) => !dismissedCardIds.value.includes(store.storeId)),
 )
+
+// 定位地址（T60-T62，PRD 806 行）：来自当前用户默认地址；无地址/未登录/失败回退课程演示地址
+const DEMO_LOCATION = '天津大学北洋园校区'
+const locationText = ref(DEMO_LOCATION)
+const isDemoLocation = ref(true)
+
+async function loadLocationAddress(): Promise<void> {
+  try {
+    if (!sessionStore.isLoggedIn) await sessionStore.checkLogin()
+    if (!sessionStore.isLoggedIn) return
+    const list = await addressApi.getAddresses()
+    const def = list.find((item) => item.isDefault) ?? list[0]
+    // PRD：地址字段不允许由前端随意拼接——优先 region，缺省 detail
+    const text = def?.region || def?.detail
+    if (text) {
+      locationText.value = text
+      isDemoLocation.value = false
+    }
+  } catch {
+    // 读取失败保留默认演示地址并标记（PRD 806 验收列）
+  }
+}
 
 // 商品预览聚合（T46，PRD 7.16.1：预览来自商家商品接口）：/stores 未返回 previewProducts
 // 时从各店商品接口取前 3 个；字段已有则直接用（后端将来补字段时零改动切换）
@@ -79,7 +104,13 @@ onMounted(() => {
   void catalogStore.fetchStores().then(() => {
     void aggregatePreviews(catalogStore.stores)
   })
+  void loadLocationAddress()
 })
+
+// PRD 806 行为列：点击定位文字进入地址列表（地址列表页自身处理登录引导）
+function goAddressList(): void {
+  void router.push({ name: 'address-list' })
+}
 
 function retryStores(): void {
   void catalogStore.fetchStores().then(() => {
@@ -154,10 +185,10 @@ function onCloseCard(storeId: string): void {
       <button
         class="location"
         type="button"
-        data-placeholder="定位"
-        @click="onPlaceholderClick"
+        :title="isDemoLocation ? '演示地址' : undefined"
+        @click="goAddressList"
       >
-        <span class="location-text">天津大学北洋园校区</span>
+        <span class="location-text">{{ locationText }}</span>
         <svg class="location-caret" viewBox="0 0 7.6 5" aria-hidden="true">
           <path
             d="M4.086 4.782L7.355 0.818C7.624 0.492 7.392 0 6.97 0L0.43 0C0.008 0 -0.224 0.492 0.045 0.818L3.314 4.782C3.514 5.025 3.886 5.025 4.086 4.782Z"

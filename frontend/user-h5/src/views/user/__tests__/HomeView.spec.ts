@@ -1,9 +1,26 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
 import HomeView from '../HomeView.vue'
 import { onToast } from '@/utils/toast'
 import { useCatalogStore } from '@/stores/catalogStore'
+import { useSessionStore } from '@/stores/sessionStore'
+import { ADDRESS_SEED, addressMockState } from '@/mocks/address'
+
+/** T60-T62 用定位跳转：自建 router 并暴露实例供断言 */
+let routerInstance: ReturnType<typeof createRouter>
+function routerPlugin() {
+  routerInstance = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/', name: 'home', component: HomeView },
+      { path: '/addresses', name: 'address-list', component: { template: '<div />' } },
+      { path: '/login', name: 'login', component: { template: '<div />' } },
+    ],
+  })
+  return routerInstance
+}
 
 /**
  * 首页 P0 行为测试（2026-09-06 负责人拍板替换初始化 Hello 用例；T7-T10 口径同日拍板）
@@ -164,5 +181,50 @@ describe('HomeView（首页 P0）', () => {
       timeout: 2000,
     })
     expect(wrapper.find('[data-testid="merchant-skeleton"]').exists()).toBe(false)
+  })
+
+  // T60-T62 首页定位地址（2026-09-07 第三批，PRD 806 行：定位文字来自当前用户默认地址，
+  // 无地址/失败回退演示地址并标记；点击定位进入地址列表）
+  it('T60 已登录显示默认地址 region（来自地址接口，非写死）', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const session = useSessionStore()
+    session.user = { account: '13800000001', nickname: '张同学' }
+    // 修改默认地址 region：定位文字应随之变化（证明来自接口而非写死文案）
+    addressMockState[0]!.region = '自定义园区测试'
+    const wrapper = mount(HomeView, { global: { plugins: [pinia, routerPlugin()] } })
+    await vi.waitFor(
+      () => expect(wrapper.find('.location-text').text()).toContain('自定义园区测试'),
+      { timeout: 2000 },
+    )
+  })
+
+  it('T61 已登录但无地址 → 回退演示地址并标记（PRD：保留默认演示地址）', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const session = useSessionStore()
+    session.user = { account: '13800000001', nickname: '张同学' }
+    addressMockState.splice(0, addressMockState.length)
+    const wrapper = mount(HomeView, { global: { plugins: [pinia, routerPlugin()] } })
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="location-bar"]').exists()).toBe(true),
+      { timeout: 2000 },
+    )
+    expect(wrapper.find('.location-text').text()).toContain('天津大学北洋园校区')
+    // 演示数据标记（PRD：标记为演示数据）
+    expect(wrapper.find('.location').attributes('title')).toContain('演示')
+  })
+
+  it('T62 点击定位文字 → 进入地址列表（PRD：点击定位文字进入地址列表）', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const wrapper = mount(HomeView, { global: { plugins: [pinia, routerPlugin()] } })
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="location-bar"]').exists()).toBe(true),
+      { timeout: 2000 },
+    )
+    await wrapper.find('.location').trigger('click')
+    await flushPromises()
+    expect(routerInstance.currentRoute.value.name).toBe('address-list')
   })
 })
