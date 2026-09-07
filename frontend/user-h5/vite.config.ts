@@ -2,14 +2,16 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
 import pxToViewport from 'postcss-px-to-viewport-8-plugin'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
-    vueDevTools(),
+    // vueDevTools 悬浮球/覆盖层会遮挡移动端视口底部的购物车栏与去结算按钮（9/7 联调实测，
+    // 点击被透明覆盖层截胡），且验收演示不需要；需要调试时临时恢复此行
+    // import vueDevTools from 'vite-plugin-vue-devtools'
+    // vueDevTools(),
   ],
   resolve: {
     alias: {

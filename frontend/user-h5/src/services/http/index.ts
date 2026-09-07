@@ -53,15 +53,21 @@ http.interceptors.request.use((config) => {
   return config
 })
 
-/** HTTP 层错误：toast 契约 message；401 未登录 → 提示并跳登录（带 redirect） */
+/** HTTP 层错误：toast 契约 message；401 未登录 → 受保护页跳登录带 redirect */
 function handleHttpError(status: number, payload: ApiResponse | undefined, url?: string): never {
   const message = payload?.message ?? `请求失败（HTTP ${status}）`
   if (status === 401) {
-    // /me 探活 401 属预期分支（未登录），静默：由守卫/store 决定跳转，不重复提示
-    if (!url?.endsWith('/me')) {
+    if (url?.endsWith('/auth/login')) {
+      // 登录接口自身的 401 是业务失败（账号或密码错误，A6 口径）：提示但不跳转
       toast(message)
+    } else if (router.currentRoute.value.meta.auth === true) {
+      // XA-06 联调修正（2026-09-07）：公开页面（如商家详情购物车栏 /cart）未登录 401 属预期，
+      // 静默降级，不再全局跳登录（PRD：未登录可浏览）；仅受保护页面由 401 引导登录
+      if (!url?.endsWith('/me')) {
+        toast(message)
+      }
+      void router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath } })
     }
-    void router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath } })
   } else {
     toast(message)
   }
