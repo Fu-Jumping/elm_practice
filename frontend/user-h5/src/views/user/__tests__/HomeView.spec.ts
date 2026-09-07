@@ -13,9 +13,11 @@ import { useCatalogStore } from '@/stores/catalogStore'
  * T3 活动区与筛选标签：占位内容点击提示
  * T4 搜索框：P0 只承担入口，未实现时提示且不发起请求
  * T7 商家卡数据驱动：mock GET /stores 渲染 5 家，字段格式化对齐 PRD 金额/文案口径
- * T8 字段缺失降级：接口未返回的优惠标签/距离/商品预览整块隐藏，不出现 undefined
+ * T8 字段缺失降级：接口未返回的优惠标签/距离整块隐藏，不出现 undefined
  * T9 空态：店铺列表为空显示"暂无商家"
  * T10 加载态：加载中渲染占位卡，完成后消失
+ * T46 商品预览聚合（2026-09-07 联调补）：/stores 不返回预览字段时，从各店商品接口聚合前 3 个
+ *     （PRD 7.16.1：预览来自商家商品接口；图片为空用占位图；口径演进见 raw 用户端-1428.md）
  */
 describe('HomeView（首页 P0）', () => {
   const messages: string[] = []
@@ -97,8 +99,26 @@ describe('HomeView（首页 P0）', () => {
     expect(first.text()).toContain('30分钟')
     expect(first.text()).toContain('1.8km')
     expect(first.text()).toContain('食无忧')
-    // 商品预览价格按 PRD 金额口径两位小数（normalizers.formatMoney）
+    // 商品预览按 PRD 口径来自商品接口聚合（2026-09-07 演进：/stores 不再内嵌预览字段）
+    await vi.waitFor(() => expect(first.text()).toContain('家常豆腐'), { timeout: 2000 })
+    // 价格按 PRD 金额口径两位小数（normalizers.formatMoney）
     expect(first.text()).toContain('12.00')
+  })
+
+  it('T46 商品预览从商品接口聚合：每卡最多 3 个、图片为空用占位图', async () => {
+    const wrapper = mountHome()
+    await vi.waitFor(() => expect(wrapper.findAll('.merchant-card')).toHaveLength(5), {
+      timeout: 2000,
+    })
+    // m002 肯德基有 5 个商品 → 预览聚合只取前 3 个
+    const kfc = wrapper.findAll('.merchant-card').find((c) => c.text().includes('肯德基'))!
+    await vi.waitFor(() => expect(kfc.text()).toContain('香辣鸡腿堡'), { timeout: 2000 })
+    expect(kfc.findAll('.product-cell')).toHaveLength(3)
+    // 商品接口图片为空 → 占位图（PRD：图片为空显示占位图）
+    const firstImg = kfc.find('.product-img')
+    expect(firstImg.attributes('src')).toContain('product-thumb')
+    // 空态兜底：无商品也不出现 undefined
+    expect(wrapper.text()).not.toContain('undefined')
   })
 
   it('T8 接口未返回的字段整块隐藏，页面不出现 undefined', async () => {
@@ -112,7 +132,10 @@ describe('HomeView（首页 P0）', () => {
       .find((c) => c.text().includes('麦当劳'))!
     // PRD 商家卡行：优惠标签只有接口明确返回时展示，字段缺失整块隐藏且不显示 undefined
     expect(mcdonald.find('.merchant-tags').exists()).toBe(false)
-    expect(mcdonald.find('.merchant-products').exists()).toBe(true)
+    // 商品预览为异步聚合（T46），等待完成后再断言存在
+    await vi.waitFor(() => expect(mcdonald.find('.merchant-products').exists()).toBe(true), {
+      timeout: 2000,
+    })
     expect(mcdonald.find('.merchant-meta--distance').exists()).toBe(true)
     expect(wrapper.text()).not.toContain('undefined')
   })

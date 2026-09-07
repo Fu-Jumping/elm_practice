@@ -13,7 +13,9 @@ const THUMB_1 = '/design-assets/首页-精细/product-thumb-1.png'
 const THUMB_2 = '/design-assets/首页-精细/product-thumb-2.png'
 const THUMB_3 = '/design-assets/首页-精细/product-thumb-3.png'
 
-// TODO(契约缺口)：distanceText/couponTags/previewProducts 为 mock-only 展示字段（见 types.ts 注）；
+// TODO(契约缺口)：distanceText/couponTags 为 mock-only 展示字段（见 types.ts 注）；
+// previewProducts 已于 2026-09-07 从 mock 列表移除——对齐真实后端 /stores 响应（无该字段），
+// 首页商品预览改由前端从商品接口聚合（PRD 7.16.1：预览来自商家商品接口，用例 T46）
 // m003 刻意缺配，供"字段缺失整块隐藏"用例（T8）与降级路径验证
 const STORES: StoreSummary[] = [
   {
@@ -28,11 +30,6 @@ const STORES: StoreSummary[] = [
     status: 'OPEN',
     distanceText: '1.8km',
     couponTags: ['满30减8', '36减1|58减4', '食无忧'],
-    previewProducts: [
-      { name: '白葡萄柠檬茶', image: THUMB_1, price: 12 },
-      { name: '西瓜冰柠茶', image: THUMB_2, price: 12 },
-      { name: '黄皮冰柠茶', image: THUMB_3, price: 12 },
-    ],
   },
   {
     storeId: 'm002',
@@ -46,10 +43,6 @@ const STORES: StoreSummary[] = [
     status: 'OPEN',
     distanceText: '2.4km',
     couponTags: ['满50减10'],
-    previewProducts: [
-      { name: '香辣鸡腿堡', image: THUMB_2, price: 19.5 },
-      { name: '九珍果汁', image: THUMB_1, price: 9 },
-    ],
   },
   {
     storeId: 'm003',
@@ -63,10 +56,6 @@ const STORES: StoreSummary[] = [
     status: 'OPEN',
     // 缺配 couponTags：优惠标签未返回时整块隐藏（T8 降级口径；现实合理——该店无优惠活动）
     distanceText: '2.9km',
-    previewProducts: [
-      { name: '巨无霸', image: THUMB_2, price: 25.5 },
-      { name: '麦乐鸡（5块）', image: THUMB_1, price: 11 },
-    ],
   },
   {
     storeId: 'm004',
@@ -80,10 +69,6 @@ const STORES: StoreSummary[] = [
     status: 'CLOSED',
     distanceText: '3.6km',
     couponTags: ['满88减20'],
-    previewProducts: [
-      { name: '羊肉串（10串）', image: THUMB_3, price: 28 },
-      { name: '烤茄子', image: THUMB_2, price: 10 },
-    ],
   },
   {
     storeId: 'm005',
@@ -97,10 +82,6 @@ const STORES: StoreSummary[] = [
     status: 'OPEN',
     distanceText: '4.2km',
     couponTags: ['新客减15', '食无忧'],
-    previewProducts: [
-      { name: '精品肥牛', image: THUMB_2, price: 39 },
-      { name: '手切鲜羊肉', image: THUMB_1, price: 46 },
-    ],
   },
 ]
 
