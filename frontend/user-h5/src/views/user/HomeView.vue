@@ -498,32 +498,37 @@ function onCloseCard(storeId: string): void {
 /* ---- 搜索框（52px） ---- */
 .search-section {
   height: 52px;
-  padding: 6px 10px;
+  /* 8 + 36 + 8 = 52：框高 36（稿），垂直居中 */
+  padding: 8px 10px;
   background: var(--color-surface-white);
 }
 
 .search-box {
   display: flex;
   align-items: center;
-  height: 40px;
-  border: 2px solid var(--color-primary);
+  height: 36px;
+  border: 1.5px solid var(--color-primary);
   border-radius: 20px;
   background: var(--color-surface-white);
-  padding-left: 15px;
+  /* 框左沿 → 图标盒左沿 14px（稿），减去 1.5px 边框 */
+  padding-left: 12.5px;
   cursor: pointer;
 }
 
+/* 稿：图标盒 24×24（内缩 2px 后视口 20×20，字形 16.5px，盒左沿距框外沿 14px） */
 .search-scan {
   flex: none;
-  width: 17px;
-  height: 17px;
+  width: 24px;
+  height: 24px;
+  padding: 2px;
 }
 
 .search-divider {
   flex: none;
   width: 1px;
   height: 18px;
-  margin: 0 8px;
+  /* 稿：分隔线在框左 46（图标盒右沿 38 + 8），文字起于框左 54（分隔线后 7） */
+  margin: 0 7px 0 8px;
   background: #cccccc;
 }
 
@@ -556,19 +561,19 @@ function onCloseCard(storeId: string): void {
 .cat-row {
   display: flex;
   justify-content: space-between;
-}
-
-.cat-row:nth-child(1) {
-  padding: 0 20px 0 19px;
+  /* 稿：5 列等距（列心 47/122/197/271/345，间距 74.5）；左右内边距使列心对齐 */
+  padding: 0 10.75px 0 9.75px;
 }
 
 .cat-row:nth-child(2),
 .cat-row:nth-child(3) {
   margin-top: 12px;
-  padding: 0 30px 0 29px;
 }
 
 .cat-cell {
+  /* 等分列宽（393 - 20.5）/ 5 = 74.5：列宽不再被标签文案撑开，保证 5 列等距；
+     行 1 大图标 56px 在 74.5 单元格内居中，列心与稿一致（19 + 9.25 = 47） */
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -593,6 +598,8 @@ function onCloseCard(storeId: string): void {
   font-size: 12px;
   line-height: 13px;
   color: var(--color-text-primary);
+  /* 标签不换行，也不参与单元格宽度计算（列宽由 flex 等分决定） */
+  white-space: nowrap;
 }
 
 .cat-row:nth-child(1) .cat-label {
@@ -915,11 +922,12 @@ function onCloseCard(storeId: string): void {
 }
 
 .merchant-tag {
-  padding: 0 4px;
+  /* 稿（画板 3/4/5）：1px 边框 + 1px 内边距 + 14px 行高 = 高 18px，字号 11px */
+  padding: 1px 4px;
   border: 1px solid;
   border-radius: 4px;
   font-size: 11px;
-  line-height: 12px;
+  line-height: 14px;
   white-space: nowrap;
 }
 

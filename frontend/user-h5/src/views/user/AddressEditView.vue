@@ -210,27 +210,35 @@ function goBack(): void {
             <input v-model="form.isDefault" type="checkbox" data-testid="input-isDefault" />
           </label>
         </section>
-
-        <button
-          class="ae-save"
-          type="button"
-          data-testid="save-address-btn"
-          :disabled="saving"
-          @click="save"
-        >
-          {{ saving ? '保存中' : '保存' }}
-        </button>
       </template>
       <p v-else class="ae-skeleton">地址加载中…</p>
     </main>
+
+    <!-- 固定底栏「保存」：设计稿 .fixedActionButtonAtB（06-新增收货地址 :59-98）
+         白底 + border-top 1px #e5e5e5，padding 15/16/16、高 77px；按钮 radius 4px
+         渲染条件与改造前一致（仅表单加载完成且地址存在时出现） -->
+    <footer v-if="loaded && !missing" class="ae-footer">
+      <button
+        class="ae-save"
+        type="button"
+        data-testid="save-address-btn"
+        :disabled="saving"
+        @click="save"
+      >
+        {{ saving ? '保存中' : '保存' }}
+      </button>
+    </footer>
   </div>
 </template>
 
 <style scoped>
 .address-edit-page {
+  /* 固定底栏高度（设计稿 .fixedActionButtonAtB h77）；内容底部留白 = 底栏高 + 16px 安全间距，
+     保证滚动到底时「设为默认地址」行不被底栏遮挡 */
+  --ae-footer-h: 77px;
   min-height: 100vh;
   background: #f9f9f9;
-  padding-bottom: 24px;
+  padding-bottom: calc(var(--ae-footer-h) + 16px);
 }
 
 .ae-header {
@@ -272,63 +280,112 @@ function goBack(): void {
   width: 32px;
 }
 
+/* 通栏行式：设计稿 .mainContentCanvas（padding-top 12px、row-gap 16px、无左右留白） */
 .ae-main {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 12px;
+  gap: 16px;
+  padding: 12px 0 0;
 }
 
+/* 表单区：设计稿 .form（06-新增收货地址 :121-127）通栏白底，无圆角无阴影 */
 .ae-card {
   display: flex;
   flex-direction: column;
-  gap: 14px;
   background: #fff;
-  border-radius: 8px;
-  padding: 14px 12px;
 }
 
+/* 表单行：设计稿 .contactPersonRow/.phoneNumberRow/.areaRow/.tagSelectionRow（:161-171、230-239、273-282、344-353）
+   padding 16/16/15、min-height 56、border-bottom 1px #e5e5e5；行内是「标签 + 值」文本，无输入框边线 */
 .ae-field {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  min-height: 56px;
+  padding: 16px 16px 15px;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
+/* 行标签：设计稿 .text3（:129-139）宽 96、padding-right 16、16px/500 #1a1c1c */
 .ae-label {
-  font-size: 13px;
-  color: #666;
-}
-
-.ae-input {
-  height: 40px;
-  border: 1px solid #e5e5e5;
-  border-radius: 6px;
-  padding: 0 10px;
-  font-size: 14px;
+  flex-shrink: 0;
+  width: 96px;
+  padding-right: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
   color: #1a1c1c;
-  background: #fff;
-  box-sizing: border-box;
 }
 
+/* 行值：设计稿 .text4（:150-158）为纯文本，无边框，占位色 #999999 */
+.ae-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  font-size: 16px;
+  line-height: 24px;
+  color: #1a1c1c;
+}
+
+.ae-input::placeholder {
+  color: #999;
+}
+
+/* 校验提示：换行到行下方（设计稿无错误态，保留既有提示样式） */
 .ae-error {
+  flex-basis: 100%;
+  margin: 4px 0 0;
   font-size: 12px;
   color: #ba1a1a;
 }
 
+/* 设为默认行：设计稿 .setDefaultSwitch（:382-392）padding 15/16；上一行的 1px 底边线即分隔线 */
 .ae-switch-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: 56px;
+  padding: 15px 16px;
 }
 
+/* 该行文案不套用表单行 96px 标签宽度（否则「设为默认地址」被挤换行） */
+.ae-switch-row .ae-label {
+  width: auto;
+  padding-right: 0;
+}
+
+/* 固定底栏：设计稿 .fixedActionButtonAtB（06-新增收货地址 :59-98）
+   白底 + 上边线 1px #e5e5e5，padding 15/16/16、高 77px
+   固定定位按页面壳宽度居中（对齐 MainLayout 的 430px 壳），窄视口不产生横向溢出 */
+.ae-footer {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 430px;
+  height: var(--ae-footer-h);
+  padding: 15px 16px 16px;
+  background: #fff;
+  border-top: 1px solid var(--color-border-light);
+}
+
+/* 保存按钮：设计稿 .button2（:80-96）radius 4px、上下 padding 12px、字号 16px/行高 20px */
 .ae-save {
-  padding: 13px;
+  padding: 12px 0;
   border: none;
-  border-radius: 12px;
+  border-radius: 4px;
   background: #ff5a1f;
   color: #fff;
   font-size: 16px;
   font-weight: 600;
+  line-height: 20px;
 }
 
 .ae-save:disabled {
@@ -336,6 +393,7 @@ function goBack(): void {
 }
 
 .ae-missing {
+  margin: 0 12px;
   background: #fff;
   border-radius: 8px;
   padding: 40px 12px;
