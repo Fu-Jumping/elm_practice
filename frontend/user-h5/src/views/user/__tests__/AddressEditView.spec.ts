@@ -43,6 +43,7 @@ describe('AddressEditView（新增/编辑地址页 P0）', () => {
         { path: '/addresses', name: 'address-list', component: { template: '<div />' } },
         { path: '/addresses/new', name: 'address-new', component: AddressEditView },
         { path: '/addresses/:addressId/edit', name: 'address-edit', component: AddressEditView },
+        { path: '/orders/confirm', name: 'order-confirm', component: { template: '<div />' } },
       ],
     })
     await router.push(path)
@@ -119,5 +120,25 @@ describe('AddressEditView（新增/编辑地址页 P0）', () => {
     await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('address-list'), {
       timeout: 2000,
     })
+  })
+
+  // T62 选择模式新增保存后回到确认订单并回填新地址（2026-09-08 缺陷修复：
+  // 此前新增保存固定回管理态列表，用户无法回到选择回填链路）
+  it('T62 选择模式新增保存成功 → 回确认订单页并回填新地址', async () => {
+    const { wrapper, router } = await mountEdit('/addresses/new?select=1&storeId=m002')
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="save-address-btn"]').exists()).toBe(true),
+      { timeout: 2000 },
+    )
+    await wrapper.find('[data-testid="input-contactName"]').setValue('李同学')
+    await wrapper.find('[data-testid="input-contactPhone"]').setValue('13900000000')
+    await wrapper.find('[data-testid="input-region"]').setValue('天津大学北洋园校区')
+    await wrapper.find('[data-testid="input-detail"]').setValue('11号楼 502室')
+    await wrapper.find('[data-testid="save-address-btn"]').trigger('click')
+    await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('order-confirm'), {
+      timeout: 2000,
+    })
+    expect(router.currentRoute.value.query.storeId).toBe('m002')
+    expect(String(router.currentRoute.value.query.addressId)).toMatch(/^da\d+$/)
   })
 })

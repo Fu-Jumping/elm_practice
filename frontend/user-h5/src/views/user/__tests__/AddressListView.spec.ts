@@ -166,4 +166,19 @@ describe('AddressListView（地址列表页 P0）', () => {
     expect(mgmt.router.currentRoute.value.name).toBe('address-edit')
     expect(mgmt.router.currentRoute.value.params.addressId).toBe('da002')
   })
+
+  // T61 选择模式新增入口透传来源上下文（2026-09-08 缺陷修复：新增后要能回到选择回填链路）
+  it('T61 选择模式点「新增地址」→ 新增页携带 select 与 storeId', async () => {
+    login()
+    const { wrapper, router } = await mountList('/addresses?select=1&storeId=m002')
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="add-address-btn"]').exists()).toBe(true),
+      { timeout: 2000 },
+    )
+    await wrapper.find('[data-testid="add-address-btn"]').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('address-new')
+    expect(router.currentRoute.value.query.select).toBe('1')
+    expect(router.currentRoute.value.query.storeId).toBe('m002')
+  })
 })
