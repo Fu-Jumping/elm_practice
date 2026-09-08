@@ -24,6 +24,8 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   scrollBehavior(_to, _from, savedPosition) {
     // 浏览器返回/前进（popstate）恢复原滚动位置；普通跳转回顶部（T65/T66，2026-09-07 负责人需求）
+    // 注意：本工程滚动发生在 MainLayout 的 .app-main 独立容器上，window 级滚动不生效——
+    // 真实现见 MainLayout 滚动管线（2026-09-08，返回恢复浏览位置）
     if (savedPosition) return savedPosition
     return { top: 0 }
   },
