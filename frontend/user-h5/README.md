@@ -47,6 +47,18 @@ npm run build
 npm run test:unit
 ```
 
+### Run E2E Tests with [Playwright](https://playwright.dev/)
+
+```sh
+npm run test:e2e
+```
+
+- 用例目录 `e2e/`；`vitest.config.ts` 已 `exclude: e2e/**`，避免 Vitest 误收集。
+- `playwright.config.ts`：`channel: 'chrome'` 复用本机 Chrome（不下载 Playwright 浏览器二进制），
+  `webServer` 自动拉起 `npm run dev`（`.env.development` 为 mock 模式，**无需后端**），已在跑则复用。
+- 新机器首次运行：`npm install`（`@playwright/test` 已在 devDependencies）且本机需装有 Chrome。
+- 产物 `test-results/`、`playwright-report/` 已 gitignore，不入库。
+
 ### Lint with [ESLint](https://eslint.org/)
 
 ```sh
