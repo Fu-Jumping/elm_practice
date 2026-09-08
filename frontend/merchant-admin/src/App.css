@@ -79,21 +79,24 @@
 
 .auth-page,
 .boot-screen {
-  /* 固定视口高 + 内部滚动：独立页面与 overflow:hidden 的 iframe 嵌入（现场演示）下，
-     注册等长表单都能在容器内滚动到底部，不再被裁切（SHOW-QA-003） */
+  /* 固定视口高：卡片经 auth-scale-wrap 按视口高度自动缩放，
+     任意缩放/视口下都保持垂直居中且完整可见（SHOW-QA-003） */
   height: 100vh;
   height: 100dvh;
   padding: 16px;
   background: #f8f9ff;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  overflow-y: auto;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.auth-scale-wrap {
+  width: min(440px, 100%);
+  transform-origin: center center;
 }
 
 .auth-card {
-  width: min(440px, 100%);
-  margin-block: auto;
+  width: 100%;
   border-color: #e4beb3;
 }
 

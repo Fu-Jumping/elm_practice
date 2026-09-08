@@ -113,6 +113,28 @@ function LoginPage({
 }) {
   const { message } = AntdApp.useApp()
   const [activeKey, setActiveKey] = useState<'login' | 'register'>('login')
+
+  // SHOW-QA-003：卡片按视口高度自动缩放——任意缩放/视口下保持垂直居中且完整可见
+  const scaleWrapRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    const el = scaleWrapRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const refit = () => {
+      el.style.transform = 'none'
+      const natural = el.offsetHeight
+      const avail = window.innerHeight - 32
+      const scale = Math.min(1, avail / natural)
+      el.style.transform = scale < 1 ? `scale(${scale})` : 'none'
+    }
+    refit()
+    const ro = new ResizeObserver(refit)
+    ro.observe(el)
+    window.addEventListener('resize', refit)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', refit)
+    }
+  }, [])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(initialError)
 
@@ -151,6 +173,7 @@ function LoginPage({
 
   return (
     <main className="auth-page">
+      <div className="auth-scale-wrap" ref={scaleWrapRef}>
       <Card className="auth-card">
         <div className="auth-brand">
           <div className="brand-logo">E</div>
@@ -215,6 +238,7 @@ function LoginPage({
           ]}
         />
       </Card>
+      </div>
     </main>
   )
 }
