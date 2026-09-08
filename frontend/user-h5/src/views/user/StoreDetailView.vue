@@ -7,6 +7,7 @@
  * - 售罄商品灰化禁加购；店铺休息加购/结算禁用并提示
  * - 去结算校验顺序：登录 → 购物车非空 → 店铺营业，然后进确认订单（确认订单页 9/7 实现）
  * - 无底部导航（底部为购物车栏）；未登录可浏览
+ * 2026-09-08 滚动交接修复（§5）：外层未滚到 Tab 吸顶线时锁定左右两栏滚动，滚轮/触摸先滚外层
  */
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -89,6 +90,10 @@ onMounted(async () => {
   void catalogStore.fetchStoreDetail(storeId)
   void catalogStore.fetchStoreCategories(storeId)
   void catalogStore.fetchStoreProducts(storeId)
+  // §5 滚动交接：监听外层滚动容器（MainLayout 的 .app-main）维护吸顶状态位
+  mainScrollEl = document.querySelector('.app-main')
+  mainScrollEl?.addEventListener('scroll', updateOuterPinned, { passive: true })
+  updateOuterPinned()
   await cartStore.fetchCart(storeId)
   // TC-CRT-012：A 店有商品进 B 店 → 提示购物车按店独立保留
   const hint = cartStore.takeCrossStoreHint()
@@ -124,6 +129,24 @@ let spyLockUntil = 0
 let spy: IntersectionObserver | null = null
 
 /**
+ * 外层是否已滚到点餐/评价 Tab 吸顶线（§5 滚动交接的状态位）。
+ * 未吸顶时左右两栏锁定滚动（.order-area--locked），滚轮/触摸先滚外层整页——
+ * 否则鼠标悬停在商品列表上时滚轮被内层直接吃掉、外层不滚，与 §5
+ * 「先滚外层到吸顶线，再滚左右两栏」相悖（2026-09-08 负责人反馈，
+ * E2E store-detail-scroll-handoff.spec.ts 复现：悬停列表滚 100px，内层滚了 100px）。
+ */
+const outerPinned = ref(false)
+let mainScrollEl: HTMLElement | null = null
+
+function updateOuterPinned(): void {
+  const tabs = storeTabsEl.value
+  const header = detailHeaderEl.value
+  if (!tabs || !header) return
+  // jsdom 无布局（矩形与高度均为 0）时恒判定为已吸顶，不影响既有单测
+  outerPinned.value = tabs.getBoundingClientRect().top <= header.offsetHeight + 1
+}
+
+/**
  * 点击分类：立即高亮 + 列表滚动定位到该分区（项目规则 §5：连续联动，不做整列表切换）
  * 定位基准为分区标题在滚动容器内的 offsetTop。
  */
@@ -157,6 +180,8 @@ function pinOuterToTabs(): void {
   if (!main) return
   const target = main.scrollTop + tabs.getBoundingClientRect().top - header.offsetHeight
   if (target > main.scrollTop) main.scrollTop = target
+  // 程序化滚动同样要刷新吸顶状态位（scroll 事件下一帧才派发，此处同步一次）
+  updateOuterPinned()
 }
 
 /**
@@ -227,7 +252,10 @@ watch(
   { immediate: true, flush: 'post' },
 )
 
-onUnmounted(() => spy?.disconnect())
+onUnmounted(() => {
+  spy?.disconnect()
+  mainScrollEl?.removeEventListener('scroll', updateOuterPinned)
+})
 
 /** 售罄/下架商品禁止加购（契约：库存 0 显示售罄禁止加购） */
 function isSoldOut(product: Product): boolean {
@@ -404,7 +432,7 @@ function onCheckout(): void {
       </div>
 
       <!-- 点餐区：左分类栏 + 右商品列表 -->
-      <div v-else class="order-area">
+      <div v-else class="order-area" :class="{ 'order-area--locked': !outerPinned }">
         <nav class="cat-rail">
           <button
             v-for="cat in catalogStore.categories"
@@ -848,6 +876,14 @@ function onCheckout(): void {
   height: calc(100dvh - 100px);
   display: flex;
   align-items: stretch;
+}
+
+/* 未吸顶：锁定左右两栏滚动，让滚轮/触摸先作用于外层整页（§5 滚动交接）。
+   2026-09-08 修复「鼠标悬停在商品列表上时滚轮直接滚内层、外层不动」，
+   回归见 e2e/store-detail-scroll-handoff.spec.ts */
+.order-area--locked .cat-rail,
+.order-area--locked .product-list {
+  overflow-y: hidden;
 }
 
 .cat-rail {
