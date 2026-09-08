@@ -44,6 +44,8 @@ export interface Order {
   contactName?: string
   contactPhone?: string
   address?: string
+  /** 订单备注（契约订单视图 remark；PRD 6.13/7.11 详情 P0 字段） */
+  remark?: string
   status: string
   createdAt?: string
   productTotal: number
@@ -156,6 +158,7 @@ export function normalizeOrder(value: unknown): Order {
     contactName: record.contactName || addressInfo.contactName ? String(record.contactName || addressInfo.contactName) : undefined,
     contactPhone: record.contactPhone || addressInfo.contactPhone ? String(record.contactPhone || addressInfo.contactPhone) : undefined,
     address: addressText,
+    remark: record.remark === undefined || record.remark === null ? undefined : String(record.remark),
     status: String(record.status ?? 'PROCESSING'),
     createdAt: record.createdAt ? String(record.createdAt) : undefined,
     productTotal: asNumber(record.productTotal ?? record.itemSubtotal ?? record.goodsAmount ?? record.subtotal),
@@ -223,6 +226,7 @@ const mockState: MockState = {
   orders: [
     {
       orderId: 'o10234',
+      remark: '少放辣',
       customerName: '王小明',
       contactName: '王小明',
       contactPhone: '138****0001',

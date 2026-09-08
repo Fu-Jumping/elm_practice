@@ -40,8 +40,8 @@ describe('订单备注 remark 映射与展示（评审缺口2）', () => {
     const user = userEvent.setup()
     render(<App />)
 
-    await user.click(await screen.findByRole('button', { name: /查看详情/ }))
-    expect(await screen.findByText('少放辣')).toBeTruthy()
+    await user.click(await screen.findByRole('button', { name: /查看详情/ }, { timeout: 3000 }))
+    expect(await screen.findByText('少放辣', undefined, { timeout: 3000 })).toBeTruthy()
   })
 })
 

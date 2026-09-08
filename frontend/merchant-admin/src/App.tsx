@@ -23,7 +23,7 @@ import {
   Typography,
 } from 'antd'
 import type { TableProps } from 'antd'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   ApiError,
   type Category,
@@ -67,8 +67,12 @@ function formatMoney(value: number) {
   return `¥${Number(value || 0).toFixed(2)}`
 }
 
+// 覆盖后端 Domain.OrderStatus 全部枚举；新增状态须同步此处（PR #36 评审缺口1）
 const orderStatusLabels: Record<string, string> = {
   PENDING_PAYMENT: '待支付',
+  PENDING: '待接单',
+  COOKING: '制作中',
+  DELIVERING: '配送中',
   PROCESSING: '进行中',
   COMPLETED: '已完成',
   CANCELLED: '已取消',
@@ -290,6 +294,7 @@ function OrdersPage() {
               <Descriptions.Item label="订单号">{selectedOrder.orderId}</Descriptions.Item>
               <Descriptions.Item label="订单状态"><Tag color="processing">{orderStatusLabel(selectedOrder.status)}</Tag></Descriptions.Item>
               <Descriptions.Item label="顾客">{selectedOrder.contactName ?? selectedOrder.customerName ?? '暂无'}</Descriptions.Item>
+              <Descriptions.Item label="备注">{selectedOrder.remark || '无'}</Descriptions.Item>
               <Descriptions.Item label="联系电话">{selectedOrder.contactPhone ?? '暂无'}</Descriptions.Item>
               <Descriptions.Item label="配送地址">{selectedOrder.address ?? '暂无'}</Descriptions.Item>
               <Descriptions.Item label="下单时间">{selectedOrder.createdAt ?? '暂无'}</Descriptions.Item>
@@ -358,7 +363,6 @@ function StorePage({ currentStore, onStoreChange }: { currentStore: Store; onSto
       const savedStore = await merchantApi.updateStore({
         name: values.name.trim(),
         description: values.description?.trim(),
-        contactPhone: values.contactPhone?.trim(),
       })
       const finalStore = savedStore.status === values.status
         ? savedStore
@@ -392,9 +396,8 @@ function StorePage({ currentStore, onStoreChange }: { currentStore: Store; onSto
           <Form.Item label="店铺简介" name="description">
             <Input.TextArea rows={4} maxLength={200} showCount />
           </Form.Item>
-          <Form.Item label="联系电话" name="contactPhone" rules={[{ required: true, message: '请输入联系电话' }]}>
-            <Input maxLength={30} />
-          </Form.Item>
+          {/* 联系电话暂不提供编辑：后端 StorePatch 无 contactPhone，保存即假成功（BUG-20260908-012，
+              后端补字段后恢复此表单项） */}
           <Form.Item label="营业状态" name="status" rules={[{ required: true, message: '请选择营业状态' }]}>
             <Select
               options={(Object.keys(statusMeta) as StoreStatus[]).map((status) => ({
@@ -775,6 +778,14 @@ function MerchantWorkspace() {
     setPage(nextPage)
   }, [])
 
+  // 未登录跳登录页前记录当前受保护页，登录成功后回跳（PRD 7.15）
+  const protectedPageRef = useRef<Page | null>(null)
+  const rememberProtectedPage = useCallback(() => {
+    // 仅首次记录：navigate('login') 清空 hash 会触发 hashchange 把 page 重算为 orders，
+    // effect 重跑不能让派生值污染回跳目标；登录成功消费后由 onAuthenticated 清空
+    if (page !== 'login' && protectedPageRef.current === null) protectedPageRef.current = page
+  }, [page])
+
   const restoreSession = useCallback(async () => {
     setBooting(true)
     setBootError(undefined)
@@ -786,15 +797,17 @@ function MerchantWorkspace() {
       if (apiError.status && apiError.status !== 401 && apiError.status !== 403) {
         setBootError(errorMessage(requestError))
       }
+      rememberProtectedPage()
       navigate('login')
     } finally {
       setBooting(false)
     }
-  }, [navigate])
+  }, [navigate, rememberProtectedPage])
 
   useEffect(() => {
     void Promise.resolve().then(restoreSession)
   }, [restoreSession])
+
 
   useEffect(() => {
     const onHashChange = () => setPage(getPageFromHash())
@@ -810,6 +823,7 @@ function MerchantWorkspace() {
       message.error(errorMessage(requestError))
     } finally {
       setSession(undefined)
+      rememberProtectedPage()
       navigate('login')
     }
   }
@@ -823,9 +837,12 @@ function MerchantWorkspace() {
   }
 
   if (!session) {
+    // PRD 7.15：登录成功后返回原流程——回跳进入前所在的受保护页面，无记录则回订单页
+    const redirectPage = protectedPageRef.current ?? 'orders'
     return <LoginPage initialError={bootError} onAuthenticated={(nextSession) => {
       setSession(nextSession)
-      navigate('orders')
+      protectedPageRef.current = null
+      navigate(redirectPage)
     }} />
   }
 
