@@ -19,7 +19,7 @@ public class AuthController {
     @PostMapping("/auth/logout") public ApiResponse<?> logout(HttpSession session){auth.logout(session);return ApiResponse.success(java.util.Map.of());}
     @GetMapping("/me") public ApiResponse<?> me(HttpSession session){return ApiResponse.success(ViewMapper.user(auth.requireUser(session)));}
     @PatchMapping("/me") public ApiResponse<?> patchMe(@RequestBody Requests.UserPatch r,HttpSession session){var u=auth.requireUser(session);if(r.nickname!=null)u=auth.updateNickname(u,RequestUtil.required(r.nickname,"nickname"));return ApiResponse.success(ViewMapper.user(u));}
-    @PostMapping("/merchants") public ApiResponse<?> registerMerchant(@RequestBody Requests.MerchantRegister r){var m=auth.registerMerchant(r.account,r.password,r.storeName,r.phone,r.description);return ApiResponse.success(ViewMapper.merchant(m,stores.get(m.storeId)));}
+    @PostMapping("/merchants") public ApiResponse<?> registerMerchant(@RequestBody Requests.MerchantRegister r){var phone=r.phone!=null?r.phone:r.contactPhone;var m=auth.registerMerchant(r.account,r.password,r.storeName,phone,r.description);return ApiResponse.success(ViewMapper.merchant(m,stores.get(m.storeId)));}
     @PostMapping("/merchant/auth/login") public ApiResponse<?> loginMerchant(@RequestBody Requests.Login r,HttpSession session){var m=auth.loginMerchant(r.account,r.password,r.role,session);return ApiResponse.success(ViewMapper.merchant(m,stores.get(m.storeId)));}
     @GetMapping("/merchant/me") public ApiResponse<?> merchantMe(HttpSession session){var m=auth.requireMerchant(session);return ApiResponse.success(ViewMapper.merchant(m,stores.get(m.storeId)));}
 }
