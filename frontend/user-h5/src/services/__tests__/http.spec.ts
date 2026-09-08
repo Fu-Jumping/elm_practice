@@ -15,7 +15,7 @@ vi.mock('@/router', async () => {
     history: createMemoryHistory(),
     routes: [
       { path: '/', name: 'home', component: { template: '<div />' } },
-      { path: '/orders', name: 'orders', component: { template: '<div />' }, meta: { auth: true } },
+      { path: '/orders', name: 'orders', component: { template: '<div />' }, meta: { title: '订单', auth: true } },
       { path: '/login', name: 'login', component: { template: '<div />' } },
     ],
   })
