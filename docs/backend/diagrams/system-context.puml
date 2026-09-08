@@ -1,0 +1,21 @@
+@startuml
+!theme plain
+left to right direction
+
+actor "用户" as User
+actor "商家" as Merchant
+
+rectangle "用户端移动 H5\n(frontend/user-h5/\nVue 3 + Vite + Pinia)" as UserFrontend
+rectangle "商家端桌面 Web 后台\n(frontend/merchant-admin/\nReact 18 + Vite + AntD 5)" as MerchantFrontend
+rectangle "Java 后端服务\n(backend/\nSpring Boot, :8080)" as Backend
+database "MySQL 数据库\n(local, 3306)" as DB
+
+User --> UserFrontend : 浏览器访问
+Merchant --> MerchantFrontend : 浏览器访问
+
+UserFrontend --> Backend : HTTP /api/v1/**\n(JSON + Cookie Session)
+MerchantFrontend --> Backend : HTTP /api/v1/merchant/**\n(JSON + Cookie Session)
+
+Backend --> DB : JDBC (读写业务数据)
+Backend --> Backend : Session 管理\n统一响应与异常
+@enduml

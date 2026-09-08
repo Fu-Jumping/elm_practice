@@ -14,6 +14,8 @@ build/
 *.log
 tmp/
 .uploads/
+!.env.example
+!.env.development
 
 # 参考导出与工具目录（不入库）
 .figma/
@@ -36,3 +38,9 @@ playwright-report/
 Thumbs.db
 .idea/
 .vscode/
+# Local build/tool downloads
+.tools/
+.repo_memory/
+
+# 本地 AI 工具产物（与 .repo_memory/ 同类，不入库）
+.memorax-code/

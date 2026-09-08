@@ -1,0 +1,75 @@
+-- 应用启动时由 DatabaseInitializer 自动执行（CREATE IF NOT EXISTS 幂等）。
+-- 注意：本文件与 backend/database/schema/schema.sql 保持同步，修改需同步两处。
+CREATE TABLE IF NOT EXISTS users (
+  user_id VARCHAR(32) PRIMARY KEY, account VARCHAR(64) NOT NULL UNIQUE,
+  password_hash VARCHAR(128) NOT NULL, nickname VARCHAR(80) NOT NULL, created_at TIMESTAMP NOT NULL
+);
+CREATE TABLE IF NOT EXISTS merchants (
+  merchant_id VARCHAR(32) PRIMARY KEY, account VARCHAR(64) NOT NULL UNIQUE,
+  password_hash VARCHAR(128) NOT NULL, store_id VARCHAR(32), phone VARCHAR(20) NOT NULL, created_at TIMESTAMP NOT NULL
+);
+CREATE TABLE IF NOT EXISTS stores (
+  store_id VARCHAR(32) PRIMARY KEY, merchant_id VARCHAR(32), name VARCHAR(120) NOT NULL,
+  description VARCHAR(500), image VARCHAR(500), rating DECIMAL(3,2) NOT NULL DEFAULT 0,
+  monthly_sales INT NOT NULL DEFAULT 0, delivery_minutes INT NOT NULL DEFAULT 30,
+  start_price DECIMAL(10,2) NOT NULL DEFAULT 0, delivery_fee DECIMAL(10,2) NOT NULL DEFAULT 0,
+  status VARCHAR(32) NOT NULL
+);
+CREATE TABLE IF NOT EXISTS categories (
+  category_id VARCHAR(32) PRIMARY KEY, store_id VARCHAR(32) NOT NULL, name VARCHAR(80) NOT NULL,
+  sort_order INT NOT NULL DEFAULT 1, UNIQUE(store_id,name)
+);
+CREATE TABLE IF NOT EXISTS products (
+  product_id VARCHAR(32) PRIMARY KEY, store_id VARCHAR(32) NOT NULL, category_id VARCHAR(32) NOT NULL,
+  name VARCHAR(120) NOT NULL, description VARCHAR(500), image VARCHAR(500), price DECIMAL(10,2) NOT NULL,
+  stock INT NOT NULL DEFAULT 0, on_sale BOOLEAN NOT NULL DEFAULT TRUE, sales INT NOT NULL DEFAULT 0,
+  CHECK(price >= 0), CHECK(stock >= 0)
+);
+CREATE TABLE IF NOT EXISTS addresses (
+  address_id VARCHAR(32) PRIMARY KEY, user_id VARCHAR(32) NOT NULL, contact_name VARCHAR(80) NOT NULL,
+  contact_sex VARCHAR(16), contact_phone VARCHAR(20) NOT NULL, region VARCHAR(200) NOT NULL,
+  detail VARCHAR(300) NOT NULL, label VARCHAR(40), is_default BOOLEAN NOT NULL DEFAULT FALSE, updated_at TIMESTAMP NOT NULL
+);
+CREATE TABLE IF NOT EXISTS cart_lines (
+  cart_line_id VARCHAR(32) PRIMARY KEY, user_id VARCHAR(32) NOT NULL, store_id VARCHAR(32) NOT NULL,
+  product_id VARCHAR(32) NOT NULL, quantity INT NOT NULL, unit_price DECIMAL(10,2) NOT NULL, updated_at TIMESTAMP NOT NULL,
+  UNIQUE(user_id,store_id,product_id), CHECK(quantity > 0)
+);
+CREATE TABLE IF NOT EXISTS orders (
+  order_id VARCHAR(32) PRIMARY KEY, user_id VARCHAR(32) NOT NULL, store_id VARCHAR(32) NOT NULL,
+  address_id VARCHAR(32) NOT NULL, address_snapshot JSON NOT NULL, remark VARCHAR(500), status VARCHAR(32) NOT NULL,
+  item_subtotal DECIMAL(10,2) NOT NULL, packaging_fee DECIMAL(10,2) NOT NULL, total DECIMAL(10,2) NOT NULL,
+  created_at TIMESTAMP NOT NULL, paid_at TIMESTAMP NULL, idempotency_key VARCHAR(100),
+  UNIQUE(user_id, idempotency_key)
+);
+CREATE TABLE IF NOT EXISTS order_items (
+  order_id VARCHAR(32) NOT NULL, product_id VARCHAR(32) NOT NULL, name VARCHAR(120) NOT NULL,
+  image VARCHAR(500), category_id VARCHAR(32), unit_price DECIMAL(10,2) NOT NULL, quantity INT NOT NULL,
+  PRIMARY KEY(order_id,product_id)
+);
+-- 以下 5 张表为 MyBatis 持久化接入新增（评价、会话、消息、店铺促销、应用侧 ID 序列）。
+CREATE TABLE IF NOT EXISTS reviews (
+  review_id VARCHAR(32) PRIMARY KEY, order_id VARCHAR(32) NOT NULL UNIQUE,
+  store_id VARCHAR(32) NOT NULL, user_id VARCHAR(32) NOT NULL,
+  content VARCHAR(500) NOT NULL, rating INT NOT NULL, reply VARCHAR(500),
+  created_at TIMESTAMP NOT NULL, replied_at TIMESTAMP NULL,
+  CHECK(rating BETWEEN 1 AND 5)
+);
+CREATE TABLE IF NOT EXISTS conversations (
+  conversation_id VARCHAR(32) PRIMARY KEY, order_id VARCHAR(32) NOT NULL,
+  user_id VARCHAR(32) NOT NULL, merchant_id VARCHAR(32) NOT NULL,
+  user_read BOOLEAN NOT NULL DEFAULT FALSE, merchant_read BOOLEAN NOT NULL DEFAULT FALSE
+);
+CREATE TABLE IF NOT EXISTS messages (
+  message_id VARCHAR(32) PRIMARY KEY, conversation_id VARCHAR(32) NOT NULL,
+  sender_id VARCHAR(32) NOT NULL, sender_role VARCHAR(16) NOT NULL,
+  content VARCHAR(1000) NOT NULL, created_at TIMESTAMP NOT NULL
+);
+CREATE TABLE IF NOT EXISTS promotions (
+  store_id VARCHAR(32) PRIMARY KEY, enabled BOOLEAN NOT NULL DEFAULT FALSE,
+  threshold DECIMAL(10,2) NOT NULL DEFAULT 0, amount DECIMAL(10,2) NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS id_sequence (
+  name VARCHAR(32) PRIMARY KEY, next_val BIGINT NOT NULL
+);
+INSERT IGNORE INTO id_sequence(name,next_val) VALUES ('global',1004);
