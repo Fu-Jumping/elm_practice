@@ -134,7 +134,7 @@ function normalizeCategory(value: unknown): Category {
   }
 }
 
-function normalizeOrder(value: unknown): Order {
+export function normalizeOrder(value: unknown): Order {
   const record = (value ?? {}) as Record<string, unknown>
   const items = asArray<Record<string, unknown>>(record.items).map((item) => ({
     productId: item.productId ? String(item.productId) : undefined,

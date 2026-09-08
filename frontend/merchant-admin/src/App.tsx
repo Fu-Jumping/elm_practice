@@ -67,7 +67,7 @@ function formatMoney(value: number) {
   return `¥${Number(value || 0).toFixed(2)}`
 }
 
-function orderStatusLabel(status: string) {
+export function orderStatusLabel(status: string) {
   return status === 'PROCESSING' ? '进行中' : status
 }
 
