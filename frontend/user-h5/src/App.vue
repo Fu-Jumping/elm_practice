@@ -6,7 +6,7 @@ import ToastHost from '@/components/ToastHost.vue'
 <template>
   <!-- 页面切换只做 opacity 淡入淡出（复刻约定 2.11，设计系统弃用位移动画） -->
   <RouterView v-slot="{ Component }">
-    <Transition name="page-fade" mode="out-in">
+    <Transition name="page-fade" :duration="250">
       <component :is="Component" />
     </Transition>
   </RouterView>
