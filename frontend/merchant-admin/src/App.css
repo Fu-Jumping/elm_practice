@@ -80,14 +80,18 @@
 .auth-page,
 .boot-screen {
   min-height: 100vh;
+  min-height: 100dvh;
   padding: 16px;
   background: #f8f9ff;
-  display: grid;
-  place-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow-y: auto;
 }
 
 .auth-card {
   width: min(440px, 100%);
+  margin-block: auto;
   border-color: #e4beb3;
 }
 
