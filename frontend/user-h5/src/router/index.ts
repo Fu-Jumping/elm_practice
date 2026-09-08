@@ -112,6 +112,19 @@ const router = createRouter({
       ],
     },
     {
+      // 注册页：公开页（不设 auth）；顶部栏返回目标为登录页（PRD 7.16.1 注册页-顶部栏行）
+      path: '/register',
+      component: () => import('@/layouts/BlankLayout.vue'),
+      children: [
+        {
+          path: '',
+          name: 'register',
+          component: () => import('@/views/user/RegisterView.vue'),
+          meta: { title: '注册', priority: 'P0' },
+        },
+      ],
+    },
+    {
       // 显式 404 页，不静默重定向首页
       path: '/:pathMatch(.*)*',
       name: 'not-found',
