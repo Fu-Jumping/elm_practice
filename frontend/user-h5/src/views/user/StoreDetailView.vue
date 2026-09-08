@@ -5,7 +5,7 @@
  * 口径（PRD 7.16.1 + 契约 §3.2/§3.4）：
  * - 评价 Tab：P1 未选定，占位"评价功能暂未开放"，不请求评价接口（契约 §6.2）
  * - 售罄商品灰化禁加购；店铺休息加购/结算禁用并提示
- * - 去结算校验顺序：登录 → 购物车非空 → 店铺营业，然后进确认订单（确认订单页 9/7 实现）
+ * - 去结算校验顺序：登录 → 购物车非空 → 店铺营业 → 达起送价，然后进确认订单（2026-09-08 起送拦截）
  * - 无底部导航（底部为购物车栏）；未登录可浏览
  * 2026-09-08 滚动交接修复（§5）：外层未滚到 Tab 吸顶线时锁定左右两栏滚动，滚轮/触摸先滚外层
  */
@@ -299,7 +299,7 @@ function toggleCartPopup(): void {
   cartPopupOpen.value = !cartPopupOpen.value
 }
 
-/** 去结算校验顺序：登录 → 购物车非空 → 店铺营业（PRD 点餐内容区行） */
+/** 去结算校验顺序：登录 → 购物车非空 → 店铺营业 → 达起送价（PRD 点餐内容区行） */
 function onCheckout(): void {
   if (!sessionStore.isLoggedIn) {
     void router.push({ name: 'login', query: { redirect: route.fullPath } })
@@ -307,6 +307,14 @@ function onCheckout(): void {
   }
   if (cartStore.totalCount === 0) {
     toast('请先加入商品')
+    return
+  }
+  // 起送金额拦截（2026-09-08 负责人拍板「点去结算就拦」）：差额算法与确认订单页同口径，
+  // 确认订单页内的 submitDisabled/blockReason 兜底保留（可深链直达、购物车可再变）
+  const startPrice = store.value?.startPrice ?? 0
+  const delta = startPrice - cartStore.totalAmount
+  if (delta > 0) {
+    toast(`还差 ¥${formatMoney(delta)} 起送（满 ¥${formatMoney(startPrice)} 可下单）`)
     return
   }
   // 确认订单页 9/7 落地：校验通过进入确认订单，携带商家编号（PRD 顶部栏行）
