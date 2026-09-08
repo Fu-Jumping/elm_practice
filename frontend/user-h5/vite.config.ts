@@ -21,6 +21,12 @@ export default defineConfig({
   server: {
     // 固定端口（架构约定 §5：5173 / 5174）
     port: 5173,
+    watch: {
+      // 其他工具在工程目录写入 .<name>.<pid>.<uuid>.tmpdir/ 临时文件时，Windows 下 chokidar
+      // watch 这些文件会报 EBUSY 并让 dev server 直接退出（2026-09-08 两次复现，含 src/ 与工程根目录）；
+      // 忽略临时文件可彻底规避，不影响源码热更新。
+      ignored: (filePath: string) => filePath.includes('.tmpdir') || filePath.endsWith('.tmp'),
+    },
     // 联调代理（9/7）：/api 同源转发后端——绕开 CORS 与 Cookie 域限制，
     // 手机经局域网 IP 访问 dev server 时接口同源可用（配合 VITE_API_BASE_URL=/api/v1）
     proxy: {
