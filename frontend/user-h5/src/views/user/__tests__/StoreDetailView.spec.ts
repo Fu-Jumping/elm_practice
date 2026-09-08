@@ -256,6 +256,30 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     expect(router.currentRoute.value.query.storeId).toBe('m003')
   })
 
+  // T71 起送金额不满足 → 去结算拦截（2026-09-08 口径变更：负责人拍板「点去结算就拦」，
+  // 不再等进确认订单页才提示；确认订单页内兜底保留，见 ConfirmOrderView T57）
+  it('T71 起送金额不满足：去结算拦截并提示差额，停留本店页', async () => {
+    // m001 起送 15，加购一份米饭（¥2）→ 差额 13；清空 m001 购物车隔离跨用例残留
+    clearMockCart('m001')
+    const { wrapper, router } = await mountDetail('/stores/m001')
+    const session = useSessionStore()
+    session.user = { account: '13800000001', nickname: '张同学' }
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="add-btn-p203"]').exists()).toBe(true),
+      { timeout: 5000 },
+    )
+    await wrapper.find('[data-testid="add-btn-p203"]').trigger('click')
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="cart-bar-count"]').text()).toBe('1'),
+      { timeout: 5000 },
+    )
+    await wrapper.find('[data-testid="checkout-btn"]').trigger('click')
+    await flushPromises()
+    // 拦截：停留本店页，提示差额
+    expect(router.currentRoute.value.name).toBe('store-detail')
+    expect(messages.join()).toContain('13')
+  })
+
   // T47-T50 购物车弹层与商品行步进器（2026-09-07 第三批，PRD 7.16.1 商家详情页行 + 契约 §3.4，
   // AI 设计落地沿用 1359 追认框架）：行内步进器 "- 数量 +"、减到 0 转删除、购物车栏点击展开弹层
   async function loginAndAdd(storeId: string, productId: string, times = 1) {
