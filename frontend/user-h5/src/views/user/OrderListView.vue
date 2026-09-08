@@ -95,7 +95,9 @@ function goDetail(order: OrderSummary): void {
 <style scoped>
 .order-list-page {
   min-height: 100vh;
-  background: #f9f9f9;
+  /* 设计稿 .frame 画布 #eeeeee（06-订单/01-订单列表）：卡片通栏白底、行间 8px 灰缝靠画布色分辨。
+     此前误用 #f9f9f9（与白色仅差 6 个色阶），灰缝肉眼不可见（2026-09-08 负责人反馈） */
+  background: var(--color-surface-container);
 }
 
 .ol-header {
