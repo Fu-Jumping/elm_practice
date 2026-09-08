@@ -79,15 +79,24 @@
 
 .auth-page,
 .boot-screen {
-  /* 固定视口高：卡片经 auth-scale-wrap 按视口高度自动缩放，
-     任意缩放/视口下都保持垂直居中且完整可见（SHOW-QA-003） */
-  height: 100vh;
-  height: 100dvh;
+  /* fixed 铺满 iframe 可视区：容器高度/缩放/嵌入方式都不影响，
+     卡片始终对可见区域垂直居中（SHOW-QA-003）；上下弹性占位保证
+     长表单（注册）溢出时仍可滚动到顶/底，且初始视图居中 */
+  position: fixed;
+  inset: 0;
   padding: 16px;
   background: #f8f9ff;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+}
+
+.auth-page::before,
+.auth-page::after,
+.boot-screen::before {
+  content: '';
+  flex: 1 0 1rem;
 }
 
 .auth-scale-wrap {
