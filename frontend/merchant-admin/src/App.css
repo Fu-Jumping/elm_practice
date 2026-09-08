@@ -79,24 +79,16 @@
 
 .auth-page,
 .boot-screen {
-  /* fixed 铺满 iframe 可视区：容器高度/缩放/嵌入方式都不影响，
-     卡片始终对可见区域垂直居中（SHOW-QA-003）；上下弹性占位保证
-     长表单（注册）溢出时仍可滚动到顶/底，且初始视图居中 */
-  position: fixed;
-  inset: 0;
+  /* 固定 780px 高度块：现场演示页将 900 高的商家端 iframe 以 ~0.82 缩放进 ~735 窗格，
+     780 块缩放后完整落在窗格内，卡片在块内垂直居中且不会被演示窗格裁切（SHOW-QA-003 定稿）；
+     独立浏览器访问时窗口过矮则由页面滚动兜底 */
+  height: 780px;
+  max-height: 100dvh;
   padding: 16px;
   background: #f8f9ff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: grid;
+  place-items: center;
   overflow-y: auto;
-}
-
-.auth-page::before,
-.auth-page::after,
-.boot-screen::before {
-  content: '';
-  flex: 1 0 1rem;
 }
 
 .auth-scale-wrap {
