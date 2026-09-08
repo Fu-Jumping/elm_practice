@@ -67,8 +67,15 @@ function formatMoney(value: number) {
   return `¥${Number(value || 0).toFixed(2)}`
 }
 
+const orderStatusLabels: Record<string, string> = {
+  PENDING_PAYMENT: '待支付',
+  PROCESSING: '进行中',
+  COMPLETED: '已完成',
+  CANCELLED: '已取消',
+}
+
 export function orderStatusLabel(status: string) {
-  return status === 'PROCESSING' ? '进行中' : status
+  return orderStatusLabels[status] ?? status
 }
 
 function StoreStatusTag({ status }: { status: StoreStatus }) {

@@ -143,17 +143,24 @@ export function normalizeOrder(value: unknown): Order {
     price: asNumber(item.price ?? item.unitPrice),
     subtotal: item.subtotal === undefined ? undefined : asNumber(item.subtotal),
   }))
+  const addressRaw = record.address
+  const addressInfo = (addressRaw && typeof addressRaw === 'object' ? addressRaw : {}) as Record<string, unknown>
+  const addressText = addressRaw === undefined || addressRaw === null
+    ? undefined
+    : typeof addressRaw === 'object'
+      ? [addressInfo.region, addressInfo.detail].filter(Boolean).map(String).join(' ')
+      : String(addressRaw)
   return {
     orderId: String(record.orderId ?? record.id ?? ''),
-    customerName: record.customerName ? String(record.customerName) : undefined,
-    contactName: record.contactName ? String(record.contactName) : undefined,
-    contactPhone: record.contactPhone ? String(record.contactPhone) : undefined,
-    address: record.address ? String(record.address) : undefined,
+    customerName: record.customerName || addressInfo.contactName ? String(record.customerName || addressInfo.contactName) : undefined,
+    contactName: record.contactName || addressInfo.contactName ? String(record.contactName || addressInfo.contactName) : undefined,
+    contactPhone: record.contactPhone || addressInfo.contactPhone ? String(record.contactPhone || addressInfo.contactPhone) : undefined,
+    address: addressText,
     status: String(record.status ?? 'PROCESSING'),
     createdAt: record.createdAt ? String(record.createdAt) : undefined,
-    productTotal: asNumber(record.productTotal ?? record.goodsAmount ?? record.subtotal),
+    productTotal: asNumber(record.productTotal ?? record.itemSubtotal ?? record.goodsAmount ?? record.subtotal),
     packagingFee: asNumber(record.packagingFee, 2),
-    totalAmount: asNumber(record.totalAmount ?? record.amount ?? record.payAmount),
+    totalAmount: asNumber(record.totalAmount ?? record.total ?? record.amount ?? record.payAmount),
     items,
   }
 }
