@@ -334,4 +334,28 @@ describe('StoreDetailView（商家详情页 P0）', () => {
       { timeout: 2000 },
     )
   })
+
+  it('T67 跨店切换不残留旧店默认分类：逛过 m002 再进 m005 显示本店商品（2026-09-08 真浏览器复现缺陷）', async () => {
+    // 缺陷链路：catalogStore 全局残留上一店分类/商品 → 进新店挂载时 watch(immediate)
+    // 用旧店数据把 activeCategoryId 锁到旧店分类 id → 新店数据到达后 watcher 直接 return
+    // → 当前分类下无商品 → “暂无商品”；退出重进因组件重建+缓存属本店才恢复。
+    // PRD 7.16.1 点餐内容区行：默认选中第一个有商品的分类；商品接口为空才显示空态。
+    const pinia = createPinia()
+    const { wrapper: first } = await mountDetail('/stores/m002', pinia)
+    await vi.waitFor(
+      () => expect(first.findAll('[data-testid^="product-item-"]').length).toBeGreaterThan(0),
+      { timeout: 2000 },
+    )
+    // 共享同一 pinia 进 m005（模拟返回列表后再进店；mock 分类 c201/c202 与 m002 的 c101~c103 不同）
+    const { wrapper: second } = await mountDetail('/stores/m005', pinia)
+    await vi.waitFor(
+      () => expect(second.findAll('[data-testid^="product-item-"]').length).toBeGreaterThan(0),
+      { timeout: 2000 },
+    )
+    // 默认选中 m005 第一个有商品的分类（招牌），不落“暂无商品”空态
+    const activeCat = second.find('.cat-rail-item--active')
+    expect(activeCat.exists()).toBe(true)
+    expect(activeCat.text()).toBe('招牌')
+    expect(second.find('[data-testid="product-list"]').text()).not.toContain('暂无商品')
+  })
 })
