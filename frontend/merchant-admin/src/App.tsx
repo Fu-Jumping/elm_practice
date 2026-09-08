@@ -120,11 +120,10 @@ function LoginPage({
     const el = scaleWrapRef.current
     if (!el || typeof ResizeObserver === 'undefined') return
     const refit = () => {
-      el.style.transform = 'none'
-      const natural = el.offsetHeight
+      const natural = el.offsetHeight / (Number(el.style.zoom) || 1)
       const avail = window.innerHeight - 32
       const scale = Math.min(1, avail / natural)
-      el.style.transform = scale < 1 ? `scale(${scale})` : 'none'
+      el.style.zoom = scale < 1 ? String(scale) : ''
     }
     refit()
     const ro = new ResizeObserver(refit)
