@@ -7,6 +7,30 @@ import { onToast } from '@/utils/toast'
 import { useCatalogStore } from '@/stores/catalogStore'
 import { useSessionStore } from '@/stores/sessionStore'
 import { ADDRESS_SEED, addressMockState } from '@/mocks/address'
+import { mockDispatch } from '@/mocks'
+
+// 原始 mock 分发器保留引用：T67/T68 在其响应上剥离 image 字段，模拟 real 模式（后端不填图）形状
+const actualMocks = await vi.importActual<typeof import('@/mocks')>('@/mocks')
+vi.mock('@/mocks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/mocks')>()
+  return { ...actual, mockDispatch: vi.fn() }
+})
+
+/** 递归剥离 data 中的 image 字段（置空串），对齐真实后端种子不填图的响应形状 */
+function stripImages<T>(data: T): T {
+  if (Array.isArray(data)) return data.map((d) => stripImages(d)) as unknown as T
+  if (data && typeof data === 'object') {
+    const out: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+      out[k] = k === 'image' ? '' : stripImages(v)
+    }
+    return out as T
+  }
+  return data
+}
+
+const dispatchStripped: typeof mockDispatch = async (config) =>
+  stripImages(await actualMocks.mockDispatch(config))
 
 /** T60-T62 用定位跳转：自建 router 并暴露实例供断言 */
 let routerInstance: ReturnType<typeof createRouter>
@@ -35,6 +59,8 @@ function routerPlugin() {
  * T10 加载态：加载中渲染占位卡，完成后消失
  * T46 商品预览聚合（2026-09-07 联调补）：/stores 不返回预览字段时，从各店商品接口聚合前 3 个
  *     （PRD 7.16.1：预览来自商家商品接口；图片为空用占位图；口径演进见 raw 用户端-1428.md）
+ * T67/T68 real 形状图片兜底（2026-09-08）：接口 image 为空时首页店招/预览商品图走演示映射
+ *     （与详情页同一 utils/demoImages 兜底链；缺陷由 real 模式冒烟暴露，mock 填图曾掩盖）
  */
 describe('HomeView（首页 P0）', () => {
   const messages: string[] = []
@@ -45,10 +71,13 @@ describe('HomeView（首页 P0）', () => {
   beforeEach(() => {
     messages.length = 0
     offToast = onToast((message) => messages.push(message))
+    // 默认代理原始 mock 分发；T67/T68 用例内再覆写为剥图实现
+    vi.mocked(mockDispatch).mockImplementation(actualMocks.mockDispatch)
   })
 
   afterEach(() => {
     offToast?.()
+    vi.mocked(mockDispatch).mockReset()
   })
 
   it('T1 定位频道栏渲染演示地址；点击"常点"占位提示暂未开放', async () => {
@@ -135,6 +164,32 @@ describe('HomeView（首页 P0）', () => {
     const firstImg = kfc.find('.product-img')
     expect(firstImg.attributes('src')).toContain('/demo-images/product-m002-01.jpg')
     // 空态兜底：无商品也不出现 undefined
+    expect(wrapper.text()).not.toContain('undefined')
+  })
+
+  // T67/T68（2026-09-08 real 模式冒烟发现，负责人报"店图/食物图没了"）：mock 数据层填图掩盖了
+  // 首页视图未走 demoImages 兜底链的缺陷——真实后端 image=null 时首页店招与预览商品图全部空图。
+  // 口径：接口 image 为空 → 演示映射兜底（与详情页 StoreCover/商品行同一 utils/demoImages 链）
+  it('T67 real 形状（接口无 image）：首页店招走演示映射兜底', async () => {
+    vi.mocked(mockDispatch).mockImplementation(dispatchStripped)
+    const wrapper = mountHome()
+    await vi.waitFor(() => expect(wrapper.findAll('.merchant-card')).toHaveLength(5), {
+      timeout: 2000,
+    })
+    const kfc = wrapper.findAll('.merchant-card').find((c) => c.text().includes('肯德基'))!
+    const cover = kfc.find('img.merchant-cover-img')
+    expect(cover.attributes('src')).toBe('/demo-images/store-m002.jpg')
+  })
+
+  it('T68 real 形状（接口无 image）：首页预览商品图走演示映射兜底', async () => {
+    vi.mocked(mockDispatch).mockImplementation(dispatchStripped)
+    const wrapper = mountHome()
+    await vi.waitFor(() => expect(wrapper.findAll('.merchant-card')).toHaveLength(5), {
+      timeout: 2000,
+    })
+    const kfc = wrapper.findAll('.merchant-card').find((c) => c.text().includes('肯德基'))!
+    await vi.waitFor(() => expect(kfc.find('.product-img').exists()).toBe(true), { timeout: 2000 })
+    expect(kfc.find('.product-img').attributes('src')).toBe('/demo-images/product-m002-01.jpg')
     expect(wrapper.text()).not.toContain('undefined')
   })
 

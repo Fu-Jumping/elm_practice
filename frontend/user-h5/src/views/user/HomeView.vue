@@ -14,7 +14,7 @@ import { useSessionStore } from '@/stores/sessionStore'
 import { addressApi } from '@/services/api'
 import { storeApi } from '@/services/api'
 import { formatMoney } from '@/services/normalizers'
-import { productImageSrc } from '@/utils/demoImages'
+import { productImageSrc, storeImageSrc } from '@/utils/demoImages'
 import type { StorePreviewProduct, StoreSummary } from '@/services/api/types'
 import type { CSSProperties } from 'vue'
 
@@ -343,7 +343,11 @@ function onCloseCard(storeId: string): void {
           @click="onOpenStore(store.storeId)"
         >
           <div class="merchant-cover">
-            <StoreCover class="merchant-cover-img" :name="store.name" :image="store.image" />
+            <StoreCover
+              class="merchant-cover-img"
+              :name="store.name"
+              :image="storeImageSrc(store.storeId, store.image)"
+            />
             <span class="merchant-ribbon">
               优享大牌
               <svg class="merchant-ribbon-fold" viewBox="0 0 4.5 2" aria-hidden="true">
