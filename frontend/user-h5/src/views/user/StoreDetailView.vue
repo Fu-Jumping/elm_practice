@@ -47,10 +47,23 @@ const productsByCategory = computed(() => {
 })
 
 // PRD：默认选中第一个有商品的分类
+// 2026-09-08 跨店修复（T67）：仅当分类/商品数据归属当前店铺时才参与默认选中——
+// catalogStore 为全局单例，挂载瞬间可能残留上一店铺数据，旧逻辑会把 activeCategoryId
+// 锁到旧店分类 id，等本店数据到达后 watcher 直接 return，落成"暂无商品"空态。
+// 另：等商品加载完成后再按"第一个有商品"判定，不再先锁空分类（同店缓存命中时立即选中，秒开不变）。
 watch(
-  () => [catalogStore.categories.length, catalogStore.productsLoading] as const,
+  () =>
+    [catalogStore.categories.length, catalogStore.products.length, catalogStore.productsLoading] as const,
   () => {
     if (activeCategoryId.value) return
+    if (
+      catalogStore.categories.length === 0 ||
+      catalogStore.categoriesStoreId !== storeId ||
+      catalogStore.productsStoreId !== storeId
+    ) {
+      return
+    }
+    if (catalogStore.productsLoading) return
     const firstWithProducts =
       catalogStore.categories.find(
         (cat) => (productsByCategory.value.get(cat.categoryId) ?? []).length > 0,
