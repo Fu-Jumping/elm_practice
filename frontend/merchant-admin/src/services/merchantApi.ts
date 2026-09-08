@@ -17,7 +17,7 @@ export interface Store {
 export interface Category {
   categoryId: string
   name: string
-  sort?: number
+  sortOrder?: number
 }
 
 export interface Product {
@@ -65,7 +65,7 @@ export interface StoreDraft {
 
 export interface CategoryDraft {
   name: string
-  sort?: number
+  sortOrder?: number
 }
 
 export interface ProductDraft {
@@ -130,7 +130,7 @@ function normalizeCategory(value: unknown): Category {
   return {
     categoryId: String(record.categoryId ?? record.id ?? ''),
     name: String(record.name ?? ''),
-    sort: record.sort === undefined ? undefined : asNumber(record.sort),
+    sortOrder: record.sortOrder === undefined ? undefined : asNumber(record.sortOrder),
   }
 }
 
@@ -204,9 +204,9 @@ const mockState: MockState = {
     status: 'OPEN',
   },
   categories: [
-    { categoryId: 'c001', name: '人气套餐', sort: 1 },
-    { categoryId: 'c002', name: '汉堡小食', sort: 2 },
-    { categoryId: 'c003', name: '饮品', sort: 3 },
+    { categoryId: 'c001', name: '人气套餐', sortOrder: 1 },
+    { categoryId: 'c002', name: '汉堡小食', sortOrder: 2 },
+    { categoryId: 'c003', name: '饮品', sortOrder: 3 },
   ],
   products: [
     { productId: 'p101', categoryId: 'c001', name: '香辣鸡腿堡套餐', description: '含可乐和薯条', price: 28, stock: 20, onSale: true },
@@ -296,14 +296,14 @@ const mockApi = {
   },
   async listCategories(): Promise<Category[]> {
     mockRequireSession()
-    return mockCopy([...mockState.categories].sort((left, right) => (left.sort ?? 0) - (right.sort ?? 0)))
+    return mockCopy([...mockState.categories].sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0)))
   },
   async createCategory(input: CategoryDraft): Promise<Category> {
     mockRequireSession()
     if (mockState.categories.some((category) => category.name === input.name.trim())) {
       throw new ApiError('同一店铺内分类名称不能重复。', 409)
     }
-    const category: Category = { categoryId: nextId('c'), name: input.name.trim(), sort: input.sort }
+    const category: Category = { categoryId: nextId('c'), name: input.name.trim(), sortOrder: input.sortOrder }
     mockState.categories.push(category)
     return mockCopy(category)
   },
@@ -314,7 +314,7 @@ const mockApi = {
     if (mockState.categories.some((item) => item.categoryId !== categoryId && item.name === input.name.trim())) {
       throw new ApiError('同一店铺内分类名称不能重复。', 409)
     }
-    Object.assign(category, { name: input.name.trim(), sort: input.sort })
+    Object.assign(category, { name: input.name.trim(), sortOrder: input.sortOrder })
     return mockCopy(category)
   },
   async deleteCategory(categoryId: string) {

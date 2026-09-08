@@ -432,7 +432,7 @@ function CategoriesPage() {
 
   function openEditor(category?: Category) {
     setEditing(category)
-    form.setFieldsValue(category ?? { name: '', sort: categories.length + 1 })
+    form.setFieldsValue(category ?? { name: '', sortOrder: categories.length + 1 })
     setEditorOpen(true)
   }
 
@@ -474,7 +474,7 @@ function CategoriesPage() {
 
   const columns: TableProps<Category>['columns'] = [
     { title: '分类名称', dataIndex: 'name', key: 'name' },
-    { title: '排序值', dataIndex: 'sort', key: 'sort', align: 'right', render: (value) => value ?? '—' },
+    { title: '排序值', dataIndex: 'sortOrder', key: 'sortOrder', align: 'right', render: (value) => value ?? '—' },
     {
       title: '操作',
       key: 'actions',
@@ -519,7 +519,7 @@ function CategoriesPage() {
           <Form.Item label="分类名称" name="name" rules={[{ required: true, whitespace: true, message: '请输入分类名称' }, { max: 30, message: '分类名称不能超过 30 个字符' }]}>
             <Input maxLength={30} />
           </Form.Item>
-          <Form.Item label="排序值" name="sort" rules={[{ type: 'number', min: 0, message: '排序值不能小于 0' }]}>
+          <Form.Item label="排序值" name="sortOrder" rules={[{ type: 'number', min: 0, message: '排序值不能小于 0' }]}>
             <InputNumber min={0} precision={0} className="full-width" />
           </Form.Item>
         </Form>
