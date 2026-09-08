@@ -62,4 +62,10 @@ class AuthControllerIntegrationTest {
                 .andExpect(jsonPath("$.code").value(0))
                 .andExpect(jsonPath("$.data.storeId").exists());
     }
+
+    /** 素材包接入：/demo-images/** 须由后端伺服（add-mappings=false 时需显式注册资源处理器） */
+    @Test void demoImagesAreServedByBackend() throws Exception {
+        mvc.perform(get("/demo-images/store-m001.jpg"))
+                .andExpect(status().isOk());
+    }
 }
