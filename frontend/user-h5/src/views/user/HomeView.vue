@@ -5,7 +5,7 @@
  * 占位口径（PRD 7.16.1 + 精细版 README §2.3）：占位内容点击一律提示"暂未开放"，不进入功能范围
  * TODO(口径待确认)：课程 10 类分类固定数据未在文档枚举，宫格文案暂用设计稿原文，待分类接口定稿替换
  */
-import { computed, onMounted, ref } from 'vue'
+import { computed, onActivated, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from '@/utils/toast'
 import StoreCover from '@/components/StoreCover.vue'
@@ -17,6 +17,9 @@ import { formatMoney } from '@/services/normalizers'
 import { productImageSrc, storeImageSrc } from '@/utils/demoImages'
 import type { StorePreviewProduct, StoreSummary } from '@/services/api/types'
 import type { CSSProperties } from 'vue'
+
+// KeepAlive include 按组件名匹配（MainLayout 缓存首页以保持返回浏览位置）
+defineOptions({ name: 'HomeView' })
 
 const ASSETS = '/design-assets/首页-精细'
 
@@ -100,11 +103,27 @@ async function aggregatePreviews(stores: StoreSummary[]): Promise<void> {
   )
 }
 
-onMounted(() => {
+/** 刷新首页数据：挂载与 KeepAlive 激活共用（PRD 通用规则 6：返回重读，不依赖旧页面缓存） */
+function refreshHome(): void {
   void catalogStore.fetchStores().then(() => {
     void aggregatePreviews(catalogStore.stores)
   })
+}
+
+onMounted(() => {
+  refreshHome()
   void loadLocationAddress()
+})
+
+// 从商家详情等返回（KeepAlive 激活）：重新读取商家列表；滚动位置由 MainLayout 滚动管线恢复。
+// KeepAlive 初次挂载会紧随 mounted 再触发一次 activated——首次激活跳过，避免首屏双请求
+let firstActivation = true
+onActivated(() => {
+  if (firstActivation) {
+    firstActivation = false
+    return
+  }
+  refreshHome()
 })
 
 // PRD 806 行为列：点击定位文字进入地址列表（地址列表页自身处理登录引导）
