@@ -6,6 +6,7 @@
  * - 前端校验复用 validateAddressForm（TC-ADR-002 体验层），校验不过不发请求；业务规则后端兜底
  * - 保存按钮：先校验再只发一次请求，保存中禁用（PRD 7.9"保存中"）；失败保留输入
  * - 编辑地址不存在：提示并返回列表（PRD 顶部栏行）
+ * 2026-09-08 缺陷修复：选择模式（select/storeId）新增保存后直接回确认订单页并回填，不落管理态列表
  */
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -19,6 +20,10 @@ const router = useRouter()
 
 const addressId = typeof route.params.addressId === 'string' ? route.params.addressId : ''
 const isEdit = addressId !== ''
+
+/** 选择模式来源（确认订单 → 地址列表 → 新增）：保存后直接回确认订单页并回填（2026-09-08 缺陷修复） */
+const selectMode = route.query.select === '1'
+const returnStoreId = typeof route.query.storeId === 'string' ? route.query.storeId : ''
 
 const form = reactive({
   contactName: '',
@@ -83,8 +88,17 @@ async function save(): Promise<void> {
       label: form.label.trim() || undefined,
       isDefault: form.isDefault,
     }
-    if (isEdit) await addressApi.updateAddress(addressId, body)
-    else await addressApi.addAddress(body)
+    const saved = isEdit
+      ? await addressApi.updateAddress(addressId, body)
+      : await addressApi.addAddress(body)
+    // 选择模式：直接回确认订单页并回填本次保存的地址，不落到管理态列表（2026-09-08 缺陷修复）
+    if (selectMode && returnStoreId) {
+      void router.replace({
+        name: 'order-confirm',
+        query: { storeId: returnStoreId, addressId: saved.addressId },
+      })
+      return
+    }
     void router.push({ name: 'address-list' })
   } catch {
     // 失败不返回、不清空输入（PRD）；提示由 http 层统一 toast

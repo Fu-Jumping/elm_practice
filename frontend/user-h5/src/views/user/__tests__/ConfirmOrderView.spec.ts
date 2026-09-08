@@ -231,4 +231,21 @@ describe('ConfirmOrderView（确认订单页 P0）', () => {
     expect(router.currentRoute.value.query.select).toBe('1')
     expect(router.currentRoute.value.query.storeId).toBe('m002')
   })
+
+  // T60 无地址引导可点击（2026-09-08 缺陷修复：地址删光后点引导无响应，只能退出页面再加）
+  it('T60 无地址点引导 → 进入地址列表选择模式（PRD 873：新增入口为路由操作）', async () => {
+    const pinia = bootstrapPinia()
+    await loginAndFillCart()
+    addressMockState.splice(0, addressMockState.length)
+    const { wrapper, router } = await mountConfirm({ storeId: 'm002' }, pinia)
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="address-missing-tip"]').exists()).toBe(true),
+      { timeout: 2000 },
+    )
+    await wrapper.find('[data-testid="address-missing-tip"]').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('address-list')
+    expect(router.currentRoute.value.query.select).toBe('1')
+    expect(router.currentRoute.value.query.storeId).toBe('m002')
+  })
 })
