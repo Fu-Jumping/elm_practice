@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { nextTick } from 'vue'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
 import StoreDetailView from '../StoreDetailView.vue'
+import { useCatalogStore } from '@/stores/catalogStore'
 import { useSessionStore } from '@/stores/sessionStore'
 import { useCartStore } from '@/stores/cartStore'
 import { onToast } from '@/utils/toast'
@@ -13,7 +15,9 @@ import { clearMockCart } from '@/mocks/cart'
  * 口径来源：PRD 7.16.1 商家详情页三行 + 商家评价页行、契约 §3.2/§3.4、PRD 7.3
  * T11 详情接口数据渲染 + document.title 更新
  * T12 无效 storeId → "商家不存在" + 返回列表
- * T13 分类栏默认选中第一个，点击切换商品并高亮
+ * T13 分类栏与商品列表连续联动：默认选中第一个有商品的分类；点击分类滚动定位到分区并高亮
+ *     （2026-09-08 口径修正：负责人真机反馈 + 项目规则 §5「不得把分类切换做成页面切换」，
+ *     右侧改为分段连续渲染全部分类商品，不再整列表切换）
  * T14 商品项字段渲染；售罄商品灰化且加购禁用
  * T15 加购后购物车栏数量/合计刷新；同商品合并数量
  * T16 店铺休息：提示可见，加购/结算禁用
@@ -89,33 +93,47 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     expect(router.currentRoute.value.name).toBe('home')
   })
 
-  it('T13 分类栏默认选中第一个，点击切换商品并高亮', async () => {
+  it('T13 分类栏与商品列表连续联动：默认选中第一个有商品的分类，点击分类滚动定位并高亮', async () => {
     const { wrapper } = await mountDetail('/stores/m002')
     await vi.waitFor(
       () => expect(wrapper.findAll('[data-testid="cat-rail-item"]').length).toBe(3),
       { timeout: 2000 },
     )
     const rails = wrapper.findAll('[data-testid="cat-rail-item"]')
-    expect(rails[0]!.classes()).toContain('cat-rail-item--active')
-    // 商品列表可能在 mock 延迟窗口内未返回，等默认分类商品渲染
+    // 默认选中第一个有商品的分类（等分类与商品都就绪后由 watcher 落定）
     await vi.waitFor(
       () =>
-        expect(wrapper.find('[data-testid="product-list"]').text()).toContain(
-          '香辣鸡腿堡',
+        expect(wrapper.findAll('[data-testid="cat-rail-item"]')[0]!.classes()).toContain(
+          'cat-rail-item--active',
         ),
       { timeout: 2000 },
     )
+    // 连续渲染：三个分类的商品同时存在于列表（过滤式切换只会保留当前分类的商品）
+    await vi.waitFor(
+      () => {
+        const text = wrapper.find('[data-testid="product-list"]').text()
+        expect(text).toContain('香辣鸡腿堡')
+        expect(text).toContain('黄金鸡块（5块）')
+        expect(text).toContain('九珍果汁')
+      },
+      { timeout: 2000 },
+    )
+    // 每个分类一个分区锚点，供点击定位与滚动高亮使用
+    expect(wrapper.find('[data-testid="product-section-c101"]').text()).toBe('主食')
+    expect(wrapper.find('[data-testid="product-section-c102"]').text()).toBe('小食')
+    expect(wrapper.find('[data-testid="product-section-c103"]').text()).toBe('饮品')
+    // 点击第三个分类：立即高亮 + 列表滚动定位到该分区
+    const listEl = wrapper.find('[data-testid="product-list"]').element as HTMLElement
+    const scrollTo = vi.fn()
+    listEl.scrollTo = scrollTo as unknown as HTMLElement['scrollTo']
     await rails[2]!.trigger('click')
     expect(
       wrapper.findAll('[data-testid="cat-rail-item"]')[2]!.classes(),
     ).toContain('cat-rail-item--active')
-    // 商品列表可能在 mock 延迟窗口内未返回，等目标分类商品渲染后再断言
-    await vi.waitFor(
-      () =>
-        expect(wrapper.find('[data-testid="product-list"]').text()).toContain('九珍果汁'),
-      { timeout: 2000 },
-    )
-    expect(wrapper.find('[data-testid="product-list"]').text()).not.toContain('香辣鸡腿堡')
+    expect(scrollTo).toHaveBeenCalled()
+    // jsdom 无布局（offsetTop 恒为 0），断言调用参数为数字 top 即可
+    const arg = scrollTo.mock.calls[0]![0] as { top: number }
+    expect(typeof arg.top).toBe('number')
   })
 
   it('T14 商品项字段渲染，售罄商品灰化且加购禁用', async () => {
@@ -357,5 +375,161 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     expect(activeCat.exists()).toBe(true)
     expect(activeCat.text()).toBe('招牌')
     expect(second.find('[data-testid="product-list"]').text()).not.toContain('暂无商品')
+  })
+
+  it('T68 滚动商品列表时分类高亮同步（scroll-spy：偏移量判定 + 观察器触发）', async () => {
+    // jsdom 无 IntersectionObserver：注入假实现捕获回调（实现以它作为同步触发源之一）
+    let captured: { cb: IntersectionObserverCallback } | null = null
+    class FakeIntersectionObserver {
+      constructor(cb: IntersectionObserverCallback) {
+        captured = { cb }
+      }
+      observe(): void {}
+      unobserve(): void {}
+      disconnect(): void {}
+      takeRecords(): IntersectionObserverEntry[] {
+        return []
+      }
+    }
+    vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver)
+    try {
+      const { wrapper } = await mountDetail('/stores/m002')
+      await vi.waitFor(
+        () => expect(wrapper.findAll('[data-testid^="product-item-"]').length).toBeGreaterThan(0),
+        { timeout: 2000 },
+      )
+      await vi.waitFor(() => expect(captured).not.toBeNull(), { timeout: 2000 })
+
+      // 造几何（jsdom 无布局）：三个分区依次位于 0 / 400 / 800，列表可视高 400、内容高 1200
+      const listEl = wrapper.find('[data-testid="product-list"]').element as HTMLElement
+      const sections = Array.from(listEl.querySelectorAll('[data-section-id]')) as HTMLElement[]
+      expect(sections.length).toBe(3)
+      sections.forEach((el, index) => {
+        Object.defineProperty(el, 'offsetTop', { value: index * 400, configurable: true })
+      })
+      Object.defineProperty(listEl, 'scrollHeight', { value: 1200, configurable: true })
+      Object.defineProperty(listEl, 'clientHeight', { value: 400, configurable: true })
+      let scrollTop = 0
+      Object.defineProperty(listEl, 'scrollTop', {
+        get: () => scrollTop,
+        set: (value: number) => {
+          scrollTop = value
+        },
+        configurable: true,
+      })
+      const activeIndex = () =>
+        wrapper
+          .findAll('[data-testid="cat-rail-item"]')
+          .findIndex((rail) => rail.classes().includes('cat-rail-item--active'))
+      const fireObserver = async () => {
+        captured!.cb([], captured as unknown as IntersectionObserver)
+        await nextTick()
+      }
+
+      // 列表在顶部 → 第一个分区高亮
+      scrollTop = 0
+      await fireObserver()
+      expect(activeIndex()).toBe(0)
+      // 滚过第二个分区标题 → 第二个分区高亮（长分区内滚动时观察器不回调，靠 scroll 事件同步）
+      scrollTop = 500
+      await wrapper.find('[data-testid="product-list"]').trigger('scroll')
+      expect(activeIndex()).toBe(1)
+      // 滚到底部 → 最后一个分区高亮（最后一个分区可能永远到不了命中线，需底部特判）
+      scrollTop = 900
+      await wrapper.find('[data-testid="product-list"]').trigger('scroll')
+      expect(activeIndex()).toBe(2)
+      // 从底部滑回顶部 → 高亮回到第一个分区（IntersectionObserver 交集无变化时不回调的场景）
+      scrollTop = 0
+      await wrapper.find('[data-testid="product-list"]').trigger('scroll')
+      expect(activeIndex()).toBe(0)
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
+  it('T69 换店不闪现上一家店铺详情：旧店详情不参与渲染（2026-09-08 负责人真机反馈）', async () => {
+    // 缺陷链路：catalogStore.storeDetail 全局残留上一店详情（T67 只修了分类/商品）→
+    // 进新店首帧即渲染旧店横幅（头图/店名/评分），新店响应到达后才切换，形成闪烁。
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const catalog = useCatalogStore()
+    catalog.storeDetail = {
+      storeId: 'm002',
+      name: '肯德基宅急送',
+      rating: 4.8,
+      monthlySales: 3500,
+      deliveryMinutes: 25,
+      startPrice: 20,
+      deliveryFee: 5,
+      status: 'OPEN',
+    }
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', name: 'home', component: { template: '<div />' } },
+        { path: '/stores/:storeId', name: 'store-detail', component: StoreDetailView },
+        { path: '/orders/confirm', name: 'order-confirm', component: { template: '<div />' } },
+        { path: '/login', name: 'login', component: { template: '<div />' } },
+      ],
+    })
+    await router.push('/stores/m001')
+    await router.isReady()
+    const wrapper = mount(StoreDetailView, { global: { plugins: [pinia, router] } })
+    // 首帧同步断言（不等接口返回）：不得渲染 m002 的横幅
+    const firstFrame = wrapper.find('[data-testid="store-banner"]')
+    expect(firstFrame.exists() ? firstFrame.text() : '').not.toContain('肯德基宅急送')
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="store-banner"]').text()).toContain('老王小店'),
+      { timeout: 2000 },
+    )
+  })
+
+  it('T70 点击分类先滚外层到 Tab 吸顶线，再定位内层分区（项目规则 §5 滚动交接）', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', name: 'home', component: { template: '<div />' } },
+        { path: '/stores/:storeId', name: 'store-detail', component: StoreDetailView },
+        { path: '/orders/confirm', name: 'order-confirm', component: { template: '<div />' } },
+        { path: '/login', name: 'login', component: { template: '<div />' } },
+      ],
+    })
+    await router.push('/stores/m002')
+    await router.isReady()
+    // 外层滚动容器由 MainLayout 提供（.app-main），此处用宿主组件模拟
+    const Host = {
+      components: { StoreDetailView },
+      template: '<div class="app-main"><StoreDetailView /></div>',
+    }
+    const wrapper = mount(Host, { global: { plugins: [pinia, router] } })
+    await vi.waitFor(
+      () => expect(wrapper.findAll('[data-testid="cat-rail-item"]').length).toBe(3),
+      { timeout: 2000 },
+    )
+    // 造几何（jsdom 无布局）：外层已滚 0，Tab 距视口顶 300px，顶部栏高 44px → 吸顶线目标 256px
+    const mainEl = wrapper.find('.app-main').element as HTMLElement
+    let outerScrollTop = 0
+    Object.defineProperty(mainEl, 'scrollTop', {
+      get: () => outerScrollTop,
+      set: (value: number) => {
+        outerScrollTop = value
+      },
+      configurable: true,
+    })
+    const tabsEl = wrapper.find('.store-tabs').element as HTMLElement
+    tabsEl.getBoundingClientRect = () => ({ top: 300 }) as DOMRect
+    const headerEl = wrapper.find('.detail-header').element as HTMLElement
+    Object.defineProperty(headerEl, 'offsetHeight', { value: 44, configurable: true })
+    const listEl = wrapper.find('[data-testid="product-list"]').element as HTMLElement
+    const innerScrollTo = vi.fn()
+    listEl.scrollTo = innerScrollTo as unknown as HTMLElement['scrollTo']
+
+    await wrapper.findAll('[data-testid="cat-rail-item"]')[2]!.trigger('click')
+
+    // 外层先滚到吸顶线（300 - 44 = 256），随后才滚内层列表
+    expect(outerScrollTop).toBe(256)
+    expect(innerScrollTo).toHaveBeenCalled()
   })
 })

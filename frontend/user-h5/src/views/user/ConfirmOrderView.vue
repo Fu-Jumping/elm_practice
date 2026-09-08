@@ -204,8 +204,8 @@ function goBack(): void {
         <span class="co-delivery-value">尽快送达</span>
       </section>
 
-      <!-- 商品清单（来自该店购物车接口） -->
-      <section class="co-card">
+      <!-- 商品清单（来自该店购物车接口；设计稿为通栏白底分段 padding 10px 12px） -->
+      <section class="co-card co-goods">
         <div v-if="storeName" class="co-store">{{ storeName }}</div>
         <div v-if="cartStore.lines.length" class="co-items" data-testid="order-items">
           <div v-for="line in cartStore.lines" :key="line.cartLineId" class="co-item">
@@ -218,8 +218,8 @@ function goBack(): void {
         <p v-else class="co-skeleton">商品加载中…</p>
       </section>
 
-      <!-- 订单备注（设计稿为弹层交互，本期内联输入；最多 50 字） -->
-      <section class="co-card">
+      <!-- 订单备注（设计稿为弹层交互，本期内联输入；最多 50 字；通栏白底分段 padding 18px 12px） -->
+      <section class="co-card co-remark">
         <div class="co-remark-label">订单备注</div>
         <textarea
           v-model="remark"
@@ -315,12 +315,13 @@ function goBack(): void {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 12px;
+  /* 通栏：左右不内缩（设计稿 main 为 px-0 + 12px 灰缝，2026-09-08 去卡片壳） */
+  padding: 12px 0;
 }
 
+/* 通栏白底分段（设计稿无圆角/无阴影/无左右外边距；类名沿用 co-card 以兼容既有断言脚本与文档引用） */
 .co-card {
   background: #fff;
-  border-radius: 8px;
   padding: 12px;
 }
 
@@ -329,11 +330,12 @@ function goBack(): void {
   font-size: 14px;
 }
 
-/* 地址卡 */
+/* 地址卡（设计稿：通栏白底，padding 24px 12px） */
 .co-address {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 24px 12px;
 }
 
 .co-address-icon {
@@ -408,11 +410,12 @@ function goBack(): void {
   font-size: 14px;
 }
 
-/* 送达时间 */
+/* 送达时间（设计稿：通栏白底，padding 18px 12px） */
 .co-delivery {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 18px 12px;
 }
 
 .co-delivery-label {
@@ -426,7 +429,11 @@ function goBack(): void {
   color: #1a1c1c;
 }
 
-/* 商品清单 */
+/* 商品清单（设计稿：通栏白底，padding 10px 12px） */
+.co-goods {
+  padding: 10px 12px;
+}
+
 .co-store {
   display: flex;
   align-items: center;
@@ -474,7 +481,11 @@ function goBack(): void {
   color: #999;
 }
 
-/* 备注 */
+/* 备注（设计稿：通栏白底，padding 18px 12px，右侧灰字 + 箭头弹层；本期内联输入，仅去卡片壳） */
+.co-remark {
+  padding: 18px 12px;
+}
+
 .co-remark-label {
   margin-bottom: 8px;
   font-size: 14px;

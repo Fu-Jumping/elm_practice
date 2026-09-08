@@ -123,17 +123,18 @@ function goDetail(order: OrderSummary): void {
   font-weight: 600;
 }
 
+/* 通栏分段：设计稿 .orderList（padding-top: 8px、row-gap: 8px 灰缝），左右不加外边距 */
 .ol-main {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 12px;
+  gap: 8px;
+  padding: 8px 0 0;
 }
 
+/* 订单卡：通栏白块，无圆角无阴影（设计稿 .orderCard* padding: 16px） */
 .ol-card {
   background: #fff;
-  border-radius: 8px;
-  padding: 12px;
+  padding: 16px;
 }
 
 .ol-store-row {
@@ -172,9 +173,9 @@ function goDetail(order: OrderSummary): void {
   color: #1a1c1c;
 }
 
+/* 空态为设计稿外的兜底块：随父级通栏后不再带圆角，避免出现"整屏白卡" */
 .ol-empty {
   background: #fff;
-  border-radius: 8px;
   padding: 40px 12px;
   text-align: center;
 }

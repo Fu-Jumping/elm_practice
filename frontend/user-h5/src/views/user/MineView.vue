@@ -80,6 +80,8 @@ async function onLogout(): Promise<void> {
       </section>
 
       <section class="mn-menu">
+        <!-- 设计稿 .heading3「常用功能」标题行（10-个人中心/01-个人中心/index.module.scss:371-391） -->
+        <p class="mn-menu-heading">常用功能</p>
         <button class="mn-item" type="button" data-testid="entry-addresses" @click="goAddresses">
           <span>收货地址</span>
           <span class="mn-arrow" aria-hidden="true">›</span>
@@ -118,11 +120,15 @@ async function onLogout(): Promise<void> {
   flex-direction: column;
 }
 
+/* 未登录引导：与功能入口分组同族的通栏白条（满宽、零圆角、1px 上下边线），不再用卡片壳
+   （复刻约定 2.2：设计稿通栏区域不加卡片壳） */
 .mn-login-card {
-  margin: 16px 12px;
-  background: #fff;
-  border-radius: 8px;
+  margin: 16px 0 0;
   padding: 40px 16px;
+  border-top: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
+  border-radius: 0;
+  background: var(--color-surface-white);
   text-align: center;
 }
 
@@ -142,14 +148,17 @@ async function onLogout(): Promise<void> {
   font-weight: 600;
 }
 
+/* 用户信息区：设计稿通栏 #ff5a1f 色块（390×144），仅底部圆角，无边框无阴影
+   （10-个人中心/01-个人中心/index.module.scss:29-45 .container4） */
 .mn-profile {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 16px 12px;
-  padding: 16px;
-  background: #fff;
-  border-radius: 8px;
+  align-items: flex-start;
+  gap: 16px;
+  margin: 0;
+  min-height: 144px;
+  padding: 32px 52px 48px 12px;
+  background: var(--color-primary);
+  border-radius: 0 0 24px 24px;
 }
 
 .mn-avatar-img {
@@ -159,6 +168,7 @@ async function onLogout(): Promise<void> {
   object-fit: cover;
 }
 
+/* 无头像兜底：橙底上用白色系（设计稿 .userAvatar 为白色半透明描边 + 白字，:47-67） */
 .mn-avatar {
   display: flex;
   align-items: center;
@@ -166,29 +176,51 @@ async function onLogout(): Promise<void> {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: rgba(255, 90, 31, 0.1);
-  color: #ff5a1f;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
   font-size: 22px;
   font-weight: 700;
 }
 
+.mn-user {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  min-width: 0;
+}
+
 .mn-nickname {
+  margin: 0;
   font-size: 17px;
   font-weight: 700;
-  color: #1a1c1c;
+  color: #ffffff;
 }
 
 .mn-account {
-  margin-top: 4px;
+  margin: 0;
   font-size: 13px;
-  color: #999;
+  color: rgba(255, 255, 255, 0.8);
 }
 
+/* 功能入口分组：设计稿通栏白底（无圆角、无左右 margin）+ 浅阴影 + 「常用功能」标题行
+   （10-个人中心/01-个人中心/index.module.scss:345-449 .servicesArea） */
 .mn-menu {
-  margin: 0 12px;
-  background: #fff;
-  border-radius: 8px;
+  margin: 16px 0 0;
+  background: var(--color-surface-white);
+  border-radius: 0;
+  box-shadow: 0 1px 2px #0000000d;
   overflow: hidden;
+}
+
+.mn-menu-heading {
+  margin: 0;
+  padding: 12px 16px 11px;
+  border-bottom: 1px solid var(--color-border-light);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--color-text-primary);
 }
 
 .mn-item {
@@ -196,17 +228,19 @@ async function onLogout(): Promise<void> {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 14px 16px;
+  padding: 12px 16px 11px;
   border: none;
-  border-bottom: 1px solid #f3f3f3;
+  border-bottom: 1px solid var(--color-border-light);
   background: none;
   font-size: 15px;
-  color: #1a1c1c;
+  color: var(--color-text-primary);
   text-align: left;
   cursor: pointer;
 }
 
+/* 末行无下边线（设计稿 .link3 padding 12px 16px，:436-448） */
 .mn-item:last-child {
+  padding-bottom: 12px;
   border-bottom: none;
 }
 
@@ -215,26 +249,32 @@ async function onLogout(): Promise<void> {
   font-size: 18px;
 }
 
+/* 退出登录：设计稿无此块（PRD 要求保留功能），外观按功能入口分组同族的通栏白条处理
+   —— 满宽、零圆角、1px 上下边线，不再自加卡片壳（复刻约定 2.2） */
 .mn-logout-section {
-  margin: 16px 12px;
+  margin: 16px 0 0;
 }
 
 .mn-logout {
   width: 100%;
-  padding: 13px;
-  border: none;
-  border-radius: 10px;
-  background: #fff;
+  padding: 12px 16px;
+  border-top: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
+  border-radius: 0;
+  background: var(--color-surface-white);
   color: #ba1a1a;
   font-size: 15px;
   font-weight: 600;
 }
 
+/* 页脚版本号：设计稿 .text12（10-个人中心/01-个人中心/index.module.scss:451-460）
+   margin-top 36px、字号 10px、行高 14px、色 #999999 */
 .mn-footer {
-  margin-top: auto;
-  padding: 24px 0 12px;
+  margin-top: 36px;
+  padding: 0;
   text-align: center;
-  font-size: 12px;
-  color: #ccc;
+  font-size: 10px;
+  line-height: 14px;
+  color: #999999;
 }
 </style>
