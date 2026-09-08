@@ -1029,15 +1029,19 @@ function onCheckout(): void {
   background: rgba(0, 0, 0, 0.45);
 }
 
+/* 展开态抽屉贴视口底端并盖住购物车栏（2026-09-08 缺陷修复）：
+   原 bottom 为「购物车栏 64px + 8px 间距」，抽屉与底栏之间留出可透视的缝，
+   而遮罩（z-index 30）又压在底栏（z-index 20）之上，缝隙里露出商品列表、底栏整体被压暗。
+   贴底后底部内边距自行吃安全区，避免「合计」行被 Home 指示条遮挡。 */
 .cart-popup {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(72px + env(safe-area-inset-bottom));
+  bottom: 0;
   z-index: 40;
   background: #fff;
   border-radius: 12px 12px 0 0;
-  padding: 12px;
+  padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
   box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.12);
 }
 
