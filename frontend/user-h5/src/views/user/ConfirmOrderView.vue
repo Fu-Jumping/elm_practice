@@ -10,7 +10,7 @@
  * - 去支付只发一次创建订单请求；成功后清空该店购物车并进入订单列表（PRD 底部结算栏行）
  * 口径差异备注：设计稿地址卡电话为脱敏展示、备注为弹层交互、支付方式区为 P1 扩展；
  * 本期按测试锁定口径完整号码 + 内联备注输入，支付方式区 P0 不渲染，视觉细化任务再对齐
- * TODO(第二批 TDD)：商家关闭/起送不满足禁提交（TC-ORD-006/009）、地址卡点击进入地址选择页
+ * 2026-09-08 缺陷修复：无地址引导块补点击（此前无点击事件，地址删光后只能退出页面新增）
  */
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -35,18 +35,19 @@ const addresses = ref<Address[]>([])
 const loaded = ref(false)
 const submitting = ref(false)
 
-const selectedAddressId =
-  typeof route.query.addressId === 'string' ? route.query.addressId : ''
-
 /** 地址选择回填（PRD 873）：query.addressId（地址列表选择返回）优先，否则默认地址 */
+const selectedAddressId = computed(() =>
+  typeof route.query.addressId === 'string' ? route.query.addressId : '',
+)
+
 const defaultAddress = computed(() => {
-  const bySelected = selectedAddressId
-    ? addresses.value.find((item) => item.addressId === selectedAddressId)
+  const bySelected = selectedAddressId.value
+    ? addresses.value.find((item) => item.addressId === selectedAddressId.value)
     : undefined
   return bySelected ?? addresses.value.find((item) => item.isDefault) ?? null
 })
 
-/** 点地址卡 → 地址列表选择模式（携带 select 与 storeId，不直接创建订单） */
+/** 点地址卡/无地址引导 → 地址列表选择模式（携带 select 与 storeId，不直接创建订单） */
 function pickAddress(): void {
   void router.push({ name: 'address-list', query: { select: '1', storeId } })
 }
@@ -192,7 +193,13 @@ function goBack(): void {
         </div>
         <span class="co-chevron" aria-hidden="true">›</span>
       </section>
-      <section v-else-if="loaded" class="co-card co-address-missing" data-testid="address-missing-tip">
+      <section
+        v-else-if="loaded"
+        class="co-card co-address-missing"
+        data-testid="address-missing-tip"
+        role="button"
+        @click="pickAddress"
+      >
         <span>请先添加收货地址</span>
         <span class="co-address-guide">去添加 ›</span>
       </section>

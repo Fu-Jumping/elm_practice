@@ -6,7 +6,7 @@
  * - 空态展示无数据提示与"新增地址"按钮；未登录转登录带 redirect
  * - 管理场景点击地址卡进入编辑；设为默认调用更新接口（成功后其他地址取消默认）
  * - 删除需要二次确认并调用删除接口（后端自动改派默认，刷新列表回读）
- * TODO(第三批 TDD)：确认订单场景的地址选择回填（PRD：选择结果回填，不直接创建订单）
+ * 2026-09-08 缺陷修复：选择模式下新增入口透传 select/storeId，新增保存后回到选择回填链路
  */
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -85,7 +85,11 @@ function onCardClick(address: Address): void {
 }
 
 function goNew(): void {
-  void router.push({ name: 'address-new' })
+  // 选择模式把来源上下文透传给新增页，保存后仍能回到选择回填链路（2026-09-08 缺陷修复）
+  void router.push({
+    name: 'address-new',
+    query: selectMode.value ? { select: '1', storeId: returnStoreId } : undefined,
+  })
 }
 
 function goBack(): void {
