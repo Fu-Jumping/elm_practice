@@ -79,8 +79,10 @@
 
 .auth-page,
 .boot-screen {
-  min-height: 100vh;
-  min-height: 100dvh;
+  /* 固定视口高 + 内部滚动：独立页面与 overflow:hidden 的 iframe 嵌入（现场演示）下，
+     注册等长表单都能在容器内滚动到底部，不再被裁切（SHOW-QA-003） */
+  height: 100vh;
+  height: 100dvh;
   padding: 16px;
   background: #f8f9ff;
   display: flex;
