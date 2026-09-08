@@ -20,8 +20,18 @@ export const useCatalogStore = defineStore('catalog', () => {
   const categories = ref<StoreCategory[]>([])
   const products = ref<Product[]>([])
   const productsLoading = ref(false)
+  /** 分类/商品数据当前归属的店铺：换店请求前据此清旧店数据，防默认分类选中锁到旧店 id（2026-09-08 跨店修复，T67） */
+  const categoriesStoreId = ref('')
+  const productsStoreId = ref('')
+  /** 详情数据当前归属的店铺：换店请求前据此清旧店详情，防新店首帧渲染旧店横幅（2026-09-08 闪屏修复，T69） */
+  const detailStoreId = ref('')
 
   async function fetchStoreDetail(storeId: string): Promise<void> {
+    // 换店：先清旧店详情（同店刷新保留缓存秒开），避免新店页面首帧渲染上一家店铺的横幅
+    if (detailStoreId.value && detailStoreId.value !== storeId) {
+      storeDetail.value = null
+    }
+    detailStoreId.value = storeId
     detailLoading.value = true
     detailError.value = null
     try {
@@ -41,6 +51,11 @@ export const useCatalogStore = defineStore('catalog', () => {
   }
 
   async function fetchStoreCategories(storeId: string): Promise<void> {
+    // 换店：先清旧店分类（同店刷新保留缓存秒开），避免商家详情页挂载期默认分类用旧店 id 锁定
+    if (categoriesStoreId.value && categoriesStoreId.value !== storeId) {
+      categories.value = []
+    }
+    categoriesStoreId.value = storeId
     try {
       categories.value = await storeApi.getStoreCategories(storeId)
     } catch (err) {
@@ -51,6 +66,11 @@ export const useCatalogStore = defineStore('catalog', () => {
   }
 
   async function fetchStoreProducts(storeId: string): Promise<void> {
+    // 换店：先清旧店商品，避免新店页面短暂串显上一店商品
+    if (productsStoreId.value && productsStoreId.value !== storeId) {
+      products.value = []
+    }
+    productsStoreId.value = storeId
     productsLoading.value = true
     try {
       products.value = await storeApi.getStoreProducts(storeId)
@@ -88,6 +108,9 @@ export const useCatalogStore = defineStore('catalog', () => {
     categories,
     products,
     productsLoading,
+    categoriesStoreId,
+    productsStoreId,
+    detailStoreId,
     fetchStoreDetail,
     fetchStoreCategories,
     fetchStoreProducts,

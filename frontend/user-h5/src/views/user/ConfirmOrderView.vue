@@ -10,7 +10,7 @@
  * - 去支付只发一次创建订单请求；成功后清空该店购物车并进入订单列表（PRD 底部结算栏行）
  * 口径差异备注：设计稿地址卡电话为脱敏展示、备注为弹层交互、支付方式区为 P1 扩展；
  * 本期按测试锁定口径完整号码 + 内联备注输入，支付方式区 P0 不渲染，视觉细化任务再对齐
- * TODO(第二批 TDD)：商家关闭/起送不满足禁提交（TC-ORD-006/009）、地址卡点击进入地址选择页
+ * 2026-09-08 缺陷修复：无地址引导块补点击（此前无点击事件，地址删光后只能退出页面新增）
  */
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -35,18 +35,19 @@ const addresses = ref<Address[]>([])
 const loaded = ref(false)
 const submitting = ref(false)
 
-const selectedAddressId =
-  typeof route.query.addressId === 'string' ? route.query.addressId : ''
-
 /** 地址选择回填（PRD 873）：query.addressId（地址列表选择返回）优先，否则默认地址 */
+const selectedAddressId = computed(() =>
+  typeof route.query.addressId === 'string' ? route.query.addressId : '',
+)
+
 const defaultAddress = computed(() => {
-  const bySelected = selectedAddressId
-    ? addresses.value.find((item) => item.addressId === selectedAddressId)
+  const bySelected = selectedAddressId.value
+    ? addresses.value.find((item) => item.addressId === selectedAddressId.value)
     : undefined
   return bySelected ?? addresses.value.find((item) => item.isDefault) ?? null
 })
 
-/** 点地址卡 → 地址列表选择模式（携带 select 与 storeId，不直接创建订单） */
+/** 点地址卡/无地址引导 → 地址列表选择模式（携带 select 与 storeId，不直接创建订单） */
 function pickAddress(): void {
   void router.push({ name: 'address-list', query: { select: '1', storeId } })
 }
@@ -192,7 +193,13 @@ function goBack(): void {
         </div>
         <span class="co-chevron" aria-hidden="true">›</span>
       </section>
-      <section v-else-if="loaded" class="co-card co-address-missing" data-testid="address-missing-tip">
+      <section
+        v-else-if="loaded"
+        class="co-card co-address-missing"
+        data-testid="address-missing-tip"
+        role="button"
+        @click="pickAddress"
+      >
         <span>请先添加收货地址</span>
         <span class="co-address-guide">去添加 ›</span>
       </section>
@@ -204,8 +211,8 @@ function goBack(): void {
         <span class="co-delivery-value">尽快送达</span>
       </section>
 
-      <!-- 商品清单（来自该店购物车接口） -->
-      <section class="co-card">
+      <!-- 商品清单（来自该店购物车接口；设计稿为通栏白底分段 padding 10px 12px） -->
+      <section class="co-card co-goods">
         <div v-if="storeName" class="co-store">{{ storeName }}</div>
         <div v-if="cartStore.lines.length" class="co-items" data-testid="order-items">
           <div v-for="line in cartStore.lines" :key="line.cartLineId" class="co-item">
@@ -218,8 +225,8 @@ function goBack(): void {
         <p v-else class="co-skeleton">商品加载中…</p>
       </section>
 
-      <!-- 订单备注（设计稿为弹层交互，本期内联输入；最多 50 字） -->
-      <section class="co-card">
+      <!-- 订单备注（设计稿为弹层交互，本期内联输入；最多 50 字；通栏白底分段 padding 18px 12px） -->
+      <section class="co-card co-remark">
         <div class="co-remark-label">订单备注</div>
         <textarea
           v-model="remark"
@@ -315,12 +322,13 @@ function goBack(): void {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 12px;
+  /* 通栏：左右不内缩（设计稿 main 为 px-0 + 12px 灰缝，2026-09-08 去卡片壳） */
+  padding: 12px 0;
 }
 
+/* 通栏白底分段（设计稿无圆角/无阴影/无左右外边距；类名沿用 co-card 以兼容既有断言脚本与文档引用） */
 .co-card {
   background: #fff;
-  border-radius: 8px;
   padding: 12px;
 }
 
@@ -329,11 +337,12 @@ function goBack(): void {
   font-size: 14px;
 }
 
-/* 地址卡 */
+/* 地址卡（设计稿：通栏白底，padding 24px 12px） */
 .co-address {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 24px 12px;
 }
 
 .co-address-icon {
@@ -408,11 +417,12 @@ function goBack(): void {
   font-size: 14px;
 }
 
-/* 送达时间 */
+/* 送达时间（设计稿：通栏白底，padding 18px 12px） */
 .co-delivery {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 18px 12px;
 }
 
 .co-delivery-label {
@@ -426,7 +436,11 @@ function goBack(): void {
   color: #1a1c1c;
 }
 
-/* 商品清单 */
+/* 商品清单（设计稿：通栏白底，padding 10px 12px） */
+.co-goods {
+  padding: 10px 12px;
+}
+
 .co-store {
   display: flex;
   align-items: center;
@@ -474,7 +488,11 @@ function goBack(): void {
   color: #999;
 }
 
-/* 备注 */
+/* 备注（设计稿：通栏白底，padding 18px 12px，右侧灰字 + 箭头弹层；本期内联输入，仅去卡片壳） */
+.co-remark {
+  padding: 18px 12px;
+}
+
 .co-remark-label {
   margin-bottom: 8px;
   font-size: 14px;

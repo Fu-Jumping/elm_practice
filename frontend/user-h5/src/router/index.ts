@@ -24,6 +24,8 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   scrollBehavior(_to, _from, savedPosition) {
     // 浏览器返回/前进（popstate）恢复原滚动位置；普通跳转回顶部（T65/T66，2026-09-07 负责人需求）
+    // 注意：本工程滚动发生在 MainLayout 的 .app-main 独立容器上，window 级滚动不生效——
+    // 真实现见 MainLayout 滚动管线（2026-09-08，返回恢复浏览位置）
     if (savedPosition) return savedPosition
     return { top: 0 }
   },
@@ -108,6 +110,19 @@ const router = createRouter({
           name: 'login',
           component: () => import('@/views/user/LoginView.vue'),
           meta: { title: '登录', priority: 'P0' },
+        },
+      ],
+    },
+    {
+      // 注册页：公开页（不设 auth）；顶部栏返回目标为登录页（PRD 7.16.1 注册页-顶部栏行）
+      path: '/register',
+      component: () => import('@/layouts/BlankLayout.vue'),
+      children: [
+        {
+          path: '',
+          name: 'register',
+          component: () => import('@/views/user/RegisterView.vue'),
+          meta: { title: '注册', priority: 'P0' },
         },
       ],
     },

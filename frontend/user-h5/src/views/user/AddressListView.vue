@@ -6,7 +6,7 @@
  * - 空态展示无数据提示与"新增地址"按钮；未登录转登录带 redirect
  * - 管理场景点击地址卡进入编辑；设为默认调用更新接口（成功后其他地址取消默认）
  * - 删除需要二次确认并调用删除接口（后端自动改派默认，刷新列表回读）
- * TODO(第三批 TDD)：确认订单场景的地址选择回填（PRD：选择结果回填，不直接创建订单）
+ * 2026-09-08 缺陷修复：选择模式下新增入口透传 select/storeId，新增保存后回到选择回填链路
  */
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -85,7 +85,11 @@ function onCardClick(address: Address): void {
 }
 
 function goNew(): void {
-  void router.push({ name: 'address-new' })
+  // 选择模式把来源上下文透传给新增页，保存后仍能回到选择回填链路（2026-09-08 缺陷修复）
+  void router.push({
+    name: 'address-new',
+    query: selectMode.value ? { select: '1', storeId: returnStoreId } : undefined,
+  })
 }
 
 function goBack(): void {
@@ -109,9 +113,8 @@ function goBack(): void {
         </svg>
       </button>
       <span class="al-title">收货地址</span>
-      <button class="al-add" type="button" data-testid="add-address-btn" @click="goNew">
-        新增地址
-      </button>
+      <!-- 设计稿顶栏仅「返回 + 标题」（05-收货地址 .headerTaskFocusedTop :10-33），右侧占位保持标题居中 -->
+      <span class="al-header-slot" />
     </header>
 
     <main class="al-main">
@@ -168,14 +171,25 @@ function goBack(): void {
       </template>
       <p v-else class="al-skeleton">地址加载中…</p>
     </main>
+
+    <!-- 固定底栏「新增地址」：设计稿 .footerFixedBottomAct（05-收货地址 :113-151）
+         白底 + border-top 1px #e5e5e5，padding 11/12/24，按钮 h48/radius 8 -->
+    <footer class="al-footer">
+      <button class="al-footer-btn" type="button" data-testid="add-address-btn" @click="goNew">
+        新增地址
+      </button>
+    </footer>
   </div>
 </template>
 
 <style scoped>
 .address-list-page {
+  /* 固定底栏高度（设计稿 .footerFixedBottomAct h85）；内容底部留白 = 底栏高 + 16px 安全间距，
+     保证滚动到底时最后一个地址行不被底栏遮挡 */
+  --al-footer-h: 85px;
   min-height: 100vh;
   background: #f9f9f9;
-  padding-bottom: 24px;
+  padding-bottom: calc(var(--al-footer-h) + 16px);
 }
 
 .al-header {
@@ -213,31 +227,50 @@ function goBack(): void {
   color: #ff5a1f;
 }
 
-.al-add {
-  border: none;
-  background: none;
-  color: #ff5a1f;
-  font-size: 14px;
-  font-weight: 600;
+.al-header-slot {
+  width: 32px;
 }
 
+/* 通栏行式：设计稿 .mainContentArea（padding-top 12px、无左右留白、行间无缝）——§2.2 不加卡片壳 */
 .al-main {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 12px;
+  padding: 12px 0 0;
 }
 
+/* 地址行：设计稿 .addressCardDefault/.addressCardSecondary（05-收货地址 :153-204）
+   通栏白底、无圆角无阴影，padding 10/10/9，行间 border-bottom 1px #e5e5e5 */
 .al-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   background: #fff;
-  border-radius: 8px;
-  padding: 12px;
+  padding: 10px 10px 9px;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+/* 设计稿最后一行 .addressCardThird（:238-247）：无底边线、padding 10px */
+.al-card:last-child {
+  border-bottom: none;
+  padding-bottom: 10px;
+}
+
+/* 左侧信息区：设计稿 .leftContent（:167-174）纵向 4px 行距、右侧留 12px */
+.al-card-main {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  align-items: flex-start;
+  min-width: 0;
+  padding-right: 12px;
+  row-gap: 4px;
 }
 
 .al-contact {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .al-name {
@@ -252,36 +285,46 @@ function goBack(): void {
   color: #666;
 }
 
+/* 默认徽标：设计稿 .backgroundBorder（05-收货地址 :182-201）
+   border-radius 2px、border 1px #ffb59e、padding 1px 5px、字号 10px；配色保留项目品牌橙 #ff5a1f 系（项目规则 §5） */
 .al-default-tag {
-  padding: 1px 6px;
-  border-radius: 999px;
+  padding: 1px 5px;
+  border: 1px solid #ffb59e;
+  border-radius: 2px;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 500;
+  line-height: 14px;
   color: #ff5a1f;
   background: rgba(255, 90, 31, 0.1);
 }
 
+/* 普通标签：设计稿 .background（05-收货地址 :264-282）border-radius 2px、padding 2px 6px、背景 #e2e2e2 */
 .al-label {
-  padding: 1px 6px;
-  border-radius: 999px;
+  padding: 2px 6px;
+  border-radius: 2px;
   font-size: 10px;
+  line-height: 14px;
   color: #666;
-  background: #f3f3f3;
+  background: #e2e2e2;
 }
 
 .al-detail {
-  margin-top: 4px;
+  margin: 4px 0 0;
   font-size: 14px;
   color: #1a1c1c;
 }
 
+/* 右侧编辑区：设计稿 .buttonRightAction（:101-111）以 border-left 1px #e5e5e5 分隔，padding 8/8/8/7 */
 .al-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #f3f3f3;
+  flex-direction: column;
+  align-self: stretch;
+  flex-shrink: 0;
+  align-items: flex-end;
+  justify-content: center;
+  row-gap: 8px;
+  padding: 8px 8px 8px 7px;
+  border-left: 1px solid var(--color-border-light);
 }
 
 .al-action {
@@ -295,7 +338,37 @@ function goBack(): void {
   color: #ba1a1a;
 }
 
+/* 固定底栏：设计稿 .footerFixedBottomAct（05-收货地址 :113-151）
+   白底 + 上边线 1px #e5e5e5，padding 11/12/24、高 85px；按钮 h48/radius 8/#ff5a1f
+   固定定位按页面壳宽度居中（对齐 MainLayout 的 430px 壳），窄视口不产生横向溢出 */
+.al-footer {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 430px;
+  height: var(--al-footer-h);
+  padding: 11px 12px 24px;
+  background: #fff;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.al-footer-btn {
+  height: 48px;
+  border: none;
+  border-radius: 8px;
+  background: #ff5a1f;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
 .al-empty {
+  margin: 0 12px;
   background: #fff;
   border-radius: 8px;
   padding: 40px 12px;

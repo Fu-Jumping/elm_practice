@@ -167,17 +167,24 @@ function goBack(): void {
   width: 32px;
 }
 
+/* 通栏分段：设计稿 .mainContent（padding-top: 12px、row-gap: 12px 灰缝），左右不加外边距 */
 .od-main {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 12px;
+  padding: 12px 0;
 }
 
+/* 分段：通栏白块，无圆角无阴影；底部 1px #e5e5e5 边线（设计稿 .section/.sectionPaymentAmount border-width: 1px 0） */
 .od-card {
   background: #fff;
-  border-radius: 8px;
   padding: 12px;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+/* 首个分段（状态区）按稿上下各 1px 边线 */
+.od-card:first-child {
+  border-top: 1px solid var(--color-border-light);
 }
 
 .od-head {
@@ -206,7 +213,7 @@ function goBack(): void {
 .od-section-title {
   padding-bottom: 8px;
   margin-bottom: 8px;
-  border-bottom: 1px solid #f3f3f3;
+  border-bottom: 1px solid var(--color-border-light);
   font-size: 15px;
   font-weight: 600;
   color: #1a1c1c;
@@ -256,7 +263,7 @@ function goBack(): void {
 .od-amounts {
   margin-top: 8px;
   padding-top: 10px;
-  border-top: 1px solid #f3f3f3;
+  border-top: 1px solid var(--color-border-light);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -275,9 +282,9 @@ function goBack(): void {
   color: #ff5a1f;
 }
 
+/* 缺单提示为设计稿外的兜底块：随父级通栏后不再带圆角，避免出现"整屏白卡" */
 .od-missing {
   background: #fff;
-  border-radius: 8px;
   padding: 40px 12px;
   text-align: center;
   font-size: 14px;
