@@ -99,16 +99,16 @@ describe('MainLayout 内容区滚动管线与首页缓存', () => {
     main.element.scrollTop = 800
     await main.trigger('scroll')
 
-    // push 进店 → 内容区置顶
+    // push 进店 → 内容区置顶（恢复链路含双帧等待与延时补赋值，用 waitFor 断言）
     window.history.replaceState({ position: 2 }, '')
     await router.push('/stores/m002')
     await flushPromises()
-    expect(main.element.scrollTop).toBe(0)
+    await vi.waitFor(() => expect(main.element.scrollTop).toBe(0))
 
     // 返回首页 → 恢复 800
     window.history.replaceState({ position: 1 }, '')
     await router.back()
     await flushPromises()
-    expect(main.element.scrollTop).toBe(800)
+    await vi.waitFor(() => expect(main.element.scrollTop).toBe(800))
   })
 })
