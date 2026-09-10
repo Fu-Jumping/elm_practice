@@ -121,21 +121,21 @@
     },
     {
       "method": "DELETE",
-      "path": "/merchant/categories/c1090",
+      "path": "/merchant/categories/c1164",
       "expected": 409,
       "actual": 409,
       "pass": true
     },
     {
       "method": "DELETE",
-      "path": "/merchant/products/p1091",
+      "path": "/merchant/products/p1165",
       "expected": 409,
       "actual": 409,
       "pass": true
     },
     {
       "method": "PATCH",
-      "path": "/merchant/products/p1091",
+      "path": "/merchant/products/p1165",
       "expected": 400,
       "actual": 400,
       "pass": true
@@ -163,21 +163,21 @@
     },
     {
       "method": "GET",
-      "path": "/cart?storeId=m1088",
+      "path": "/cart?storeId=m1162",
       "expected": 200,
       "actual": 200,
       "pass": true
     },
     {
       "method": "PATCH",
-      "path": "/cart/items/cl1093",
+      "path": "/cart/items/cl1167",
       "expected": 400,
       "actual": 400,
       "pass": true
     },
     {
       "method": "PATCH",
-      "path": "/cart/items/cl1093",
+      "path": "/cart/items/cl1167",
       "expected": 409,
       "actual": 409,
       "pass": true
@@ -198,133 +198,133 @@
     },
     {
       "method": "GET",
-      "path": "/cart?storeId=m1088",
+      "path": "/cart?storeId=m1162",
       "expected": 200,
       "actual": 200,
       "pass": true
     },
     {
       "method": "GET",
-      "path": "/merchant/products/p1091",
+      "path": "/merchant/products/p1165",
       "expected": 200,
       "actual": 200,
       "pass": true
     },
     {
       "method": "GET",
-      "path": "/merchant/orders/o1094",
+      "path": "/merchant/orders/o1168",
       "expected": 404,
       "actual": 404,
       "pass": true
     },
     {
       "method": "POST",
-      "path": "/orders/o1094/payment",
+      "path": "/orders/o1168/payment",
       "expected": 200,
       "actual": 200,
       "pass": true
     },
     {
       "method": "POST",
-      "path": "/orders/o1094/payment",
+      "path": "/orders/o1168/payment",
       "expected": 200,
       "actual": 200,
       "pass": true
     },
     {
       "method": "POST",
-      "path": "/orders/o1094/payment",
+      "path": "/orders/o1168/payment",
       "expected": 200,
       "actual": 200,
       "pass": true
     },
     {
       "method": "GET",
-      "path": "/merchant/orders/o1094",
+      "path": "/merchant/orders/o1168",
       "expected": 200,
       "actual": 200,
       "pass": true
     },
     {
       "method": "PATCH",
-      "path": "/merchant/orders/o1094/status",
+      "path": "/merchant/orders/o1168/status",
       "expected": 409,
       "actual": 409,
       "pass": true
     },
     {
       "method": "PATCH",
-      "path": "/merchant/orders/o1094/status",
+      "path": "/merchant/orders/o1168/status",
       "expected": 200,
       "actual": 200,
       "pass": true
     },
     {
       "method": "PATCH",
-      "path": "/merchant/orders/o1094/status",
+      "path": "/merchant/orders/o1168/status",
       "expected": 200,
       "actual": 200,
       "pass": true
     },
     {
       "method": "PATCH",
-      "path": "/merchant/orders/o1094/status",
+      "path": "/merchant/orders/o1168/status",
       "expected": 200,
       "actual": 200,
       "pass": true
     },
     {
       "method": "PATCH",
-      "path": "/merchant/orders/o1094/status",
+      "path": "/merchant/orders/o1168/status",
       "expected": 200,
       "actual": 200,
       "pass": true
     },
     {
       "method": "PATCH",
-      "path": "/merchant/orders/o1094/status",
+      "path": "/merchant/orders/o1168/status",
       "expected": 200,
       "actual": 200,
       "pass": true
     },
     {
       "method": "GET",
-      "path": "/orders/o1094",
+      "path": "/orders/o1168",
       "expected": 200,
       "actual": 200,
       "pass": true
     },
     {
       "method": "PATCH",
-      "path": "/merchant/products/p1091/availability",
+      "path": "/merchant/products/p1165/availability",
       "expected": 200,
       "actual": 200,
       "pass": true
     },
     {
       "method": "GET",
-      "path": "/merchant/products/p1091",
+      "path": "/merchant/products/p1165",
       "expected": 200,
       "actual": 200,
       "pass": true
     },
     {
       "method": "DELETE",
-      "path": "/merchant/products/p1091",
+      "path": "/merchant/products/p1165",
       "expected": 200,
       "actual": 200,
       "pass": true
     },
     {
       "method": "GET",
-      "path": "/orders/o1094",
+      "path": "/orders/o1168",
       "expected": 200,
       "actual": 200,
       "pass": true
     },
     {
       "method": "DELETE",
-      "path": "/merchant/categories/c1090",
+      "path": "/merchant/categories/c1164",
       "expected": 200,
       "actual": 200,
       "pass": true
@@ -353,8 +353,10 @@
   ],
   "passed": 50,
   "total": 50,
-  "orderId": "o1094",
-  "storeId": "m1088",
-  "userId": "u1086",
+  "businessAssertionsPassed": true,
+  "completed": true,
+  "orderId": "o1168",
+  "storeId": "m1162",
+  "userId": "u1160",
   "testStoreClosed": true
 }
