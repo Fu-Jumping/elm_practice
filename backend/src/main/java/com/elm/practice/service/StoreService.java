@@ -67,4 +67,10 @@ public class StoreService {
         if (fee != null) s.deliveryFee = RequestUtil.money(fee, "deliveryFee");
         stores.updateFull(s);
     }
+
+    @Transactional
+    public void updateStatus(Domain.Store store, Domain.StoreStatus status) {
+        if (stores.updateStatus(store.id, status) != 1) throw ApiException.notFound("店铺不存在");
+        store.status = status;
+    }
 }
