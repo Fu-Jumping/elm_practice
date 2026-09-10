@@ -1,6 +1,17 @@
 import { fileURLToPath } from 'node:url'
 import { mergeConfig, defineConfig, configDefaults } from 'vitest/config'
-import viteConfig from './vite.config'
+import viteConfigExport from './vite.config'
+
+// vite.config.ts 自 2026-09-09 起为函数式配置（按 mode 注入 dev 端口与代理目标，见
+// BUG-20260908-007 端口口径）。mergeConfig 不支持函数式配置，直接合并会在启动时报
+// "Cannot merge config in form of callback"，因此先按其签名解析成配置对象再合并。
+const viteConfig =
+  typeof viteConfigExport === 'function'
+    ? (viteConfigExport as (env: { mode: string; command: string }) => object)({
+        mode: 'test',
+        command: 'serve',
+      })
+    : viteConfigExport
 
 export default mergeConfig(
   viteConfig,
