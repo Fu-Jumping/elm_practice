@@ -131,7 +131,7 @@ export interface OrderCreated {
 }
 
 /** 订单状态（契约 §3.5：基础 P0 仅 PROCESSING；后端已实现支付扩展状态机，见 PENDING_PAYMENT） */
-export type OrderStatus = 'PROCESSING' | 'PENDING_PAYMENT'
+export type OrderStatus = 'PROCESSING' | 'PENDING_PAYMENT' | 'PENDING' | 'COOKING' | 'DELIVERING' | 'COMPLETED'
 
 /**
  * 订单记录（后端 GET /orders 实际形状，2026-09-07 联调对齐）

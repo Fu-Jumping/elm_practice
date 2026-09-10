@@ -33,5 +33,6 @@ export const endpoints = {
     create: '/orders',
     list: '/orders',
     detail: (orderId: string) => `/orders/${orderId}`,
+    payment: (orderId: string) => `/orders/${encodeURIComponent(orderId)}/payment`,
   },
 } as const

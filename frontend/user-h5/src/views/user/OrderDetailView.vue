@@ -15,6 +15,7 @@ import { orderApi } from '@/services/api'
 import { formatMoney, formatTime, normalizeOrderDetail, statusText } from '@/services/normalizers'
 import { useCatalogStore } from '@/stores/catalogStore'
 import type { OrderDetail } from '@/services/api/types'
+import PaymentActions from '@/components/PaymentActions.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -23,6 +24,8 @@ const catalogStore = useCatalogStore()
 const orderId = typeof route.params.orderId === 'string' ? route.params.orderId : ''
 const order = ref<OrderDetail | null>(null)
 const missing = ref(false)
+const refreshing = ref(false)
+const refreshError = ref('')
 
 const createdTime = computed(() => (order.value ? formatTime(order.value.createdAt) : ''))
 
@@ -47,6 +50,19 @@ onMounted(async () => {
 
 function goBack(): void {
   void router.push({ name: 'orders' })
+}
+
+async function refreshOrder(): Promise<void> {
+  if (refreshing.value) return
+  refreshing.value = true
+  refreshError.value = ''
+  try {
+    order.value = normalizeOrderDetail(await orderApi.getOrder(orderId))
+  } catch {
+    refreshError.value = '刷新失败，请检查网络后重试'
+  } finally {
+    refreshing.value = false
+  }
 }
 </script>
 
@@ -74,12 +90,15 @@ function goBack(): void {
       </div>
 
       <div v-else-if="order" class="od-detail" data-testid="order-detail">
+        <PaymentActions :order-id="order.orderId" :status="order.status" @paid="refreshOrder" />
         <section class="od-card">
           <div class="od-head">
             <span class="od-status">{{ statusText(order.status) }}</span>
             <span class="od-no">订单号 {{ order.orderId }}</span>
           </div>
           <p class="od-time">下单时间：{{ createdTime }}</p>
+          <button class="od-refresh" type="button" :disabled="refreshing" @click="refreshOrder">{{ refreshing ? '刷新中…' : '刷新订单状态' }}</button>
+          <p v-if="refreshError" role="alert">{{ refreshError }}</p>
         </section>
 
         <section class="od-card">
@@ -209,6 +228,8 @@ function goBack(): void {
   font-size: 12px;
   color: #999;
 }
+
+.od-refresh { border: 0; background: transparent; color: #ff5a1f; padding: 8px 0; font-size: 13px; cursor: pointer; }
 
 .od-section-title {
   padding-bottom: 8px;
