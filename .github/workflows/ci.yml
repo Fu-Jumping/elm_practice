@@ -71,10 +71,9 @@ jobs:
           cache: maven
       - run: mvn -B -DskipTests package
 
-  # 观察期任务（continue-on-error）：证明稳定后应改为必需检查
+  # 2026-09-10 首次运行即通过（23 条后端测试），已由观察期提升为必需检查
   backend-test:
-    name: 后端集成测试（MySQL，观察期）
-    continue-on-error: true
+    name: 后端集成测试（MySQL）
     runs-on: ubuntu-latest
     services:
       mysql:
