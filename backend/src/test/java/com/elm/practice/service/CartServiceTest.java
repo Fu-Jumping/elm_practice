@@ -40,7 +40,8 @@ class CartServiceTest {
     }
 
     @Test void exceedingStockIsRejectedWithConflictCode40901() {
-        ApiException ex = assertThrows(ApiException.class, () -> carts.add(user(), add("p101", 21)));
+        // canonical seed gives p101 100 units; request one more than stock.
+        ApiException ex = assertThrows(ApiException.class, () -> carts.add(user(), add("p101", 101)));
         assertEquals(409, ex.getStatus().value());
         assertEquals(40901, ex.getCode());
     }

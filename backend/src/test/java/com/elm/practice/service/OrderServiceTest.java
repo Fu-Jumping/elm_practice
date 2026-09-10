@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * 订单服务测试：真事务 + DB 断言（原 repo 状态断言改为注入 mapper 查询，场景与口径不变）。
- * 每用例前 reset.sql 复位：p101 库存 20、种子订单 o1001/o1002/o1003。
+ * 每用例前 reset.sql 复位：p101 库存 100、种子订单 o1001/o1002/o1003。
  */
 @SpringBootTest
 @SqlConfig(encoding = "UTF-8")
@@ -36,7 +36,7 @@ class OrderServiceTest {
 
     private void seedCartLine(String productId, int quantity) {
         cartLineMapper.insert(new Domain.CartLine("cl-test", "u001", "m002", productId, quantity,
-                new BigDecimal("29.00"), LocalDateTime.now()));
+                new BigDecimal("19.50"), LocalDateTime.now()));
     }
 
     private Domain.Order createFromCart() {
@@ -49,15 +49,15 @@ class OrderServiceTest {
         seedCartLine("p101", 2);
         Requests.OrderCreate request = new Requests.OrderCreate(); request.storeId="m002"; request.addressId="da001"; request.expectedTotal=new BigDecimal("999");
         Domain.Order order = orders.create(user(), request);
-        assertEquals(new BigDecimal("58.00"), order.itemSubtotal);
+        assertEquals(new BigDecimal("39.00"), order.itemSubtotal);
         assertEquals(new BigDecimal("2.00"), order.packagingFee);
-        assertEquals(new BigDecimal("60.00"), order.total);
+        assertEquals(new BigDecimal("41.00"), order.total);
         assertEquals(Domain.OrderStatus.PENDING_PAYMENT, order.status);
         // 原 repo.cartLines.isEmpty()：购物车行已删除。
         assertTrue(cartLineMapper.findByUserAndStore("u001", "m002").isEmpty());
-        // 原 repo.products.get("p101").stock == 18：库存扣减落库。
-        assertEquals(18, productMapper.findById("p101").stock);
-        assertEquals("吮指原味鸡", order.items.get(0).name);
+        // p101 是素材清单中的香辣鸡腿堡，库存扣减落库。
+        assertEquals(98, productMapper.findById("p101").stock);
+        assertEquals("香辣鸡腿堡", order.items.get(0).name);
         // 明细落库（修复点：create 必须插 order_items）。
         assertEquals(1, orderItemMapper.findByOrder(order.id).size());
     }
@@ -73,7 +73,7 @@ class OrderServiceTest {
         assertNotNull(orderMapper.findById("o1002"));
         // 原 repo.cartLines.containsKey("cl-test")：事务回滚，购物车行保留。
         assertNotNull(cartLineMapper.findById("cl-test"));
-        assertEquals(20, productMapper.findById("p101").stock);
+        assertEquals(100, productMapper.findById("p101").stock);
     }
 
     @Test void unpaidOrderBecomesProcessingAfterPaymentAndRepeatPayIsIdempotent() {
