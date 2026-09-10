@@ -1,0 +1,14 @@
+<!doctype html><meta charset="utf-8"><style>body{margin:0;padding:28px;background:#fff;color:#1f2328;font:16px/1.7 "Microsoft YaHei"}small{color:#59636e}h2{font-size:22px}pre{white-space:pre-wrap;font:15px/1.75 "Microsoft YaHei";border:1px solid #d1d9e0;padding:22px;border-radius:8px}b{color:#a32626}</style><small>GitHub API 原文存档 · Fu-Jumping/elm_practice · 非 GitHub 网页截图</small><h2>PR #9 · Fu-Jumping <b>请求修改</b></h2><small>2026-09-06T08:17:36Z · https://github.com/Fu-Jumping/elm_practice/pull/9#pullrequestreview-5124724748</small><pre>## 评审结论：打回（Request Changes）——代码可收，但 TDD 红绿在提交历史里不成立
+
+代码本身验收是过的：
+- 分支尖端全量 vitest 实测：**29/29 passed**（4 个测试文件）
+- 无 `docs/record/daily/**` 变更，raw 留痕齐全，提交信息中文+类型前缀规范
+- 素材提交（7dd0d81 / 5b13276 / 81fb433）实测**未随 #7 进入 main**（#7 只合并了注册功能部分），本 PR retarget 到 main 后会一并进入，符合 PR 描述预期
+
+打回的唯一原因——先红→转绿在提交历史中从未发生：
+
+1. `d63fe1a`（test: 先红）实际包含**全部实现**：TabBar.vue(+158)、MainLayout.vue(±76)、HomeView.vue(+861) 都在这个提交里。实测在该提交上跑 HomeView.spec：**4 passed，不是 4 failed**。
+2. `b6fb523`（feat: 转绿）实际只含 `docs/record/raw/2026-09-06/用户端-1221.md`（+35 行），无任何代码。
+3. 即「test 提交 = 实现+测试、feat 提交 = 一篇记录」。对照团队既有标准：#7 的 `f3058d4`（test 先红）实测 **14 failed / 6 passed**，是真红。
+
+</pre>

@@ -1,0 +1,15 @@
+<!doctype html><meta charset="utf-8"><style>body{margin:0;padding:28px;background:#fff;color:#1f2328;font:16px/1.7 "Microsoft YaHei"}small{color:#59636e}h2{font-size:22px}pre{white-space:pre-wrap;font:15px/1.75 "Microsoft YaHei";border:1px solid #d1d9e0;padding:22px;border-radius:8px}b{color:#a32626}</style><small>GitHub API 原文存档 · Fu-Jumping/elm_practice · 非 GitHub 网页截图</small><h2>PR #1 · Fu-Jumping <b>请求修改</b></h2><small>2026-09-03T14:14:44Z · https://github.com/Fu-Jumping/elm_practice/pull/1#pullrequestreview-5103034207</small><pre>## 审查结论：Request Changes（1 个阻塞项；其余已逐文件审查 + 本地实跑验证）
+
+### 🔴 阻塞项：`.env.development` 与 `.env.example` 未提交
+
+PR 描述与 daily 记录均声称「`.env.development`（mock 模式）与 `.env.example`（三件套带注释）落位」，但**分支里实际不存在这两个文件**（已用 `git ls-tree` 核对远端分支，全分支只有 `env.d.ts`，且未被 .gitignore 忽略——应属遗漏提交）。
+
+
+
+## 更正：env 文件缺失的根因已查明——是仓库根 `.gitignore` 的 `.env.*` 规则静默忽略所致
+
+上一条评审中断言「这两个文件未被 .gitignore 忽略，应属遗漏提交」，**该判断有误，特此更正**。
+
+经实测（`git check-ignore -v`）：**仓库根目录 `.gitignore`**（首版基线提交引入）中的 `.env` / `.env.*` 规则对全仓库生效，把 `frontend/user-h5/.env.development` 与 `.env.example` 一并忽略——创建的文件在 `git add` 时被静默跳过，`git status` 中不可见，导致本 PR 缺失这两个文件。本机建过文件≠已提交，属于工具链静默坑，不是作者意图问题。
+
+</pre>

@@ -1,0 +1,92 @@
+{
+  "reviews": [
+    {
+      "id": 5103034207,
+      "node_id": "PRR_kwDOULaxtM8AAAABMCofXw",
+      "user": {
+        "login": "Fu-Jumping",
+        "id": 234341049,
+        "node_id": "U_kgDODffCuQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/234341049?u=b991452c8ee2ae30131649584f3cf97d689e3009&v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Fu-Jumping",
+        "html_url": "https://github.com/Fu-Jumping",
+        "followers_url": "https://api.github.com/users/Fu-Jumping/followers",
+        "following_url": "https://api.github.com/users/Fu-Jumping/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Fu-Jumping/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Fu-Jumping/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Fu-Jumping/subscriptions",
+        "organizations_url": "https://api.github.com/users/Fu-Jumping/orgs",
+        "repos_url": "https://api.github.com/users/Fu-Jumping/repos",
+        "events_url": "https://api.github.com/users/Fu-Jumping/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Fu-Jumping/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "body": "## 审查结论：Request Changes（1 个阻塞项；其余已逐文件审查 + 本地实跑验证）\n\n### 🔴 阻塞项：`.env.development` 与 `.env.example` 未提交\n\nPR 描述与 daily 记录均声称「`.env.development`（mock 模式）与 `.env.example`（三件套带注释）落位」，但**分支里实际不存在这两个文件**（已用 `git ls-tree` 核对远端分支，全分支只有 `env.d.ts`，且未被 .gitignore 忽略——应属遗漏提交）。\n\n影响：`src/services/http/index.ts` 的 `isMockMode()` 读取 `VITE_API_MODE`，缺失时默认走 real 模式且 `VITE_API_BASE_URL` 为 undefined——任何人克隆后，整套 mock 演示层（登录 / 店铺 / 路由守卫探活）都不会生效，页面会向不存在的后端发真实请求。\n\n这也是《前端架构设计与工程约定.md》**§8.1 第 4 条**的初始化 Checklist 必选项；`.env.example` 同属 §7.8「9/3 当天随脚手架落地、不后补」的五件之一。\n\n**修复建议（几行即可）**：\n- `.env.development`：`VITE_API_MODE=mock`\n- `.env.example`：三件套变量 + 注释（`VITE_API_MODE` / `VITE_API_BASE_URL` / `VITE_MOCK_FALLBACK`），并注明联调阶段 `VITE_MOCK_FALLBACK` 必须为 `false`\n- 顺手在 README 补一小节「环境变量」，说明从 `.env.example` 复制配置\n\n### 🟡 次要项（建议随本次一并修，不单独拦截）\n\n1. `postcss-px-to-viewport-8-plugin` 目前在 `dependencies`，属构建期 PostCSS 插件，应挪到 `devDependencies`。\n2. 提醒：三件套中的 `VITE_MOCK_FALLBACK` 在 http 层暂无消费逻辑——脚手架阶段可以不实现，但联调阶段（9/7 前）记得补上，勿遗漏。\n\n### ✅ 已验证通过的部分\n\n- 本地临时 worktree 实跑（Node v24.10.0）：`type-check` / `build` / `test` / `lint` 四条命令全绿，lint `--fix` 零改动\n- 44 个文件全部限定在 `frontend/user-h5/` + `docs/record/daily/2026-09-03.md`，无越界目录\n- 请求层 mock/real 双模式收敛、axios 单实例 + withCredentials、路由守卫带 redirect、tokens.css（品牌橙 #ff5a1f 单一来源）、禁阴影/禁胶囊等口径均符合架构与设计系统约定\n- 提交信息合规（中文 + `记录:` / `AI协作:` 尾注）；package-lock 已入库、无 node_modules、无密钥\n\n补上阻塞项后二次 review 无误即合并。\n",
+      "state": "CHANGES_REQUESTED",
+      "html_url": "https://github.com/Fu-Jumping/elm_practice/pull/1#pullrequestreview-5103034207",
+      "pull_request_url": "https://api.github.com/repos/Fu-Jumping/elm_practice/pulls/1",
+      "author_association": "OWNER",
+      "_links": {
+        "html": {
+          "href": "https://github.com/Fu-Jumping/elm_practice/pull/1#pullrequestreview-5103034207"
+        },
+        "pull_request": {
+          "href": "https://api.github.com/repos/Fu-Jumping/elm_practice/pulls/1"
+        }
+      },
+      "submitted_at": "2026-09-03T14:14:44Z",
+      "commit_id": "49e040841b4f9027b9ddc6373e774be63e1cb7fb"
+    }
+  ],
+  "comments": [
+    {
+      "url": "https://api.github.com/repos/Fu-Jumping/elm_practice/issues/comments/5527310326",
+      "html_url": "https://github.com/Fu-Jumping/elm_practice/pull/1#issuecomment-5527310326",
+      "issue_url": "https://api.github.com/repos/Fu-Jumping/elm_practice/issues/1",
+      "id": 5527310326,
+      "node_id": "IC_kwDOULaxtM8AAAABSXQP9g",
+      "user": {
+        "login": "Fu-Jumping",
+        "id": 234341049,
+        "node_id": "U_kgDODffCuQ",
+        "avatar_url": "https://avatars.githubusercontent.com/u/234341049?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/Fu-Jumping",
+        "html_url": "https://github.com/Fu-Jumping",
+        "followers_url": "https://api.github.com/users/Fu-Jumping/followers",
+        "following_url": "https://api.github.com/users/Fu-Jumping/following{/other_user}",
+        "gists_url": "https://api.github.com/users/Fu-Jumping/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/Fu-Jumping/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/Fu-Jumping/subscriptions",
+        "organizations_url": "https://api.github.com/users/Fu-Jumping/orgs",
+        "repos_url": "https://api.github.com/users/Fu-Jumping/repos",
+        "events_url": "https://api.github.com/users/Fu-Jumping/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/Fu-Jumping/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "created_at": "2026-09-03T14:30:39Z",
+      "updated_at": "2026-09-03T14:30:39Z",
+      "body": "## 更正：env 文件缺失的根因已查明——是仓库根 `.gitignore` 的 `.env.*` 规则静默忽略所致\n\n上一条评审中断言「这两个文件未被 .gitignore 忽略，应属遗漏提交」，**该判断有误，特此更正**。\n\n经实测（`git check-ignore -v`）：**仓库根目录 `.gitignore`**（首版基线提交引入）中的 `.env` / `.env.*` 规则对全仓库生效，把 `frontend/user-h5/.env.development` 与 `.env.example` 一并忽略——创建的文件在 `git add` 时被静默跳过，`git status` 中不可见，导致本 PR 缺失这两个文件。本机建过文件≠已提交，属于工具链静默坑，不是作者意图问题。\n\n### 修复步骤（建议随本 PR 一并完成）\n\n1. **修改仓库根 `.gitignore`**：「本地环境与临时文件」段加两行否定例外（Git 要求例外写在忽略规则之后），真密钥类文件仍被挡、应入库的放行：\n\n   ```gitignore\n   .env\n   .env.*\n   !.env.example\n   !.env.development\n   ```\n\n2. **提交两个 env 文件**（此时已可正常 add）：\n   - `frontend/user-h5/.env.development`：`VITE_API_MODE=mock`\n   - `frontend/user-h5/.env.example`：三件套变量 + 注释（`VITE_API_MODE` / `VITE_API_BASE_URL` / `VITE_MOCK_FALLBACK`），注明联调阶段 `VITE_MOCK_FALLBACK` 必须为 `false`\n3. **顺手项（上一条评审的次要项）**：`postcss-px-to-viewport-8-plugin` 从 `dependencies` 挪到 `devDependencies`；README 补一小节「环境变量」说明从 `.env.example` 复制。\n\n### 备注\n\n根 `.gitignore` 的这个坑同样会影响商家端初始化（架构约定 §8.2 同样要求 `.env` + `.env.example`），本次在根规则上加例外是一次性解决，各端受益。\n\n阻塞项修复并推送后请 re-request review，二次核对无误即合并。\n",
+      "author_association": "OWNER",
+      "reactions": {
+        "url": "https://api.github.com/repos/Fu-Jumping/elm_practice/issues/comments/5527310326/reactions",
+        "total_count": 0,
+        "+1": 0,
+        "-1": 0,
+        "laugh": 0,
+        "hooray": 0,
+        "confused": 0,
+        "heart": 0,
+        "rocket": 0,
+        "eyes": 0
+      },
+      "performed_via_github_app": null,
+      "minimized": null
+    }
+  ]
+}

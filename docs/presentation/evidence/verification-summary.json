@@ -1,0 +1,63 @@
+{
+  "date": "2026-09-08",
+  "baseline": "508889ee2c0b09431d93fa40482fe47a9200b0b0",
+  "changes": "audited working tree; not committed/pushed",
+  "userTests": {
+    "files": 23,
+    "passed": 148
+  },
+  "merchantTests": {
+    "files": 3,
+    "passed": 10
+  },
+  "backendTests": {
+    "passed": 25,
+    "failed": 0,
+    "database": "elm_practice_test"
+  },
+  "backendRed": {
+    "tests": 2,
+    "failed": 1,
+    "expected": "CLOSED",
+    "actual": "OPEN"
+  },
+  "paymentRed": {
+    "failed": 2,
+    "passed": 1
+  },
+  "paymentGreen": {
+    "passed": 3
+  },
+  "frontendTypeChecks": "passed",
+  "frontendBuilds": "passed",
+  "apiSmoke": {
+    "httpChecks": 50,
+    "businessAssertions": "passed",
+    "orderId": "o1094",
+    "amount": 60,
+    "state": "COMPLETED"
+  },
+  "browserOrder": {
+    "orderId": "o1097",
+    "amount": 31,
+    "state": "COMPLETED",
+    "screenshots": [
+      "user-paid.png",
+      "merchant-completed.png",
+      "user-completed.png"
+    ]
+  },
+  "presentation": {
+    "slides": 12,
+    "contributionDialogs": 5,
+    "realApiHTTP": 200,
+    "liveFrames": 2,
+    "pageErrors": 0
+  },
+  "limitations": [
+    "H5 wide desktop shell SHOW-QA-002 remains",
+    "physical phone/projector not verified",
+    "P1 concurrency/timeout matrix pending",
+    "formal defect closure and Git review pending"
+  ]
+}

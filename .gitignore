@@ -14,7 +14,6 @@ build/
 *.log
 tmp/
 .uploads/
-backend/uploads/
 !.env.example
 !.env.development
 
@@ -33,6 +32,7 @@ docs/_archive/
 # 测试产物
 test-results/
 playwright-report/
+deploy-bundle/
 
 # 系统与编辑器
 .DS_Store
