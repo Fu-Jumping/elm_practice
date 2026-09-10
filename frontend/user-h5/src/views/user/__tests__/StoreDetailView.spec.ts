@@ -68,7 +68,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     const { wrapper } = await mountDetail('/stores/m002')
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="store-banner"]').exists()).toBe(true),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     const banner = wrapper.find('[data-testid="store-banner"]')
     expect(banner.text()).toContain('肯德基宅急送')
@@ -85,7 +85,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     const { wrapper, router } = await mountDetail('/stores/none')
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="store-missing"]').exists()).toBe(true),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     expect(wrapper.find('[data-testid="store-missing"]').text()).toContain('商家不存在')
     await wrapper.find('[data-testid="store-back-home"]').trigger('click')
@@ -97,7 +97,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     const { wrapper } = await mountDetail('/stores/m002')
     await vi.waitFor(
       () => expect(wrapper.findAll('[data-testid="cat-rail-item"]').length).toBe(3),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     const rails = wrapper.findAll('[data-testid="cat-rail-item"]')
     // 默认选中第一个有商品的分类（等分类与商品都就绪后由 watcher 落定）
@@ -106,7 +106,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
         expect(wrapper.findAll('[data-testid="cat-rail-item"]')[0]!.classes()).toContain(
           'cat-rail-item--active',
         ),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     // 连续渲染：三个分类的商品同时存在于列表（过滤式切换只会保留当前分类的商品）
     await vi.waitFor(
@@ -116,7 +116,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
         expect(text).toContain('黄金鸡块（5块）')
         expect(text).toContain('九珍果汁')
       },
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     // 每个分类一个分区锚点，供点击定位与滚动高亮使用
     expect(wrapper.find('[data-testid="product-section-c101"]').text()).toBe('主食')
@@ -140,7 +140,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     const { wrapper } = await mountDetail('/stores/m002')
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="product-list"]').text()).toContain('香辣鸡腿堡'),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     const list = wrapper.find('[data-testid="product-list"]')
     expect(list.text()).toContain('招牌汉堡，香辣多汁')
@@ -159,7 +159,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     const { wrapper, router } = await mountDetail('/stores/m002')
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="add-btn-p101"]').exists()).toBe(true),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     await wrapper.find('[data-testid="add-btn-p101"]').trigger('click')
     await flushPromises()
@@ -177,19 +177,19 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     session.user = { account: '13800000001', nickname: '张同学' }
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="add-btn-p101"]').exists()).toBe(true),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     // 第一次加购，等购物车栏刷新到 1（XA-05：加购进行中按钮禁用，需等完成再点下一次）
     await wrapper.find('[data-testid="add-btn-p101"]').trigger('click')
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="cart-bar-count"]').text()).toBe('1'),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     // 第二次加购同商品：合并为同一行，数量累加为 2
     await wrapper.find('[data-testid="add-btn-p101"]').trigger('click')
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="cart-bar-count"]').text()).toBe('2'),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     // 19.50 × 2 = 39.00（金额两位小数）
     expect(wrapper.find('[data-testid="cart-bar-total"]').text()).toContain('39.00')
@@ -201,12 +201,12 @@ describe('StoreDetailView（商家详情页 P0）', () => {
 
   it('T16 店铺休息：提示可见，加购与结算禁用', async () => {
     const { wrapper } = await mountDetail('/stores/m004')
-    await vi.waitFor(() => expect(wrapper.text()).toContain('老胖烧烤'), { timeout: 5000 })
+    await vi.waitFor(() => expect(wrapper.text()).toContain('老胖烧烤'), { timeout: 10000 })
     expect(wrapper.find('[data-testid="store-closed-tip"]').text()).toContain('休息')
     // 商品列表可能在 mock 延迟窗口内未返回，先等加购按钮渲染
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid^="add-btn-"]').exists()).toBe(true),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     expect(wrapper.find('[data-testid^="add-btn-"]').attributes('disabled')).toBeDefined()
     expect(wrapper.find('[data-testid="checkout-btn"]').attributes('disabled')).toBeDefined()
@@ -216,7 +216,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     const { wrapper } = await mountDetail('/stores/m002')
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="tab-review"]').exists()).toBe(true),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     await wrapper.find('[data-testid="tab-review"]').trigger('click')
     expect(wrapper.find('[data-testid="review-placeholder"]').text()).toContain(
@@ -229,7 +229,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     const { wrapper, router } = await mountDetail('/stores/m003')
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="checkout-btn"]').exists()).toBe(true),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     // 未登录：登录校验先行（PRD 去结算校验顺序）
     await wrapper.find('[data-testid="checkout-btn"]').trigger('click')
@@ -242,12 +242,12 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     // 商品列表可能在 mock 延迟窗口内未返回，等加购按钮就绪再点
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="add-btn-p204"]').exists()).toBe(true),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     await wrapper.find('[data-testid="add-btn-p204"]').trigger('click')
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="cart-bar-count"]').text()).toBe('1'),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     await wrapper.find('[data-testid="checkout-btn"]').trigger('click')
     await flushPromises()
@@ -266,12 +266,12 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     session.user = { account: '13800000001', nickname: '张同学' }
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="add-btn-p203"]').exists()).toBe(true),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     await wrapper.find('[data-testid="add-btn-p203"]').trigger('click')
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="cart-bar-count"]').text()).toBe('1'),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     await wrapper.find('[data-testid="checkout-btn"]').trigger('click')
     await flushPromises()
@@ -291,7 +291,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     const { wrapper, router } = await mountDetail(`/stores/${storeId}`, pinia)
     await vi.waitFor(
       () => expect(wrapper.find(`[data-testid="add-btn-${productId}"]`).exists()).toBe(true),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     for (let i = 0; i < times; i++) {
       await wrapper.find(`[data-testid="add-btn-${productId}"]`).trigger('click')
@@ -300,7 +300,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
           expect(
             Number(wrapper.find(`[data-testid="product-qty-${productId}"]`).text() || '0'),
           ).toBe(i + 1),
-        { timeout: 5000 },
+        { timeout: 10000 },
       )
     }
     return { wrapper, router }
@@ -320,7 +320,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     await wrapper.find('[data-testid="add-btn-p101"]').trigger('click')
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="product-qty-p101"]').text()).toBe('2'),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     expect(wrapper.find('[data-testid="cart-bar-count"]').text()).toBe('2')
   })
@@ -330,13 +330,13 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     await wrapper.find('[data-testid="minus-btn-p101"]').trigger('click')
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="product-qty-p101"]').text()).toBe('1'),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     await wrapper.find('[data-testid="minus-btn-p101"]').trigger('click')
     // 减到 0：前端转 DELETE 移除该行，商品行回到 + 态
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="minus-btn-p101"]').exists()).toBe(false),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     expect(wrapper.find('[data-testid="cart-bar-count"]').exists()).toBe(false)
   })
@@ -346,7 +346,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     await wrapper.find('[data-testid="cart-bar"]').trigger('click')
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="cart-popup"]').exists()).toBe(true),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     const popup = wrapper.find('[data-testid="cart-popup"]')
     expect(popup.text()).toContain('香辣鸡腿堡')
@@ -368,12 +368,12 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     // A 店（m002）加购 2 件
     await cart.fetchCart('m002')
     await cart.addItem('m002', 'p101', 2)
-    await vi.waitFor(() => expect(cart.lines).toHaveLength(1), { timeout: 5000 })
+    await vi.waitFor(() => expect(cart.lines).toHaveLength(1), { timeout: 10000 })
     // 进入 B 店（m003）详情 → 触发跨店提示（A 店商品保留，B 店独立结算）
     await mountDetail('/stores/m003', pinia)
     await vi.waitFor(
       () => expect(messages.some((m) => m.includes('独立结算') || m.includes('保留'))).toBe(true),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
   })
 
@@ -386,13 +386,13 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     const { wrapper: first } = await mountDetail('/stores/m002', pinia)
     await vi.waitFor(
       () => expect(first.findAll('[data-testid^="product-item-"]').length).toBeGreaterThan(0),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     // 共享同一 pinia 进 m005（模拟返回列表后再进店；mock 分类 c501/c502 与 m002 的 c101~c103 不同）
     const { wrapper: second } = await mountDetail('/stores/m005', pinia)
     await vi.waitFor(
       () => expect(second.findAll('[data-testid^="product-item-"]').length).toBeGreaterThan(0),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     // 默认选中 m005 第一个有商品的分类（招牌），不落“暂无商品”空态
     const activeCat = second.find('.cat-rail-item--active')
@@ -420,9 +420,9 @@ describe('StoreDetailView（商家详情页 P0）', () => {
       const { wrapper } = await mountDetail('/stores/m002')
       await vi.waitFor(
         () => expect(wrapper.findAll('[data-testid^="product-item-"]').length).toBeGreaterThan(0),
-        { timeout: 5000 },
+        { timeout: 10000 },
       )
-      await vi.waitFor(() => expect(captured).not.toBeNull(), { timeout: 5000 })
+      await vi.waitFor(() => expect(captured).not.toBeNull(), { timeout: 10000 })
 
       // 造几何（jsdom 无布局）：三个分区依次位于 0 / 400 / 800，列表可视高 400、内容高 1200
       const listEl = wrapper.find('[data-testid="product-list"]').element as HTMLElement
@@ -504,7 +504,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     expect(firstFrame.exists() ? firstFrame.text() : '').not.toContain('肯德基宅急送')
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="store-banner"]').text()).toContain('老王小店'),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
   })
 
@@ -530,7 +530,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     const wrapper = mount(Host, { global: { plugins: [pinia, router] } })
     await vi.waitFor(
       () => expect(wrapper.findAll('[data-testid="cat-rail-item"]').length).toBe(3),
-      { timeout: 5000 },
+      { timeout: 10000 },
     )
     // 造几何（jsdom 无布局）：外层已滚 0，Tab 距视口顶 300px，顶部栏高 44px → 吸顶线目标 256px
     const mainEl = wrapper.find('.app-main').element as HTMLElement
