@@ -1,0 +1,10 @@
+{
+  "date": "2026-09-08",
+  "browser": "Microsoft Edge via Playwright",
+  "viewports": {"user": "390x844", "merchant": "1440x960", "presentation": ["1440x960", "390x844"]},
+  "userFlow": {"login": true, "catalog": true, "addToCart": true, "checkout": true, "orderId": "o1097", "subtotal": 29, "packagingFee": 2, "total": 31, "simulatedFailure": true, "simulatedSuccess": true, "merchantProcessing": ["PENDING", "COOKING", "DELIVERING", "COMPLETED"], "userRefreshCompleted": true},
+  "merchantCrud": {"register": true, "refreshSession": true, "storeRemainedClosed": true, "categorySortOrder": 7, "productPrice": 29, "productStock": 3, "availability": true, "testProductDeleted": true, "testCategoryDeleted": true},
+  "presentation": {"slides": 12, "contributionDialogs": 5, "realApiHTTP": 200, "liveFrames": 2, "pageErrors": 0},
+  "screenshots": ["user-paid.png", "merchant-completed.png", "user-completed.png", "merchant-products.png", "demo-cover.png", "demo-live.png", "demo-review.png", "demo-roadmap.png", "demo-mobile.png"],
+  "limitations": ["Desktop viewport emulation is not physical-phone testing", "Initial unauthenticated me returns expected 401", "Business changes use synthetic/demo accounts", "P1 concurrency and timeout matrix remains a subsequent task"]
+}

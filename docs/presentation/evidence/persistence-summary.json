@@ -1,0 +1,13 @@
+{
+  "before": [
+    "o1094\tCOMPLETED\t60.00",
+    "o1097\tCOMPLETED\t31.00",
+    "m1088\tCLOSED"
+  ],
+  "after": [
+    "o1094\tCOMPLETED\t60.00",
+    "o1097\tCOMPLETED\t31.00",
+    "m1088\tCLOSED"
+  ],
+  "restartPersistencePassed": true
+}
