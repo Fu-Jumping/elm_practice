@@ -1,12 +1,17 @@
--- MySQL 8+ demo seed. Password for both accounts is 123456 (SHA-256 digest only).
--- 目录真源：图片清单.md。商品编号、图片文件、店铺归属、分类必须保持一一对应。
--- 应用启动时仅当 users 为空才执行；已有环境使用 catalog-alignment.sql 做一次性对齐。
-INSERT INTO users(user_id,account,password_hash,nickname,created_at) VALUES
-('u001','13800000001','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','演示用户',NOW())
-ON DUPLICATE KEY UPDATE nickname=VALUES(nickname);
-INSERT INTO merchants(merchant_id,account,password_hash,store_id,phone,created_at) VALUES
-('ma001','merchant-a','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','m002','13800000002',NOW())
-ON DUPLICATE KEY UPDATE store_id=VALUES(store_id);
+-- 2026-09-08 演示目录对齐迁移
+-- 用途：服务器已经有运行期订单/用户，DatabaseInitializer 不会重新执行 seed.sql，
+-- 因此单独、可重复执行一次，修正旧 seed 中商品图片、名称、归属和分类。
+-- 执行前请先备份数据库；本脚本只触碰固定演示 ID，不删除 QA 临时店铺。
+START TRANSACTION;
+
+-- 订单明细保存了商品快照（名称/图片/价格），因此旧商品行可以安全移除；
+-- 同时清掉旧购物车行，避免用户端继续提交已下线的商品。
+DELETE FROM cart_lines
+WHERE product_id IN ('p111','p112','p113','p114','p131','p132','p133','p134','p141','p142','p143','p144','p151','p152','p153','p154');
+DELETE FROM products
+WHERE product_id IN ('p111','p112','p113','p114','p131','p132','p133','p134','p141','p142','p143','p144','p151','p152','p153','p154');
+DELETE FROM categories
+WHERE category_id IN ('c101','c102','c103','c104','c105');
 
 INSERT INTO stores(store_id,merchant_id,name,description,rating,monthly_sales,delivery_minutes,start_price,delivery_fee,image,status) VALUES
 ('m001',NULL,'老王小店','家常小炒 · 经济实惠',4.60,1200,30,15.00,3.00,'/demo-images/store-m001.jpg','OPEN'),
@@ -19,7 +24,6 @@ ON DUPLICATE KEY UPDATE
   delivery_minutes=VALUES(delivery_minutes),start_price=VALUES(start_price),delivery_fee=VALUES(delivery_fee),
   image=VALUES(image),status=VALUES(status);
 
--- 分类 ID 按店铺分段，避免不同商家复用同一个分类 ID 导致商品串店。
 INSERT INTO categories(category_id,store_id,name,sort_order) VALUES
 ('c201','m001','招牌',1),('c202','m001','配菜',2),
 ('c101','m002','主食',1),('c102','m002','小食',2),('c103','m002','饮品',3),
@@ -28,7 +32,6 @@ INSERT INTO categories(category_id,store_id,name,sort_order) VALUES
 ('c501','m005','招牌',1),('c502','m005','配菜',2)
 ON DUPLICATE KEY UPDATE store_id=VALUES(store_id),name=VALUES(name),sort_order=VALUES(sort_order);
 
--- 商品与图片清单逐项对应；p101–p106 是肯德基主菜单，p201–p209 是其余四店菜单。
 INSERT INTO products(product_id,store_id,category_id,name,description,image,price,stock,on_sale,sales) VALUES
 ('p201','m001','c201','家常豆腐','下饭神器','/demo-images/product-m001-04.jpg',12.00,50,TRUE,300),
 ('p202','m001','c201','鱼香肉丝','酸甜下饭','/demo-images/product-m001-05.jpg',15.00,40,TRUE,260),
@@ -49,18 +52,17 @@ ON DUPLICATE KEY UPDATE
   store_id=VALUES(store_id),category_id=VALUES(category_id),name=VALUES(name),description=VALUES(description),
   image=VALUES(image),price=VALUES(price),stock=VALUES(stock),on_sale=VALUES(on_sale),sales=VALUES(sales);
 
-INSERT INTO addresses(address_id,user_id,contact_name,contact_sex,contact_phone,region,detail,label,is_default,updated_at) VALUES
-('da001','u001','张同学','先生','13800000001','天津大学北洋园校区','12号楼 304室','学校',TRUE,NOW())
-ON DUPLICATE KEY UPDATE region=VALUES(region),detail=VALUES(detail),is_default=VALUES(is_default);
+UPDATE orders SET item_subtotal=19.50, packaging_fee=2.00, total=21.50,
+  address_snapshot=JSON_SET(address_snapshot,'$.region','天津大学北洋园校区')
+WHERE order_id IN ('o1001','o1002') AND store_id='m002';
+UPDATE orders SET item_subtotal=9.00, packaging_fee=2.00, total=11.00,
+  address_snapshot=JSON_SET(address_snapshot,'$.region','天津大学北洋园校区')
+WHERE order_id='o1003' AND store_id='m002';
+UPDATE order_items SET product_id='p101',name='香辣鸡腿堡',image='/demo-images/product-m002-01.jpg',category_id='c101',unit_price=19.50
+WHERE order_id='o1001';
+UPDATE order_items SET product_id='p102',name='劲脆鸡腿堡',image='/demo-images/product-m002-02.jpg',category_id='c101',unit_price=19.50
+WHERE order_id='o1002';
+UPDATE order_items SET product_id='p105',name='九珍果汁',image='/demo-images/product-m002-05.jpg',category_id='c103',unit_price=9.00
+WHERE order_id='o1003';
 
--- 演示订单：商品快照也必须跟商品目录保持一致。
-INSERT INTO orders(order_id,user_id,store_id,address_id,address_snapshot,remark,status,item_subtotal,packaging_fee,total,created_at,paid_at,idempotency_key) VALUES
-('o1001','u001','m002','da001',JSON_OBJECT('addressId','da001','contactName','张同学','contactSex','先生','contactPhone','13800000001','region','天津大学北洋园校区','detail','12号楼 304室','label','学校','isDefault',TRUE),'少放辣','PROCESSING',19.50,2.00,21.50,DATE_SUB(NOW(),INTERVAL 40 MINUTE),DATE_SUB(NOW(),INTERVAL 40 MINUTE),NULL),
-('o1002','u001','m002','da001',JSON_OBJECT('addressId','da001','contactName','张同学','contactSex','先生','contactPhone','13800000001','region','天津大学北洋园校区','detail','12号楼 304室','label','学校','isDefault',TRUE),'','COMPLETED',19.50,2.00,21.50,DATE_SUB(NOW(),INTERVAL 2 DAY),DATE_SUB(NOW(),INTERVAL 2 DAY),NULL),
-('o1003','u001','m002','da001',JSON_OBJECT('addressId','da001','contactName','张同学','contactSex','先生','contactPhone','13800000001','region','天津大学北洋园校区','detail','12号楼 304室','label','学校','isDefault',TRUE),'','PENDING_PAYMENT',9.00,2.00,11.00,NOW(),NULL,NULL)
-ON DUPLICATE KEY UPDATE status=VALUES(status),item_subtotal=VALUES(item_subtotal),packaging_fee=VALUES(packaging_fee),total=VALUES(total),address_snapshot=VALUES(address_snapshot);
-INSERT INTO order_items(order_id,product_id,name,image,category_id,unit_price,quantity) VALUES
-('o1001','p101','香辣鸡腿堡','/demo-images/product-m002-01.jpg','c101',19.50,1),
-('o1002','p102','劲脆鸡腿堡','/demo-images/product-m002-02.jpg','c101',19.50,1),
-('o1003','p105','九珍果汁','/demo-images/product-m002-05.jpg','c103',9.00,1)
-ON DUPLICATE KEY UPDATE product_id=VALUES(product_id),name=VALUES(name),image=VALUES(image),category_id=VALUES(category_id),unit_price=VALUES(unit_price),quantity=VALUES(quantity);
+COMMIT;

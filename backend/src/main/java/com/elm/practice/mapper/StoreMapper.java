@@ -39,4 +39,7 @@ public interface StoreMapper {
     @Update("UPDATE stores SET name = #{name}, description = #{description}, image = #{image}, "
             + "start_price = #{startPrice}, delivery_fee = #{deliveryFee}, status = #{status} WHERE store_id = #{id}")
     int updateFull(Domain.Store store);
+
+    @Update("UPDATE stores SET status = #{status} WHERE store_id = #{id}")
+    int updateStatus(@Param("id") String id, @Param("status") Domain.StoreStatus status);
 }
