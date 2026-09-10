@@ -38,7 +38,8 @@ const activeCategoryId = ref('')
 const store = computed(() =>
   catalogStore.storeDetail?.storeId === storeId ? catalogStore.storeDetail : null,
 )
-const isClosed = computed(() => store.value?.status === 'CLOSED')
+// CLOSED 与 TEMPORARILY_CLOSED 都不可下单；只有 OPEN 才允许加购/结算。
+const isClosed = computed(() => Boolean(store.value && store.value.status !== 'OPEN'))
 
 /** 分类 → 商品 分组（分类接口 + 商品接口在前端按 categoryId 归组） */
 const productsByCategory = computed(() => {

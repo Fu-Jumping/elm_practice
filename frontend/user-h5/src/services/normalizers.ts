@@ -31,6 +31,9 @@ const STATUS_TEXT_MAP: Record<string, string> = {
   PROCESSING: '进行中',
   // 后端已实现支付扩展状态机（联调实测 2026-09-07）：创建订单即进入待支付
   PENDING_PAYMENT: '待支付',
+  PENDING: '待接单',
+  COOKING: '制作中',
+  DELIVERING: '配送中',
   // 后端种子数据含已完成状态订单（联调实测 2026-09-07）
   COMPLETED: '已完成',
 }

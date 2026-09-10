@@ -22,3 +22,8 @@ export function listOrders(status?: string): Promise<OrderRecord[]> {
 export function getOrder(orderId: string): Promise<OrderRecord> {
   return request<OrderRecord>({ method: 'GET', url: endpoints.order.detail(orderId) })
 }
+
+/** 接入已经存在的后端模拟支付；金额与状态全部使用服务端结果。 */
+export function payOrder(orderId: string, success: boolean): Promise<OrderRecord> {
+  return request<OrderRecord>({ method: 'POST', url: endpoints.order.payment(orderId), data: { success } })
+}

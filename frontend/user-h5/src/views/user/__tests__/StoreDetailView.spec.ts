@@ -388,7 +388,7 @@ describe('StoreDetailView（商家详情页 P0）', () => {
       () => expect(first.findAll('[data-testid^="product-item-"]').length).toBeGreaterThan(0),
       { timeout: 5000 },
     )
-    // 共享同一 pinia 进 m005（模拟返回列表后再进店；mock 分类 c201/c202 与 m002 的 c101~c103 不同）
+    // 共享同一 pinia 进 m005（模拟返回列表后再进店；mock 分类 c501/c502 与 m002 的 c101~c103 不同）
     const { wrapper: second } = await mountDetail('/stores/m005', pinia)
     await vi.waitFor(
       () => expect(second.findAll('[data-testid^="product-item-"]').length).toBeGreaterThan(0),

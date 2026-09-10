@@ -70,7 +70,7 @@ const STORES: StoreSummary[] = [
     deliveryMinutes: 40,
     startPrice: 30,
     deliveryFee: 4,
-    status: 'CLOSED',
+    status: 'TEMPORARILY_CLOSED',
     distanceText: '3.6km',
     couponTags: ['满88减20'],
   },
@@ -164,31 +164,37 @@ const PRODUCTS_M002: Product[] = [
 ]
 
 // 其余店铺演示分类/商品（数量精简，满足浏览链路演示与 T13/T14/T16 用例）
-const CATEGORIES_GENERIC: StoreCategory[] = [
-  { categoryId: 'c201', name: '招牌' },
-  { categoryId: 'c202', name: '配菜' },
-]
+const CATEGORIES_BY_STORE: Record<string, StoreCategory[]> = {
+  m001: [
+    { categoryId: 'c201', name: '招牌' },
+    { categoryId: 'c202', name: '配菜' },
+  ],
+  m002: CATEGORIES_M002,
+  m003: [
+    { categoryId: 'c301', name: '招牌' },
+    { categoryId: 'c302', name: '配菜' },
+  ],
+  m004: [
+    { categoryId: 'c401', name: '招牌' },
+    { categoryId: 'c402', name: '配菜' },
+  ],
+  m005: [
+    { categoryId: 'c501', name: '招牌' },
+    { categoryId: 'c502', name: '配菜' },
+  ],
+}
 
 const PRODUCTS_GENERIC: Product[] = [
   { productId: 'p201', image: '/demo-images/product-m001-04.jpg', storeId: 'm001', categoryId: 'c201', name: '家常豆腐', description: '下饭神器', price: 12, stock: 50, onSale: true, monthlySalesText: '月售300+', goodRateText: '好评率96%' },
   { productId: 'p202', image: '/demo-images/product-m001-05.jpg', storeId: 'm001', categoryId: 'c201', name: '鱼香肉丝', price: 15, stock: 40, onSale: true, monthlySalesText: '月售260+', goodRateText: '好评率95%' },
   { productId: 'p203', image: '/demo-images/product-m001-06.jpg', storeId: 'm001', categoryId: 'c202', name: '米饭', price: 2, stock: 100, onSale: true },
-  { productId: 'p204', image: '/demo-images/product-m003-01.jpg', storeId: 'm003', categoryId: 'c201', name: '巨无霸', description: '经典双层牛肉', price: 25.5, stock: 60, onSale: true, monthlySalesText: '月售1800+', goodRateText: '好评率97%' },
-  { productId: 'p205', image: '/demo-images/product-m003-03.jpg', storeId: 'm003', categoryId: 'c202', name: '薯条（大）', price: 11, stock: 80, onSale: true },
-  { productId: 'p206', image: '/demo-images/product-m004-01.jpg', storeId: 'm004', categoryId: 'c201', name: '羊肉串（10串）', description: '现烤现送', price: 28, stock: 30, onSale: true, monthlySalesText: '月售500+', goodRateText: '好评率94%' },
-  { productId: 'p207', image: '/demo-images/product-m004-02.jpg', storeId: 'm004', categoryId: 'c202', name: '烤茄子', price: 10, stock: 20, onSale: true },
-  { productId: 'p208', image: '/demo-images/product-m005-01.jpg', storeId: 'm005', categoryId: 'c201', name: '精品肥牛', price: 39, stock: 25, onSale: true, monthlySalesText: '月售400+', goodRateText: '好评率98%' },
-  { productId: 'p209', image: '/demo-images/product-m005-02.jpg', storeId: 'm005', categoryId: 'c202', name: '手切鲜羊肉', price: 46, stock: 18, onSale: true },
+  { productId: 'p204', image: '/demo-images/product-m003-01.jpg', storeId: 'm003', categoryId: 'c301', name: '巨无霸', description: '经典双层牛肉', price: 25.5, stock: 60, onSale: true, monthlySalesText: '月售1800+', goodRateText: '好评率97%' },
+  { productId: 'p205', image: '/demo-images/product-m003-03.jpg', storeId: 'm003', categoryId: 'c302', name: '薯条（大）', price: 11, stock: 80, onSale: true },
+  { productId: 'p206', image: '/demo-images/product-m004-01.jpg', storeId: 'm004', categoryId: 'c401', name: '羊肉串（10串）', description: '现烤现送', price: 28, stock: 30, onSale: true, monthlySalesText: '月售500+', goodRateText: '好评率94%' },
+  { productId: 'p207', image: '/demo-images/product-m004-02.jpg', storeId: 'm004', categoryId: 'c402', name: '烤茄子', price: 10, stock: 20, onSale: true },
+  { productId: 'p208', image: '/demo-images/product-m005-01.jpg', storeId: 'm005', categoryId: 'c501', name: '精品肥牛', price: 39, stock: 25, onSale: true, monthlySalesText: '月售400+', goodRateText: '好评率98%' },
+  { productId: 'p209', image: '/demo-images/product-m005-02.jpg', storeId: 'm005', categoryId: 'c502', name: '手切鲜羊肉', price: 46, stock: 18, onSale: true },
 ]
-
-// 给非 m002 商品挂分类（按 storeId 生成所属分类集合）
-const CATEGORIES_BY_STORE: Record<string, StoreCategory[]> = {
-  m002: CATEGORIES_M002,
-  m001: CATEGORIES_GENERIC,
-  m003: CATEGORIES_GENERIC,
-  m004: CATEGORIES_GENERIC,
-  m005: CATEGORIES_GENERIC,
-}
 
 const ALL_PRODUCTS: Product[] = [
   ...PRODUCTS_M002.map((p) => ({
