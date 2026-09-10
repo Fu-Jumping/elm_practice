@@ -361,11 +361,14 @@ const mockApi = {
     Object.assign(product, input)
     return mockCopy(product)
   },
-  async updateProductAvailability(productId: string, input: Pick<ProductDraft, 'onSale' | 'stock'>): Promise<Product> {
+  async updateProductAvailability(productId: string, input: Partial<Pick<ProductDraft, 'onSale' | 'stock'>>): Promise<Product> {
     mockRequireSession()
     const product = mockState.products.find((item) => item.productId === productId)
     if (!product) throw new ApiError('商品不存在。', 404)
-    Object.assign(product, input)
+    // 只应用本次显式传入的字段：后端对 null 字段同样不做修改（CatalogService.availability）
+    for (const [key, value] of Object.entries(input)) {
+      if (value !== undefined) (product as unknown as Record<string, unknown>)[key] = value
+    }
     return mockCopy(product)
   },
   async deleteProduct(productId: string) {
@@ -451,7 +454,7 @@ const realApi = {
   async updateProduct(productId: string, input: ProductDraft) {
     return normalizeProduct(await request<unknown>(`/merchant/products/${encodeURIComponent(productId)}`, { method: 'PATCH', body: JSON.stringify(input) }))
   },
-  async updateProductAvailability(productId: string, input: Pick<ProductDraft, 'onSale' | 'stock'>) {
+  async updateProductAvailability(productId: string, input: Partial<Pick<ProductDraft, 'onSale' | 'stock'>>) {
     return normalizeProduct(await request<unknown>(`/merchant/products/${encodeURIComponent(productId)}/availability`, { method: 'PATCH', body: JSON.stringify(input) }))
   },
   async deleteProduct(productId: string) {

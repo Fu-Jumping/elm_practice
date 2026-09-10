@@ -662,7 +662,8 @@ function ProductsPage() {
     setSaving(true)
     setError(undefined)
     try {
-      await merchantApi.updateProductAvailability(product.productId, { onSale, stock: product.stock })
+      // 只提交上下架状态：库存由后端保留原值，避免把列表行的旧库存回写、覆盖顾客下单后的实时库存
+      await merchantApi.updateProductAvailability(product.productId, { onSale })
       message.success(onSale ? '商品已上架' : '商品已下架')
       await loadProducts(categoryId)
     } catch (requestError) {
