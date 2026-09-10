@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: 检查提交信息、test: 纯度与 daily 携带
+      - name: "检查提交信息、test: 纯度与 daily 携带"
         run: bash .github/scripts/commit-hygiene.sh "origin/${{ github.base_ref }}"
 
   user-h5:
@@ -103,7 +103,7 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: maven
-      - name: 初始化测试库结构与种子
+      - name: "初始化测试库结构与种子"
         run: |
           mysql -h127.0.0.1 -uelm -pelm elm_practice_test < database/schema/schema.sql
           mysql -h127.0.0.1 -uelm -pelm elm_practice_test < database/seed/seed.sql
