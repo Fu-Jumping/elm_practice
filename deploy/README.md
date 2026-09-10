@@ -11,7 +11,16 @@
 | 互动汇报 | http://82.157.137.114:4001/demo/ |
 | 后端 | 仅本机 127.0.0.1:4000，由 Nginx 两条 API 路径代理 |
 
-当前 release：`/home/ubuntu/releases/elm-20260908-508889e`，static release：`/srv/elm-releases/20260908-508889e`。
+当前 release：`/home/ubuntu/releases/elm-20260910-e41444c`（提交 `99a646d`），static release：`/srv/elm-releases/20260910-99a646d`（`/srv/elm-current` 指向它）。上一版本 `/home/ubuntu/releases/elm-20260908-508889e` 与其 static release 保留作回滚点。
+
+`release.py` 已参数化（2026-09-10，默认值仍为 2026-09-08 首次发布，不带参数运行行为不变）：
+
+```bash
+python3 deploy/release.py --source /home/ubuntu/releases/elm-20260910-e41444c \
+    --tag 20260910-99a646d --release-sha 99a646d --backup /home/ubuntu/backups/elm-20260908
+```
+
+发布前会校验 `--source/www`、`nginx.conf` 模板、`--backup/pm2-before.json` 与后端 jar，缺失即退出，不触碰现网；失败按原逻辑回滚到 `--backup` 指向的版本。
 
 ## 构建
 
