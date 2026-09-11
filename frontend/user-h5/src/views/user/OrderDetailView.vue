@@ -16,7 +16,7 @@
  */
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { orderApi } from '@/services/api'
+import { messageApi, orderApi } from '@/services/api'
 import {
   buildAmountLines,
   formatMoney,
@@ -205,8 +205,23 @@ function onRejected(reason: string): void {
 }
 
 /** 联系商家入口对应批次④（消息模块）尚未实现，先给占位提示 */
-function onContactMerchant(): void {
-  toast('消息与联系商家将随批次④接入')
+async function onContactMerchant(): Promise<void> {
+  if (!order.value) return
+  try {
+    // 契约 §6.1（口径补充）：会话列表支持 orderId 过滤，按订单直取该订单会话
+    const conversations = await messageApi.listConversations({ orderId: order.value.orderId })
+    const target = conversations[0]
+    if (!target) {
+      cancelTip.value = '该订单暂无会话'
+      window.setTimeout(() => {
+        cancelTip.value = ''
+      }, 2000)
+      return
+    }
+    void router.push({ name: 'chat-detail', params: { conversationId: target.conversationId } })
+  } catch {
+    toast('会话加载失败，请稍后重试')
+  }
 }
 function onReview(): void {
   if (!order.value) return
@@ -438,6 +453,7 @@ async function onReorder(): Promise<void> {
       <!-- 底部操作区：取消按钮状态驱动；支付入口沿用 PaymentActions；不出现「查看配送进度」 -->
       <footer v-if="hasFooter" class="od-footer" data-testid="order-footer-actions">
         <p v-if="cancelTip" class="od-footer-tip" data-testid="cancel-disabled-tip">{{ cancelTip }}</p>
+        <p v-if="cancelTip" class="od-footer-tip" data-testid="contact-merchant-tip">{{ cancelTip }}</p>
         <button
           v-if="showCancel"
           class="od-btn od-btn--ghost"

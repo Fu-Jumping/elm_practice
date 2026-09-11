@@ -69,6 +69,13 @@ const router = createRouter({
           meta: { title: '支付', auth: true, priority: 'P1' },
         },
         {
+          // 聊天详情（批次⑩ TODO-USER-004b）：会话头部 + 订单状态卡 + 消息时间线 + 底部输入区
+          path: 'messages/:conversationId',
+          name: 'chat-detail',
+          component: () => import('@/views/user/ChatDetailView.vue'),
+          meta: { title: '聊天详情', auth: true, priority: 'P1' },
+        },
+        {
           // 评价订单页：批次⑩ TODO-USER-003（PRD 7.7/7.16.1，设计真源 08-评价/01-评价订单）
           path: 'orders/:orderId/review',
           name: 'order-review',
