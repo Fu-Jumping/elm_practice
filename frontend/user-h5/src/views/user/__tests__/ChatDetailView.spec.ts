@@ -52,9 +52,14 @@ describe('ChatDetailView 聊天详情（批次⑩ TODO-USER-004b）', () => {
     )
     const page = wrapper.find('[data-testid="chat-detail"]')
     // 店名映射为二次异步（店铺列表接口），需等映射就绪
-    await vi.waitFor(() => expect(page.text()).toContain('麦当劳'), { timeout: 2000 })
+    // 店名映射为二次异步（会话 → 店铺列表），全量并行下需放宽等待上限
+    await vi.waitFor(() => expect(page.text()).toContain('麦当劳'), { timeout: 10000 })
     const text = page.text()
-    // 订单状态卡（来自订单接口）
+    // 订单状态卡来自**第二个异步**（订单接口）：必须等它出现再断言，否则偶发失败
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="chat-order-card"]').exists()).toBe(true),
+      { timeout: 10000 },
+    )
     const card = wrapper.find('[data-testid="chat-order-card"]')
     expect(card.exists()).toBe(true)
     expect(card.text()).toContain('o0002')
