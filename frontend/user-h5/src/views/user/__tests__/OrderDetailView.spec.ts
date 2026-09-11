@@ -312,6 +312,23 @@ describe('OrderDetailView 批次⑩（CHG-003 订单详情含跟踪时间线）'
     expect(text).toContain('共 2 件商品')
   })
 
+  it('TP-10 可用态点「取消订单」打开弹层，提交成功后详情刷新为已取消并展示原因（TODO-USER-002）', async () => {
+    const { wrapper } = await mountOd('od01')
+    const cancel = wrapper.find('[data-testid="cancel-order-btn"]')
+    expect(cancel.attributes('aria-disabled')).toBe('false')
+    await cancel.trigger('click')
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="cancel-sheet"]').exists()).toBe(true), {
+      timeout: 2000,
+    })
+    await wrapper.findAll('[data-testid="reason-chip"]')[0]!.trigger('click')
+    await wrapper.find('[data-testid="cancel-confirm-btn"]').trigger('click')
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="order-status-head"]').text()).toContain('已取消'),
+      { timeout: 2000 },
+    )
+    expect(wrapper.find('[data-testid="cancel-reason"]').text()).toContain('不想要了')
+  })
+
   it('TD-10 待支付订单点「去支付」进入支付页（批次⑩ 105 入口接线）', async () => {
     const { wrapper, router } = await mountOd('od01')
     await wrapper.find('[data-testid="order-pay-entry"]').trigger('click')

@@ -95,6 +95,7 @@ describe('OrderPayView 支付页（批次⑩ TODO-USER-105）', () => {
       payOrder({}),
       payOrder({ orderId: 'op02', payDeadline: deadlineFromNow(-60 * 1000) }),
       payOrder({ orderId: 'op03', payDeadline: null }),
+      payOrder({ orderId: 'op04', status: 'CANCELLED', cancelReason: '地址填错了', cancelledAt: '2026-09-11 12:10:00', cancelledBy: 'USER' }),
     )
   })
 
@@ -176,15 +177,26 @@ describe('OrderPayView 支付页（批次⑩ TODO-USER-105）', () => {
     expect(orderMockState.find((order) => order.orderId === 'op01')?.status).toBe('PENDING_PAYMENT')
   })
 
-  it('TD-6 卡内「取消订单」文字入口给出占位提示（弹层归 TODO-USER-002）', async () => {
-    const { wrapper } = await mountPay('op01')
+  it('TP-8 卡内「取消订单」入口打开取消确认弹层；取消成功后回订单列表（TODO-USER-002）', async () => {
+    const { wrapper, router } = await mountPay('op01')
     const entry = wrapper.find('[data-testid="pay-cancel-entry"]')
     expect(entry.exists()).toBe(true)
     await entry.trigger('click')
-    await vi.waitFor(() => expect(wrapper.find('[data-testid="pay-cancel-tip"]').exists()).toBe(true), {
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="cancel-sheet"]').exists()).toBe(true), {
       timeout: 2000,
     })
-    expect(wrapper.find('[data-testid="pay-cancel-tip"]').text()).toContain('批次②')
+    await wrapper.findAll('[data-testid="reason-chip"]')[0]!.trigger('click')
+    await wrapper.find('[data-testid="cancel-confirm-btn"]').trigger('click')
+    await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('orders'), { timeout: 2000 })
+    expect(orderMockState.find((order) => order.orderId === 'op01')?.status).toBe('CANCELLED')
+  })
+
+  it('TP-9 已取消订单进支付页 → 转订单详情（不误判为已支付，展示已取消与原因）', async () => {
+    const { router } = await mountPay('op04')
+    await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('order-detail'), {
+      timeout: 2000,
+    })
+    expect(router.currentRoute.value.params.orderId).toBe('op04')
   })
 
   it('TD-7 课程口径：不出现真实支付方式/退款/资金/客服文案，不提供联系客服入口', async () => {
