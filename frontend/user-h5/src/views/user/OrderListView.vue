@@ -5,7 +5,7 @@
  * - 订单卡由订单列表接口返回，金额、状态、时间使用接口值（PRD 7.16 订单列表行）
  * - P0 仅"全部"筛选（待支付/待评价筛选在对应 P1 扩展后出现）；订单按创建时间倒序（TC-ORD-013）
  * - 空结果显示空态；点击卡片进入订单详情；回到列表重新请求，不沿用过期列表
- * TODO(第三批 TDD)：待支付去支付/已完成再来一单等状态操作（P1 扩展实施后）
+ * - 待支付订单提供「去支付」入口 → 支付页（批次⑩ 105，PRD 订单列表页行：待支付点击去支付）
  */
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -21,6 +21,11 @@ const sessionStore = useSessionStore()
 
 const orders = ref<OrderSummary[]>([])
 const loading = ref(false)
+
+/** 待支付订单 → 支付页（收银台） */
+function goPay(order: OrderSummary): void {
+  void router.push({ name: 'order-pay', params: { orderId: order.orderId } })
+}
 
 /** 店名映射（后端订单记录无 storeName：按 storeId 从店铺列表映射，缺口见联调问题清单） */
 const storeNameMap = computed(() => new Map(catalogStore.stores.map((s) => [s.storeId, s.name])))
@@ -77,6 +82,11 @@ function goDetail(order: OrderSummary): void {
           <div class="ol-meta-row">
             <span class="ol-time">{{ formatTime(order.createdAt) }}</span>
             <span class="ol-amount">实付 ¥{{ formatMoney(order.amounts.payableAmount) }}</span>
+          </div>
+          <div v-if="order.status === 'PENDING_PAYMENT'" class="ol-actions">
+            <button class="ol-pay" type="button" data-testid="order-pay-entry" @click.stop="goPay(order)">
+              去支付
+            </button>
           </div>
         </section>
 
@@ -174,6 +184,25 @@ function goDetail(order: OrderSummary): void {
   font-weight: 600;
   color: #1a1c1c;
 }
+
+/* 待支付卡片「去支付」入口（批次⑩ 105）：白底品牌橙描边次按钮，点击冒泡已阻止 */
+.ol-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 10px;
+}
+
+.ol-pay {
+  border: 1px solid var(--color-primary);
+  border-radius: 4px;
+  background: #ffffff;
+  padding: 6px 14px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-primary);
+}
+
+
 
 /* 空态为设计稿外的兜底块：随父级通栏后不再带圆角，避免出现"整屏白卡" */
 .ol-empty {

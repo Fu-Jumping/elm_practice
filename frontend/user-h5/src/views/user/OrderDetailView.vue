@@ -26,7 +26,6 @@ import {
 } from '@/services/normalizers'
 import { useCatalogStore } from '@/stores/catalogStore'
 import type { OrderDetail } from '@/services/api/types'
-import PaymentActions from '@/components/PaymentActions.vue'
 import { toast } from '@/utils/toast'
 
 const route = useRoute()
@@ -105,6 +104,7 @@ const itemCount = computed(() =>
 const cancelEnabled = computed(
   () => order.value?.status === 'PENDING_PAYMENT' || order.value?.status === 'PENDING',
 )
+const isPendingPayment = computed(() => order.value?.status === 'PENDING_PAYMENT')
 const hasFooter = computed(() => !!order.value && !isCancelled.value)
 const showCancel = computed(() => !!order.value && !isCompleted.value)
 const showReview = computed(() => isCompleted.value)
@@ -136,6 +136,12 @@ function goBack(): void {
 function goStore(): void {
   if (!order.value) return
   void router.push({ name: 'store-detail', params: { storeId: order.value.storeId } })
+}
+
+/** 待支付 → 支付页（收银台；批次⑩ 105） */
+function goPay(): void {
+  if (!order.value) return
+  void router.push({ name: 'order-pay', params: { orderId: order.value.orderId } })
 }
 
 async function refreshOrder(): Promise<void> {
@@ -415,7 +421,16 @@ function onReorder(): void {
         <button v-if="showReview" class="od-btn od-btn--primary" type="button" data-testid="goto-review-btn" @click="onReview">
           去评价
         </button>
-        <PaymentActions :order-id="order.orderId" :status="order.status" variant="footer" @paid="refreshOrder" />
+        <!-- 待支付：主按钮进入支付页（批次⑩ 105 起由支付页承担收银台，本页不再内联支付动作） -->
+        <button
+          v-if="isPendingPayment"
+          class="od-btn od-btn--primary"
+          type="button"
+          data-testid="order-pay-entry"
+          @click="goPay"
+        >
+          去支付
+        </button>
       </footer>
     </template>
 

@@ -62,6 +62,27 @@ const router = createRouter({
           meta: { title: '订单详情', priority: 'P0' },
         },
         {
+          // 支付页（待支付收银台）：批次⑩ CHG-003，设计真源 12-订单与支付/02-支付页（PRD 7.5/7.16.1）
+          path: 'orders/:orderId/pay',
+          name: 'order-pay',
+          component: () => import('@/views/user/OrderPayView.vue'),
+          meta: { title: '支付', auth: true, priority: 'P1' },
+        },
+        {
+          // 支付成功页：批次⑩ 105b 实现设计真稿（07-支付/03-支付成功）；105a 先提供可跳转骨架
+          path: 'orders/:orderId/pay-success',
+          name: 'pay-success',
+          component: () => import('@/views/user/PaySuccessView.vue'),
+          meta: { title: '支付成功', auth: true, priority: 'P1' },
+        },
+        {
+          // 支付失败页：批次⑩ 105b 实现设计真稿（07-支付/04-支付失败）；105a 先提供可跳转骨架
+          path: 'orders/:orderId/pay-fail',
+          name: 'pay-fail',
+          component: () => import('@/views/user/PayFailView.vue'),
+          meta: { title: '支付失败', auth: true, priority: 'P1' },
+        },
+        {
           // 地址管理：列表（管理场景点击进入编辑；确认订单选择回填待第三批）
           path: 'addresses',
           name: 'address-list',
