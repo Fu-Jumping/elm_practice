@@ -8,6 +8,8 @@ import {
   normalizeOrderSummary,
   normalizeOrderDetail,
   buildAmountLines,
+  remainingSeconds,
+  formatCountdown,
 } from '../normalizers'
 import type { OrderRecord } from '../api/types'
 // 把被测函数引进来。'../normalizers' 是相对路径：测试文件在 __tests__ 里，往上一层就是它
@@ -259,5 +261,41 @@ describe('批次⑩ 订单详情扩展归一化 OD-N（CHG-003/004）', () => {
     expect(noDiscount.filter((line) => line.kind === 'discount')).toEqual([])
     expect(lines.find((line) => line.key === 'coupon')?.text).toBe('−¥3.00')
     expect(lines.find((line) => line.key === 'payable')?.kind).toBe('payable')
+  })
+})
+/**
+ * 批次⑩ 105 TD-12 组（TODO-USER-105，2026-09-11；契约 §3.5 待支付倒计时）
+ * 测试场景由负责人确认（倒计时归零仅前端禁用，不回查后端）后由 AI 落地脚手架；本组在 feat: 前必须红。
+ * TD-12a 详情归一化透传 payDeadline（支付页倒计时数据源）
+ * TD-12b remainingSeconds：未到期返回剩余秒数；到点/过期/缺失/非法一律 0
+ * TD-12c formatCountdown：mm:ss 补零、负数按 0、分钟位不截断上限
+ */
+const PAY_DEADLINE_RECORD: OrderRecord = {
+  ...OD_ORDER_RECORD,
+  status: 'PENDING_PAYMENT',
+  payDeadline: '2026-09-11 12:15:00',
+}
+
+describe('批次⑩ 待支付倒计时 TD-12（契约 §3.5 payDeadline）', () => {
+  it('TD-12a 详情归一化透传 payDeadline', () => {
+    expect(normalizeOrderDetail(PAY_DEADLINE_RECORD).payDeadline).toBe('2026-09-11 12:15:00')
+  })
+
+  it('TD-12b remainingSeconds：剩余秒数 / 到点 / 过期 / 缺失 / 非法', () => {
+    expect(remainingSeconds('2026-09-11 12:15:00', new Date('2026-09-11 12:00:00'))).toBe(900)
+    expect(remainingSeconds('2026-09-11 12:15:00', new Date('2026-09-11 12:15:00'))).toBe(0)
+    expect(remainingSeconds('2026-09-11 12:15:00', new Date('2026-09-11 12:20:00'))).toBe(0)
+    expect(remainingSeconds(null, new Date('2026-09-11 12:00:00'))).toBe(0)
+    expect(remainingSeconds(undefined, new Date('2026-09-11 12:00:00'))).toBe(0)
+    expect(remainingSeconds('not-a-date', new Date('2026-09-11 12:00:00'))).toBe(0)
+  })
+
+  it('TD-12c formatCountdown：mm:ss 格式与边界', () => {
+    expect(formatCountdown(899)).toBe('14:59')
+    expect(formatCountdown(900)).toBe('15:00')
+    expect(formatCountdown(59)).toBe('00:59')
+    expect(formatCountdown(0)).toBe('00:00')
+    expect(formatCountdown(-5)).toBe('00:00')
+    expect(formatCountdown(3661)).toBe('61:01')
   })
 })

@@ -51,6 +51,7 @@ describe('ConfirmOrderView（确认订单页 P0）', () => {
         { path: '/orders', name: 'orders', component: { template: '<div />' } },
         { path: '/addresses', name: 'address-list', component: { template: '<div />' } },
         { path: '/orders/confirm', name: 'order-confirm', component: ConfirmOrderView },
+        { path: '/orders/:orderId/pay', name: 'order-pay', component: { template: '<div />' } },
       ],
     })
     await router.push({ path: '/orders/confirm', query })
@@ -149,7 +150,8 @@ describe('ConfirmOrderView（确认订单页 P0）', () => {
     await wrapper.find('[data-testid="submit-order-btn"]').trigger('click')
     // 成功后：该店购物车清空（PRD：成功前不得清空，成功后由明确前端流程清空）
     await vi.waitFor(() => expect(cart.lines).toHaveLength(0), { timeout: 2000 })
-    expect(router.currentRoute.value.name).toBe('orders')
+    // TD-11（批次⑩ 105）：创建订单成功后按 PRD 7.5 进入支付页（原先跳订单列表）
+    expect(router.currentRoute.value.name).toBe('order-pay')
     expect(messages).toContain('下单成功')
   })
 

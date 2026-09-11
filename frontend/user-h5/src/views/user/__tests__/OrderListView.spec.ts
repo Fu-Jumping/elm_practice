@@ -34,6 +34,7 @@ describe('OrderListView（订单列表页 P0）', () => {
       routes: [
         { path: '/orders', name: 'orders', component: OrderListView },
         { path: '/orders/:orderId', name: 'order-detail', component: { template: '<div />' } },
+        { path: '/orders/:orderId/pay', name: 'order-pay', component: { template: '<div />' } },
         { path: '/login', name: 'login', component: { template: '<div />' } },
       ],
     })
@@ -86,4 +87,24 @@ describe('OrderListView（订单列表页 P0）', () => {
   function cards_first(wrapper: ReturnType<typeof mount>) {
     return wrapper.findAll('[data-testid="order-card"]')[0]!
   }
+
+  it('TD-9 待支付订单卡提供「去支付」并进入支付页（PRD 订单列表页行，批次⑩ 105）', async () => {
+    orderMockState.splice(0, orderMockState.length, {
+      ...ORDER_SEED[1]!,
+      orderId: 'op09',
+      status: 'PENDING_PAYMENT',
+      payDeadline: '2099-01-01 00:00:00',
+    })
+    const { wrapper, router } = await mountList()
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="order-card"]').exists()).toBe(true),
+      { timeout: 2000 },
+    )
+    const entry = wrapper.find('[data-testid="order-pay-entry"]')
+    expect(entry.exists()).toBe(true)
+    await entry.trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('order-pay')
+    expect(router.currentRoute.value.params.orderId).toBe('op09')
+  })
 })
