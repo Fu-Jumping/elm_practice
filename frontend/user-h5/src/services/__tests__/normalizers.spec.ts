@@ -7,6 +7,7 @@ import {
   payableAmountText,
   normalizeOrderSummary,
   normalizeOrderDetail,
+  buildAmountLines,
 } from '../normalizers'
 import type { OrderRecord } from '../api/types'
 // 把被测函数引进来。'../normalizers' 是相对路径：测试文件在 __tests__ 里，往上一层就是它
@@ -154,5 +155,109 @@ describe('normalizeOrderDetail 订单详情归一（含明细与地址快照）'
     })
     expect(view.items).toEqual([])
     expect(view.addressSnapshot).toEqual({ contactName: '', contactPhone: '', region: '', detail: '' })
+  })
+})
+
+/**
+ * 批次⑩ OD-N 组（TODO-USER-104，2026-09-11；口径：契约 §3.5 + CHG-003/CHG-004 + PRD 7.6）
+ * 测试场景由负责人确认后由 AI 落地脚手架（TDD 纪律）；本组在 feat: 实现前必须红。
+ * OD-N1 statusText 补 CANCELLED → 已取消（契约 §3.5「前端需补齐 CANCELLED 文案映射」/ TODO-USER-009）
+ * OD-N2 详情归一化透传配送费与优惠快照（TC-ORD-022 CHG-004 口径）
+ * OD-N3 详情归一化透传取消字段（契约 §3.5 取消成功响应新增字段）
+ * OD-N4 金额明细行构造：基础四行恒显示 + 优惠项非 0 各一行 + 顺序固定（CHG-004 定稿）
+ */
+const OD_ORDER_RECORD: OrderRecord = {
+  orderId: 'od10',
+  userId: 'u001',
+  storeId: 'm002',
+  addressId: 'da001',
+  remark: '',
+  status: 'COOKING',
+  createdAt: '2026-09-11 12:00:00',
+  itemSubtotal: 39,
+  packagingFee: 2,
+  deliveryFee: 3,
+  fullReductionAmount: 5,
+  couponAmount: 3,
+  total: 36,
+  paidAt: '2026-09-11 12:01:00',
+  cancelReason: '地址填错了',
+  cancelledAt: '2026-09-11 12:10:00',
+  cancelledBy: 'USER',
+  address: {
+    addressId: 'da001',
+    contactName: '张同学',
+    contactSex: '男',
+    contactPhone: '13800000001',
+    region: '天津大学软件园校区',
+    detail: '4号楼',
+    label: '学校',
+    isDefault: true,
+  },
+  items: [{ productId: 'p101', name: '香辣鸡腿堡', unitPrice: 19.5, quantity: 2, subtotal: 39 }],
+}
+
+describe('批次⑩ 订单详情扩展归一化 OD-N（CHG-003/004）', () => {
+  it('OD-N1 statusText CANCELLED → 已取消（契约 §3.5 前端需补齐）', () => {
+    expect(statusText('CANCELLED')).toBe('已取消')
+  })
+
+  it('OD-N2 详情透传配送费与优惠快照（deliveryFee/discounts，CHG-004）', () => {
+    const view = normalizeOrderDetail(OD_ORDER_RECORD)
+    expect(view.deliveryFee).toBe(3)
+    expect(view.discounts).toEqual([
+      { key: 'full-reduction', label: '满减优惠', amount: 5 },
+      { key: 'coupon', label: '红包优惠', amount: 3 },
+    ])
+  })
+
+  it('OD-N3 详情透传取消字段（cancelReason/cancelledAt，契约 §3.5）', () => {
+    const view = normalizeOrderDetail(OD_ORDER_RECORD)
+    expect(view.cancelReason).toBe('地址填错了')
+    expect(view.cancelledAt).toBe('2026-09-11 12:10:00')
+  })
+
+  it('OD-N4 金额明细行：基础四行恒显示 + 优惠非 0 各一行 + 顺序固定（CHG-004）', () => {
+    const lines = buildAmountLines({
+      itemsTotal: 39,
+      packagingFee: 2,
+      deliveryFee: 3,
+      discounts: [
+        { key: 'full-reduction', label: '满减优惠', amount: 5 },
+        { key: 'coupon', label: '红包优惠', amount: 3 },
+      ],
+      payableAmount: 36,
+    })
+    expect(lines.map((line) => line.label)).toEqual([
+      '商品小计',
+      '打包费',
+      '配送费',
+      '满减优惠',
+      '红包优惠',
+      '实付金额',
+    ])
+    // 配送费为 0 时仍显示 ¥0.00（基础四行恒显示）
+    const zeroDelivery = buildAmountLines({
+      itemsTotal: 39,
+      packagingFee: 2,
+      deliveryFee: 0,
+      discounts: [],
+      payableAmount: 41,
+    })
+    expect(zeroDelivery.find((line) => line.key === 'delivery-fee')?.text).toBe('¥0.00')
+    // 优惠未发生（金额 0）不生成行；优惠行为负数品牌橙（kind=discount）
+    const noDiscount = buildAmountLines({
+      itemsTotal: 39,
+      packagingFee: 2,
+      deliveryFee: 3,
+      discounts: [
+        { key: 'full-reduction', label: '满减优惠', amount: 0 },
+        { key: 'coupon', label: '红包优惠', amount: 0 },
+      ],
+      payableAmount: 44,
+    })
+    expect(noDiscount.filter((line) => line.kind === 'discount')).toEqual([])
+    expect(lines.find((line) => line.key === 'coupon')?.text).toBe('−¥3.00')
+    expect(lines.find((line) => line.key === 'payable')?.kind).toBe('payable')
   })
 })
