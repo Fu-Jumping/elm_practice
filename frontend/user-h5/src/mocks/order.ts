@@ -7,9 +7,11 @@
  * - 金额后端重读购物车行计价：实付 = 商品小计 + 打包费 2.00；前端 expectedTotal 仅作一致性提示
  * - 创建成功持久化订单（含商品/地址/金额快照与创建时间）并清空该店购物车（TC-ORD-003）
  * - GET /orders 按创建时间倒序、支持 status 筛选（TC-ORD-013）；GET /orders/{orderId} 详情含明细（TC-ORD-016）
- * 状态口径：mock 保持 P0 纯度仅 PROCESSING（真实后端为 PENDING_PAYMENT 起步，状态文案由 statusText 兜底）
+ * 状态口径：种子数据保持 P0 纯度仅 PROCESSING（历史数据兼容，详情页按等价档位展示）；
+ * 新建订单自 2026-09-11（批次⑩ 支付页）起对齐契约 §3.5 定稿状态机——创建成功即 PENDING_PAYMENT
+ * 并附带 payDeadline（= 创建时间 + 15 分钟），使「下单 → 支付页 → 模拟支付」链路在 mock 下可完整走通。
  */
-import { PACKAGING_FEE } from '@/services/normalizers'
+import { PACKAGING_FEE, formatTime, remainingSeconds } from '@/services/normalizers'
 import type { OrderRecord } from '@/services/api/types'
 import { addressMockState } from './address'
 import { clearMockCart, getMockCartSnapshot } from './cart'
@@ -18,6 +20,9 @@ import { fail, ok } from './index'
 
 /** 订单内存态（查询侧数据源；导出供测试隔离重灌，与 addressMockState 同风格） */
 export type MockOrder = OrderRecord
+
+/** 待支付时长（契约 §3.5：payDeadline = createdAt + 15 分钟） */
+const PAY_DEADLINE_MINUTES = 15
 
 export const ORDER_SEED: MockOrder[] = [
   {
@@ -111,8 +116,11 @@ export const orderMocks: Record<string, MockHandler> = {
       storeId,
       addressId,
       remark: remark ?? '',
-      status: 'PROCESSING',
+      // 契约 §3.5 定稿：创建成功即待支付（PROCESSING 仅作为 P0 阶段历史状态保留）
+      status: 'PENDING_PAYMENT',
       createdAt: new Date().toISOString(),
+      // 待支付倒计时（契约 §3.5）：payDeadline = createdAt + 15 分钟，前端据此倒计时
+      payDeadline: new Date(Date.now() + PAY_DEADLINE_MINUTES * 60 * 1000).toISOString(),
       itemSubtotal: itemsTotal,
       packagingFee: PACKAGING_FEE,
       total,
@@ -138,6 +146,54 @@ export const orderMocks: Record<string, MockHandler> = {
   'GET /orders/:orderId': ({ params }) => {
     const order = orderMockState.find((item) => item.orderId === params?.orderId)
     if (!order) return fail(404, 40400, '订单不存在')
+    return ok({ ...order, items: (order.items ?? []).map((item) => ({ ...item })) })
+  },
+
+  /**
+   * 模拟支付（契约 §3.5，批次⑩ 支付页）
+   * - success=true：待支付订单 → `PENDING`（待接单）并记录 `paidAt`；已过 `payDeadline` 返回 409（超时不回补库存）
+   * - success=false：模拟失败，订单保持 `PENDING_PAYMENT`（前端据此进入支付失败页）
+   * - 幂等：非待支付状态重复请求直接返回当前订单，不二次变更状态（契约 §3.5 / §7）
+   */
+  'POST /orders/:orderId/payment': ({ params, data }) => {
+    const order = orderMockState.find((item) => item.orderId === params?.orderId)
+    if (!order) return fail(404, 40400, '订单不存在')
+    const copy = { ...order, items: (order.items ?? []).map((item) => ({ ...item })) }
+    if (order.status !== 'PENDING_PAYMENT') return ok(copy)
+    const success = (data as { success?: boolean } | undefined)?.success === true
+    if (!success) return ok(copy)
+    if (remainingSeconds(order.payDeadline, new Date()) <= 0) {
+      return fail(409, 40900, '支付已超时，订单已失效')
+    }
+    order.status = 'PENDING'
+    order.paidAt = formatTime(new Date())
+    return ok({ ...order, items: (order.items ?? []).map((item) => ({ ...item })) })
+  },
+
+  /**
+   * 用户取消订单（契约 §3.5，批次⑩ TODO-USER-002）
+   * - reason 必填且 1–50 字：缺失/全空白/超长 → 400
+   * - 仅 `PENDING_PAYMENT`（未支付）与 `PENDING`（已支付未接单）可取消；`COOKING` 及之后 → 409
+   * - 已是 `CANCELLED` 幂等返回当前订单（HTTP 200），不重复回补库存
+   * - 成功：状态置 `CANCELLED` 并写入 cancelReason/cancelledAt/cancelledBy=USER（订单与金额快照保留）
+   *   库存回补：mock 不维护库存，真实后端在取消事务内按明细回补（契约 §7），此处以注释标注口径
+   */
+  'POST /orders/:orderId/cancel': ({ params, data }) => {
+    const order = orderMockState.find((item) => item.orderId === params?.orderId)
+    if (!order) return fail(404, 40400, '订单不存在')
+    const copy = { ...order, items: (order.items ?? []).map((item) => ({ ...item })) }
+    if (order.status === 'CANCELLED') return ok(copy)
+    const reason = String((data as { reason?: string } | undefined)?.reason ?? '').trim()
+    if (reason.length < 1 || reason.length > 50) {
+      return fail(400, 40000, '取消原因必填且不超过 50 字')
+    }
+    if (order.status !== 'PENDING_PAYMENT' && order.status !== 'PENDING') {
+      return fail(409, 40900, '商家已接单，无法取消')
+    }
+    order.status = 'CANCELLED'
+    order.cancelReason = reason
+    order.cancelledAt = formatTime(new Date())
+    order.cancelledBy = 'USER'
     return ok({ ...order, items: (order.items ?? []).map((item) => ({ ...item })) })
   },
 }

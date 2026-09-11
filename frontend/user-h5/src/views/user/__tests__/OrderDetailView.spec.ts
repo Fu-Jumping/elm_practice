@@ -5,6 +5,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import OrderDetailView from '../OrderDetailView.vue'
 import { useSessionStore } from '@/stores/sessionStore'
 import { ORDER_SEED, orderMockState } from '@/mocks/order'
+import { clearMockCart, getMockCartSnapshot } from '@/mocks/cart'
 import type { OrderRecord } from '@/services/api/types'
 
 /**
@@ -31,6 +32,8 @@ async function mountDetail(orderId: string, pinia?: ReturnType<typeof createPini
     routes: [
       { path: '/orders', name: 'orders', component: { template: '<div />' } },
       { path: '/orders/:orderId', name: 'order-detail', component: OrderDetailView },
+      { path: '/orders/:orderId/pay', name: 'order-pay', component: { template: '<div />' } },
+      { path: '/orders/:orderId/review', name: 'order-review', component: { template: '<div />' } },
       { path: '/stores/:storeId', name: 'store-detail', component: { template: '<div />' } },
     ],
   })
@@ -180,8 +183,8 @@ describe('OrderDetailView 批次⑩（CHG-003 订单详情含跟踪时间线）'
     expect(wrapper.find('[data-testid="order-status-head"]').text()).toContain('待支付')
     expect(wrapper.findAll('[data-testid="timeline-step"]').map((s) => s.text())).toEqual([...TIMELINE_LABELS])
     expect(stepStates(wrapper)).toEqual(['current', 'todo', 'todo', 'todo', 'todo'])
-    // 底部操作区：支付入口沿用 PaymentActions（pay-order），取消按钮可用（PRD 7.16.1 底部操作区行）
-    expect(wrapper.find('[data-testid="pay-order"]').exists()).toBe(true)
+    // 底部操作区：待支付提供「去支付」入口（批次⑩ 105 起改为跳转支付页），取消按钮可用（PRD 7.16.1 底部操作区行）
+    expect(wrapper.find('[data-testid="order-pay-entry"]').exists()).toBe(true)
     const cancel = wrapper.find('[data-testid="cancel-order-btn"]')
     expect(cancel.exists()).toBe(true)
     expect(cancel.attributes('aria-disabled')).not.toBe('true')
@@ -309,5 +312,49 @@ describe('OrderDetailView 批次⑩（CHG-003 订单详情含跟踪时间线）'
     expect(text).toContain('香辣鸡腿堡')
     expect(text).toContain('薯条(中)')
     expect(text).toContain('共 2 件商品')
+  })
+
+  it('TP-10 可用态点「取消订单」打开弹层，提交成功后详情刷新为已取消并展示原因（TODO-USER-002）', async () => {
+    const { wrapper } = await mountOd('od01')
+    const cancel = wrapper.find('[data-testid="cancel-order-btn"]')
+    expect(cancel.attributes('aria-disabled')).toBe('false')
+    await cancel.trigger('click')
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="cancel-sheet"]').exists()).toBe(true), {
+      timeout: 2000,
+    })
+    await wrapper.findAll('[data-testid="reason-chip"]')[0]!.trigger('click')
+    await wrapper.find('[data-testid="cancel-confirm-btn"]').trigger('click')
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="order-status-head"]').text()).toContain('已取消'),
+      { timeout: 2000 },
+    )
+    expect(wrapper.find('[data-testid="cancel-reason"]').text()).toContain('不想要了')
+  })
+
+  it('TQ-4 已完成订单点「再来一单」重建购物车并跳商家详情页（批次⑩ 008）', async () => {
+    clearMockCart('m002')
+    const { wrapper, router } = await mountOd('od05')
+    await wrapper.find('[data-testid="reorder-btn"]').trigger('click')
+    await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('store-detail'), {
+      timeout: 2000,
+    })
+    expect(router.currentRoute.value.params.storeId).toBe('m002')
+    expect(getMockCartSnapshot('m002')).toHaveLength(2)
+  })
+
+  it('TV-9 已完成订单点「去评价」进入评价订单页（批次⑩ 003 入口接线）', async () => {
+    const { wrapper, router } = await mountOd('od05')
+    await wrapper.find('[data-testid="goto-review-btn"]').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('order-review')
+    expect(router.currentRoute.value.params.orderId).toBe('od05')
+  })
+
+  it('TD-10 待支付订单点「去支付」进入支付页（批次⑩ 105 入口接线）', async () => {
+    const { wrapper, router } = await mountOd('od01')
+    await wrapper.find('[data-testid="order-pay-entry"]').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('order-pay')
+    expect(router.currentRoute.value.params.orderId).toBe('od01')
   })
 })

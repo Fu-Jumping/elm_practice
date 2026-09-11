@@ -125,7 +125,7 @@ async function submitOrder(): Promise<void> {
   if (submitDisabled.value || !defaultAddress.value) return
   submitting.value = true
   try {
-    await orderApi.createOrder({
+    const created = await orderApi.createOrder({
       storeId,
       addressId: defaultAddress.value.addressId,
       remark: remark.value.trim() || undefined,
@@ -133,9 +133,9 @@ async function submitOrder(): Promise<void> {
     })
     // 成功后由明确前端流程清空该店购物车：经购物车接口重查（mock 后端已清空，TC-ORD-003）
     await cartStore.fetchCart(storeId)
-    // 文案对齐行为测试锁定口径；订单号展示随订单列表/详情页（第二批 TDD）落地
     toast('下单成功')
-    await router.push({ name: 'orders' })
+    // PRD 7.5：创建订单成功后进入支付页（待支付收银台；批次⑩ 105 起取代原先跳订单列表）
+    await router.push({ name: 'order-pay', params: { orderId: created.orderId } })
   } catch {
     // 失败停留当前页并保留表单（PRD）；错误提示由 http 层统一 toast
   } finally {

@@ -26,7 +26,8 @@ import {
 } from '@/services/normalizers'
 import { useCatalogStore } from '@/stores/catalogStore'
 import type { OrderDetail } from '@/services/api/types'
-import PaymentActions from '@/components/PaymentActions.vue'
+import CancelOrderSheet from '@/components/CancelOrderSheet.vue'
+import { reorderToCart } from '@/utils/reorder'
 import { toast } from '@/utils/toast'
 
 const route = useRoute()
@@ -40,6 +41,8 @@ const refreshing = ref(false)
 const refreshError = ref('')
 const copyTip = ref(false)
 const cancelTip = ref('')
+/** 取消订单确认弹层可见性（批次⑩ TODO-USER-002） */
+const showCancelSheet = ref(false)
 
 /** 时间线五节点（PRD 7.6 文案 ↔ 状态值映射表，CHG-003） */
 const TIMELINE_STEPS = ['已下单', '已支付', '商家接单', '配送中', '已完成'] as const
@@ -105,6 +108,7 @@ const itemCount = computed(() =>
 const cancelEnabled = computed(
   () => order.value?.status === 'PENDING_PAYMENT' || order.value?.status === 'PENDING',
 )
+const isPendingPayment = computed(() => order.value?.status === 'PENDING_PAYMENT')
 const hasFooter = computed(() => !!order.value && !isCancelled.value)
 const showCancel = computed(() => !!order.value && !isCompleted.value)
 const showReview = computed(() => isCompleted.value)
@@ -138,6 +142,12 @@ function goStore(): void {
   void router.push({ name: 'store-detail', params: { storeId: order.value.storeId } })
 }
 
+/** 待支付 → 支付页（收银台；批次⑩ 105） */
+function goPay(): void {
+  if (!order.value) return
+  void router.push({ name: 'order-pay', params: { orderId: order.value.orderId } })
+}
+
 async function refreshOrder(): Promise<void> {
   if (refreshing.value) return
   refreshing.value = true
@@ -165,7 +175,7 @@ async function onCopyOrderId(): Promise<void> {
   }, 1500)
 }
 
-/** 取消：可用态挂 TODO-USER-002 的确认弹层；置灰态给出原因提示（本批只做状态逻辑与提示） */
+/** 取消：可用态打开取消确认弹层；置灰态给出原因提示（PRD 7.16.1 底部操作区行） */
 function onCancel(): void {
   if (!cancelEnabled.value) {
     cancelTip.value = '商家已接单，无法取消'
@@ -174,18 +184,51 @@ function onCancel(): void {
     }, 2000)
     return
   }
-  toast('取消订单确认弹层将随批次②接入')
+  showCancelSheet.value = true
 }
 
-/** 以下三个入口对应模块（批次③评价 / 批次④消息 / TODO-USER-008 再来一单）尚未实现，先给占位提示 */
+/** 取消成功：提示并刷新详情（展示「已取消」与取消原因，时间线整体置灰） */
+function onCancelled(): void {
+  showCancelSheet.value = false
+  toast('订单已取消')
+  void refreshOrder()
+}
+
+/** 取消被拒（已接单等）：关弹层、给出原因并刷新订单状态（PRD 异常列） */
+function onRejected(reason: string): void {
+  showCancelSheet.value = false
+  cancelTip.value = reason || '订单状态已变化，无法取消'
+  window.setTimeout(() => {
+    cancelTip.value = ''
+  }, 3000)
+  void refreshOrder()
+}
+
+/** 联系商家入口对应批次④（消息模块）尚未实现，先给占位提示 */
 function onContactMerchant(): void {
   toast('消息与联系商家将随批次④接入')
 }
 function onReview(): void {
-  toast('评价提交页将随批次③接入')
+  if (!order.value) return
+  // 评价订单页（批次⑩ 003）；页面内会再次校验订单已完成为评价条件
+  void router.push({ name: 'order-review', params: { orderId: order.value.orderId } })
 }
-function onReorder(): void {
-  toast('再来一单将随批次⑩后续任务接入')
+async function onReorder(): Promise<void> {
+  if (!order.value) return
+  try {
+    // 契约 §3.5：按历史订单明细重建购物车（能加尽加），复制完成后跳商家详情页，不直接创建订单
+    const result = await reorderToCart(order.value.orderId)
+    if (result.failed.length > 0) {
+      toast(`已加入 ${result.added} 件商品，${result.failed.length} 件不可购买：${result.failed.join('、')}`)
+    } else if (result.added > 0) {
+      toast(`已加入 ${result.added} 件商品`)
+    }
+    if (result.added > 0) {
+      void router.push({ name: 'store-detail', params: { storeId: result.storeId } })
+    }
+  } catch {
+    toast('再来一单失败，请稍后重试')
+  }
 }
 </script>
 
@@ -415,8 +458,26 @@ function onReorder(): void {
         <button v-if="showReview" class="od-btn od-btn--primary" type="button" data-testid="goto-review-btn" @click="onReview">
           去评价
         </button>
-        <PaymentActions :order-id="order.orderId" :status="order.status" variant="footer" @paid="refreshOrder" />
+        <!-- 待支付：主按钮进入支付页（批次⑩ 105 起由支付页承担收银台，本页不再内联支付动作） -->
+        <button
+          v-if="isPendingPayment"
+          class="od-btn od-btn--primary"
+          type="button"
+          data-testid="order-pay-entry"
+          @click="goPay"
+        >
+          去支付
+        </button>
       </footer>
+
+      <!-- 取消订单确认弹层（批次⑩ TODO-USER-002；可用态由底部「取消订单」打开） -->
+      <CancelOrderSheet
+        v-if="showCancelSheet"
+        :order-id="order.orderId"
+        @close="showCancelSheet = false"
+        @cancelled="onCancelled"
+        @rejected="onRejected"
+      />
     </template>
 
     <p v-else class="od-skeleton">详情加载中…</p>

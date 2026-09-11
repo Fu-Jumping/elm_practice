@@ -182,6 +182,8 @@ export interface OrderRecord {
   deliveryFeeDiscount?: number
   /** 待支付截止时间 = createdAt + 15 分钟（契约 §3.5 待支付倒计时） */
   payDeadline?: string | null
+  /** 是否已评价（契约 §3.5 口径补充：用户端「待评价」文案与去评价入口的判定依据，非独立存储状态） */
+  reviewed?: boolean
   /** 取消信息（契约 §3.5：取消成功后的订单响应新增字段） */
   cancelReason?: string | null
   cancelledAt?: string | null
@@ -219,6 +221,10 @@ export interface OrderSummary {
   storeName: string
   amounts: OrderAmounts
   createdAt: string
+  /** 待支付截止时间（契约 §3.5）：订单列表对待支付订单展示剩余时间与「已失效」需要 */
+  payDeadline?: string | null
+  /** 是否已评价（契约 §3.5 口径补充）：已完成未评价时列表展示「待评价」并提供去评价入口 */
+  reviewed?: boolean
 }
 
 /** 订单详情视图模型（normalizeOrderDetail 输出；明细含在详情中，TC-ORD-016） */
@@ -231,6 +237,10 @@ export interface OrderDetail extends OrderSummary {
   discounts?: OrderDiscountItem[]
   cancelReason?: string
   cancelledAt?: string | null
+  /** 待支付截止时间（契约 §3.5：= createdAt + 15 分钟，支付页倒计时数据源；缺失表示不可支付） */
+  payDeadline?: string | null
+  /** 支付时间（契约 §3.5：支付成功后记录；支付成功页摘要卡展示） */
+  paidAt?: string | null
 }
 
 /** 优惠明细项（CHG-004：金额非 0 才生成行；label 为用户端文案，key 供页面/测试挂钩） */
@@ -252,4 +262,28 @@ export interface OrderAmountLine {
   /** 已格式化金额文本（如 '¥3.00' / '−¥5.00'） */
   text: string
   kind: 'base' | 'discount' | 'payable'
+}
+
+/** 评价记录（契约 §6.2：响应含 tags/images/reply/repliedAt/userNickname，昵称由后端脱敏） */
+export interface ReviewRecord {
+  reviewId: string
+  orderId: string
+  storeId: string
+  rating: number
+  content: string
+  tags: string[]
+  images: string[]
+  /** 脱敏昵称（如「张**」） */
+  userNickname: string
+  createdAt: string
+  reply?: string | null
+  repliedAt?: string | null
+}
+
+/** 提交评价请求体（契约 §6.2：rating 1–5 必填；content/tags/images 为评价内容与可选字段） */
+export interface ReviewSubmitPayload {
+  rating: number
+  content: string
+  tags?: string[]
+  images?: string[]
 }

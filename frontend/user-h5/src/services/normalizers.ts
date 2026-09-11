@@ -95,7 +95,20 @@ export function normalizeOrderSummary(raw: OrderRecord): OrderSummary {
       payableAmount: toFiniteNumber(raw.total),
     },
     createdAt: raw.createdAt,
+    // 待支付倒计时（契约 §3.5）：订单列表对待支付订单展示剩余时间与「已失效」所需
+    payDeadline: raw.payDeadline ?? null,
+    // 是否已评价（契约 §3.5 口径补充）：完成未评价时列表展示「待评价」并提供去评价入口
+    reviewed: raw.reviewed ?? false,
   }
+}
+
+/**
+ * 展示用状态文案（契约 §3.5 / PRD 7.6）：「已完成」且未评价时用户端展示为「待评价」，
+ * 「待评价」不是独立存储状态，由状态与评价情况计算；其余状态回落 statusText。
+ */
+export function orderDisplayStatus(input: { status: string; reviewed?: boolean }): string {
+  if (input.status === 'COMPLETED' && input.reviewed === false) return '待评价'
+  return statusText(input.status)
 }
 
 /** 详情：补明细快照与地址快照映射（无字段时空数组/空快照兜底） */
@@ -120,6 +133,11 @@ export function normalizeOrderDetail(raw: OrderRecord): OrderDetail {
     discounts: buildDiscounts(raw),
     cancelReason: raw.cancelReason ?? '',
     cancelledAt: raw.cancelledAt ?? null,
+    reviewed: raw.reviewed ?? false,
+    // 待支付截止时间（契约 §3.5）：支付页倒计时数据源，缺失表示不可支付（页面据此禁用支付按钮）
+    payDeadline: raw.payDeadline ?? null,
+    // 支付时间（契约 §3.5）：支付成功页摘要卡展示，缺失显示「暂无时间」
+    paidAt: raw.paidAt ?? null,
   }
 }
 
@@ -190,4 +208,25 @@ export function buildAmountLines(input: {
     kind: 'payable',
   })
   return lines
+}
+
+/**
+ * 待支付剩余秒数（契约 §3.5 `payDeadline` = createdAt + 15 分钟；支付页倒计时数据源）
+ * 口径：缺失/非法时间/已过期一律返回 0（调用方据此显示「已失效」并禁用支付）
+ */
+export function remainingSeconds(deadline: string | null | undefined, now: Date = new Date()): number {
+  if (!deadline) return 0
+  const end = new Date(deadline)
+  if (Number.isNaN(end.getTime())) return 0
+  const diff = Math.floor((end.getTime() - now.getTime()) / 1000)
+  return diff > 0 ? diff : 0
+}
+
+/**
+ * 倒计时文本 mm:ss（支付页倒计时卡大字；负数按 0 处理，分钟位不设上限）
+ */
+export function formatCountdown(seconds: number): string {
+  const safe = Number.isFinite(seconds) && seconds > 0 ? Math.floor(seconds) : 0
+  const pad = (n: number): string => String(n).padStart(2, '0')
+  return `${pad(Math.floor(safe / 60))}:${pad(safe % 60)}`
 }
