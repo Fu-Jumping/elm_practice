@@ -36,6 +36,8 @@ const STATUS_TEXT_MAP: Record<string, string> = {
   DELIVERING: '配送中',
   // 后端种子数据含已完成状态订单（联调实测 2026-09-07）
   COMPLETED: '已完成',
+  // 批次⑩（契约 §3.5「前端需补齐 PENDING/COOKING/DELIVERING/CANCELLED 文案映射」）
+  CANCELLED: '已取消',
 }
 
 export function statusText(status: string): string {
@@ -113,22 +115,79 @@ export function normalizeOrderDetail(raw: OrderRecord): OrderDetail {
       region: raw.address?.region ?? '',
       detail: raw.address?.detail ?? '',
     },
+    // 批次⑩（契约 §3.5/§10.4 定稿字段 + CHG-004）：配送费缺省按 0（店铺可配、未配置按 0）
+    deliveryFee: toFiniteNumber(raw.deliveryFee),
+    discounts: buildDiscounts(raw),
+    cancelReason: raw.cancelReason ?? '',
+    cancelledAt: raw.cancelledAt ?? null,
   }
+}
+
+/**
+ * 优惠项定义（顺序固定为 CHG-004 定稿：满减优惠 → 红包优惠 → 其他优惠）
+ * key 供页面 data-key 与测试挂钩；field 为契约 §10.4 定稿快照字段名
+ */
+const DISCOUNT_DEFINITIONS: Array<{
+  key: OrderDiscountItem['key']
+  label: string
+  field: keyof OrderRecord
+}> = [
+  { key: 'full-reduction', label: '满减优惠', field: 'fullReductionAmount' },
+  { key: 'coupon', label: '红包优惠', field: 'couponAmount' },
+  { key: 'new-customer', label: '新客立减', field: 'newCustomerAmount' },
+  { key: 'member-discount', label: '会员折扣', field: 'memberDiscountAmount' },
+  { key: 'delivery-fee-discount', label: '配送费优惠', field: 'deliveryFeeDiscount' },
+]
+
+/**
+ * 优惠项提取（CHG-004）：金额非 0 才生成行，未发生不显示；顺序按 DISCOUNT_DEFINITIONS 固定
+ * 边界：快照可能为负数口径差异 → 取绝对值展示，页面统一按「品牌橙负号」呈现
+ */
+export function buildDiscounts(raw: OrderRecord): OrderDiscountItem[] {
+  const discounts: OrderDiscountItem[] = []
+  for (const { key, label, field } of DISCOUNT_DEFINITIONS) {
+    const amount = toFiniteNumber(raw[field])
+    if (amount !== 0) {
+      discounts.push({ key, label, amount: Math.abs(amount) })
+    }
+  }
+  return discounts
 }
 
 /**
  * 金额明细行构造（CHG-004 定稿口径，批次⑩ TODO-USER-104）：
  * 基础四行恒显示（商品小计/打包费/配送费 0 仍显示/实付金额），优惠项金额非 0 各占一行
  * 品牌橙负数、未发生不显示；顺序固定 商品小计→打包费→配送费→满减→红包→其他→实付。
- * 断言见 normalizers.spec OD-N4；本桩为 test: 提交的测试脚手架，feat: 提交实现转绿。
+ * 断言见 normalizers.spec OD-N4；本行为确认订单页/订单详情页/支付页三处共用口径的唯一出口。
  */
-export function buildAmountLines(_input: {
+export function buildAmountLines(input: {
   itemsTotal: number
   packagingFee: number
   deliveryFee?: number
   discounts?: OrderDiscountItem[]
   payableAmount: number
 }): OrderAmountLine[] {
-  void _input
-  throw new Error('TODO(批次⑩ TDD)：buildAmountLines 未实现，随 feat: 提交转绿')
+  const lines: OrderAmountLine[] = [
+    { key: 'items-total', label: '商品小计', text: `¥${formatMoney(toFiniteNumber(input.itemsTotal))}`, kind: 'base' },
+    { key: 'packaging', label: '打包费', text: `¥${formatMoney(toFiniteNumber(input.packagingFee))}`, kind: 'base' },
+    // 配送费为 0 时仍显示 ¥0.00（基础四行恒显示，2026-09-11 定稿）
+    { key: 'delivery-fee', label: '配送费', text: `¥${formatMoney(toFiniteNumber(input.deliveryFee))}`, kind: 'base' },
+  ]
+  for (const discount of input.discounts ?? []) {
+    if (toFiniteNumber(discount.amount) === 0) continue
+    lines.push({
+      key: discount.key,
+      label: discount.label,
+      // 优惠行以品牌橙负数展示（−¥5.00），绝对值取金额快照
+      text: `−¥${formatMoney(Math.abs(toFiniteNumber(discount.amount)))}`,
+      kind: 'discount',
+    })
+  }
+  lines.push({
+    key: 'payable',
+    label: '实付金额',
+    text: `¥${formatMoney(toFiniteNumber(input.payableAmount))}`,
+    kind: 'payable',
+  })
+  return lines
 }
