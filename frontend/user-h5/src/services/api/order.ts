@@ -27,3 +27,11 @@ export function getOrder(orderId: string): Promise<OrderRecord> {
 export function payOrder(orderId: string, success: boolean): Promise<OrderRecord> {
   return request<OrderRecord>({ method: 'POST', url: endpoints.order.payment(orderId), data: { success } })
 }
+
+/**
+ * 用户取消订单（契约 §3.5，批次⑩ TODO-USER-002）
+ * reason 必填 1–50 字；仅待支付/待接单可取消，COOKING 及之后返回 409；重复取消幂等返回当前订单。
+ */
+export function cancelOrder(orderId: string, reason: string): Promise<OrderRecord> {
+  return request<OrderRecord>({ method: 'POST', url: endpoints.order.cancel(orderId), data: { reason } })
+}

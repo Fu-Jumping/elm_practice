@@ -34,5 +34,7 @@ export const endpoints = {
     list: '/orders',
     detail: (orderId: string) => `/orders/${orderId}`,
     payment: (orderId: string) => `/orders/${encodeURIComponent(orderId)}/payment`,
+    // 用户取消订单（契约 §3.5：reason 必填 1–50 字；COOKING 及之后 409；重复取消幂等）
+    cancel: (orderId: string) => `/orders/${encodeURIComponent(orderId)}/cancel`,
   },
 } as const

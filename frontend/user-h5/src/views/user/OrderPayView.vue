@@ -25,6 +25,8 @@ import {
 import { useCatalogStore } from '@/stores/catalogStore'
 import type { OrderDetail } from '@/services/api/types'
 import PaymentActions from '@/components/PaymentActions.vue'
+import CancelOrderSheet from '@/components/CancelOrderSheet.vue'
+import { toast } from '@/utils/toast'
 
 const route = useRoute()
 const router = useRouter()
@@ -34,7 +36,7 @@ const orderId = typeof route.params.orderId === 'string' ? route.params.orderId 
 const order = ref<OrderDetail | null>(null)
 const missing = ref(false)
 const copyTip = ref(false)
-const cancelTip = ref('')
+const showCancelSheet = ref(false)
 /** 倒计时剩余秒数（每秒刷新）；null 表示 payDeadline 未返回（禁用支付但不判失效） */
 const remain = ref<number | null>(null)
 let timer: number | undefined
@@ -79,7 +81,7 @@ function startTimer(): void {
   timer = window.setInterval(tick, 1000)
 }
 
-onMounted(async () => {
+async function loadOrder(): Promise<void> {
   if (!orderId) {
     missing.value = true
     window.setTimeout(() => void router.replace({ name: 'orders' }), 400)
@@ -89,6 +91,11 @@ onMounted(async () => {
     const record = await orderApi.getOrder(orderId)
     order.value = normalizeOrderDetail(record)
     void catalogStore.fetchStoreDetail(order.value.storeId).catch(() => undefined)
+    // 已取消订单：转订单详情展示「已取消」与原因（不误判为已支付）
+    if (order.value.status === 'CANCELLED') {
+      void router.replace({ name: 'order-detail', params: { orderId } })
+      return
+    }
     // 已支付/非待支付订单再次进入：直接展示支付结果，不重复扣款（PRD 支付页顶部栏行）
     if (order.value.status !== 'PENDING_PAYMENT') {
       void router.replace({ name: 'pay-success', params: { orderId } })
@@ -99,7 +106,9 @@ onMounted(async () => {
     missing.value = true
     window.setTimeout(() => void router.replace({ name: 'orders' }), 400)
   }
-})
+}
+
+onMounted(loadOrder)
 
 onUnmounted(stopTimer)
 
@@ -120,12 +129,22 @@ async function onCopyOrderId(): Promise<void> {
   }, 1500)
 }
 
-/** 取消入口：弹层与取消接口归 TODO-USER-002，本批占位提示 */
+/** 取消入口：打开取消订单确认弹层（TODO-USER-002） */
 function onCancel(): void {
-  cancelTip.value = '取消订单确认弹层将随批次②接入'
-  window.setTimeout(() => {
-    cancelTip.value = ''
-  }, 2000)
+  showCancelSheet.value = true
+}
+
+/** 取消成功：提示并回订单列表（列表可查「已取消」与取消原因） */
+function onCancelled(): void {
+  showCancelSheet.value = false
+  toast('订单已取消')
+  void router.replace({ name: 'orders' })
+}
+
+/** 取消被拒（已接单/已取消等）：关弹层并刷新订单状态（PRD 异常列） */
+function onRejected(): void {
+  showCancelSheet.value = false
+  void loadOrder()
 }
 
 /** 模拟支付成功 → 支付成功页；失败 → 支付失败页（携带失败原因） */
@@ -181,7 +200,6 @@ function onFailed(reason: string): void {
                 取消订单
               </button>
             </div>
-            <p v-if="cancelTip" class="pay-tip" data-testid="pay-cancel-tip">{{ cancelTip }}</p>
 
             <!-- 商品清单 -->
             <ul class="pay-items">
@@ -263,6 +281,15 @@ function onFailed(reason: string): void {
           @failed="onFailed"
         />
       </footer>
+
+      <!-- 取消订单确认弹层（批次⑩ TODO-USER-002） -->
+      <CancelOrderSheet
+        v-if="showCancelSheet"
+        :order-id="order.orderId"
+        @close="showCancelSheet = false"
+        @cancelled="onCancelled"
+        @rejected="onRejected"
+      />
     </template>
 
     <p v-else class="pay-skeleton">支付信息加载中…</p>

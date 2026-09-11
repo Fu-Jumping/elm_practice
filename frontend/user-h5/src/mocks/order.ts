@@ -169,4 +169,31 @@ export const orderMocks: Record<string, MockHandler> = {
     order.paidAt = formatTime(new Date())
     return ok({ ...order, items: (order.items ?? []).map((item) => ({ ...item })) })
   },
+
+  /**
+   * 用户取消订单（契约 §3.5，批次⑩ TODO-USER-002）
+   * - reason 必填且 1–50 字：缺失/全空白/超长 → 400
+   * - 仅 `PENDING_PAYMENT`（未支付）与 `PENDING`（已支付未接单）可取消；`COOKING` 及之后 → 409
+   * - 已是 `CANCELLED` 幂等返回当前订单（HTTP 200），不重复回补库存
+   * - 成功：状态置 `CANCELLED` 并写入 cancelReason/cancelledAt/cancelledBy=USER（订单与金额快照保留）
+   *   库存回补：mock 不维护库存，真实后端在取消事务内按明细回补（契约 §7），此处以注释标注口径
+   */
+  'POST /orders/:orderId/cancel': ({ params, data }) => {
+    const order = orderMockState.find((item) => item.orderId === params?.orderId)
+    if (!order) return fail(404, 40400, '订单不存在')
+    const copy = { ...order, items: (order.items ?? []).map((item) => ({ ...item })) }
+    if (order.status === 'CANCELLED') return ok(copy)
+    const reason = String((data as { reason?: string } | undefined)?.reason ?? '').trim()
+    if (reason.length < 1 || reason.length > 50) {
+      return fail(400, 40000, '取消原因必填且不超过 50 字')
+    }
+    if (order.status !== 'PENDING_PAYMENT' && order.status !== 'PENDING') {
+      return fail(409, 40900, '商家已接单，无法取消')
+    }
+    order.status = 'CANCELLED'
+    order.cancelReason = reason
+    order.cancelledAt = formatTime(new Date())
+    order.cancelledBy = 'USER'
+    return ok({ ...order, items: (order.items ?? []).map((item) => ({ ...item })) })
+  },
 }

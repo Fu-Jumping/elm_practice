@@ -26,6 +26,7 @@ import {
 } from '@/services/normalizers'
 import { useCatalogStore } from '@/stores/catalogStore'
 import type { OrderDetail } from '@/services/api/types'
+import CancelOrderSheet from '@/components/CancelOrderSheet.vue'
 import { toast } from '@/utils/toast'
 
 const route = useRoute()
@@ -39,6 +40,8 @@ const refreshing = ref(false)
 const refreshError = ref('')
 const copyTip = ref(false)
 const cancelTip = ref('')
+/** 取消订单确认弹层可见性（批次⑩ TODO-USER-002） */
+const showCancelSheet = ref(false)
 
 /** 时间线五节点（PRD 7.6 文案 ↔ 状态值映射表，CHG-003） */
 const TIMELINE_STEPS = ['已下单', '已支付', '商家接单', '配送中', '已完成'] as const
@@ -171,7 +174,7 @@ async function onCopyOrderId(): Promise<void> {
   }, 1500)
 }
 
-/** 取消：可用态挂 TODO-USER-002 的确认弹层；置灰态给出原因提示（本批只做状态逻辑与提示） */
+/** 取消：可用态打开取消确认弹层；置灰态给出原因提示（PRD 7.16.1 底部操作区行） */
 function onCancel(): void {
   if (!cancelEnabled.value) {
     cancelTip.value = '商家已接单，无法取消'
@@ -180,7 +183,24 @@ function onCancel(): void {
     }, 2000)
     return
   }
-  toast('取消订单确认弹层将随批次②接入')
+  showCancelSheet.value = true
+}
+
+/** 取消成功：提示并刷新详情（展示「已取消」与取消原因，时间线整体置灰） */
+function onCancelled(): void {
+  showCancelSheet.value = false
+  toast('订单已取消')
+  void refreshOrder()
+}
+
+/** 取消被拒（已接单等）：关弹层、给出原因并刷新订单状态（PRD 异常列） */
+function onRejected(reason: string): void {
+  showCancelSheet.value = false
+  cancelTip.value = reason || '订单状态已变化，无法取消'
+  window.setTimeout(() => {
+    cancelTip.value = ''
+  }, 3000)
+  void refreshOrder()
 }
 
 /** 以下三个入口对应模块（批次③评价 / 批次④消息 / TODO-USER-008 再来一单）尚未实现，先给占位提示 */
@@ -432,6 +452,15 @@ function onReorder(): void {
           去支付
         </button>
       </footer>
+
+      <!-- 取消订单确认弹层（批次⑩ TODO-USER-002；可用态由底部「取消订单」打开） -->
+      <CancelOrderSheet
+        v-if="showCancelSheet"
+        :order-id="order.orderId"
+        @close="showCancelSheet = false"
+        @cancelled="onCancelled"
+        @rejected="onRejected"
+      />
     </template>
 
     <p v-else class="od-skeleton">详情加载中…</p>
