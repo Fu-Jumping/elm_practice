@@ -122,6 +122,8 @@ export function normalizeOrderDetail(raw: OrderRecord): OrderDetail {
     cancelledAt: raw.cancelledAt ?? null,
     // 待支付截止时间（契约 §3.5）：支付页倒计时数据源，缺失表示不可支付（页面据此禁用支付按钮）
     payDeadline: raw.payDeadline ?? null,
+    // 支付时间（契约 §3.5）：支付成功页摘要卡展示，缺失显示「暂无时间」
+    paidAt: raw.paidAt ?? null,
   }
 }
 
