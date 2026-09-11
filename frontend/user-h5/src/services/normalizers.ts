@@ -191,3 +191,23 @@ export function buildAmountLines(input: {
   })
   return lines
 }
+
+/**
+ * 待支付剩余秒数（契约 §3.5 `payDeadline` = createdAt + 15 分钟；支付页倒计时数据源）
+ * 口径：缺失/非法时间/已过期一律返回 0（调用方据此显示「已失效」并禁用支付）
+ * 断言见 normalizers.spec TD-12；本桩为 test: 提交的测试脚手架，feat: 提交实现转绿。
+ */
+export function remainingSeconds(_deadline: string | null | undefined, _now: Date = new Date()): number {
+  void _deadline
+  void _now
+  throw new Error('TODO(批次⑩ 105 TDD)：remainingSeconds 未实现，随 feat: 提交转绿')
+}
+
+/**
+ * 倒计时文本 mm:ss（支付页倒计时卡橙色大字；负数按 0 处理，分钟位不截断上限）
+ * 断言见 normalizers.spec TD-12；本桩为 test: 提交的测试脚手架，feat: 提交实现转绿。
+ */
+export function formatCountdown(_seconds: number): string {
+  void _seconds
+  throw new Error('TODO(批次⑩ 105 TDD)：formatCountdown 未实现，随 feat: 提交转绿')
+}

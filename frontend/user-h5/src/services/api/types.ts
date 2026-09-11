@@ -231,6 +231,8 @@ export interface OrderDetail extends OrderSummary {
   discounts?: OrderDiscountItem[]
   cancelReason?: string
   cancelledAt?: string | null
+  /** 待支付截止时间（契约 §3.5：= createdAt + 15 分钟，支付页倒计时数据源；缺失表示不可支付） */
+  payDeadline?: string | null
 }
 
 /** 优惠明细项（CHG-004：金额非 0 才生成行；label 为用户端文案，key 供页面/测试挂钩） */
