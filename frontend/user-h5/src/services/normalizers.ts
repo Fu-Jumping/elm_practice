@@ -230,3 +230,20 @@ export function formatCountdown(seconds: number): string {
   const pad = (n: number): string => String(n).padStart(2, '0')
   return `${pad(Math.floor(safe / 60))}:${pad(safe % 60)}`
 }
+
+/**
+ * 相对时间文案（消息中心展示，契约无该字段 → 由 createdAt 本地换算）
+ * 口径：< 1 分钟「刚刚」→ < 60 分钟「N分钟前」→ < 24 小时「N小时前」→ 昨天 → 其余「MM-DD HH:mm」
+ */
+export function formatRelativeTime(input: string | number | Date, now: Date = new Date()): string {
+  const at = new Date(input)
+  if (Number.isNaN(at.getTime())) return ''
+  const diffMinutes = Math.floor((now.getTime() - at.getTime()) / 60000)
+  if (diffMinutes < 1) return '刚刚'
+  if (diffMinutes < 60) return `${diffMinutes}分钟前`
+  const diffHours = Math.floor(diffMinutes / 60)
+  if (diffHours < 24) return `${diffHours}小时前`
+  if (diffHours < 48) return '昨天'
+  const pad = (n: number): string => String(n).padStart(2, '0')
+  return `${pad(at.getMonth() + 1)}-${pad(at.getDate())} ${pad(at.getHours())}:${pad(at.getMinutes())}`
+}
