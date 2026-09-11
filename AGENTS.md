@@ -54,6 +54,7 @@
 - 业务规则必须由后端兜底校验，前端校验只做用户体验层。
 - 需求变更（阶段 2）到达时：先补失败测试锁定新行为，再改业务代码并回归。
 - **合并前必跑矩阵（R1，2026-09-10）**：改前端必须跑 `npm run build`（含类型检查）**和** `npx vitest run`（`frontend/user-h5` 无 `test` 脚本，见其 package.json）；改后端必须跑 `mvn -B -DskipTests package`（有测试库时补 `mvn test`）；改文档必须做口径 grep 复查；改脚本必须做语法检查。只跑单测不跑构建**不算通过**（2026-09-10 实测：只跑 `npm test` 漏掉 `tsc` 类型错误，直到服务器构建才暴露）。命令与结果写入 PR 描述（模板 `.github/pull_request_template.md`），CI 见 `.github/workflows/ci.yml`。
+- **测试库口径（R8，2026-09-10）**：后端测试统一在**服务器测试库** `elm_practice_test` 上执行——SSH 到服务器、以 `DB_NAME=elm_practice_test` 运行；**禁止**对业务库 `elm_practice` 跑重置类测试；**开发机不安装 MySQL**，本机不跑依赖数据库的测试。口径与账号见 `docs/project/项目规则.md` §5 与 `docs/project/运行说明.md` §4.5。
 
 ## 执行规则
 
