@@ -1258,7 +1258,9 @@ function onCheckout(): void {
   list-style: none;
   margin: 0;
   padding: 0;
-  max-height: 40vh;
+  /* TODO-USER-018：展开态可视高度不足（负责人 9/10 走查）→ 40vh 提到 56vh；
+     仍保留内部滚动，避免抽屉顶到吸顶 Tab 线与底部购物车栏 */
+  max-height: 56vh;
   overflow-y: auto;
 }
 
