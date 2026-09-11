@@ -1,0 +1,251 @@
+<!DOCTYPE html><html lang="zh-CN" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>订单详情 - 饿了么</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#FF5A1F",
+                        "primary-hover": "#E44910",
+                        "primary-light": "#FFF3ED",
+                        "primary-border": "#FFD9CC",
+                        dark: "#1A1A1A",
+                        muted: "#757575",
+                        subtle: "#9E9E9E",
+                        page: "#F6F7F9",
+                        card: "#FFFFFF",
+                        border: "#F0F0F2",
+                        "border-subtle": "#EBECEF"
+                    },
+                    borderRadius: {
+                        card: "16px",
+                        pill: "9999px"
+                    },
+                    boxShadow: {
+                        card: "0 2px 12px rgba(0, 0, 0, 0.03)",
+                        float: "0 -4px 16px rgba(0, 0, 0, 0.04)",
+                        glow: "0 0 0 4px rgba(255, 90, 31, 0.15)"
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-page text-dark font-sans antialiased min-h-screen pb-[92px] selection:bg-primary selection:text-white">
+<!-- Top Warm Ambient Gradient Header -->
+<div class="relative bg-gradient-to-b from-[#FFF0E8] via-[#FFF7F2] to-page pt-safe transition-all">
+<!-- Top App Bar Navigation -->
+<header class="sticky top-0 z-40 flex items-center justify-between px-4 h-12 w-full">
+<button class="w-9 h-9 flex items-center justify-center rounded-full bg-white/70 backdrop-blur-md shadow-sm border border-white/50 text-dark active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[20px]">arrow_back_ios_new</span>
+</button>
+<h1 class="font-semibold text-[17px] text-dark tracking-tight">订单详情</h1>
+<div class="w-9"></div>
+</header>
+<!-- Status & Stepper Banner -->
+<div class="px-5 pt-3 pb-6 flex flex-col items-center">
+<!-- Main Status Title -->
+<div class="text-center space-y-2 mb-6">
+<h2 class="text-[26px] font-extrabold text-dark tracking-tight flex items-center justify-center gap-1.5">
+                    商家已接单
+                    <span class="material-symbols-outlined text-primary text-[22px] font-bold animate-pulse">restaurant</span>
+</h2>
+<!-- Delivery Estimation Capsule Badge -->
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-pill bg-white/90 shadow-sm border border-primary-border/60 backdrop-blur-sm">
+<span class="material-symbols-outlined text-primary text-[15px]">schedule</span>
+<span class="text-[13px] font-medium text-dark">预计 <strong class="text-primary font-bold">12:30</strong> 送达</span>
+</div>
+</div>
+<!-- Enhanced 5-Step Stepper Component -->
+<div class="w-full max-w-md px-2">
+<div class="relative flex items-center justify-between">
+<!-- Background Grey Track -->
+<div class="absolute top-[11px] left-5 right-5 h-[3px] bg-slate-200/90 rounded-full -z-0"></div>
+<!-- Active Orange Gradient Track (Spans across first 3 nodes: 50% width) -->
+<div class="absolute top-[11px] left-5 w-1/2 h-[3px] bg-gradient-to-r from-primary to-[#FF7844] rounded-full -z-0 transition-all duration-500"></div>
+<!-- Step 1: 已下单 -->
+<div class="flex flex-col items-center gap-1.5 z-10">
+<div class="w-[22px] h-[22px] rounded-full bg-primary flex items-center justify-center shadow-xs">
+<span class="material-symbols-outlined text-white text-[13px] font-bold">check</span>
+</div>
+<span class="text-[12px] font-medium text-dark">已下单</span>
+</div>
+<!-- Step 2: 已支付 -->
+<div class="flex flex-col items-center gap-1.5 z-10">
+<div class="w-[22px] h-[22px] rounded-full bg-primary flex items-center justify-center shadow-xs">
+<span class="material-symbols-outlined text-white text-[13px] font-bold">check</span>
+</div>
+<span class="text-[12px] font-medium text-dark">已支付</span>
+</div>
+<!-- Step 3: 商家接单 (Current Active with Pulse & Double Ring) -->
+<div class="flex flex-col items-center gap-1.5 z-10">
+<div class="relative flex items-center justify-center">
+<span class="absolute w-7 h-7 rounded-full bg-primary/20 animate-ping opacity-75"></span>
+<div class="w-[22px] h-[22px] rounded-full bg-white border-[2.5px] border-primary flex items-center justify-center shadow-md">
+<div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+</div>
+</div>
+<span class="text-[12px] font-bold text-primary">商家接单</span>
+</div>
+<!-- Step 4: 配送中 -->
+<div class="flex flex-col items-center gap-1.5 z-10">
+<div class="w-[20px] h-[20px] rounded-full bg-slate-200 border-[2px] border-white flex items-center justify-center">
+<div class="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
+</div>
+<span class="text-[12px] font-normal text-subtle">配送中</span>
+</div>
+<!-- Step 5: 已完成 -->
+<div class="flex flex-col items-center gap-1.5 z-10">
+<div class="w-[20px] h-[20px] rounded-full bg-slate-200 border-[2px] border-white flex items-center justify-center">
+<div class="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
+</div>
+<span class="text-[12px] font-normal text-subtle">已完成</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Content Container with Float Island Cards -->
+<main class="space-y-3 -mt-2 space-y-4">
+<!-- Merchant & Food Order Card -->
+<section class="bg-card p-4 shadow-card border-border/80 transition-all border">
+<!-- Merchant Header -->
+<div class="flex items-center justify-between pb-3.5 border-b border-border/70">
+<div class="flex items-center gap-1.5 group cursor-pointer">
+<span class="font-bold text-[16px] text-dark group-hover:text-primary transition-colors">肯德基</span>
+<span class="material-symbols-outlined text-subtle text-[18px] -ml-0.5">chevron_right</span>
+</div>
+<span class="text-[12px] text-subtle">外卖自取/送达</span>
+</div>
+<!-- Dishes List -->
+<div class="py-3.5 space-y-3.5 divide-y divide-border/40">
+<!-- Item 1 -->
+<div class="flex items-center justify-between pt-1 first:pt-0">
+<div class="flex items-center gap-3">
+<img alt="香辣脆皮鸡腿堡" class="w-14 h-14 rounded-xl object-cover border border-black/5 flex-shrink-0 shadow-xs" data-alt="A close-up of a crispy fried chicken burger, golden brown crust, fresh lettuce, and mayonnaise on a toasted sesame seed bun. Bright, appetizing studio lighting. Modern food photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7uKeCkrawFtdRFE1HrnK3n0kubMnQk2FqleTZmUythRtMY0f8xWqBo4TzIzaDghrRobfWFWOPc4XEaegDuVEsi_wmeg2jvhVjRlzTexzgox2Xx8Gypp7QrOTk1_C2D3RZz5PZgNaolk88iSoapv4Gi_5fo0r71o4GIUa9J09_fN1g1Mj66sNtB2FG0BnSIoH4q6lIVDYA65VU_fteFIO-Ch370a0djbPXjq-umXpE8J9zpESz0UGZpX_MkGpgq-8RlGl0gBzONcV_">
+<div>
+<h4 class="text-[14px] font-semibold text-dark leading-tight">香辣脆皮鸡腿堡</h4>
+<p class="text-[12px] text-subtle mt-1.5">x1</p>
+</div>
+</div>
+<div class="text-right">
+<span class="text-[15px] font-semibold text-dark">¥ 19.9</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center justify-between pt-3">
+<div class="flex items-center gap-3">
+<img alt="薯条(中)" class="w-14 h-14 rounded-xl object-cover border border-black/5 flex-shrink-0 shadow-xs" data-alt="A serving of golden, crispy french fries in a classic red and white striped container. Bright overhead lighting highlighting the texture and salt crystals. Professional food styling." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFmqencOC6a-PI0901BNmPTtBfnzRRBQsRNovwkkSj6bCJME23TQQSINNwomcVSKjhLPyRt0aKWflWE5IhU0ZBq_FbJC5HrHvQgY9ZizC_UuJBi8D6vhQdbAKT-pmAunc6ntSMp_jD8Bw61kSdV9uKYyt9MgdBkeX1E25J4Pt0bgVhVLYXNA0xRwNbkRb_IUun0ytUPoYyWP19M6crkZnuNFZoNcdxv5sGm4T0Z8e4ZzWwW_kXSMGKBHxOIPZY12YLrOAA5SPI_BGW">
+<div>
+<h4 class="text-[14px] font-semibold text-dark leading-tight">薯条(中)</h4>
+<p class="text-[12px] text-subtle mt-1.5">x1</p>
+</div>
+</div>
+<div class="text-right">
+<span class="text-[15px] font-semibold text-dark">¥ 11.5</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center justify-between pt-3">
+<div class="flex items-center gap-3">
+<img alt="可乐(大)" class="w-14 h-14 rounded-xl object-cover border border-black/5 flex-shrink-0 shadow-xs" data-alt="A tall glass of dark cola with ice cubes and condensation on the outside. Crisp, refreshing lighting with subtle backlighting to show the amber color of the drink. Studio food photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIdr8DgE5fb5LB9GikqEfJBQtPfm4QJusWbVim9o7nSwsK7Cvu8ebj6GiuZVVrRsld6F0tIHCj65Va5I8I9o45xDjDHe73AbRxGLf9HVYyJHfz6iFZR9sGk_V4ZBWQnHw8h8xFvJeZ6R7CgDu1tUnYTZElZRfUx6FYJJ29iQjZw0QHzCdAG6ecJgX2vOoS276FatzbVpr-71RA8FeYFhuTZlr8cTrpDOtSws_x0kyyJGrodyrwoo_kOVMxurtraVvik-Yr86AnvJxD">
+<div>
+<h4 class="text-[14px] font-semibold text-dark leading-tight">可乐(大)</h4>
+<p class="text-[12px] text-subtle mt-1.5">x1</p>
+</div>
+</div>
+<div class="text-right">
+<span class="text-[15px] font-semibold text-dark">¥ 9.0</span>
+</div>
+</div>
+</div>
+<!-- Price Breakdown & Discount -->
+<div class="pt-3.5 border-t border-border/70 space-y-2.5">
+<div class="flex justify-between items-center text-[13px]">
+<span class="text-muted">配送费</span>
+<span class="text-dark font-medium">¥ 3.5</span>
+</div>
+<div class="flex justify-between items-center text-[13px]">
+<div class="flex items-center gap-1.5">
+<span class="bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-none">减</span>
+<span class="text-muted">满减优惠</span>
+</div>
+<span class="text-primary font-bold">-¥ 5.0</span>
+</div>
+</div>
+<!-- Total Payment Summary -->
+<div class="mt-4 pt-3.5 border-t border-border/70 flex justify-between items-baseline">
+<span class="text-[13px] text-subtle">共 3 件商品</span>
+<div class="flex items-baseline gap-1">
+<span class="text-[13px] text-muted font-medium">实付</span>
+<span class="text-primary text-[15px] font-bold">¥</span>
+<span class="text-primary text-[24px] font-extrabold tracking-tight">38.9</span>
+</div>
+</div>
+</section>
+<!-- Delivery Info Card -->
+<section class="bg-card p-4 shadow-card border-border/80 border">
+<h3 class="text-[15px] font-bold text-dark mb-3.5 flex items-center gap-1.5">
+<span class="w-1 h-3.5 bg-primary rounded-full inline-block"></span>
+                配送信息
+            </h3>
+<div class="space-y-3.5 text-[13px]">
+<div class="flex items-start">
+<span class="text-muted w-20 shrink-0">配送地址</span>
+<div class="text-dark font-medium leading-relaxed">
+<p class="font-semibold text-dark">天津大学软件园校区 4号楼</p>
+<p class="text-muted text-[12px] mt-0.5 font-normal">张同学 138****8888</p>
+</div>
+</div>
+<div class="flex items-center">
+<span class="text-muted w-20 shrink-0">配送服务</span>
+<div class="flex items-center gap-1.5">
+<span class="inline-flex items-center text-primary font-medium text-[12px] bg-primary-light border border-primary-border px-1.5 py-0.5 rounded">蜂鸟专送</span>
+<span class="text-dark">由 蜂鸟专送 提供配送服务</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Order Info Card -->
+<section class="bg-card p-4 shadow-card border-border/80 border">
+<h3 class="text-[15px] font-bold text-dark mb-3.5 flex items-center gap-1.5">
+<span class="w-1 h-3.5 bg-primary rounded-full inline-block"></span>
+                订单信息
+            </h3>
+<div class="space-y-3 text-[13px]">
+<div class="flex justify-between items-center">
+<span class="text-muted">订单号</span>
+<div class="flex items-center gap-2">
+<span class="text-dark font-medium tracking-wide">3492847192837482</span>
+<button class="text-primary text-[11px] font-medium border border-primary/40 bg-primary/5 hover:bg-primary/10 px-2 py-0.5 rounded-full active:scale-95 transition-all">
+                            复制
+                        </button>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-muted">下单时间</span>
+<span class="text-dark font-medium">2023-10-27 11:45:23</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-muted">支付方式</span>
+<span class="text-dark font-medium flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                        微信支付
+                    </span>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Bottom Action Bar -->
+<footer class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-border/80 px-4 py-3 pb-safe shadow-float flex items-center justify-end gap-3 h-[72px]"><button class="px-4 py-2.5 rounded-xl border border-slate-300 text-[14px] font-medium text-dark bg-white hover:bg-slate-50 active:scale-95 transition-all shadow-xs">取消订单</button><button class="px-4 py-2.5 rounded-xl border border-slate-300 text-[14px] font-medium text-dark bg-white hover:bg-slate-50 active:scale-95 transition-all shadow-xs">联系商家</button><button class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary to-[#FF7133] hover:from-primary-hover hover:to-primary text-white text-[14px] font-semibold active:scale-95 transition-all shadow-md shadow-primary/25">查看配送进度</button></footer>
+
+
+</body></html>
