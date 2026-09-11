@@ -5,6 +5,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import OrderDetailView from '../OrderDetailView.vue'
 import { useSessionStore } from '@/stores/sessionStore'
 import { ORDER_SEED, orderMockState } from '@/mocks/order'
+import { clearMockCart, getMockCartSnapshot } from '@/mocks/cart'
 import type { OrderRecord } from '@/services/api/types'
 
 /**
@@ -327,6 +328,17 @@ describe('OrderDetailView 批次⑩（CHG-003 订单详情含跟踪时间线）'
       { timeout: 2000 },
     )
     expect(wrapper.find('[data-testid="cancel-reason"]').text()).toContain('不想要了')
+  })
+
+  it('TQ-4 已完成订单点「再来一单」重建购物车并跳商家详情页（批次⑩ 008）', async () => {
+    clearMockCart('m002')
+    const { wrapper, router } = await mountOd('od05')
+    await wrapper.find('[data-testid="reorder-btn"]').trigger('click')
+    await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('store-detail'), {
+      timeout: 2000,
+    })
+    expect(router.currentRoute.value.params.storeId).toBe('m002')
+    expect(getMockCartSnapshot('m002')).toHaveLength(2)
   })
 
   it('TD-10 待支付订单点「去支付」进入支付页（批次⑩ 105 入口接线）', async () => {

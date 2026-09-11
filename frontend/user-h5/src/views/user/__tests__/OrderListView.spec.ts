@@ -1,10 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
 import OrderListView from '../OrderListView.vue'
 import { useSessionStore } from '@/stores/sessionStore'
 import { ORDER_SEED, orderMockState } from '@/mocks/order'
+import { clearMockCart, getMockCartSnapshot } from '@/mocks/cart'
+import { onToast } from '@/utils/toast'
 
 /**
  * 订单列表页 P0 行为测试 T40–T42（2026-09-07 第二批，口径来自 PRD 7.6 + 7.16 订单列表页三行，AI 辅助脚手架）
@@ -14,9 +16,26 @@ import { ORDER_SEED, orderMockState } from '@/mocks/order'
  * 口径：P0 仅"全部"筛选；订单按创建时间倒序（TC-ORD-013）
  */
 describe('OrderListView（订单列表页 P0）', () => {
+  const messages: string[] = []
+  let offToast: (() => void) | undefined
+
   beforeEach(() => {
     orderMockState.splice(0, orderMockState.length, ...ORDER_SEED.map((item) => ({ ...item })))
+    messages.length = 0
+    offToast = onToast((message) => messages.push(message))
   })
+
+  afterEach(() => offToast?.())
+
+  /** 以当前时刻为基准生成 yyyy-MM-dd HH:mm:ss（待支付倒计时用例需要相对时间） */
+  function deadlineFromNow(offsetMs: number): string {
+    const date = new Date(Date.now() + offsetMs)
+    const pad = (n: number): string => String(n).padStart(2, '0')
+    return (
+      `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+      ` ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+    )
+  }
 
   function bootstrapPinia() {
     const pinia = createPinia()
@@ -35,6 +54,7 @@ describe('OrderListView（订单列表页 P0）', () => {
         { path: '/orders', name: 'orders', component: OrderListView },
         { path: '/orders/:orderId', name: 'order-detail', component: { template: '<div />' } },
         { path: '/orders/:orderId/pay', name: 'order-pay', component: { template: '<div />' } },
+        { path: '/stores/:storeId', name: 'store-detail', component: { template: '<div />' } },
         { path: '/login', name: 'login', component: { template: '<div />' } },
       ],
     })
@@ -106,5 +126,90 @@ describe('OrderListView（订单列表页 P0）', () => {
     await flushPromises()
     expect(router.currentRoute.value.name).toBe('order-pay')
     expect(router.currentRoute.value.params.orderId).toBe('op09')
+  })
+  it('TQ-1 待支付卡片显示支付剩余时间；已到期显示「已失效」并禁用「去支付」（PRD 列表页异常列）', async () => {
+    orderMockState.splice(
+      0,
+      orderMockState.length,
+      {
+        ...ORDER_SEED[1]!,
+        orderId: 'op31',
+        status: 'PENDING_PAYMENT',
+        createdAt: '2026-09-11 12:00:00',
+        payDeadline: deadlineFromNow(15 * 60 * 1000),
+      },
+      {
+        ...ORDER_SEED[1]!,
+        orderId: 'op32',
+        status: 'PENDING_PAYMENT',
+        createdAt: '2026-09-11 11:00:00',
+        payDeadline: deadlineFromNow(-60 * 1000),
+      },
+    )
+    const { wrapper } = await mountList()
+    await vi.waitFor(
+      () => expect(wrapper.findAll('[data-testid="order-countdown"]').length).toBe(2),
+      { timeout: 2000 },
+    )
+    const countdowns = wrapper.findAll('[data-testid="order-countdown"]')
+    // 列表按创建时间倒序：op31（未到期）在前、op32（已过期）在后
+    expect(countdowns[0]!.text()).toMatch(/剩余 \d{2}:\d{2}/)
+    expect(countdowns[1]!.text()).toContain('已失效')
+    const entries = wrapper.findAll('[data-testid="order-pay-entry"]')
+    expect(entries[0]!.attributes('aria-disabled')).not.toBe('true')
+    expect(entries[1]!.attributes('aria-disabled')).toBe('true')
+    await entries[1]!.trigger('click')
+    await flushPromises()
+    expect(messages.join('|')).toContain('已失效')
+  })
+
+  it('TQ-2 已完成卡片「再来一单」重建购物车并跳商家详情页（契约 §3.5）', async () => {
+    clearMockCart('m002')
+    orderMockState.splice(0, orderMockState.length, {
+      ...ORDER_SEED[0]!,
+      orderId: 'op33',
+      status: 'COMPLETED',
+      storeId: 'm002',
+      items: [{ productId: 'p101', name: '香辣鸡腿堡', unitPrice: 19.5, quantity: 2, subtotal: 39 }],
+    })
+    const { wrapper, router } = await mountList()
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="order-reorder-entry"]').exists()).toBe(true),
+      { timeout: 2000 },
+    )
+    await wrapper.find('[data-testid="order-reorder-entry"]').trigger('click')
+    await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('store-detail'), {
+      timeout: 2000,
+    })
+    expect(router.currentRoute.value.params.storeId).toBe('m002')
+    const lines = getMockCartSnapshot('m002')
+    expect(lines).toHaveLength(1)
+    expect(lines[0]!.quantity).toBe(2)
+  })
+
+  it('TQ-3 再来一单遇到不可购商品：能加尽加并按商品名汇总提示', async () => {
+    clearMockCart('m002')
+    orderMockState.splice(0, orderMockState.length, {
+      ...ORDER_SEED[0]!,
+      orderId: 'op34',
+      status: 'COMPLETED',
+      storeId: 'm002',
+      items: [
+        { productId: 'p101', name: '香辣鸡腿堡', unitPrice: 19.5, quantity: 1, subtotal: 19.5 },
+        { productId: 'p999', name: '已下架商品', unitPrice: 9, quantity: 1, subtotal: 9 },
+      ],
+    })
+    const { wrapper, router } = await mountList()
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="order-reorder-entry"]').exists()).toBe(true),
+      { timeout: 2000 },
+    )
+    await wrapper.find('[data-testid="order-reorder-entry"]').trigger('click')
+    await vi.waitFor(() => expect(messages.join('|')).toContain('已下架商品'), { timeout: 2000 })
+    expect(messages.join('|')).toContain('1 件')
+    expect(getMockCartSnapshot('m002')).toHaveLength(1)
+    await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('store-detail'), {
+      timeout: 2000,
+    })
   })
 })
