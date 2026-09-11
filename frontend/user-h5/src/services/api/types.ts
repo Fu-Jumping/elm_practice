@@ -219,6 +219,8 @@ export interface OrderSummary {
   storeName: string
   amounts: OrderAmounts
   createdAt: string
+  /** 待支付截止时间（契约 §3.5）：订单列表对待支付订单展示剩余时间与「已失效」需要 */
+  payDeadline?: string | null
 }
 
 /** 订单详情视图模型（normalizeOrderDetail 输出；明细含在详情中，TC-ORD-016） */
