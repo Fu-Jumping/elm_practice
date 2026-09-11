@@ -8,7 +8,7 @@ actor "商家" as Merchant
 rectangle "用户端移动 H5\n(frontend/user-h5/\nVue 3 + Vite + Pinia)" as UserFrontend
 rectangle "商家端桌面 Web 后台\n(frontend/merchant-admin/\nReact 18 + Vite + AntD 5)" as MerchantFrontend
 rectangle "Java 后端服务\n(backend/\nSpring Boot, :4000)" as Backend
-database "MySQL 数据库\n(local, 3306)" as DB
+database "MySQL 数据库\n(服务器 82.157.137.114:3306)" as DB
 
 User --> UserFrontend : 浏览器访问
 Merchant --> MerchantFrontend : 浏览器访问

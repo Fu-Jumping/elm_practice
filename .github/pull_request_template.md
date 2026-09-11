@@ -14,6 +14,7 @@
 | 商家端前端 | `npm run build` / `npm test` | |
 | 后端 | `mvn -B -DskipTests package`（具备测试库时补 `mvn test`） | |
 | 文档 | 口径 grep 复查（列出命令与残留） | |
+| 脚本 | `bash -n` 等语法检查（列出命令） | |
 
 ## TDD 红绿
 
