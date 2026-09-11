@@ -113,47 +113,112 @@
 </button>
 <h1 class="font-headline-md text-headline-md text-on-surface">CampusBites</h1>
 <div class="w-8"></div> <!-- Placeholder for balance -->
-</header>
+</header><div class="w-full py-5 px-4 bg-gradient-to-b from-orange-50/80 via-amber-50/50 to-surface border-b border-orange-100 flex flex-col items-center justify-center gap-1.5 shadow-sm"><div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-orange-100/60 text-primary text-[13px] font-medium"><span class="material-symbols-outlined text-[16px]">schedule</span><span class="">支付剩余时间</span></div><div class="flex items-baseline gap-1 text-primary-container"><span id="countdown" class="font-bold text-[28px] tracking-tight leading-none text-[#ae3200] font-headline-lg">14:59</span></div></div>
 <!-- Main Content -->
-<main class="flex-grow p-margin-page flex flex-col gap-gap-module pb-24">
-<!-- Payment Amount & Countdown Card -->
-<section class="bg-surface-white border border-border-light rounded-xl p-4 flex flex-col items-center justify-center py-8">
-<div class="text-text-secondary font-body-md mb-2">支付剩余时间</div>
-<div class="font-headline-lg text-headline-lg text-primary mb-4 flex items-center gap-1">
-<span class="material-symbols-outlined text-primary text-[24px]">timer</span>
-<span id="countdown" class="">14:02</span>
+<main class="flex-grow flex flex-col pb-24">
+<section class="bg-surface-white border-t border-b border-border-light flex flex-col w-full mt-2.5">
+<!-- 标题栏 -->
+<div class="px-4 py-3.5 border-b border-border-light flex justify-between items-center">
+<span class="font-semibold text-on-surface text-[15px] tracking-tight">订单详情</span>
+<button class="text-text-tertiary hover:text-text-secondary text-[13px] transition-colors">取消订单</button>
 </div>
-<div class="text-text-secondary font-body-md">订单金额</div>
-<div class="font-headline-lg text-[32px] font-bold text-on-surface leading-none mt-1">¥ 45.00</div>
-<div class="text-text-tertiary font-label-md mt-2"><div class="flex justify-between items-center w-full"><span class="">订单号：20231024883921</span></div></div>
-</section><section class="bg-surface-white border border-border-light rounded-xl flex flex-col">
-<div class="p-4 border-b border-border-light font-body-lg text-body-lg text-on-surface font-semibold flex justify-between items-center">订单详情<button class="text-text-secondary text-xs underline">取消订单</button></div>
-<div class="p-4 flex flex-col gap-3">
-<div class="flex justify-between">
-<span class="text-text-secondary font-body-md">商家</span>
-<span class="text-on-surface font-body-md">麦当劳 (校园店)</span>
+<!-- 菜品列表 -->
+<div class="p-4 flex flex-col gap-4 border-b border-border-light">
+<!-- 商品 1 -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<img alt="麦辣鸡腿堡" class="w-12 h-12 rounded-lg object-cover bg-surface-container shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJP5P_4HW6Fgc7L5iueKG9th71ELMfWuLDuAVR6lNQNqu0JgZxIqNjLJHoXWfKMTSKtElzDYIw-vTh83JHiebIC-s059elOroHGAJzmQ94YFp_gz1JgErFWkAHiccirRlSm4n9_MQQRo90JUI5e-GPs3sQrfwy19gX-5mjixyaxGhSR8CEvZsUx3CEdTmx7EkjoNsXnZ18FxuTpUZF0rFut4GL-OIZWa-tomqciU1_p0irxmYlmWgDsQ">
+<div class="flex flex-col justify-center gap-1">
+<span class="text-on-surface font-medium text-[15px] leading-tight">麦辣鸡腿汉堡</span>
+<span class="text-text-tertiary text-[12px]">x1</span>
 </div>
-<div class="flex justify-between">
-<span class="text-text-secondary font-body-md">订单编号</span>
-<span class="text-on-surface font-body-md">20231024883921</span>
 </div>
-<div class="flex justify-between">
-<span class="text-text-secondary font-body-md">下单时间</span>
-<span class="text-on-surface font-body-md">2023-10-24 12:00</span>
+<span class="text-on-surface font-semibold text-[15px]">¥19.90</span>
 </div>
-<div class="flex flex-col gap-1">
-<span class="text-text-secondary font-body-md">收货地址</span>
-<div class="text-on-surface font-body-md text-right">
-<p class="">12号楼 304室</p>
-<p class="">张同学 (先生) 138****5678</p>
+<!-- 商品 2 -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<img alt="香脆薯条 (中)" class="w-12 h-12 rounded-lg object-cover bg-surface-container shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFxtsA6vXxf8QH4z2olSebM-2ptfa_0kIGXODNImnpdKDKzcuWxuN3Zv6aAv3Bc5TI79YbEXQzIJqwNKQcBdvWhlGuI9HYGI3U_iARCdjz8vVg6XuUsx9SEdNsoSPGVZi2crzsOWFua0ZNvP6bKP0tPr5mOWqdCl1DBkNNl0a3lcHgVkYtOpcRQ9W80jColIZo6S6ZHlgnhrovA_2U8ycTHAQrnMf6_VQNM3vaL0JGvFdm1kgzQforJA">
+<div class="flex flex-col justify-center gap-1">
+<span class="text-on-surface font-medium text-[15px] leading-tight">香脆薯条 (中)</span>
+<span class="text-text-tertiary text-[12px]">x1</span>
+</div>
+</div>
+<span class="text-on-surface font-semibold text-[15px]">¥11.50</span>
+</div>
+<!-- 商品 3 -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<img alt="冰可口可乐 (大)" class="w-12 h-12 rounded-lg object-cover bg-surface-container shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfKdTAnPSNSkeb2Eh1jcRJp8PZUbZGuIOfUfgw-GPG6VLetgpErhGoDqOqmprLm_RPQVnGMiKnN2yYzPwm6qp2g9X4iiqq6wCz8vHbmKp9jLMr8nYtxLMn14dRNVbyMCR_RVY5fyaU0W2i8kh-clkMrf-Jos3TAp045xMyzwfMnW-xr_OrAjGyQRPaVgQ_bb7fGpIXejdRhn9GjGym2qbWRKSnA_I_RjPzrJifBrmUzTX60lgLMaMfHg">
+<div class="flex flex-col justify-center gap-1">
+<span class="text-on-surface font-medium text-[15px] leading-tight">冰可口可乐 (大)</span>
+<span class="text-text-tertiary text-[12px]">x1</span>
+</div>
+</div>
+<span class="text-on-surface font-semibold text-[15px]">¥9.00</span>
+</div>
+</div>
+<!-- 费用计算明细 -->
+<div class="p-4 flex flex-col gap-2.5 border-b border-border-light text-[14px]">
+<div class="flex justify-between items-center text-[14px]">
+<span class="text-text-secondary">商品小计</span>
+<span class="text-on-surface font-medium">¥40.40</span>
+</div>
+<div class="flex justify-between items-center text-[14px]">
+<span class="text-text-secondary">打包费</span>
+<span class="text-on-surface font-medium">¥2.00</span>
+</div>
+<div class="flex justify-between items-center text-[14px]">
+<span class="text-text-secondary">配送费</span>
+<span class="text-on-surface font-medium">¥3.50</span>
+</div>
+<div class="flex justify-between items-center text-[14px]">
+<span class="text-text-secondary">满减优惠</span>
+<span class="text-primary font-medium">-¥5.00</span>
+</div>
+<div class="flex justify-between items-center text-[14px]">
+<span class="text-text-secondary">红包优惠</span>
+<span class="text-primary font-medium">-¥2.00</span>
+</div>
+<div class="flex justify-between items-baseline pt-3 mt-1 border-t border-dashed border-border-light">
+<span class="font-semibold text-on-surface text-[15px]">实付金额</span>
+<div class="text-primary flex items-baseline leading-none">
+<span class="text-[14px] font-bold mr-0.5">¥</span>
+<span class="text-[22px] font-bold tracking-tight">38.90</span>
+</div>
+</div>
+</div>
+<!-- 商家与配送信息 -->
+<div class="p-4 flex flex-col gap-3 text-[14px]">
+<div class="flex justify-between items-center">
+<span class="text-text-secondary text-[13px]">商家</span>
+<span class="text-on-surface font-medium text-[14px]">麦当劳 (校园店)</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-text-secondary text-[13px]">订单编号</span>
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="font-normal text-[13px] tracking-tight">20231024883921</span>
+<button class="text-primary text-xs flex items-center p-0.5 rounded hover:bg-surface-container transition-colors" title="复制">
+<span class="material-symbols-outlined text-[15px]">content_copy</span>
+</button>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-text-secondary text-[13px]">下单时间</span>
+<span class="text-on-surface text-[13px]">2023-10-24 12:00</span>
+</div>
+<div class="flex justify-between items-start gap-4 pt-0.5">
+<span class="text-text-secondary text-[13px] shrink-0">收货地址</span>
+<div class="text-on-surface text-right flex flex-col items-end">
+<p class="font-medium text-[14px]">12号楼 304室</p>
+<p class="text-text-secondary text-[12px] mt-0.5">张同学 (先生) 138****5678</p>
 </div>
 </div>
 </div>
 </section>
-<!-- Payment Methods -->
 </main>
 <!-- Bottom Action Area -->
-<div class="fixed bottom-0 left-0 w-full bg-surface-white border-t border-border-light p-margin-page pb-safe z-40"><div class="flex items-center gap-3 w-full"><button class="flex-grow text-surface-white font-cta-button text-cta-button py-3 rounded-lg flex items-center justify-center transition-colors bg-primary-container active:bg-primary w-full">立即支付</button></div></div>
+<div class="fixed bottom-0 left-0 w-full bg-surface-white border-t border-border-light p-margin-page pb-safe z-40"><div class="flex items-center gap-3 w-full"><button class="flex-grow text-surface-white font-cta-button text-cta-button py-3 rounded-lg flex items-center justify-center transition-colors bg-primary-container active:bg-primary w-full"><span class="text-[16px] font-semibold tracking-wide flex items-center justify-center gap-1">立即支付 <span class="text-[14px] font-normal">¥</span><span class="text-[18px] font-bold">38.90</span></span></button></div></div>
 <script>
         // Simple countdown timer logic
         let timeInSeconds = 14 * 60 + 59; // 14:59
@@ -171,8 +236,6 @@
 
         setInterval(updateCountdown, 1000);
     </script>
-
-
 
 
 </body></html>
