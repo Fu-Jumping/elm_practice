@@ -6,6 +6,7 @@ import OrderDetailView from '../OrderDetailView.vue'
 import { useSessionStore } from '@/stores/sessionStore'
 import { ORDER_SEED, orderMockState } from '@/mocks/order'
 import { clearMockCart, getMockCartSnapshot } from '@/mocks/cart'
+import { CONVERSATION_SEED, conversationMockState } from '@/mocks/message'
 import type { OrderRecord } from '@/services/api/types'
 
 /**
@@ -34,6 +35,7 @@ async function mountDetail(orderId: string, pinia?: ReturnType<typeof createPini
       { path: '/orders/:orderId', name: 'order-detail', component: OrderDetailView },
       { path: '/orders/:orderId/pay', name: 'order-pay', component: { template: '<div />' } },
       { path: '/orders/:orderId/review', name: 'order-review', component: { template: '<div />' } },
+      { path: '/messages/:conversationId', name: 'chat-detail', component: { template: '<div />' } },
       { path: '/stores/:storeId', name: 'store-detail', component: { template: '<div />' } },
     ],
   })
@@ -340,6 +342,34 @@ describe('OrderDetailView 批次⑩（CHG-003 订单详情含跟踪时间线）'
     })
     expect(router.currentRoute.value.params.storeId).toBe('m002')
     expect(getMockCartSnapshot('m002')).toHaveLength(2)
+  })
+
+  it('TX-8 「联系商家」按订单取会话进入聊天详情；无会话时给出提示（批次⑩ 004b）', async () => {
+    // 为夹具订单 od03 造一条会话（替身种子的会话挂在 o0001/o0002 上）
+    conversationMockState.splice(0, conversationMockState.length, {
+      conversationId: 'cv9001',
+      orderId: 'od03',
+      storeId: 'm002',
+      lastMessage: '好的，已按要求加酱',
+      lastMessageAt: '2026-09-11 14:06:00',
+      unread: 1,
+    })
+    const { wrapper, router } = await mountOd('od03')
+    const entry = wrapper.find('[data-testid="contact-merchant-btn"]')
+    expect(entry.exists()).toBe(true)
+    await entry.trigger('click')
+    await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('chat-detail'), {
+      timeout: 2000,
+    })
+
+    // 该订单无会话时：提示且不跳转
+    conversationMockState.splice(0, conversationMockState.length)
+    const second = await mountOd('od03')
+    await second.wrapper.find('[data-testid="contact-merchant-btn"]').trigger('click')
+    await vi.waitFor(
+      () => expect(second.wrapper.find('[data-testid="contact-merchant-tip"]').exists()).toBe(true),
+      { timeout: 2000 },
+    )
   })
 
   it('TV-9 已完成订单点「去评价」进入评价订单页（批次⑩ 003 入口接线）', async () => {
