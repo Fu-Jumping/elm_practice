@@ -3,7 +3,7 @@
  * 单测必测对象（TDD 规划 §4.2）；缺字段给确定默认值，禁止多键名试探式解包
  * 本文件 9/4 起按 TDD 实现（测试场景由人设计，AI 只辅助脚手架）
  */
-import type { OrderDetail, OrderRecord, OrderSummary } from '@/services/api/types'
+import type { OrderAmountLine, OrderDetail, OrderDiscountItem, OrderRecord, OrderSummary } from '@/services/api/types'
 
 /** 金额：后端返回数字元，展示保留两位小数（契约：金额后端保留两位小数） */
 export function formatMoney(amount: number): string {
@@ -114,4 +114,21 @@ export function normalizeOrderDetail(raw: OrderRecord): OrderDetail {
       detail: raw.address?.detail ?? '',
     },
   }
+}
+
+/**
+ * 金额明细行构造（CHG-004 定稿口径，批次⑩ TODO-USER-104）：
+ * 基础四行恒显示（商品小计/打包费/配送费 0 仍显示/实付金额），优惠项金额非 0 各占一行
+ * 品牌橙负数、未发生不显示；顺序固定 商品小计→打包费→配送费→满减→红包→其他→实付。
+ * 断言见 normalizers.spec OD-N4；本桩为 test: 提交的测试脚手架，feat: 提交实现转绿。
+ */
+export function buildAmountLines(_input: {
+  itemsTotal: number
+  packagingFee: number
+  deliveryFee?: number
+  discounts?: OrderDiscountItem[]
+  payableAmount: number
+}): OrderAmountLine[] {
+  void _input
+  throw new Error('TODO(批次⑩ TDD)：buildAmountLines 未实现，随 feat: 提交转绿')
 }

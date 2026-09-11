@@ -130,8 +130,8 @@ export interface OrderCreated {
   payableAmount: number
 }
 
-/** 订单状态（契约 §3.5：基础 P0 仅 PROCESSING；后端已实现支付扩展状态机，见 PENDING_PAYMENT） */
-export type OrderStatus = 'PROCESSING' | 'PENDING_PAYMENT' | 'PENDING' | 'COOKING' | 'DELIVERING' | 'COMPLETED'
+/** 订单状态（契约 §3.5：基础 P0 仅 PROCESSING；后端已实现支付扩展状态机；CANCELLED 随批次②取消接入） */
+export type OrderStatus = 'PROCESSING' | 'PENDING_PAYMENT' | 'PENDING' | 'COOKING' | 'DELIVERING' | 'COMPLETED' | 'CANCELLED'
 
 /**
  * 订单记录（后端 GET /orders 实际形状，2026-09-07 联调对齐）
@@ -173,6 +173,19 @@ export interface OrderRecord {
   paidAt?: string | null
   address?: OrderAddressRecord
   items?: OrderRecordItem[]
+  /** 金额快照扩展（契约 §3.5/§10.4 定稿命名，CHG-004）：配送费与优惠各字段，未发生为 0 或缺省 */
+  deliveryFee?: number
+  fullReductionAmount?: number
+  newCustomerAmount?: number
+  memberDiscountAmount?: number
+  couponAmount?: number
+  deliveryFeeDiscount?: number
+  /** 待支付截止时间 = createdAt + 15 分钟（契约 §3.5 待支付倒计时） */
+  payDeadline?: string | null
+  /** 取消信息（契约 §3.5：取消成功后的订单响应新增字段） */
+  cancelReason?: string | null
+  cancelledAt?: string | null
+  cancelledBy?: string | null
 }
 
 /** 金额快照三件套（TC-ORD-022：实付 = 商品小计 + packagingFee，视图模型） */
@@ -213,4 +226,30 @@ export interface OrderDetail extends OrderSummary {
   remark: string
   items: OrderItemSnapshot[]
   addressSnapshot: AddressSnapshot
+  /** 批次⑩（CHG-003/004）扩展：配送费、优惠项与取消信息（normalizers 归一输出，页面不直连契约字段） */
+  deliveryFee?: number
+  discounts?: OrderDiscountItem[]
+  cancelReason?: string
+  cancelledAt?: string | null
+}
+
+/** 优惠明细项（CHG-004：金额非 0 才生成行；label 为用户端文案，key 供页面/测试挂钩） */
+export interface OrderDiscountItem {
+  key:
+    | 'full-reduction'
+    | 'coupon'
+    | 'new-customer'
+    | 'member-discount'
+    | 'delivery-fee-discount'
+  label: string
+  amount: number
+}
+
+/** 金额明细行（CHG-004 定稿口径）：基础四行恒显示，优惠项按实际发生，顺序固定 */
+export interface OrderAmountLine {
+  key: string
+  label: string
+  /** 已格式化金额文本（如 '¥3.00' / '−¥5.00'） */
+  text: string
+  kind: 'base' | 'discount' | 'payable'
 }
