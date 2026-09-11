@@ -14,8 +14,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { useCatalogStore } from '@/stores/catalogStore'
 import { useCartStore } from '@/stores/cartStore'
 import { useSessionStore } from '@/stores/sessionStore'
-import { formatMoney, statusText } from '@/services/normalizers'
-import type { CartLine, Product } from '@/services/api/types'
+import { formatMoney, formatTime, statusText } from '@/services/normalizers'
+import { reviewApi } from '@/services/api'
+import type { CartLine, Product, ReviewRecord } from '@/services/api/types'
 import { toast } from '@/utils/toast'
 import StoreCover from '@/components/StoreCover.vue'
 import { productImageSrc, storeImageSrc } from '@/utils/demoImages'
@@ -31,6 +32,27 @@ const sessionStore = useSessionStore()
 const storeId = String(route.params.storeId)
 
 const activeTab = ref<'order' | 'review'>('order')
+
+/** 店铺评价（批次⑩ TODO-USER-003：接契约 §6.2 店铺评价接口，含商家回复与脱敏昵称） */
+const reviews = ref<ReviewRecord[]>([])
+const reviewLoading = ref(false)
+
+async function loadReviews(): Promise<void> {
+  reviewLoading.value = true
+  try {
+    reviews.value = await reviewApi.getStoreReviews(storeId)
+  } catch {
+    // 评价加载失败不阻塞点餐主链路：展示空态
+    reviews.value = []
+  } finally {
+    reviewLoading.value = false
+  }
+}
+
+// 切到评价页签时才请求评价接口（点餐页签不拉取）
+watch(activeTab, (tab) => {
+  if (tab === 'review' && reviews.value.length === 0) void loadReviews()
+})
 const activeCategoryId = ref('')
 
 // 2026-09-08 闪屏修复（T69）：详情数据归属当前店铺才参与渲染——
@@ -435,9 +457,31 @@ function onCheckout(): void {
         </button>
       </nav>
 
-      <!-- 评价占位（契约 §6.2：P1 未选定不实现，不请求评价接口） -->
-      <div v-if="activeTab === 'review'" class="review-placeholder" data-testid="review-placeholder">
-        评价功能暂未开放
+      <!-- 店铺评价列表（批次⑩ 003 真实化：GET /stores/{storeId}/reviews） -->
+      <div v-if="activeTab === 'review'" class="review-area" data-testid="review-list">
+        <p v-if="reviewLoading" class="review-empty">评价加载中…</p>
+        <p v-else-if="reviews.length === 0" class="review-empty" data-testid="review-empty">暂无评价</p>
+        <ul v-else class="review-list">
+          <li v-for="review in reviews" :key="review.reviewId" class="review-item" data-testid="review-item">
+            <div class="review-head">
+              <span class="review-nickname">{{ review.userNickname }}</span>
+              <span class="review-stars" :aria-label="`${review.rating} 星`">
+                {{ '★'.repeat(review.rating) }}{{ '☆'.repeat(5 - review.rating) }}
+              </span>
+            </div>
+            <p class="review-content">{{ review.content }}</p>
+            <div v-if="review.tags.length > 0" class="review-tags">
+              <span v-for="tag in review.tags" :key="tag" class="review-tag">{{ tag }}</span>
+            </div>
+            <p class="review-time">{{ formatTime(review.createdAt) }}</p>
+            <!-- 商家回复（TC-REV-003：回复内容与时间可见；商家端写权，用户端只读展示） -->
+            <div v-if="review.reply" class="review-reply" data-testid="review-reply">
+              <p class="review-reply-label">商家回复</p>
+              <p class="review-reply-content">{{ review.reply }}</p>
+              <p v-if="review.repliedAt" class="review-reply-time">{{ formatTime(review.repliedAt) }}</p>
+            </div>
+          </li>
+        </ul>
       </div>
 
       <!-- 点餐区：左分类栏 + 右商品列表 -->
@@ -868,14 +912,111 @@ function onCheckout(): void {
   background: var(--color-primary);
 }
 
-.review-placeholder {
-  /* 与点餐区同高：评价态同样在外层滚到吸顶线后不再滚动（§5 滚动交接一致） */
-  height: calc(100dvh - 100px);
-  overflow-y: auto;
-  padding: 64px 12px;
+.review-area {
+  padding: 12px;
+  background: #ffffff;
+}
+
+.review-empty {
+  padding: 32px 12px;
   text-align: center;
+  font-size: 13px;
+  color: #999999;
+}
+
+.review-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.review-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.review-item:last-child {
+  border-bottom: none;
+}
+
+.review-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.review-nickname {
   font-size: 14px;
-  color: var(--color-text-secondary);
+  font-weight: 500;
+  color: #1a1c1c;
+}
+
+.review-stars {
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--color-primary);
+}
+
+.review-content {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: #1a1c1c;
+}
+
+.review-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.review-tag {
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  line-height: 18px;
+  color: #666666;
+}
+
+.review-time {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: #999999;
+}
+
+/* 商家回复块：浅品牌底，与评价正文区分（设计系统-用户端「商家评价页/评价列表」行） */
+.review-reply {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff3ed;
+}
+
+.review-reply-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  color: var(--color-primary);
+}
+
+.review-reply-content {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: #1a1c1c;
+}
+
+.review-reply-time {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: #999999;
 }
 
 /* ---- 点餐区（滚动容器策略按设计稿导出 code.html：页面不滚，左右两栏各自滚动、右侧铺满到购物车栏上沿）---- */

@@ -204,12 +204,14 @@ function onRejected(reason: string): void {
   void refreshOrder()
 }
 
-/** 以下入口对应模块（批次③评价 / 批次④消息）尚未实现，先给占位提示 */
+/** 联系商家入口对应批次④（消息模块）尚未实现，先给占位提示 */
 function onContactMerchant(): void {
   toast('消息与联系商家将随批次④接入')
 }
 function onReview(): void {
-  toast('评价提交页将随批次③接入')
+  if (!order.value) return
+  // 评价订单页（批次⑩ 003）；页面内会再次校验订单已完成为评价条件
+  void router.push({ name: 'order-review', params: { orderId: order.value.orderId } })
 }
 async function onReorder(): Promise<void> {
   if (!order.value) return

@@ -15,8 +15,8 @@ import {
   formatMoney,
   formatTime,
   normalizeOrderSummary,
+  orderDisplayStatus,
   remainingSeconds,
-  statusText,
 } from '@/services/normalizers'
 import { reorderToCart } from '@/utils/reorder'
 import { toast } from '@/utils/toast'
@@ -60,6 +60,11 @@ function goPay(order: OrderSummary): void {
     return
   }
   void router.push({ name: 'order-pay', params: { orderId: order.orderId } })
+}
+
+/** 去评价（PRD 列表页行：待评价点击评价）→ 评价订单页 */
+function goReview(order: OrderSummary): void {
+  void router.push({ name: 'order-review', params: { orderId: order.orderId } })
 }
 
 /** 再来一单（契约 §3.5）：按历史明细重建购物车，能加尽加，复制完成后跳商家详情页 */
@@ -137,7 +142,7 @@ function goDetail(order: OrderSummary): void {
         >
           <div class="ol-store-row">
             <span class="ol-store">{{ displayName(order) }}</span>
-            <span class="ol-status">{{ statusText(order.status) }}</span>
+            <span class="ol-status">{{ orderDisplayStatus(order) }}</span>
           </div>
           <div class="ol-meta-row">
             <span class="ol-time">{{ formatTime(order.createdAt) }}</span>
@@ -167,13 +172,22 @@ function goDetail(order: OrderSummary): void {
               去支付
             </button>
             <button
-              v-if="order.status === 'COMPLETED'"
+              v-if="order.status === 'COMPLETED' && order.reviewed"
               class="ol-pay"
               type="button"
               data-testid="order-reorder-entry"
               @click.stop="onReorder(order)"
             >
               再来一单
+            </button>
+            <button
+              v-if="order.status === 'COMPLETED' && !order.reviewed"
+              class="ol-pay"
+              type="button"
+              data-testid="order-review-entry"
+              @click.stop="goReview(order)"
+            >
+              去评价
             </button>
           </div>
         </section>

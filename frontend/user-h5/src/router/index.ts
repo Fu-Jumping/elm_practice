@@ -69,6 +69,13 @@ const router = createRouter({
           meta: { title: '支付', auth: true, priority: 'P1' },
         },
         {
+          // 评价订单页：批次⑩ TODO-USER-003（PRD 7.7/7.16.1，设计真源 08-评价/01-评价订单）
+          path: 'orders/:orderId/review',
+          name: 'order-review',
+          component: () => import('@/views/user/ReviewOrderView.vue'),
+          meta: { title: '评价订单', auth: true, priority: 'P1' },
+        },
+        {
           // 支付成功页：批次⑩ 105b 实现设计真稿（07-支付/03-支付成功）；105a 先提供可跳转骨架
           path: 'orders/:orderId/pay-success',
           name: 'pay-success',

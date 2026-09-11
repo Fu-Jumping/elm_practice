@@ -37,4 +37,9 @@ export const endpoints = {
     // 用户取消订单（契约 §3.5：reason 必填 1–50 字；COOKING 及之后 409；重复取消幂等）
     cancel: (orderId: string) => `/orders/${encodeURIComponent(orderId)}/cancel`,
   },
+  // 评价（契约 §6.2）：用户为已完成订单提交评价 / 查询店铺评价列表
+  review: {
+    submit: (orderId: string) => `/orders/${encodeURIComponent(orderId)}/review`,
+    byStore: (storeId: string) => `/stores/${encodeURIComponent(storeId)}/reviews`,
+  },
 } as const
