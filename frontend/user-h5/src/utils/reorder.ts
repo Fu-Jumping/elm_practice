@@ -4,8 +4,10 @@
  * POST /cart/items；商品下架或库存不足时按 §3.4 规则拒绝并提示」+ PRD 6.1 功能清单「按历史订单重建购物车」。
  * 负责人确认口径（2026-09-11）：能加尽加——逐条加入，不可购的商品跳过并汇总提示；
  * 复制完成后由页面跳转商家详情页（不直接创建订单）。
- * 本桩为 test: 提交的测试脚手架，实现随 feat: 提交转绿。
  */
+import { cartApi, orderApi } from '@/services/api'
+import { normalizeOrderDetail } from '@/services/normalizers'
+
 export interface ReorderResult {
   /** 成功加入购物车的商品行数 */
   added: number
@@ -15,7 +17,23 @@ export interface ReorderResult {
   storeId: string
 }
 
-export async function reorderToCart(_orderId: string): Promise<ReorderResult> {
-  void _orderId
-  throw new Error('TODO(批次⑩ 008 TDD)：reorderToCart 未实现，随 feat: 提交转绿')
+export async function reorderToCart(orderId: string): Promise<ReorderResult> {
+  const detail = normalizeOrderDetail(await orderApi.getOrder(orderId))
+  let added = 0
+  const failed: string[] = []
+  for (const item of detail.items) {
+    try {
+      // 按历史订单快照重建购物车行（后端会重读商品价格与上下架状态，前端只传数量）
+      await cartApi.addCartItem({
+        storeId: detail.storeId,
+        productId: item.productId,
+        quantity: item.quantity,
+      })
+      added += 1
+    } catch {
+      // 商品下架/售罄/库存不足等（契约 §3.4 拒绝）：跳过该件并汇总商品名
+      failed.push(item.name)
+    }
+  }
+  return { added, failed, storeId: detail.storeId }
 }

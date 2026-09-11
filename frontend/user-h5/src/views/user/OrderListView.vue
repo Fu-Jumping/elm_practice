@@ -7,10 +7,19 @@
  * - 空结果显示空态；点击卡片进入订单详情；回到列表重新请求，不沿用过期列表
  * - 待支付订单提供「去支付」入口 → 支付页（批次⑩ 105，PRD 订单列表页行：待支付点击去支付）
  */
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { orderApi } from '@/services/api'
-import { formatMoney, formatTime, normalizeOrderSummary, statusText } from '@/services/normalizers'
+import {
+  formatCountdown,
+  formatMoney,
+  formatTime,
+  normalizeOrderSummary,
+  remainingSeconds,
+  statusText,
+} from '@/services/normalizers'
+import { reorderToCart } from '@/utils/reorder'
+import { toast } from '@/utils/toast'
 import { useCatalogStore } from '@/stores/catalogStore'
 import { useSessionStore } from '@/stores/sessionStore'
 import type { OrderSummary } from '@/services/api/types'
@@ -22,9 +31,52 @@ const sessionStore = useSessionStore()
 const orders = ref<OrderSummary[]>([])
 const loading = ref(false)
 
-/** 待支付订单 → 支付页（收银台） */
+/** 每秒刷新的「当前时间」（待支付倒计时展示用） */
+const now = ref(Date.now())
+let countdownTimer: number | undefined
+
+/** 待支付剩余秒数（契约 §3.5 payDeadline；缺失或已过为 0） */
+function remainingOf(order: OrderSummary): number {
+  return remainingSeconds(order.payDeadline, new Date(now.value))
+}
+
+/** 待支付且已过 payDeadline：显示已失效并禁止支付（PRD 订单列表页异常列） */
+function isExpired(order: OrderSummary): boolean {
+  return order.status === 'PENDING_PAYMENT' && !!order.payDeadline && remainingOf(order) <= 0
+}
+
+function hasCountdown(order: OrderSummary): boolean {
+  return order.status === 'PENDING_PAYMENT' && !!order.payDeadline
+}
+
+function countdownText(order: OrderSummary): string {
+  return isExpired(order) ? '已失效' : `剩余 ${formatCountdown(remainingOf(order))}`
+}
+
+/** 待支付订单 → 支付页（收银台）；已失效则禁止支付并提示 */
 function goPay(order: OrderSummary): void {
+  if (isExpired(order)) {
+    toast('订单已失效，请重新下单')
+    return
+  }
   void router.push({ name: 'order-pay', params: { orderId: order.orderId } })
+}
+
+/** 再来一单（契约 §3.5）：按历史明细重建购物车，能加尽加，复制完成后跳商家详情页 */
+async function onReorder(order: OrderSummary): Promise<void> {
+  try {
+    const result = await reorderToCart(order.orderId)
+    if (result.failed.length > 0) {
+      toast(`已加入 ${result.added} 件商品，${result.failed.length} 件不可购买：${result.failed.join('、')}`)
+    } else if (result.added > 0) {
+      toast(`已加入 ${result.added} 件商品`)
+    }
+    if (result.added > 0) {
+      void router.push({ name: 'store-detail', params: { storeId: result.storeId } })
+    }
+  } catch {
+    toast('再来一单失败，请稍后重试')
+  }
 }
 
 /** 店名映射（后端订单记录无 storeName：按 storeId 从店铺列表映射，缺口见联调问题清单） */
@@ -40,6 +92,14 @@ onMounted(async () => {
   // 店铺列表供店名映射（失败不阻塞订单渲染，降级显示 storeId）
   void catalogStore.fetchStores().catch(() => undefined)
   await refresh()
+  // 倒计时每秒刷新（仅用于展示与失效判定，不向服务端轮询）
+  countdownTimer = window.setInterval(() => {
+    now.value = Date.now()
+  }, 1000)
+})
+
+onUnmounted(() => {
+  if (countdownTimer !== undefined) window.clearInterval(countdownTimer)
 })
 
 async function refresh(): Promise<void> {
@@ -83,9 +143,37 @@ function goDetail(order: OrderSummary): void {
             <span class="ol-time">{{ formatTime(order.createdAt) }}</span>
             <span class="ol-amount">实付 ¥{{ formatMoney(order.amounts.payableAmount) }}</span>
           </div>
-          <div v-if="order.status === 'PENDING_PAYMENT'" class="ol-actions">
-            <button class="ol-pay" type="button" data-testid="order-pay-entry" @click.stop="goPay(order)">
+          <div
+            v-if="hasCountdown(order) || order.status === 'PENDING_PAYMENT' || order.status === 'COMPLETED'"
+            class="ol-actions"
+          >
+            <span
+              v-if="hasCountdown(order)"
+              class="ol-countdown"
+              :class="{ 'is-expired': isExpired(order) }"
+              data-testid="order-countdown"
+            >
+              {{ countdownText(order) }}
+            </span>
+            <button
+              v-if="order.status === 'PENDING_PAYMENT'"
+              class="ol-pay"
+              :class="{ 'is-disabled': isExpired(order) }"
+              type="button"
+              data-testid="order-pay-entry"
+              :aria-disabled="isExpired(order) ? 'true' : 'false'"
+              @click.stop="goPay(order)"
+            >
               去支付
+            </button>
+            <button
+              v-if="order.status === 'COMPLETED'"
+              class="ol-pay"
+              type="button"
+              data-testid="order-reorder-entry"
+              @click.stop="onReorder(order)"
+            >
+              再来一单
             </button>
           </div>
         </section>
@@ -188,8 +276,27 @@ function goDetail(order: OrderSummary): void {
 /* 待支付卡片「去支付」入口（批次⑩ 105）：白底品牌橙描边次按钮，点击冒泡已阻止 */
 .ol-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 10px;
   padding-top: 10px;
+}
+
+/* 待支付倒计时：未到期品牌橙、已失效置灰 */
+.ol-countdown {
+  margin-right: auto;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--color-primary);
+}
+
+.ol-countdown.is-expired {
+  color: #999999;
+}
+
+.ol-pay.is-disabled {
+  border-color: #e5e5e5;
+  color: #bfbfbf;
 }
 
 .ol-pay {

@@ -95,6 +95,8 @@ export function normalizeOrderSummary(raw: OrderRecord): OrderSummary {
       payableAmount: toFiniteNumber(raw.total),
     },
     createdAt: raw.createdAt,
+    // 待支付倒计时（契约 §3.5）：订单列表对待支付订单展示剩余时间与「已失效」所需
+    payDeadline: raw.payDeadline ?? null,
   }
 }
 

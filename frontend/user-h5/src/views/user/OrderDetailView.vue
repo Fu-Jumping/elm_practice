@@ -27,6 +27,7 @@ import {
 import { useCatalogStore } from '@/stores/catalogStore'
 import type { OrderDetail } from '@/services/api/types'
 import CancelOrderSheet from '@/components/CancelOrderSheet.vue'
+import { reorderToCart } from '@/utils/reorder'
 import { toast } from '@/utils/toast'
 
 const route = useRoute()
@@ -203,15 +204,29 @@ function onRejected(reason: string): void {
   void refreshOrder()
 }
 
-/** 以下三个入口对应模块（批次③评价 / 批次④消息 / TODO-USER-008 再来一单）尚未实现，先给占位提示 */
+/** 以下入口对应模块（批次③评价 / 批次④消息）尚未实现，先给占位提示 */
 function onContactMerchant(): void {
   toast('消息与联系商家将随批次④接入')
 }
 function onReview(): void {
   toast('评价提交页将随批次③接入')
 }
-function onReorder(): void {
-  toast('再来一单将随批次⑩后续任务接入')
+async function onReorder(): Promise<void> {
+  if (!order.value) return
+  try {
+    // 契约 §3.5：按历史订单明细重建购物车（能加尽加），复制完成后跳商家详情页，不直接创建订单
+    const result = await reorderToCart(order.value.orderId)
+    if (result.failed.length > 0) {
+      toast(`已加入 ${result.added} 件商品，${result.failed.length} 件不可购买：${result.failed.join('、')}`)
+    } else if (result.added > 0) {
+      toast(`已加入 ${result.added} 件商品`)
+    }
+    if (result.added > 0) {
+      void router.push({ name: 'store-detail', params: { storeId: result.storeId } })
+    }
+  } catch {
+    toast('再来一单失败，请稍后重试')
+  }
 }
 </script>
 
