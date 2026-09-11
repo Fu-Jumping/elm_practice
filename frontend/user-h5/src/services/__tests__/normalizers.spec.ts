@@ -10,6 +10,7 @@ import {
   buildAmountLines,
   remainingSeconds,
   formatCountdown,
+  orderDisplayStatus,
 } from '../normalizers'
 import type { OrderRecord } from '../api/types'
 // 把被测函数引进来。'../normalizers' 是相对路径：测试文件在 __tests__ 里，往上一层就是它
@@ -297,5 +298,26 @@ describe('批次⑩ 待支付倒计时 TD-12（契约 §3.5 payDeadline）', () 
     expect(formatCountdown(0)).toBe('00:00')
     expect(formatCountdown(-5)).toBe('00:00')
     expect(formatCountdown(3661)).toBe('61:01')
+  })
+})
+
+/**
+ * 批次⑩ 评价相关归一化 TV-11（TODO-USER-003，契约 §3.5/§6.2）
+ * TV-11a 摘要/详情透传 reviewed（待评价判定依据，非独立存储状态）
+ * TV-11b orderDisplayStatus：已完成未评价显示「待评价」，已评价显示「已完成」，其余回落 statusText
+ */
+describe('批次⑩ 评价相关归一化 TV-11', () => {
+  it('TV-11a 摘要与详情透传 reviewed', () => {
+    const record: OrderRecord = { ...OD_ORDER_RECORD, status: 'COMPLETED', reviewed: false }
+    expect(normalizeOrderSummary(record).reviewed).toBe(false)
+    expect(normalizeOrderDetail(record).reviewed).toBe(false)
+    expect(normalizeOrderDetail({ ...record, reviewed: true }).reviewed).toBe(true)
+  })
+
+  it('TV-11b orderDisplayStatus：待评价/已完成与其余状态回落', () => {
+    expect(orderDisplayStatus({ status: 'COMPLETED', reviewed: false })).toBe('待评价')
+    expect(orderDisplayStatus({ status: 'COMPLETED', reviewed: true })).toBe('已完成')
+    expect(orderDisplayStatus({ status: 'PENDING' })).toBe('待接单')
+    expect(orderDisplayStatus({ status: 'CANCELLED' })).toBe('已取消')
   })
 })

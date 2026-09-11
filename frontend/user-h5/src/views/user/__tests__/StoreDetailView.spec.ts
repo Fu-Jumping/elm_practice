@@ -212,15 +212,30 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     expect(wrapper.find('[data-testid="checkout-btn"]').attributes('disabled')).toBeDefined()
   })
 
-  it('T17 评价 Tab 占位：显示评价功能暂未开放', async () => {
+  it('TV-10 评价 Tab 展示真实评价（含商家回复与脱敏昵称）与空态（批次⑩ 003 真实化）', async () => {
     const { wrapper } = await mountDetail('/stores/m002')
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="tab-review"]').exists()).toBe(true),
       { timeout: 10000 },
     )
     await wrapper.find('[data-testid="tab-review"]').trigger('click')
-    expect(wrapper.find('[data-testid="review-placeholder"]').text()).toContain(
-      '评价功能暂未开放',
+    await vi.waitFor(
+      () => expect(wrapper.findAll('[data-testid="review-item"]').length).toBeGreaterThan(0),
+      { timeout: 10000 },
+    )
+    expect(wrapper.find('[data-testid="review-list"]').text()).toContain('*')
+    expect(wrapper.find('[data-testid="review-reply"]').exists()).toBe(true)
+
+    // 无评价店铺展示空态
+    const empty = await mountDetail('/stores/m005')
+    await vi.waitFor(
+      () => expect(empty.wrapper.find('[data-testid="tab-review"]').exists()).toBe(true),
+      { timeout: 10000 },
+    )
+    await empty.wrapper.find('[data-testid="tab-review"]').trigger('click')
+    await vi.waitFor(
+      () => expect(empty.wrapper.find('[data-testid="review-empty"]').exists()).toBe(true),
+      { timeout: 10000 },
     )
   })
 

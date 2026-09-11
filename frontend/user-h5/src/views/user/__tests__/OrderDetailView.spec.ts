@@ -33,6 +33,7 @@ async function mountDetail(orderId: string, pinia?: ReturnType<typeof createPini
       { path: '/orders', name: 'orders', component: { template: '<div />' } },
       { path: '/orders/:orderId', name: 'order-detail', component: OrderDetailView },
       { path: '/orders/:orderId/pay', name: 'order-pay', component: { template: '<div />' } },
+      { path: '/orders/:orderId/review', name: 'order-review', component: { template: '<div />' } },
       { path: '/stores/:storeId', name: 'store-detail', component: { template: '<div />' } },
     ],
   })
@@ -339,6 +340,14 @@ describe('OrderDetailView 批次⑩（CHG-003 订单详情含跟踪时间线）'
     })
     expect(router.currentRoute.value.params.storeId).toBe('m002')
     expect(getMockCartSnapshot('m002')).toHaveLength(2)
+  })
+
+  it('TV-9 已完成订单点「去评价」进入评价订单页（批次⑩ 003 入口接线）', async () => {
+    const { wrapper, router } = await mountOd('od05')
+    await wrapper.find('[data-testid="goto-review-btn"]').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('order-review')
+    expect(router.currentRoute.value.params.orderId).toBe('od05')
   })
 
   it('TD-10 待支付订单点「去支付」进入支付页（批次⑩ 105 入口接线）', async () => {

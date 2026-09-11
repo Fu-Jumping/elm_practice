@@ -55,6 +55,7 @@ describe('OrderListView（订单列表页 P0）', () => {
         { path: '/orders/:orderId', name: 'order-detail', component: { template: '<div />' } },
         { path: '/orders/:orderId/pay', name: 'order-pay', component: { template: '<div />' } },
         { path: '/stores/:storeId', name: 'store-detail', component: { template: '<div />' } },
+        { path: '/orders/:orderId/review', name: 'order-review', component: { template: '<div />' } },
         { path: '/login', name: 'login', component: { template: '<div />' } },
       ],
     })
@@ -169,6 +170,8 @@ describe('OrderListView（订单列表页 P0）', () => {
       ...ORDER_SEED[0]!,
       orderId: 'op33',
       status: 'COMPLETED',
+      // 003 起「再来一单」仅对已评价的已完成订单展示（待评价订单展示「去评价」）
+      reviewed: true,
       storeId: 'm002',
       items: [{ productId: 'p101', name: '香辣鸡腿堡', unitPrice: 19.5, quantity: 2, subtotal: 39 }],
     })
@@ -193,6 +196,8 @@ describe('OrderListView（订单列表页 P0）', () => {
       ...ORDER_SEED[0]!,
       orderId: 'op34',
       status: 'COMPLETED',
+      // 003 起「再来一单」仅对已评价的已完成订单展示（待评价订单展示「去评价」）
+      reviewed: true,
       storeId: 'm002',
       items: [
         { productId: 'p101', name: '香辣鸡腿堡', unitPrice: 19.5, quantity: 1, subtotal: 19.5 },
@@ -211,5 +216,41 @@ describe('OrderListView（订单列表页 P0）', () => {
     await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('store-detail'), {
       timeout: 2000,
     })
+  })
+
+  it('TV-8 已完成未评价显示「待评价」并提供「去评价」；已评价显示「已完成」无入口（批次⑩ 003）', async () => {
+    orderMockState.splice(
+      0,
+      orderMockState.length,
+      {
+        ...ORDER_SEED[0]!,
+        orderId: 'or11',
+        status: 'COMPLETED',
+        reviewed: false,
+        storeId: 'm002',
+        createdAt: '2026-09-11 12:00:00',
+      },
+      {
+        ...ORDER_SEED[0]!,
+        orderId: 'or12',
+        status: 'COMPLETED',
+        reviewed: true,
+        storeId: 'm002',
+        createdAt: '2026-09-11 11:00:00',
+      },
+    )
+    const { wrapper, router } = await mountList()
+    await vi.waitFor(
+      () => expect(wrapper.findAll('[data-testid="order-card"]').length).toBe(2),
+      { timeout: 2000 },
+    )
+    const cards = wrapper.findAll('[data-testid="order-card"]')
+    expect(cards[0]!.text()).toContain('待评价')
+    expect(cards[1]!.text()).toContain('已完成')
+    const entries = wrapper.findAll('[data-testid="order-review-entry"]')
+    expect(entries).toHaveLength(1)
+    await entries[0]!.trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('order-review')
   })
 })
