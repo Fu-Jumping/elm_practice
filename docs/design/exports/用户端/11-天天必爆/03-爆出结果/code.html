@@ -1,0 +1,265 @@
+<!DOCTYPE html><html lang="zh-CN" style="width: 390px; height: 884px; overflow: hidden; position: relative;"><head></head><body class="bg-background text-on-background min-h-screen"><svg aria-hidden="true" class="inline-defs-container" style="position:absolute;width:0;height:0;overflow:hidden"></svg>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>红包 - 饿了么</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#351000",
+                        "tertiary-container": "#f46500",
+                        "on-background": "#1a1c1c",
+                        "border-light": "#E5E5E5",
+                        "on-surface-variant": "#5b4038",
+                        "surface-variant": "#e2e2e2",
+                        "surface-dim": "#dadada",
+                        "inverse-on-surface": "#f1f1f1",
+                        "inverse-surface": "#2f3131",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb694",
+                        "secondary": "#5f5e5e",
+                        "on-primary-container": "#541400",
+                        "text-tertiary": "#999999",
+                        "text-secondary": "#666666",
+                        "surface-bright": "#f9f9f9",
+                        "primary-container": "#ff5a1f",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#ae3200",
+                        "surface-white": "#FFFFFF",
+                        "on-primary-fixed-variant": "#852400",
+                        "background": "#f9f9f9",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "primary": "#ae3200",
+                        "tertiary": "#a14000",
+                        "surface-container": "#eeeeee",
+                        "outline-variant": "#e4beb3",
+                        "on-primary-fixed": "#3a0b00",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#1a1c1c",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffdbcc",
+                        "primary-fixed-dim": "#ffb59e",
+                        "inverse-primary": "#ffb59e",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "on-tertiary-container": "#4d1b00",
+                        "on-primary": "#ffffff",
+                        "on-secondary-container": "#656464",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#e8e8e8",
+                        "surface-container-highest": "#e2e2e2",
+                        "outline": "#8f7067",
+                        "on-secondary-fixed-variant": "#474747",
+                        "primary-fixed": "#ffdbd0",
+                        "surface-container-low": "#f3f3f3",
+                        "secondary-fixed": "#e4e2e1",
+                        "secondary-container": "#e4e2e1",
+                        "surface": "#f9f9f9"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    spacing: {
+                        "padding-card": "10px",
+                        "gutter": "8px",
+                        "margin-page": "12px",
+                        "base": "4px",
+                        "gap-module": "12px"
+                    },
+                    fontFamily: {
+                        "body-lg": ["Be Vietnam Pro", "sans-serif"],
+                        "label-md": ["Be Vietnam Pro", "sans-serif"],
+                        "headline-md": ["Be Vietnam Pro", "sans-serif"],
+                        "headline-lg": ["Be Vietnam Pro", "sans-serif"],
+                        "cta-button": ["Be Vietnam Pro", "sans-serif"],
+                        "body-md": ["Be Vietnam Pro", "sans-serif"],
+                        "label-sm": ["Be Vietnam Pro", "sans-serif"]
+                    },
+                    fontSize: {
+                        "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-lg": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "cta-button": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+        .coupon-notch {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: #f9f9f9;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 1px solid #ff7a45;
+        }
+        .coupon-notch-left {
+            left: -6px;
+            border-right-color: transparent;
+            border-top-color: transparent;
+            border-bottom-color: transparent;
+            transform: translateY(-50%) rotate(-45deg);
+        }
+        .coupon-notch-right {
+            right: -6px;
+            border-left-color: transparent;
+            border-top-color: transparent;
+            border-bottom-color: transparent;
+            transform: translateY(-50%) rotate(135deg);
+        }
+        .dashed-line {
+            border-left: 1px dashed rgba(255, 255, 255, 0.4);
+        }
+        
+        .red-packet-bg {
+            background-color: #FF5A1F;
+        }
+        
+        .red-packet-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom-left-radius: 50% 12px;
+            border-bottom-right-radius: 50% 12px;
+            z-index: 10;
+        }
+        
+        .gold-seal {
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
+            background: #FFEAA7;
+            border-radius: 50%;
+            z-index: 11;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #FF5A1F;
+            font-weight: bold;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<!-- Top App Bar -->
+<!-- Main Content Canvas -->
+<main class="pb-safe w-full max-w-md mx-auto pb-20"><div class="relative overflow-hidden pt-3 px-3 pb-8" style="background: linear-gradient(rgb(230, 0, 42) 0%, rgb(255, 30, 59) 25%, rgb(255, 68, 37) 50%, rgba(255, 90, 31, 0.6) 72%, rgba(248, 249, 255, 0.1) 90%, rgba(248, 249, 255, 0) 100%); margin-bottom: -65px; padding-bottom: 85px;"><div class="absolute inset-0 opacity-15 pointer-events-none" style="background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.4) 0px, rgba(255,255,255,0.4) 1px, transparent 1px, transparent 14px), repeating-linear-gradient(-45deg, rgba(255,255,255,0.4) 0px, rgba(255,255,255,0.4) 1px, transparent 1px, transparent 14px);"></div><div class="absolute -top-12 left-1/2 -translate-x-1/2 w-80 h-32 bg-white/20 rounded-full blur-2xl pointer-events-none"></div><div class="relative z-20 flex items-center justify-between h-11 text-white"><div class="flex items-center gap-2"><button class="flex items-center justify-center p-1 -ml-1 text-white active:opacity-80"><span class="material-symbols-outlined text-[24px] font-bold">arrow_back</span></button><h1 class="text-[20px] font-black tracking-wide text-white drop-shadow-xs" style="font-family: -apple-system, BlinkMacSystemFont, &quot;PingFang SC&quot;, sans-serif;">天天红包</h1></div><button class="flex items-center justify-center p-1 text-white active:opacity-80"><span class="material-symbols-outlined text-[24px]">more_horiz</span></button></div></div>
+<!-- Tabs -->
+<!-- Coupon List -->
+<div class="flex flex-col gap-gap-module px-margin-page relative z-10"><!-- 购买加量包轻量精致通栏 --><div class="flex items-center justify-between bg-white/95 backdrop-blur-sm border border-white/60 rounded-xl px-3.5 py-2.5 shadow-sm active:opacity-90 -mt-2 mb-1"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[#FF5A1F] text-xl">savings</span><div class="flex flex-col"><div class="flex items-center gap-1.5"><span class="text-xs font-bold text-[#333333]">加量红包省更多</span><span class="bg-[#FF5A1F] text-white text-[9px] px-1 py-0.2 rounded-sm font-medium">立省￥20起</span></div><span class="text-[11px] text-text-secondary">多买多省 · 可与优惠券叠加</span></div></div><button class="flex items-center text-xs font-bold text-[#FF5A1F] bg-[#FFEFE5] hover:bg-[#FFE6D9] px-2.5 py-1 rounded-full border border-[#FF5A1F]/30 active:scale-98 transition-transform">去购买<span class="material-symbols-outlined text-xs">chevron_right</span></button></div><!-- 天天必爆 18.8 活动升级卡片 --><div class="rounded-2xl shadow-xl relative overflow-hidden text-white select-none" style="background: linear-gradient(160deg, rgb(230, 0, 57) 0%, rgb(255, 30, 54) 28%, rgb(255, 80, 36) 65%, rgb(255, 115, 46) 100%);"><div class="absolute inset-0 opacity-15 pointer-events-none" style="background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.4) 0px, rgba(255,255,255,0.4) 1px, transparent 1px, transparent 12px), repeating-linear-gradient(-45deg, rgba(255,255,255,0.4) 0px, rgba(255,255,255,0.4) 1px, transparent 1px, transparent 12px);"></div><div class="absolute -top-10 left-1/2 -translate-x-1/2 w-80 h-28 bg-white/20 rounded-full blur-2xl pointer-events-none"></div><div class="relative z-10 pt-3 flex flex-col"><div class="flex items-center justify-center gap-2 mb-2 px-3 relative"><span class="text-[20px] font-black text-white italic tracking-wider drop-shadow-[0_2px_4px_rgba(150,0,0,0.8)]" style="font-family: -apple-system, BlinkMacSystemFont, &quot;PingFang SC&quot;, sans-serif;">天天必爆</span><div class="relative flex items-center justify-center px-1.5"><span class="text-[36px] leading-none font-black text-transparent bg-clip-text bg-gradient-to-b from-[#FFFDF0] via-[#FFE259] to-[#FF9800] tracking-tight drop-shadow-[0_3px_6px_rgba(130,0,0,0.8)]" style="-webkit-text-stroke: 1px rgb(255, 240, 168); font-family: -apple-system, BlinkMacSystemFont, sans-serif;">18.8</span></div><span class="text-[20px] font-black text-white italic tracking-wider drop-shadow-[0_2px_4px_rgba(150,0,0,0.8)]" style="font-family: -apple-system, BlinkMacSystemFont, &quot;PingFang SC&quot;, sans-serif;">下单更省</span></div><div class="px-3 pb-6 relative z-10"><div class="grid grid-cols-4 gap-1.5 items-stretch"><div class="bg-white rounded-t-lg py-2.5 px-1 flex flex-col items-center text-center shadow-md relative min-h-[78px]"><div class="text-[#FF2B00] flex items-baseline font-black leading-none mt-0.5"><span class="text-[11px] font-bold mr-0.5">¥</span><span class="text-[24px] font-black leading-none">2</span></div><span class="text-[9px] text-[#7A3E26] font-medium scale-90 whitespace-nowrap mt-1">满30可用</span></div><div class="bg-white rounded-t-lg py-2.5 px-1 flex flex-col items-center text-center shadow-md relative min-h-[78px]"><div class="text-[#FF2B00] flex items-baseline font-black leading-none mt-0.5"><span class="text-[11px] font-bold mr-0.5">¥</span><span class="text-[24px] font-black leading-none">?</span></div><span class="text-[9px] text-[#7A3E26] font-medium scale-90 whitespace-nowrap mt-1">门槛随机</span></div><div class="bg-white rounded-t-lg py-2.5 px-1 flex flex-col items-center text-center shadow-md relative min-h-[78px] overflow-hidden"><div class="absolute top-0 right-0 bg-[#FF0033] text-[8px] text-white px-1.5 py-0.5 font-black leading-tight rounded-bl" style="transform: scale(0.85); transform-origin: right top;">随机</div><div class="text-[#FF2B00] flex items-baseline font-black leading-none mt-0.5"><span class="text-[11px] font-bold mr-0.5">¥</span><span class="text-[21px] font-black tracking-tight leading-none">18.8</span></div><span class="text-[9px] text-[#7A3E26] font-medium scale-90 whitespace-nowrap mt-1">门槛随机</span></div><div class="bg-white rounded-t-lg py-2.5 px-1 flex flex-col items-center text-center shadow-md relative min-h-[78px]"><div class="h-6 flex items-center justify-center mt-0.5"><div class="border border-[#FFAA00] bg-[#FFFBF0] text-[#E07000] text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5 leading-none shadow-xs"><span class="material-symbols-outlined text-[12px] leading-none text-[#FF9500]">local_mall</span><span class="">免单</span></div></div><span class="text-[9px] text-[#7A3E26] font-medium scale-90 whitespace-nowrap mt-1">惊喜好礼</span></div></div></div><div class="relative z-20 -mt-10 pt-6 pb-4 px-3" style="filter: drop-shadow(rgba(120, 0, 0, 0.55) 0px -8px 12px);"><div class="absolute inset-0 pointer-events-none" style="background: linear-gradient(rgb(255, 61, 53) 0%, rgb(255, 90, 38) 40%, rgb(255, 111, 46) 100%); clip-path: path(&quot;M 0 0 Q 183 26 366 0 L 366 110 L 0 110 Z&quot;);"></div><svg class="absolute top-0 left-0 w-full pointer-events-none z-10" fill="none" height="36" preserveAspectRatio="none" style="filter: drop-shadow(rgba(255, 230, 120, 0.6) 0px 1px 3px);" viewBox="0 0 366 36"><defs><linearGradient id="goldFlapStroke" x1="0%" x2="100%" y1="0%" y2="0%"><stop offset="0%" stop-color="#FFD066" stop-opacity="0.7"></stop><stop offset="25%" stop-color="#FFF6B8"></stop><stop offset="50%" stop-color="#FFE082"></stop><stop offset="75%" stop-color="#FFF6B8"></stop><stop offset="100%" stop-color="#FFD066" stop-opacity="0.7"></stop></linearGradient></defs><path d="M 0 0 Q 183 26 366 0" stroke="url(#goldFlapStroke)" stroke-linecap="round" stroke-width="2.5"></path></svg><div class="relative z-10 flex items-center justify-center pt-1"><button class="w-full py-2.5 px-4 rounded-full flex items-center justify-center relative shadow-[0_6px_16px_rgba(140,0,0,0.4)] active:scale-98 transition-transform" style="background: linear-gradient(rgb(255, 255, 255) 0%, rgb(255, 248, 238) 60%, rgb(255, 232, 202) 100%); border: 1.5px solid rgb(255, 255, 255);"><span class="text-[#E60012] font-black text-[18px] tracking-wider drop-shadow-xs" style="font-family: -apple-system, BlinkMacSystemFont, &quot;PingFang SC&quot;, sans-serif;">免费爆1次</span></button><div class="absolute right-3 -top-2.5 pointer-events-none z-30 transform rotate-12"><svg fill="none" height="38" style="filter: drop-shadow(0 4px 6px rgba(160, 20, 0, 0.7));" viewBox="0 0 36 36" width="38"><path d="M18 3 L32 17 L23 17 L23 33 L13 33 L13 17 L4 17 Z" fill="url(#btn-3d-arrow-up)" stroke="#FFFBE6" stroke-width="1.5"></path><defs><linearGradient id="btn-3d-arrow-up" x1="0%" x2="100%" y1="0%" y2="100%"><stop offset="0%" stop-color="#FFF59D"></stop><stop offset="40%" stop-color="#FFD600"></stop><stop offset="100%" stop-color="#FF6D00"></stop></linearGradient></defs></svg></div></div></div></div></div><!-- Modern Flat Card 1 -->
+<div class="bg-gradient-to-r from-[#FF5A1F] to-[#FF7A45] rounded-xl relative overflow-hidden flex h-32 shadow-md">
+<div class="w-1/3 flex flex-col justify-center items-center border-white/20" style="border-right: 1.5px dashed rgba(255, 234, 167, 0.4); box-shadow: 1px 0 2px rgba(0, 0, 0, 0.1);">
+<div class="text-[#FFEAA7] flex items-baseline">
+<span class="font-bold text-lg">￥</span>
+<span class="text-4xl font-bold">8</span>
+</div>
+<span class="text-white/90 text-xs mt-1">满30可用</span>
+</div>
+<div class="w-2/3 p-4 flex flex-col justify-between relative">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-[#FFEAA7] text-[#FF5A1F] px-1.5 py-0.5 rounded text-[10px] font-bold">全平台</span>
+<h3 class="text-white font-bold text-lg">通用红包</h3>
+</div>
+<p class="text-white/80 text-xs">限非外卖配送订单使用</p>
+</div>
+<div class="flex items-end justify-between">
+<span class="text-white/70 text-[10px]">今天 23:59 到期</span>
+</div>
+<!-- Decorative cutout -->
+</div>
+</div>
+<!-- Modern Flat Card 2 -->
+<div class="bg-gradient-to-r from-[#FF5A1F] to-[#FF7A45] rounded-xl relative overflow-hidden flex h-32 shadow-md">
+<div class="w-1/3 flex flex-col justify-center items-center border-white/20" style="border-right: 1.5px dashed rgba(255, 234, 167, 0.4); box-shadow: 1px 0 2px rgba(0, 0, 0, 0.1);">
+<div class="text-[#FFEAA7] flex items-baseline">
+<span class="font-bold text-lg">￥</span>
+<span class="text-4xl font-bold">5</span>
+</div>
+<span class="text-white/90 text-xs mt-1">满25可用</span>
+</div>
+<div class="w-2/3 p-4 flex flex-col justify-between relative">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-white/20 text-white border border-white/40 px-1.5 py-0.5 rounded text-[10px] font-bold">商家</span>
+<h3 class="text-white font-bold text-lg">麦当劳专属红包</h3>
+</div>
+<p class="text-white/80 text-xs">限麦当劳（大学城店）可用</p>
+</div>
+<div class="flex items-end justify-between">
+<span class="text-white/70 text-[10px]">还剩 3 天</span>
+</div>
+</div>
+</div>
+<!-- Modern Flat Card 3 -->
+<div class="bg-gradient-to-r from-[#FF5A1F] to-[#FF7A45] rounded-xl relative overflow-hidden flex h-32 shadow-md">
+<div class="w-1/3 flex flex-col justify-center items-center border-white/20" style="border-right: 1.5px dashed rgba(255, 234, 167, 0.4); box-shadow: 1px 0 2px rgba(0, 0, 0, 0.1);">
+<div class="text-[#FFEAA7] flex items-baseline">
+<span class="font-bold text-lg">￥</span>
+<span class="text-4xl font-bold">12</span>
+</div>
+<span class="text-white/90 text-xs mt-1">满50可用</span>
+</div>
+<div class="w-2/3 p-4 flex flex-col justify-between relative">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-white/20 text-white border border-white/40 px-1.5 py-0.5 rounded text-[10px] font-bold">品类</span>
+<h3 class="text-white font-bold text-lg">下午茶狂欢红包</h3>
+</div>
+<p class="text-white/80 text-xs">限奶茶、甜品品类可用</p>
+</div>
+<div class="flex items-end justify-between">
+<span class="text-white/70 text-[10px]">还剩 5 天</span>
+</div>
+</div>
+</div></div>
+<!-- No more data hint -->
+<div class="mt-8 text-center pb-8">
+<span class="font-label-md text-label-md text-text-tertiary">没有更多可用红包了</span>
+</div>
+</main><nav class="fixed bottom-0 left-0 right-0 bg-surface-white border-t border-border-light flex justify-around items-center h-16 pb-safe z-50 transition-colors duration-200"><button class="flex flex-col items-center gap-1 flex-1 text-secondary">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0, &quot;wght&quot; 400, &quot;GRAD&quot; 0, &quot;opsz&quot; 24;">home</span>
+<span class="text-[10px]">首页</span>
+</button>
+<button class="flex flex-col items-center gap-1 flex-1 text-secondary">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: &quot;FILL&quot; 0, &quot;wght&quot; 400, &quot;GRAD&quot; 0, &quot;opsz&quot; 24;">chat_bubble</span>
+<span class="text-[10px]">消息</span>
+</button>
+<button class="flex flex-col items-center gap-1 flex-1 text-secondary">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: &quot;FILL&quot; 0, &quot;wght&quot; 400, &quot;GRAD&quot; 0, &quot;opsz&quot; 24;">receipt_long</span>
+<span class="text-[10px]">订单</span>
+</button>
+<button class="flex flex-col items-center gap-1 flex-1 text-[#FF5A1F]">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: &quot;FILL&quot; 1, &quot;wght&quot; 400, &quot;GRAD&quot; 0, &quot;opsz&quot; 24; color: rgb(255, 90, 31);">person</span>
+<span class="text-[10px] font-medium">我的</span>
+</button></nav>
+<div class="fixed inset-0 z-50 flex items-center justify-center select-none overflow-hidden" id="reward-modal-container" style="background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);"><div class="relative w-full max-w-xs mx-auto flex flex-col items-center px-4"><div class="absolute -top-16 left-1/2 -translate-x-1/2 pointer-events-none w-[360px] h-[360px] flex items-center justify-center opacity-40"><div class="w-full h-full rounded-full" style="background: radial-gradient(circle, rgba(255,215,0,0.65) 0%, rgba(255,100,0,0.2) 50%, rgba(0,0,0,0) 70%);"></div></div><div class="relative z-10 w-full rounded-2xl p-4 pt-5 shadow-2xl flex flex-col items-center" style="background: linear-gradient(165deg, #E6002A 0%, #FF334B 25%, #FF5A1F 70%, #FF7A45 100%); border: 2px solid rgba(255, 234, 167, 0.5); box-shadow: 0 16px 40px rgba(180, 0, 0, 0.6);"><div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#FFF59D] via-[#FFD700] to-[#FFA000] text-[#B71C1C] px-3.5 py-1 rounded-full text-xs font-black tracking-wide shadow-md whitespace-nowrap border border-white flex items-center gap-1"><span class="material-symbols-outlined text-xs leading-none">auto_awesome</span>恭喜获得天天必爆专属红包！<span class="material-symbols-outlined text-xs leading-none">auto_awesome</span></div><div class="w-full bg-white rounded-xl p-3.5 shadow-lg relative overflow-hidden mt-2 mb-2.5"><div class="absolute top-0 right-0 bg-[#FF0033] text-white text-[9px] font-black px-2 py-0.5 rounded-bl-lg">大额必爆</div><div class="flex items-center justify-between border-b border-dashed border-[#FFC8A3] pb-3"><div class="flex items-baseline text-[#FF2B00]"><span class="text-sm font-bold mr-0.5">¥</span><span class="text-4xl font-black tracking-tight">18.8</span></div><div class="flex flex-col items-end"><div class="flex items-center gap-1"><span class="bg-[#FFEFE5] text-[#FF5A1F] text-[10px] px-1.5 py-0.2 rounded font-bold">通用券</span><h4 class="text-sm font-black text-[#333333]">通用爆单红包</h4></div><span class="text-[11px] text-[#7A3E26] font-medium mt-1">满30元可用</span></div></div><div class="flex flex-col gap-1 pt-2.5"><div class="flex items-center justify-between text-[10px] text-[#FF5A1F] font-bold"><span class="">限今天 23:59 前使用 · 快去下单</span><span class="material-symbols-outlined text-[12px]">timer</span></div><div class="text-[9px] text-[#999999]">已放入「我的红包」</div></div></div><button class="w-full py-2.5 px-4 rounded-full flex flex-col items-center justify-center shadow-lg active:scale-98 transition-transform" style="background: linear-gradient(rgb(255, 246, 184) 0%, rgb(255, 208, 0) 60%, rgb(255, 149, 0) 100%); border: 1.5px solid rgb(255, 255, 255);"><span class="text-[#A30000] font-black text-[16px] tracking-wide leading-tight">去使用，立即抵扣</span><span class="text-[#A30000]/80 text-[10px] font-bold leading-tight mt-0.5">即将失效，马上点餐</span></button></div><button class="mt-4 w-9 h-9 rounded-full border border-white/70 bg-black/30 flex items-center justify-center text-white active:opacity-75 transition-opacity"><span class="material-symbols-outlined text-[20px]">close</span></button></div></div>
+
+</body></html>

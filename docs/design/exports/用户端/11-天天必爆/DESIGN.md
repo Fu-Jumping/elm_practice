@@ -1,0 +1,176 @@
+---
+name: Kinetic Merchant Interface
+colors:
+  surface: '#f8f9ff'
+  surface-dim: '#d7dae2'
+  surface-bright: '#f8f9ff'
+  surface-container-lowest: '#ffffff'
+  surface-container-low: '#f1f3fc'
+  surface-container: '#ebeef6'
+  surface-container-high: '#e5e8f0'
+  surface-container-highest: '#dfe2eb'
+  on-surface: '#181c22'
+  on-surface-variant: '#5b4038'
+  inverse-surface: '#2d3137'
+  inverse-on-surface: '#eef1f9'
+  outline: '#8f7067'
+  outline-variant: '#e4beb3'
+  surface-tint: '#ae3200'
+  primary: '#ae3200'
+  on-primary: '#ffffff'
+  primary-container: '#ff5a1f'
+  on-primary-container: '#541400'
+  inverse-primary: '#ffb59e'
+  secondary: '#815600'
+  on-secondary: '#ffffff'
+  secondary-container: '#fdaf1e'
+  on-secondary-container: '#6a4600'
+  tertiary: '#006d37'
+  on-tertiary: '#ffffff'
+  tertiary-container: '#2da65d'
+  on-tertiary-container: '#003316'
+  error: '#ba1a1a'
+  on-error: '#ffffff'
+  error-container: '#ffdad6'
+  on-error-container: '#93000a'
+  primary-fixed: '#ffdbd0'
+  primary-fixed-dim: '#ffb59e'
+  on-primary-fixed: '#3a0b00'
+  on-primary-fixed-variant: '#852400'
+  secondary-fixed: '#ffddb1'
+  secondary-fixed-dim: '#ffba4b'
+  on-secondary-fixed: '#291800'
+  on-secondary-fixed-variant: '#624000'
+  tertiary-fixed: '#86faa7'
+  tertiary-fixed-dim: '#6add8d'
+  on-tertiary-fixed: '#00210c'
+  on-tertiary-fixed-variant: '#005228'
+  background: '#f8f9ff'
+  on-background: '#181c22'
+  surface-variant: '#dfe2eb'
+typography:
+  page-title:
+    fontFamily: PingFang SC
+    fontSize: 24px
+    fontWeight: '700'
+    lineHeight: 32px
+  section-title:
+    fontFamily: PingFang SC
+    fontSize: 18px
+    fontWeight: '700'
+    lineHeight: 26px
+  card-title:
+    fontFamily: PingFang SC
+    fontSize: 15px
+    fontWeight: '600'
+    lineHeight: 22px
+  body-main:
+    fontFamily: PingFang SC
+    fontSize: 15px
+    fontWeight: '400'
+    lineHeight: 22px
+  label-table:
+    fontFamily: PingFang SC
+    fontSize: 13px
+    fontWeight: '500'
+    lineHeight: 18px
+  caption-muted:
+    fontFamily: PingFang SC
+    fontSize: 12px
+    fontWeight: '400'
+    lineHeight: 16px
+  currency-display:
+    fontFamily: PingFang SC
+    fontSize: 15px
+    fontWeight: '700'
+    lineHeight: 22px
+rounded:
+  sm: 0.25rem
+  DEFAULT: 0.5rem
+  md: 0.75rem
+  lg: 1rem
+  xl: 1.5rem
+  full: 9999px
+spacing:
+  base: 4px
+  page-margin: 16px
+  module-gap: 12px
+  card-padding: 12px
+  item-gap: 8px
+---
+
+## Brand & Style
+
+This design system is engineered for high-velocity merchant operations within the campus food delivery ecosystem. The aesthetic is inspired by contemporary transactional backends, prioritizing information density, clarity, and rapid cognitive processing. 
+
+The style is **Corporate / Modern**, utilizing a structured grid and a high-contrast primary accent to drive user action. It eliminates all traditional "Blue" utility colors—often associated with general SaaS—replacing them with a high-energy orange to signify the heat, urgency, and vitality of the food service industry. The interface relies on clean card-based containment, subtle elevations, and a rigorous adherence to functional hierarchy.
+
+## Colors
+
+The color palette is strictly functional. The primary orange (#ff5a1f) is the sole driver for "Action" and "Selection." 
+
+- **Actionable:** Use the primary orange for primary buttons, active checkbox/radio states, and focused input borders.
+- **Transactional:** Price values and main operations (like "Dispatch") must use the primary color to draw immediate attention.
+- **Semantic:** 
+    - **Success (#1f9d55):** Completed orders, "In Stock" toggles.
+    - **Warning (#ffb020):** Pending reviews, low stock alerts.
+    - **Error/Danger (#ba1a1a):** Order cancellations, "Sold Out" status, and destructive actions.
+    - **Unread (#ff3b30):** High-priority notification badges.
+- **Surface & Neutrals:** Use the page background (#f7f7f7) to provide contrast against the card white (#ffffff). Use the soft background (#fff1eb) exclusively for row selection highlights or soft-filled tags to maintain a warm, food-centric vibe without overwhelming the user.
+
+## Typography
+
+The typography system is optimized for Simplified Chinese legibility. 
+
+- **Hierarchy:** Use `page-title` for the main header of any module. `section-title` should be used for grouping content within a page, and `card-title` for the header of individual white cards.
+- **Data Display:** Table content and form labels use 13px (`label-table`) to maximize information density on laptop screens.
+- **Currency:** Must always be prefixed with the `¥` symbol. Decimals are mandatory (e.g., ¥28.00). Align currency right in tables to allow for easy vertical scanning of price points.
+- **Timestamps:** Use the format `yyyy-MM-dd HH:mm:ss` in `caption-muted` style for all order logs and history items.
+
+## Layout & Spacing
+
+The design system utilizes a **Fluid Grid** with a 4px base unit. 
+
+- **Page Layout:** Maintain a strict 16px margin around the entire viewport. 
+- **Modules:** Use a 12px gap between cards or major functional modules.
+- **Density:** Inside a card, use 12px padding. Elements within a group (like a label and its input) should use an 8px gap. 
+- **Tables:** Rows should be compact. Use 8px vertical padding for table cells to ensure a high number of visible rows without scrolling.
+
+## Elevation & Depth
+
+Hierarchy is established through **Tonal Layers** rather than heavy shadows.
+
+- **Level 0 (Floor):** Page background (#f7f7f7).
+- **Level 1 (Content):** White cards (#ffffff) with a 1px border (#e5e5e5). No shadow is required for standard cards to keep the UI "flat" and efficient.
+- **Level 2 (Overlays):** Modals and Drawers use a soft ambient shadow (Blur 12px, 8% opacity black) to separate them from the content layer.
+- **Interaction:** On hover, clickable cards may transition to a 1px border of the primary color (#ff5a1f) rather than lifting with a shadow.
+
+## Shapes
+
+The shape language is structured and professional. 
+
+- **Tags & Status Badges:** Use `radius-sm` (4px).
+- **Standard Elements:** Buttons, Input fields, and Cards must use `radius-md` (8px). 
+- **Containers:** Large overlays such as Modals and side Drawers use `radius-lg` (12px) on all visible corners.
+- **Constraint:** Do not use "Pill" or "Capsule" shapes for buttons; all buttons must maintain the 8px corner radius to ensure a cohesive, architectural look.
+
+## Components
+
+### Buttons
+- **Primary:** Solid #ff5a1f background with white text. Used for "Submit," "Save," or "Confirm."
+- **Secondary:** White background with #e5e5e5 border and #1f2329 text. Used for "Cancel" or "Back."
+- **Danger:** White background with #ba1a1a border and text. Used for "Delete" or "Withdraw."
+
+### Form Controls
+- **Inputs:** 8px radius, white background. On focus, the border changes to #ff5a1f with a subtle 2px glow of the same color at 10% opacity.
+- **Switches:** Off state is a neutral gray (#d1d5db). On state is #ff5a1f.
+- **Checkboxes:** When checked, the fill is #ff5a1f.
+
+### Feedback & States
+- **Loading:** Buttons in a loading state should be disabled (gray background), showing a spinner or the suffix "中" (e.g., 保存中).
+- **Empty States:** Use muted gray icons and text to indicate no data, ensuring the "Add" button remains the clear primary action.
+- **Table Selection:** Highlight selected rows using the soft background color (#fff1eb).
+
+### Tables
+- **Header:** Light surface (#f3f3f3) with #6b7280 text (500 weight).
+- **Cell Divider:** 1px solid #e5e5e5 (horizontal only).
