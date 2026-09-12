@@ -18,12 +18,13 @@
  * 并附带 payDeadline（= 创建时间 + 15 分钟），使「下单 → 支付页 → 模拟支付」链路在 mock 下可完整走通。
  */
 import { PACKAGING_FEE, formatTime, remainingSeconds } from '@/services/normalizers'
-import type { OrderRecord } from '@/services/api/types'
+import type { CouponRecord, OrderRecord } from '@/services/api/types'
 import { addressMockState } from './address'
 import { clearMockCart, getMockCartSnapshot } from './cart'
 import type { MockHandler } from './index'
 import { fail, ok } from './index'
 import { findMockStore } from './store'
+import { couponMockState, formatDateTime } from './coupon'
 
 /** 订单内存态（查询侧数据源；导出供测试隔离重灌，与 addressMockState 同风格） */
 export type MockOrder = OrderRecord
@@ -219,6 +220,11 @@ function priceOrder(input: {
   }
 }
 
+/** 当前时间文本（东八区 `yyyy-MM-dd HH:mm:ss` 口径，用于红包有效期窗口判定） */
+function nowText(): string {
+  return formatDateTime(new Date())
+}
+
 /** 是否该店新客：镜像后端 `orders.countByUserAndStore(userId, storeId) == 0` */
 function isNewCustomerAt(storeId: string): boolean {
   return !orderMockState.some((order) => order.storeId === storeId)
@@ -226,11 +232,16 @@ function isNewCustomerAt(storeId: string): boolean {
 
 export const orderMocks: Record<string, MockHandler> = {
   'POST /orders': ({ data }) => {
-    const { storeId, addressId, remark, expectedTotal } = (data ?? {}) as {
+    const { storeId, addressId, remark, expectedTotal, couponId } = (data ?? {}) as {
       storeId?: string
       addressId?: string
       remark?: string
       expectedTotal?: number
+      couponId?: unknown
+    }
+    // 一单一红包（契约 §3.8 / TC-CPN-004）：请求体只允许一个 couponId
+    if (Array.isArray(couponId)) {
+      return fail(400, 40000, '一单只能使用一个红包')
     }
     if (!storeId || !addressId) {
       return fail(400, 40000, '缺少店铺或收货地址')
@@ -248,12 +259,28 @@ export const orderMocks: Record<string, MockHandler> = {
     const itemsTotal = Number(lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0).toFixed(2))
     // 配送费取店铺配置，未配置/店铺缺失按 0（契约 §3.5：配送费默认 3.00、店铺可配、未配置按 0）
     const deliveryFee = findMockStore(storeId)?.deliveryFee ?? 0
+    // 红包选用（契约 §3.8）：后端重新校验门槛/适用范围/有效期/归属并锁定，一单一红包（七步第 ⑥ 步）
+    let couponAmount = 0
+    let lockedCoupon: CouponRecord | undefined
+    if (typeof couponId === 'string' && couponId.trim()) {
+      const coupon = couponMockState.find((item) => item.couponId === couponId.trim())
+      if (!coupon) return fail(404, 40400, '红包不存在')
+      const inWindowNow = coupon.validFrom <= nowText() && coupon.validTo >= nowText()
+      if (coupon.used || !inWindowNow) return fail(409, 40900, '红包已使用或已过期')
+      if (coupon.scope === 'STORE' && coupon.storeId !== storeId) {
+        return fail(400, 40000, '红包不适用于当前店铺')
+      }
+      if (itemsTotal < coupon.threshold) return fail(400, 40000, '未满足红包使用门槛')
+      couponAmount = coupon.amount
+      lockedCoupon = coupon
+    }
     // 七步计价（镜像后端 PricingService；前端 expectedTotal 只作一致性提示，不参与计价）
     const price = priceOrder({
       itemSubtotal: itemsTotal,
       deliveryFee,
       storeId,
       isNewCustomer: isNewCustomerAt(storeId),
+      couponAmount,
     })
     const total = price.total
     void expectedTotal // 一致性提示字段：mock 后端不采信，仅后端计价口径生效
@@ -291,6 +318,8 @@ export const orderMocks: Record<string, MockHandler> = {
       items: items.map((item) => ({ ...item })),
     }
     orderMockState.push(order)
+    // 红包核销：与订单在同一事务内（替身按核销后置表示；真实后端为条件更新，并发下同一券只成功一次）
+    if (lockedCoupon) lockedCoupon.used = true
     // 事务成功后清空该用户该店购物车（TC-ORD-003）
     clearMockCart(storeId)
     return ok({ ...order, items: items.map((item) => ({ ...item })) })

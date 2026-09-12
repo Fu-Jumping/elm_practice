@@ -7,6 +7,8 @@
  * - 商品行来自该店购物车
  * - 金额明细按「基础四行 + 优惠项按实际发生展示」渲染（PRD 7.4 / 契约 §3.5，2026-09-11 定稿 CHG-004，
  *   批次① TODO-USER-001）：无优惠时实付 = 商品小计 + 打包费 2.00 + 配送费（店铺配置，未配置按 0）
+ * - 红包选择（批次⑥ TODO-USER-006 剩余 + CHG-001 闭环）：可用券由 `GET /me/coupons/available?storeId=&amount=`
+ *   返回（门槛基数=商品小计），选中后把 `couponId` 随下单提交，金额明细加一行「红包优惠」（七步第 ⑥ 步）
  * - 金额以后端为准：前端合计仅作 expectedTotal 一致性提示（TC-ORD-011）
  * - 去支付只发一次创建订单请求；成功后清空该店购物车并进入支付页（PRD 底部结算栏行）
  * 口径差异备注：设计稿地址卡电话为脱敏展示、备注为弹层交互、支付方式区为 P1 扩展；
@@ -15,13 +17,13 @@
  */
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { addressApi, orderApi } from '@/services/api'
+import { addressApi, couponApi, orderApi } from '@/services/api'
 import { PACKAGING_FEE, buildAmountLines, formatMoney, payableAmountText } from '@/services/normalizers'
 import { useCartStore } from '@/stores/cartStore'
 import { useCatalogStore } from '@/stores/catalogStore'
 import { useSessionStore } from '@/stores/sessionStore'
 import { toast } from '@/utils/toast'
-import type { Address } from '@/services/api/types'
+import type { Address, CouponRecord } from '@/services/api/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -61,14 +63,16 @@ const deliveryFee = computed(() => catalogStore.storeDetail?.deliveryFee ?? 0)
  * 实付金额预览：商品小计 + 打包费 + 配送费（无优惠退化口径；后端计价为准，TC-ORD-011）
  * 优惠项（满减/红包/新客立减/会员折扣/配送费优惠）待批次① 计价与红包选择接入后按实际发生传入
  */
-const payableAmount = computed(() =>
-  Number(
-    payableAmountText({
-      itemsTotal: cartStore.totalAmount,
-      packagingFee: PACKAGING_FEE,
-      deliveryFee: deliveryFee.value,
-    }),
-  ),
+/** 实付预览：基础金额 − 已选红包面额（红包为七步第 ⑥ 步的减项） */
+const payableAmount = computed(
+  () =>
+    Number(
+      payableAmountText({
+        itemsTotal: cartStore.totalAmount,
+        packagingFee: PACKAGING_FEE,
+        deliveryFee: deliveryFee.value,
+      }),
+    ) - couponAmount.value,
 )
 
 /**
@@ -81,9 +85,57 @@ const amountLines = computed(() =>
     itemsTotal: cartStore.totalAmount,
     packagingFee: PACKAGING_FEE,
     deliveryFee: deliveryFee.value,
+    // 红包优惠：选中券时各占一行（未发生不显示，CHG-004 优惠项按实际发生展示）
+    discounts: selectedCoupon.value
+      ? [{ key: 'coupon', label: '红包优惠', amount: couponAmount.value }]
+      : [],
     payableAmount: payableAmount.value,
   }),
 )
+
+/**
+ * 红包选择（批次⑥ TODO-USER-006 剩余部分 + CHG-001 闭环）：
+ * 可用券由后端按门槛（门槛基数=商品小计，不含打包费/配送费）与适用范围过滤，前端只展示返回项、不自判可选性。
+ * 设计稿无此区块 → 按 `设计系统-用户端` 新建（与取消确认页同口径），沿用本站「通栏白底分段」形态。
+ */
+const availableCoupons = ref<CouponRecord[]>([])
+const selectedCoupon = ref<CouponRecord | null>(null)
+const couponSheetOpen = ref(false)
+
+/** 已选红包的金额（未选为 0）；金额为 0 时金额明细不出优惠行 */
+const couponAmount = computed(() => selectedCoupon.value?.amount ?? 0)
+
+async function loadAvailableCoupons(): Promise<void> {
+  try {
+    availableCoupons.value = await couponApi.listAvailableCoupons({
+      storeId,
+      amount: cartStore.totalAmount,
+    })
+  } catch {
+    // 可用券读取失败不阻塞下单：按「暂无可用红包」展示（不补演示数据）
+    availableCoupons.value = []
+  }
+}
+
+function toggleCouponSheet(): void {
+  if (availableCoupons.value.length === 0) return
+  couponSheetOpen.value = true
+}
+
+function pickCoupon(coupon: CouponRecord): void {
+  selectedCoupon.value = coupon
+  couponSheetOpen.value = false
+}
+
+function clearCoupon(): void {
+  selectedCoupon.value = null
+  couponSheetOpen.value = false
+}
+
+/** 券卡适用范围说明（与红包页同口径） */
+function couponScopeText(coupon: CouponRecord): string {
+  return coupon.scope === 'ALL' ? '全平台可用' : `限${storeName.value || '该商家'}可用`
+}
 
 /** 店铺休息（CLOSED/TEMPORARILY_CLOSED 均不可下单，TC-ORD-006 前端侧） */
 const storeClosed = computed(() => {
@@ -145,6 +197,8 @@ onMounted(async () => {
     cartStore.fetchCart(storeId),
   ])
   loaded.value = true
+  // 可用券依赖商品小计：购物车就绪后读取（失败不阻塞下单）
+  void loadAvailableCoupons()
 })
 
 /** 提交创建订单：只发一次请求；成功前不清购物车，成功后经购物车接口刷新清空（PRD 结算栏行） */
@@ -157,6 +211,7 @@ async function submitOrder(): Promise<void> {
       addressId: defaultAddress.value.addressId,
       remark: remark.value.trim() || undefined,
       expectedTotal: payableAmount.value,
+      couponId: selectedCoupon.value?.couponId,
     })
     // 成功后由明确前端流程清空该店购物车：经购物车接口重查（mock 后端已清空，TC-ORD-003）
     await cartStore.fetchCart(storeId)
@@ -252,6 +307,27 @@ function goBack(): void {
         <p v-else class="co-skeleton">商品加载中…</p>
       </section>
 
+      <!-- 红包选择（批次⑥：设计稿无此区，按设计系统新建；通栏白底分段） -->
+      <section
+        class="co-card co-coupon"
+        data-testid="coupon-select"
+        role="button"
+        :aria-disabled="availableCoupons.length === 0 ? 'true' : 'false'"
+        @click="toggleCouponSheet"
+      >
+        <span class="co-coupon-label">红包</span>
+        <span class="co-coupon-value" :class="{ 'is-picked': !!selectedCoupon }">
+          {{
+            selectedCoupon
+              ? `−¥${formatMoney(selectedCoupon.amount)}`
+              : availableCoupons.length > 0
+                ? `${availableCoupons.length} 张可用`
+                : '暂无可用红包'
+          }}
+        </span>
+        <span v-if="availableCoupons.length > 0" class="co-chevron" aria-hidden="true">›</span>
+      </section>
+
       <!-- 订单备注（设计稿为弹层交互，本期内联输入；最多 50 字；通栏白底分段 padding 18px 12px） -->
       <section class="co-card co-remark">
         <div class="co-remark-label">订单备注</div>
@@ -300,6 +376,39 @@ function goBack(): void {
         </div>
       </div>
     </footer>
+
+    <!-- 红包选择弹层（底部弹层：列出后端返回的可用券 + 不使用红包） -->
+    <div v-if="couponSheetOpen" class="co-mask" data-testid="coupon-sheet" @click.self="couponSheetOpen = false">
+      <section class="co-sheet">
+        <header class="co-sheet-head">
+          <h2 class="co-sheet-title">选择红包</h2>
+          <button class="co-sheet-close" type="button" aria-label="关闭" @click="couponSheetOpen = false">×</button>
+        </header>
+        <button
+          v-for="coupon in availableCoupons"
+          :key="coupon.couponId"
+          class="co-coupon-option"
+          type="button"
+          data-testid="coupon-option"
+          :data-coupon-id="coupon.couponId"
+          @click="pickCoupon(coupon)"
+        >
+          <span class="co-coupon-option-amount">¥{{ formatMoney(coupon.amount) }}</span>
+          <span class="co-coupon-option-body">
+            <span class="co-coupon-option-name">
+              {{ coupon.name }}
+            </span>
+            <span class="co-coupon-option-meta">
+              {{ coupon.threshold > 0 ? `满${formatMoney(coupon.threshold)}可用` : '无门槛' }} ·
+              {{ couponScopeText(coupon) }}
+            </span>
+          </span>
+        </button>
+        <button class="co-coupon-none" type="button" data-testid="coupon-none-btn" @click="clearCoupon">
+          不使用红包
+        </button>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -540,6 +649,123 @@ function goBack(): void {
   color: #1a1c1c;
   resize: none;
   box-sizing: border-box;
+}
+
+/* 红包选择区（通栏白底分段，与送达时间/备注同形态） */
+.co-coupon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 18px 12px;
+}
+
+.co-coupon-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1c1c;
+}
+
+.co-coupon-value {
+  margin-left: auto;
+  font-size: 14px;
+  color: #999;
+}
+
+.co-coupon-value.is-picked {
+  color: #ff5a1f;
+  font-weight: 600;
+}
+
+/* 红包选择弹层 */
+.co-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.co-sheet {
+  width: 100%;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 16px;
+  border-radius: 8px 8px 0 0;
+  background: #fff;
+}
+
+.co-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.co-sheet-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1c1c;
+}
+
+.co-sheet-close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  font-size: 22px;
+  line-height: 1;
+  color: #999;
+}
+
+.co-coupon-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #ffb59e;
+  border-radius: 8px;
+  background: rgba(255, 219, 208, 0.15);
+  text-align: left;
+}
+
+.co-coupon-option-amount {
+  flex: none;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ff5a1f;
+}
+
+.co-coupon-option-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.co-coupon-option-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1c1c;
+}
+
+.co-coupon-option-meta {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: #666;
+}
+
+.co-coupon-none {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+  color: #666;
 }
 
 /* 底部结算栏 */

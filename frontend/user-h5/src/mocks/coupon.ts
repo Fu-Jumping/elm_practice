@@ -132,6 +132,22 @@ export const couponMocks: Record<string, MockHandler> = {
     return ok(list)
   },
 
+  'GET /me/coupons/available': ({ params }) => {
+    const storeId = String(params?.storeId ?? '')
+    const amount = Number(params?.amount ?? 0)
+    const now = formatDateTime(new Date())
+    const list = couponMockState
+      .map((item) => viewOf(item, now))
+      .filter((item) => item.status === 'available' && !item.used)
+      // 适用范围：ALL 全场 / STORE 需匹配当前店铺（本期不做品类范围）
+      .filter((item) => item.scope === 'ALL' || (item.scope === 'STORE' && item.storeId === storeId))
+      // 门槛基数 = 商品小计（不含打包费/配送费，契约 §3.8 实现回写）
+      .filter((item) => amount >= item.threshold)
+      // 面额大的在前（更划算优先展示；契约未规定排序，替身按此口径）
+      .sort((a, b) => b.amount - a.amount)
+    return ok(list)
+  },
+
   'POST /me/coupons/blast': ({ data }) => {
     const couponId = String((data as { couponId?: unknown } | undefined)?.couponId ?? '').trim()
     const today = formatDateTime(new Date()).slice(0, 10)
