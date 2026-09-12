@@ -5,6 +5,7 @@ import com.elm.practice.common.RequestUtil;
 import com.elm.practice.common.ViewMapper;
 import com.elm.practice.domain.Domain;
 import com.elm.practice.mapper.CategoryMapper;
+import com.elm.practice.mapper.MerchantMapper;
 import com.elm.practice.mapper.ProductMapper;
 import com.elm.practice.mapper.StoreMapper;
 import org.springframework.stereotype.Service;
@@ -16,8 +17,9 @@ import java.util.Map;
 @Service
 public class StoreService {
     private final StoreMapper stores; private final CategoryMapper categories; private final ProductMapper products;
-    public StoreService(StoreMapper stores, CategoryMapper categories, ProductMapper products) {
-        this.stores = stores; this.categories = categories; this.products = products;
+    private final MerchantMapper merchants;
+    public StoreService(StoreMapper stores, CategoryMapper categories, ProductMapper products, MerchantMapper merchants) {
+        this.stores = stores; this.categories = categories; this.products = products; this.merchants = merchants;
     }
 
     public List<Map<String,Object>> list(String keyword, String categoryId, String sort) {
@@ -59,12 +61,19 @@ public class StoreService {
     }
 
     @Transactional
-    public void updateStore(Domain.Store s, String name, String desc, String image, java.math.BigDecimal start, java.math.BigDecimal fee) {
+    public void updateStore(Domain.Merchant m, Domain.Store s, String name, String desc, String image, java.math.BigDecimal start, java.math.BigDecimal fee, String contactPhone) {
         if (name != null) s.name = RequestUtil.required(name, "name");
         if (desc != null) s.description = desc.trim();
         if (image != null) s.image = image.trim();
         if (start != null) s.startPrice = RequestUtil.money(start, "startPrice");
         if (fee != null) s.deliveryFee = RequestUtil.money(fee, "deliveryFee");
+        // BUG-20260908-012：联系电话随店铺设置保存（落 merchants.phone）；不传 = 不改，传值必须为 11 位手机号。
+        if (contactPhone != null) {
+            String phone = contactPhone.trim();
+            if (!phone.matches("^1\\d{10}$")) throw ApiException.badRequest("联系电话必须是 11 位手机号");
+            if (merchants.updatePhone(m.id, phone) != 1) throw ApiException.notFound("商家不存在");
+            m.phone = phone;
+        }
         stores.updateFull(s);
     }
 

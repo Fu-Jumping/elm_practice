@@ -3,7 +3,9 @@ package com.elm.practice.mapper;
 import com.elm.practice.domain.Domain;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 @Mapper
 public interface MerchantMapper {
@@ -15,6 +17,10 @@ public interface MerchantMapper {
 
     @Select("SELECT " + COLS + " FROM merchants WHERE account = #{account}")
     Domain.Merchant findByAccount(String account);
+
+    /** 店铺设置修改联系电话（BUG-20260908-012：落库 merchants.phone）。 */
+    @Update("UPDATE merchants SET phone = #{phone} WHERE merchant_id = #{id}")
+    int updatePhone(@Param("id") String id, @Param("phone") String phone);
 
     @Insert("INSERT INTO merchants(merchant_id, account, password_hash, store_id, phone, created_at) "
             + "VALUES(#{id}, #{account}, #{passwordHash}, #{storeId}, #{phone}, STR_TO_DATE(#{createdAt},'%Y-%m-%d %H:%i:%s'))")
