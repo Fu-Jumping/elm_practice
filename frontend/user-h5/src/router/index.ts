@@ -143,6 +143,13 @@ const router = createRouter({
           meta: { title: '我的收藏', tab: true, auth: true, priority: 'P1' },
         },
         {
+          // 红包页（批次⑥/CHG-001 TODO-USER-028）：天天红包 = 加量通栏 + 天天必爆活动卡 + 可用红包列表
+          path: 'coupons',
+          name: 'coupons',
+          component: () => import('@/views/user/CouponView.vue'),
+          meta: { title: '天天红包', tab: true, auth: true, priority: 'P1' },
+        },
+        {
           // 会员权益（批次⑥ TODO-USER-006）：会员标识与权益说明；本期不提供开通/续费（契约 §3.8）
           path: 'member',
           name: 'member',
