@@ -41,6 +41,11 @@ function goMember(): void {
   void router.push({ name: 'member' })
 }
 
+/** 红包页（批次⑥/CHG-001 TODO-USER-028）：天天红包 = 加量通栏 + 天天必爆活动卡 + 可用红包列表 */
+function goCoupons(): void {
+  void router.push({ name: 'coupons' })
+}
+
 /** 未选定扩展入口：提示暂未开放，不进入业务（PRD 862 列） */
 function placeholder(): void {
   toast('暂未开放')
@@ -104,7 +109,7 @@ async function onLogout(): Promise<void> {
           <span>我的收藏</span>
           <span class="mn-arrow" aria-hidden="true">›</span>
         </button>
-        <button class="mn-item" type="button" data-testid="entry-coupons" @click="placeholder">
+        <button class="mn-item" type="button" data-testid="entry-coupons" @click="goCoupons">
           <span>红包卡券</span>
           <span class="mn-arrow" aria-hidden="true">›</span>
         </button>
