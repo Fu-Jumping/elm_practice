@@ -4,6 +4,7 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
 import ConfirmOrderView from '../ConfirmOrderView.vue'
 import { orderApi } from '@/services/api'
+import { COUPON_SEED, couponMockState } from '@/mocks/coupon'
 import { useSessionStore } from '@/stores/sessionStore'
 import { useCartStore } from '@/stores/cartStore'
 import { onToast } from '@/utils/toast'
@@ -33,6 +34,8 @@ describe('ConfirmOrderView（确认订单页 P0）', () => {
     // 地址/购物车 mock 均为模块级内存态：每条用例重灌/清空，隔离跨用例污染
     // （同商品加购会合并数量，不清理会让用例间金额互相累加）
     addressMockState.splice(0, addressMockState.length, ...ADDRESS_SEED.map((item) => ({ ...item })))
+    // 红包替身内存态：每条用例重灌（CPN 组依赖券种子）
+    couponMockState.splice(0, couponMockState.length, ...COUPON_SEED.map((item) => ({ ...item })))
     clearMockCart('m002')
   })
 
@@ -394,6 +397,116 @@ describe('ConfirmOrderView（确认订单页 P0）', () => {
       expect(created.total).toBe(39)
       // 与页面预览（基础四行 46.00）的差额只来自优惠，且预览在上界（后端只可能更便宜）
       expect(created.total!).toBeLessThanOrEqual(46)
+    })
+  })
+
+  /**
+   * CPN 组：确认订单页红包选择（批次⑥ TODO-USER-006 剩余部分 + CHG-001 闭环，2026-09-12）
+   * 出处：PRD 7.4 七步第 ⑥ 步、PRD 7.16.1「红包页-红包列表」行（875：确认订单页只在红包扩展选定后可选可用红包）、
+   * 契约 §3.8（可用红包查询与一单一红包、下单 `couponId` 选用）、TC-CPN-002/003/004。
+   * 口径：可用券由后端按门槛（门槛基数=商品小计，不含打包费/配送费）与适用范围过滤，前端只展示返回项、
+   * 不自行判断可选性；金额明细的「红包优惠」行走 `buildAmountLines` 的优惠项出口（与订单详情、支付页同口径）。
+   */
+  describe('确认订单页红包选择（批次⑥ TODO-USER-006）', () => {
+    it('CPN-1 红包选择区按接口返回可用券数量，点开弹层列出可用券', async () => {
+      const pinia = bootstrapPinia()
+      await loginAndFillCart()
+      const { wrapper } = await mountConfirm({ storeId: 'm002' }, pinia)
+      await vi.waitFor(
+        () =>
+          expect(wrapper.find('[data-testid="amount-line"][data-key="payable"]').text()).toContain(
+            '46.00',
+          ),
+        { timeout: 2000 },
+      )
+      // 小计 39.00：cp001（满20减2，全场）可用；cp002（满40减5，限 m002）门槛不足 → 不返回
+      await vi.waitFor(
+        () => expect(wrapper.find('[data-testid="coupon-select"]').text()).toContain('1 张可用'),
+        { timeout: 2000 },
+      )
+      await wrapper.find('[data-testid="coupon-select"]').trigger('click')
+      await flushPromises()
+      const options = wrapper.findAll('[data-testid="coupon-option"]')
+      expect(options).toHaveLength(1)
+      expect(options[0]!.text()).toContain('满20减2红包')
+      expect(options[0]!.text()).toContain('全平台可用')
+      // 可取消选择
+      expect(wrapper.find('[data-testid="coupon-none-btn"]').exists()).toBe(true)
+    })
+
+    it('CPN-2 选择红包 → 金额明细出现「红包优惠」行且实付预览减少；可取消（TC-CPN-002）', async () => {
+      const pinia = bootstrapPinia()
+      await loginAndFillCart()
+      const { wrapper } = await mountConfirm({ storeId: 'm002' }, pinia)
+      await vi.waitFor(
+        () =>
+          expect(wrapper.find('[data-testid="coupon-select"]').text()).toContain('1 张可用'),
+        { timeout: 2000 },
+      )
+      await wrapper.find('[data-testid="coupon-select"]').trigger('click')
+      await flushPromises()
+      await wrapper.findAll('[data-testid="coupon-option"]')[0]!.trigger('click')
+      await flushPromises()
+      const couponLine = wrapper.find('[data-testid="amount-line"][data-key="coupon"]')
+      expect(couponLine.exists()).toBe(true)
+      expect(couponLine.attributes('data-kind')).toBe('discount')
+      expect(couponLine.text()).toContain('红包优惠')
+      expect(couponLine.text()).toContain('−¥2.00')
+      // 实付预览 = 46.00 − 2.00 = 44.00（优惠项按实际发生展示）
+      expect(wrapper.find('[data-testid="amount-line"][data-key="payable"]').text()).toContain('44.00')
+      // 取消选择 → 优惠行消失、实付回到 46.00
+      await wrapper.find('[data-testid="coupon-select"]').trigger('click')
+      await flushPromises()
+      await wrapper.find('[data-testid="coupon-none-btn"]').trigger('click')
+      await flushPromises()
+      expect(wrapper.find('[data-testid="amount-line"][data-key="coupon"]').exists()).toBe(false)
+      expect(wrapper.find('[data-testid="amount-line"][data-key="payable"]').text()).toContain('46.00')
+    })
+
+    it('CPN-3 提交订单把 couponId 传给后端：券置已用且订单快照 couponAmount 正确（TC-CPN-002）', async () => {
+      const pinia = bootstrapPinia()
+      await loginAndFillCart()
+      const { wrapper, router } = await mountConfirm({ storeId: 'm002' }, pinia)
+      await vi.waitFor(
+        () =>
+          expect(wrapper.find('[data-testid="coupon-select"]').text()).toContain('1 张可用'),
+        { timeout: 2000 },
+      )
+      await wrapper.find('[data-testid="coupon-select"]').trigger('click')
+      await flushPromises()
+      await wrapper.findAll('[data-testid="coupon-option"]')[0]!.trigger('click')
+      await flushPromises()
+      await vi.waitFor(
+        () => expect(wrapper.find('[data-testid="address-card"]').exists()).toBe(true),
+        { timeout: 2000 },
+      )
+      await wrapper.find('[data-testid="submit-order-btn"]').trigger('click')
+      await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('order-pay'), {
+        timeout: 2000,
+      })
+      const created = await orderApi.getOrder(String(router.currentRoute.value.params.orderId))
+      // 七步第 ⑥ 步：券金额入快照，一单一红包
+      expect(created.couponAmount).toBe(2)
+      // 39 − 满减 2 − 红包 2 + 配送费 5 − 配送费优惠 5 + 打包费 2 = 37.00
+      expect(created.total).toBe(37)
+      // 券被核销
+      expect(couponMockState.find((item) => item.couponId === 'cp001')!.used).toBe(true)
+    })
+
+    it('CPN-4 无可用券时给出「暂无可用红包」且不可点开', async () => {
+      const pinia = bootstrapPinia()
+      await loginAndFillCart()
+      // 清空券种子 → 无可用券
+      couponMockState.splice(0, couponMockState.length)
+      const { wrapper } = await mountConfirm({ storeId: 'm002' }, pinia)
+      await vi.waitFor(
+        () => expect(wrapper.find('[data-testid="coupon-select"]').exists()).toBe(true),
+        { timeout: 2000 },
+      )
+      expect(wrapper.find('[data-testid="coupon-select"]').text()).toContain('暂无可用红包')
+      await wrapper.find('[data-testid="coupon-select"]').trigger('click')
+      await flushPromises()
+      expect(wrapper.find('[data-testid="coupon-sheet"]').exists()).toBe(false)
     })
   })
 })
