@@ -17,16 +17,20 @@ public interface CouponMapper {
     @Select("SELECT " + COLS + " FROM coupons WHERE coupon_id = #{couponId} FOR UPDATE")
     Domain.Coupon findByIdForUpdate(String couponId);
 
-    /** 状态仅表达有效期：available=当前在有效期窗口内（used 单独回显），expired=已过 validTo。 */
+    /** 状态仅表达有效期：available=当前在有效期窗口内（used 单独回显），expired=已过 validTo。
+     *  时间统一东八区：valid_from/valid_to 存东八区文本，NOW() 取 UTC 故加 8 小时对齐。 */
     @Select("<script>SELECT " + COLS + " FROM coupons WHERE user_id = #{userId} "
-            + "<if test='available'> AND valid_from &lt;= NOW() AND valid_to &gt;= NOW() </if>"
-            + "<if test='!available'> AND valid_to &lt; NOW() </if>"
+            + "<if test='available'> AND valid_from &lt;= DATE_ADD(UTC_TIMESTAMP(), INTERVAL 8 HOUR) "
+            + "AND valid_to &gt;= DATE_ADD(UTC_TIMESTAMP(), INTERVAL 8 HOUR) </if>"
+            + "<if test='!available'> AND valid_to &lt; DATE_ADD(UTC_TIMESTAMP(), INTERVAL 8 HOUR) </if>"
             + " ORDER BY valid_to DESC, coupon_id</script>")
     List<Domain.Coupon> listByUser(@Param("userId") String userId, @Param("available") boolean available);
 
     /** 当前订单可用：未用、在有效期、门槛 ≤ 商品小计、全场或本店；门槛基数=商品小计（契约 §3.8）。 */
     @Select("SELECT " + COLS + " FROM coupons WHERE user_id = #{userId} AND used = FALSE "
-            + "AND valid_from <= NOW() AND valid_to >= NOW() AND threshold <= #{amount} "
+            + "AND valid_from <= DATE_ADD(UTC_TIMESTAMP(), INTERVAL 8 HOUR) "
+            + "AND valid_to >= DATE_ADD(UTC_TIMESTAMP(), INTERVAL 8 HOUR) "
+            + "AND threshold <= #{amount} "
             + "AND (scope = 'ALL' OR (scope = 'STORE' AND store_id = #{storeId})) "
             + "ORDER BY amount DESC, coupon_id")
     List<Domain.Coupon> listUsable(@Param("userId") String userId, @Param("storeId") String storeId,

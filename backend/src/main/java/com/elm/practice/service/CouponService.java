@@ -163,7 +163,7 @@ public class CouponService {
     private static boolean withinWindow(Domain.Coupon c) {
         try {
             var fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            var now = LocalDateTime.now();
+            var now = LocalDateTime.now(Times.CN);
             return !LocalDateTime.parse(c.validFrom, fmt).isAfter(now) && !LocalDateTime.parse(c.validTo, fmt).isBefore(now);
         } catch (Exception e) { return false; }
     }

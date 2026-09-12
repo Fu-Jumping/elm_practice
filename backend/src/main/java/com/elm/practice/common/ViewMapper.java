@@ -68,9 +68,10 @@ public final class ViewMapper {
         m.put("validFrom",c.validFrom); m.put("validTo",c.validTo);
         boolean inWindow = false;
         try {
-            var now = java.time.LocalDateTime.now();
-            inWindow = !java.time.LocalDateTime.parse(c.validFrom, java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).isAfter(now)
-                    && !java.time.LocalDateTime.parse(c.validTo, java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).isBefore(now);
+            var now = java.time.LocalDateTime.now(com.elm.practice.common.Times.CN);
+            var fmt = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            inWindow = !java.time.LocalDateTime.parse(c.validFrom, fmt).isAfter(now)
+                    && !java.time.LocalDateTime.parse(c.validTo, fmt).isBefore(now);
         } catch (Exception ignored) { }
         m.put("status", inWindow ? "available" : "expired");
         m.put("used",c.used); m.put("source",c.source); m.put("canBlast",c.canBlast);
