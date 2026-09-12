@@ -177,4 +177,48 @@ describe('订单计价 mock（PRD 7.4 七步顺序，镜像后端 PricingService
     expect(order.deliveryFeeDiscount).toBe(0)
     expect(order.total).toBe(32.5)
   })
+
+  /**
+   * PR-6/PR-7 交叉验证：**与后端集成测试 `PricingIntegrationTest` 同金额**
+   * 后端基线（`backend/src/test/java/.../PricingIntegrationTest.java` 第 19–21 行）：m002 配送费 5.00、
+   * 满 20 减 2 / 满 40 减 5、新客 3、免配送费门槛 30、会员 95 折，u001 在 m002 非新客。
+   * 目的：替身是"后端替身"，其金额必须与真实后端**逐分一致**——这两条用后端测试的原始数字做交叉验证，
+   * 后端改动若导致金额漂移，本组会立刻红（比只跑前端 mock 更早暴露不一致）。
+   */
+  it('PR-6 交叉验证 TC-PRV-001：小计 23.00 → 实付 28.00（满减 2，未达免配送门槛）', async () => {
+    resetState()
+    const order = await createOrder('m002', 'p104', 2) // 冰可乐(中) 11.50 × 2 = 23.00
+    expect(order.itemSubtotal).toBe(23)
+    expect(order.fullReductionAmount).toBe(2)
+    expect(order.newCustomerAmount).toBe(0)
+    expect(order.deliveryFee).toBe(5)
+    expect(order.deliveryFeeDiscount).toBe(0) // 23 < 门槛 30
+    expect(order.total).toBe(28) // 23 − 2 + 5 + 2
+  })
+
+  it('PR-7 交叉验证 TC-PRV-002/005：小计 48.00 → 满减只取最大档 5 + 免配送费 5 → 实付 45.00', async () => {
+    resetState()
+    // p101 香辣鸡腿堡 19.50 × 2 = 39.00，再 p105 九珍果汁 9.00 → 小计 48.00
+    await mockDispatch({
+      method: 'POST',
+      url: '/cart/items',
+      data: { storeId: 'm002', productId: 'p101', quantity: 2 },
+    })
+    const add2 = await mockDispatch({
+      method: 'POST',
+      url: '/cart/items',
+      data: { storeId: 'm002', productId: 'p105', quantity: 1 },
+    })
+    expect(add2.status).toBe(200)
+    const res = await mockDispatch({
+      method: 'POST',
+      url: '/orders',
+      data: { storeId: 'm002', addressId: 'da001' },
+    })
+    const order = res.payload.data as Record<string, unknown>
+    expect(order.itemSubtotal).toBe(48)
+    expect(order.fullReductionAmount).toBe(5) // 满 20 与满 40 同时满足 → 只取最大档
+    expect(order.deliveryFeeDiscount).toBe(5)
+    expect(order.total).toBe(45) // 48 − 5 + 5 − 5 + 2
+  })
 })
