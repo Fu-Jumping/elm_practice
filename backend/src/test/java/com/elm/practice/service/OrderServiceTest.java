@@ -81,13 +81,14 @@ class OrderServiceTest {
         assertEquals(100, productMapper.findById("p101").stock);
     }
 
-    @Test void unpaidOrderBecomesProcessingAfterPaymentAndRepeatPayIsIdempotent() {
+    /** 状态机修正（TODO-BE-002）：支付成功即 PENDING（待接单），PROCESSING 仅 P0 历史兼容，不再是支付后状态。 */
+    @Test void unpaidOrderBecomesPendingAfterPaymentAndRepeatPayIsIdempotent() {
         Domain.Order order = createFromCart();
         assertEquals(Domain.OrderStatus.PENDING_PAYMENT, order.status);
         assertNull(order.paidAt);
-        assertEquals(Domain.OrderStatus.PROCESSING, orders.pay(user(), order.id, true).status);
+        assertEquals(Domain.OrderStatus.PENDING, orders.pay(user(), order.id, true).status);
         assertNotNull(orderMapper.findById(order.id).paidAt);
-        assertEquals(Domain.OrderStatus.PROCESSING, orders.pay(user(), order.id, true).status);
+        assertEquals(Domain.OrderStatus.PENDING, orders.pay(user(), order.id, true).status);
     }
 
     @Test void expiredPendingPaymentReturnsConflict() {
