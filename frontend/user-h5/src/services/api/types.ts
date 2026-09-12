@@ -121,6 +121,8 @@ export interface CreateOrderPayload {
   addressId: string
   remark?: string
   expectedTotal?: number
+  /** 选用的红包（契约 §3.8：下单时选用，后端重新校验门槛/范围/有效期/归属并锁定；一单一红包） */
+  couponId?: string
 }
 
 /** 创建订单响应（P0 最小集）：订单号 + 后端计价实付金额（商品小计 + 打包费 2.00） */

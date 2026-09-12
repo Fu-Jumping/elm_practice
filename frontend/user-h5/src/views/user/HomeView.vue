@@ -29,6 +29,8 @@ interface GridCell {
   icon: string
   /** 超范围占位栏目（点击提示暂未开放，不进入课程分类范围） */
   placeholder?: boolean
+  /** 已接通的真实入口（CHG-001：宫格「天天爆红包」→ 红包页；其余栏目仍未接通） */
+  entry?: 'coupons'
 }
 
 // 优惠标签样式按序循环（真源三款：金/橙/灰）；数据驱动后样式与文案解耦
@@ -148,7 +150,8 @@ const gridRows: GridCell[][] = [
   ],
   [
     { key: 'dessert', label: '甜品饮品', icon: `${ASSETS}/cat-grid-06.png` },
-    { key: 'redpacket', label: '天天爆红包', icon: `${ASSETS}/cat-grid-07.png` },
+    // CHG-001（PRD 7.16.1 首页「天天爆红包」入口行）：由占位装饰改为红包页真实入口
+    { key: 'redpacket', label: '天天爆红包', icon: `${ASSETS}/cat-grid-07.png`, entry: 'coupons' },
     { key: 'freefruit', label: '0元领水果', icon: `${ASSETS}/cat-grid-08.png` },
     { key: 'errand', label: '跑腿', icon: `${ASSETS}/cat-grid-09.png`, placeholder: true },
     { key: 'huichi', label: '会吃', icon: `${ASSETS}/cat-grid-10.png` },
@@ -181,9 +184,16 @@ function onOpenStore(storeId: string): void {
   void router.push({ name: 'store-detail', params: { storeId } })
 }
 
-// P0 分类商家列表未实现：真实栏目与占位栏目点击均提示（PRD 搜索框行同口径）
+/**
+ * 分类宫格点击：
+ * - 已接通入口（CHG-001：天天爆红包）→ 跳红包页；未登录由红包页自身与路由守卫引导登录（PRD 877 行检查列）
+ * - P0 分类商家列表与其余栏目未实现：点击均提示「暂未开放」（PRD 搜索框行同口径，PRD 877 行「其余占位保持不可点」）
+ */
 function onCellClick(cell: GridCell): void {
-  void cell
+  if (cell.entry === 'coupons') {
+    void router.push({ name: 'coupons' })
+    return
+  }
   toast('暂未开放')
 }
 

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mockDispatch } from '../index'
+import { clearMockCart } from '../cart'
 import { BLAST_TIERS, COUPON_SEED, blastRandomState, couponMockState, formatDateTime, freeBlastState } from '../coupon'
 
 /**
@@ -157,5 +158,114 @@ describe('爆红包替身（契约 §3.10）', () => {
     // 无免费次数（已用）且无可爆券 → 409
     const exhausted = await mockDispatch({ method: 'POST', url: '/me/coupons/blast', data: {} })
     expect(exhausted.status).toBe(409)
+  })
+})
+
+/**
+ * 可用券查询与下单选用（契约 §3.8、TC-CPN-002/003/004）
+ * CPM-5 可用券过滤：门槛基数=商品小计、适用范围（ALL/STORE 匹配店铺）、已用与过期不返回
+ * CPM-6 下单选用：券金额入快照并核销；门槛不足 400、他人/不存在券 404、已用或过期 409、一次两个红包 400
+ */
+describe('可用红包查询与下单选用（契约 §3.8）', () => {
+  beforeEach(() => {
+    couponMockState.splice(0, couponMockState.length, ...COUPON_SEED.map((item) => ({ ...item })))
+    freeBlastState.date = ''
+    clearMockCart('m002')
+  })
+
+  it('CPM-5 可用券按门槛（商品小计）与适用范围过滤，已用/过期不返回（TC-CPN-003）', async () => {
+    // 小计 39（< cp002 门槛 40）→ 只返回 cp001
+    const small = await mockDispatch({
+      method: 'GET',
+      url: '/me/coupons/available',
+      params: { storeId: 'm002', amount: 39 },
+    })
+    const smallList = small.payload.data as Array<Record<string, unknown>>
+    expect(smallList.map((item) => item.couponId)).toEqual(['cp001'])
+    // 小计 45 → 两张都可用（面额大者在前）
+    const big = await mockDispatch({
+      method: 'GET',
+      url: '/me/coupons/available',
+      params: { storeId: 'm002', amount: 45 },
+    })
+    expect((big.payload.data as unknown[]).map((item) => (item as Record<string, unknown>).couponId)).toEqual([
+      'cp002',
+      'cp001',
+    ])
+    // 换店（m003）→ 指定商家券不适用
+    const otherStore = await mockDispatch({
+      method: 'GET',
+      url: '/me/coupons/available',
+      params: { storeId: 'm003', amount: 45 },
+    })
+    expect((otherStore.payload.data as Array<Record<string, unknown>>).map((item) => item.couponId)).toEqual([
+      'cp001',
+    ])
+    // 已用 / 过期不返回
+    couponMockState.find((item) => item.couponId === 'cp001')!.used = true
+    couponMockState.push({ ...COUPON_SEED[0]!, couponId: 'cp-old', validTo: '2026-09-01 23:59:59' })
+    const filtered = await mockDispatch({
+      method: 'GET',
+      url: '/me/coupons/available',
+      params: { storeId: 'm003', amount: 99 },
+    })
+    expect(filtered.payload.data).toEqual([])
+  })
+
+  it('CPM-6 下单选用红包：金额入快照并核销；异常分支按契约拒绝（TC-CPN-002/003/004）', async () => {
+    const add = await mockDispatch({
+      method: 'POST',
+      url: '/cart/items',
+      data: { storeId: 'm002', productId: 'p101', quantity: 2 },
+    })
+    expect(add.status).toBe(200)
+    const ok = await mockDispatch({
+      method: 'POST',
+      url: '/orders',
+      data: { storeId: 'm002', addressId: 'da001', couponId: 'cp001' },
+    })
+    expect(ok.status).toBe(200)
+    const order = ok.payload.data as Record<string, unknown>
+    // 39 − 满减 2 − 红包 2 + 配送费 5 − 配送费优惠 5 + 打包费 2 = 37.00
+    expect(order.couponAmount).toBe(2)
+    expect(order.total).toBe(37)
+    expect(couponMockState.find((item) => item.couponId === 'cp001')!.used).toBe(true)
+    // 已用券再次选用 → 409
+    await mockDispatch({ method: 'POST', url: '/cart/items', data: { storeId: 'm002', productId: 'p101', quantity: 2 } })
+    const reused = await mockDispatch({
+      method: 'POST',
+      url: '/orders',
+      data: { storeId: 'm002', addressId: 'da001', couponId: 'cp001' },
+    })
+    expect(reused.status).toBe(409)
+    // 一次两个红包 → 400（TC-CPN-004）
+    const two = await mockDispatch({
+      method: 'POST',
+      url: '/orders',
+      data: { storeId: 'm002', addressId: 'da001', couponId: ['cp002', 'cp001'] },
+    })
+    expect(two.status).toBe(400)
+    // 门槛不足（cp002 需满 40，小计 39）→ 400（TC-CPN-003）
+    const belowThreshold = await mockDispatch({
+      method: 'POST',
+      url: '/orders',
+      data: { storeId: 'm002', addressId: 'da001', couponId: 'cp002' },
+    })
+    expect(belowThreshold.status).toBe(400)
+    // 不存在/他人券 → 404（TC-CPN-006）
+    const unknown = await mockDispatch({
+      method: 'POST',
+      url: '/orders',
+      data: { storeId: 'm002', addressId: 'da001', couponId: 'cp-none' },
+    })
+    expect(unknown.status).toBe(404)
+    // 指定商家券跨店使用 → 400（cp002 限 m002，此处下单 m003）
+    await mockDispatch({ method: 'POST', url: '/cart/items', data: { storeId: 'm003', productId: 'p204', quantity: 2 } })
+    const wrongStore = await mockDispatch({
+      method: 'POST',
+      url: '/orders',
+      data: { storeId: 'm003', addressId: 'da001', couponId: 'cp002' },
+    })
+    expect(wrongStore.status).toBe(400)
   })
 })
