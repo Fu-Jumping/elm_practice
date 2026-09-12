@@ -40,6 +40,8 @@ describe('MineView（我的页 P0）', () => {
         { path: '/', name: 'home', component: { template: '<div />' } },
         { path: '/login', name: 'login', component: { template: '<div />' } },
         { path: '/addresses', name: 'address-list', component: { template: '<div />' } },
+        { path: '/favorites', name: 'favorites', component: { template: '<div />' } },
+        { path: '/member', name: 'member', component: { template: '<div />' } },
         { path: '/mine', name: 'mine', component: MineView },
       ],
     })
@@ -99,15 +101,22 @@ describe('MineView（我的页 P0）', () => {
     )
   })
 
-  it('T55 未实现入口（会员/收藏/红包）点击 → 提示暂未开放', async () => {
+  // 2026-09-12 口径演进（批次⑥ TODO-USER-006）：会员权益与我的收藏由「暂未开放」接成真入口，
+  // 本用例相应拆分为「已接入口跳转对应页」与「仍未选定入口提示暂未开放」两段
+  it('T55 会员/收藏入口进入对应页面；仍未选定的红包入口提示暂未开放', async () => {
     const session = useSessionStore()
     session.user = { account: '13800000001', nickname: '张同学' }
-    const { wrapper } = await mountMine()
+    const { wrapper, router } = await mountMine()
     await flushPromises()
-    for (const id of ['entry-member', 'entry-favorites', 'entry-coupons']) {
-      await wrapper.find(`[data-testid="${id}"]`).trigger('click')
-      await flushPromises()
-    }
-    expect(messages.filter((m) => m === '暂未开放').length).toBe(3)
+    await wrapper.find('[data-testid="entry-member"]').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('member')
+    await wrapper.find('[data-testid="entry-favorites"]').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('favorites')
+    // 红包页（CHG-001）尚未落地 → 保持 PRD 862 列「未选定入口显示暂未开放」
+    await wrapper.find('[data-testid="entry-coupons"]').trigger('click')
+    await flushPromises()
+    expect(messages.filter((m) => m === '暂未开放').length).toBe(1)
   })
 })

@@ -31,6 +31,16 @@ function goAddresses(): void {
   void router.push({ name: 'address-list' })
 }
 
+/** 我的收藏（批次⑥ TODO-USER-006）：收藏商家列表，可取消收藏（契约 §3.7） */
+function goFavorites(): void {
+  void router.push({ name: 'favorites' })
+}
+
+/** 会员权益（批次⑥ TODO-USER-006）：会员标识与权益说明（契约 §3.8） */
+function goMember(): void {
+  void router.push({ name: 'member' })
+}
+
 /** 未选定扩展入口：提示暂未开放，不进入业务（PRD 862 列） */
 function placeholder(): void {
   toast('暂未开放')
@@ -86,11 +96,11 @@ async function onLogout(): Promise<void> {
           <span>收货地址</span>
           <span class="mn-arrow" aria-hidden="true">›</span>
         </button>
-        <button class="mn-item" type="button" data-testid="entry-member" @click="placeholder">
+        <button class="mn-item" type="button" data-testid="entry-member" @click="goMember">
           <span>会员权益</span>
           <span class="mn-arrow" aria-hidden="true">›</span>
         </button>
-        <button class="mn-item" type="button" data-testid="entry-favorites" @click="placeholder">
+        <button class="mn-item" type="button" data-testid="entry-favorites" @click="goFavorites">
           <span>我的收藏</span>
           <span class="mn-arrow" aria-hidden="true">›</span>
         </button>

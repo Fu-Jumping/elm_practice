@@ -56,4 +56,14 @@ export const endpoints = {
     submit: (orderId: string) => `/orders/${encodeURIComponent(orderId)}/review`,
     byStore: (storeId: string) => `/stores/${encodeURIComponent(storeId)}/reviews`,
   },
+  // 商家收藏（契约 §3.7）：列表 / 收藏 / 取消收藏（取消未被收藏的商店按幂等 200）
+  favorite: {
+    list: '/me/favorites',
+    add: '/me/favorites',
+    remove: (storeId: string) => `/me/favorites/${encodeURIComponent(storeId)}`,
+  },
+  // 会员（契约 §3.8）：会员标识与权益说明（开通与续费接口本期不提供）
+  member: {
+    me: '/me/member',
+  },
 } as const

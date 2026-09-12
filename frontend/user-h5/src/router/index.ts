@@ -135,6 +135,20 @@ const router = createRouter({
           component: () => import('@/views/user/MineView.vue'),
           meta: { title: '我的', tab: true, priority: 'P0' },
         },
+        {
+          // 我的收藏（批次⑥ TODO-USER-006）：收藏商家列表，可取消收藏（契约 §3.7）
+          path: 'favorites',
+          name: 'favorites',
+          component: () => import('@/views/user/FavoriteListView.vue'),
+          meta: { title: '我的收藏', tab: true, auth: true, priority: 'P1' },
+        },
+        {
+          // 会员权益（批次⑥ TODO-USER-006）：会员标识与权益说明；本期不提供开通/续费（契约 §3.8）
+          path: 'member',
+          name: 'member',
+          component: () => import('@/views/user/MemberView.vue'),
+          meta: { title: '会员权益', auth: true, priority: 'P1' },
+        },
       ],
     },
     {

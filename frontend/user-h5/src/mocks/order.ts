@@ -4,7 +4,8 @@
  * 无 storeName（店名由前端按 storeId 映射，缺口与真实后端保持一致）
  * 口径对齐后端职责（TC-ORD-001/003/004/005/013/015/016/021/022）：
  * - 缺 storeId/addressId → 400；addressId 不存在/不属于当前用户 → 按安全需要统一返回不存在（404）
- * - 金额后端重读购物车行计价：实付 = 商品小计 + 打包费 2.00；前端 expectedTotal 仅作一致性提示
+ * - 金额后端重读购物车行计价：无优惠时实付 = 商品小计 + 打包费 2.00 + 配送费（店铺 deliveryFee，
+ *   未配置按 0）；快照含 deliveryFee（契约 §3.5/§10.4 定稿命名）；前端 expectedTotal 仅作一致性提示
  * - 创建成功持久化订单（含商品/地址/金额快照与创建时间）并清空该店购物车（TC-ORD-003）
  * - GET /orders 按创建时间倒序、支持 status 筛选（TC-ORD-013）；GET /orders/{orderId} 详情含明细（TC-ORD-016）
  * 状态口径：种子数据保持 P0 纯度仅 PROCESSING（历史数据兼容，详情页按等价档位展示）；
@@ -17,6 +18,7 @@ import { addressMockState } from './address'
 import { clearMockCart, getMockCartSnapshot } from './cart'
 import type { MockHandler } from './index'
 import { fail, ok } from './index'
+import { findMockStore } from './store'
 
 /** 订单内存态（查询侧数据源；导出供测试隔离重灌，与 addressMockState 同风格） */
 export type MockOrder = OrderRecord
@@ -35,7 +37,9 @@ export const ORDER_SEED: MockOrder[] = [
     createdAt: '2026-09-07 10:00:00',
     itemSubtotal: 39,
     packagingFee: 2,
-    total: 41,
+    // 无优惠退化口径：实付 = 小计 39.00 + 打包费 2.00 + 配送费 5.00(m002)（契约 §3.5 定稿公式）
+    deliveryFee: 5,
+    total: 46,
     address: {
       addressId: 'da001',
       contactName: '张同学',
@@ -58,7 +62,9 @@ export const ORDER_SEED: MockOrder[] = [
     createdAt: '2026-09-07 11:30:00',
     itemSubtotal: 25.5,
     packagingFee: 2,
-    total: 27.5,
+    // 无优惠退化口径：25.50 + 打包费 2.00 + 配送费 5.00(m003) = 32.50
+    deliveryFee: 5,
+    total: 32.5,
     address: {
       addressId: 'da001',
       contactName: '张同学',
@@ -99,7 +105,9 @@ export const orderMocks: Record<string, MockHandler> = {
       return fail(409, 40900, '购物车为空，无法创建订单')
     }
     const itemsTotal = Number(lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0).toFixed(2))
-    const total = Number((itemsTotal + PACKAGING_FEE).toFixed(2))
+    // 配送费取店铺配置，未配置/店铺缺失按 0（契约 §3.5：配送费默认 3.00、店铺可配、未配置按 0）
+    const deliveryFee = findMockStore(storeId)?.deliveryFee ?? 0
+    const total = Number((itemsTotal + PACKAGING_FEE + deliveryFee).toFixed(2))
     void expectedTotal // 一致性提示字段：mock 后端不采信，仅后端计价口径生效
 
     const orderId = `o${String(orderSeq++).padStart(4, '0')}`
@@ -123,6 +131,7 @@ export const orderMocks: Record<string, MockHandler> = {
       payDeadline: new Date(Date.now() + PAY_DEADLINE_MINUTES * 60 * 1000).toISOString(),
       itemSubtotal: itemsTotal,
       packagingFee: PACKAGING_FEE,
+      deliveryFee,
       total,
       address: { ...address },
       items: items.map((item) => ({ ...item })),

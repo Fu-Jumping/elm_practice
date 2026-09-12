@@ -67,9 +67,16 @@ describe('OrderDetailView（订单详情页 P0）', () => {
     // 商品明细快照（名称/单价/数量）
     expect(detail.text()).toContain('巨无霸')
     expect(detail.text()).toContain('25.50')
-    // 金额明细三件套：小计 25.50 + 打包费 2.00 = 实付 27.50（TC-ORD-022）
+    // 金额明细基础四行：小计 25.50 + 打包费 2.00 + 配送费 5.00(m003) = 实付 32.50（TC-ORD-022，CHG-004）
     expect(detail.text()).toContain('2.00')
-    expect(detail.text()).toContain('27.50')
+    expect(detail.text()).toContain('32.50')
+    const amountLines = wrapper.findAll('[data-testid="amount-line"]')
+    expect(amountLines.map((line) => line.attributes('data-key'))).toEqual([
+      'items-total',
+      'packaging',
+      'delivery-fee',
+      'payable',
+    ])
     // 顶部返回 → 订单列表
     await wrapper.find('[data-testid="back-btn"]').trigger('click')
     await flushPromises()

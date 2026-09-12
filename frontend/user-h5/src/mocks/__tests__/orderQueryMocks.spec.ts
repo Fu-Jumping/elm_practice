@@ -51,10 +51,12 @@ describe('订单查询 mock（契约 §3.5 后端替身行为）', () => {
     expect(items[0]!.unitPrice).toBe(25.5)
     expect(items[0]!.quantity).toBe(1)
 
-    // 金额快照（扁平字段，2026-09-07 对齐真实后端形状）：total = itemSubtotal + packagingFee（TC-ORD-022）
+    // 金额快照（扁平字段，2026-09-07 对齐真实后端形状）：total = itemSubtotal + packagingFee + deliveryFee
+    // （契约 §3.5 定稿公式的无优惠退化口径，TC-ORD-022；o0002 属 m003，配送费 5.00）
     expect(order.itemSubtotal).toBe(25.5)
     expect(order.packagingFee).toBe(2)
-    expect(order.total).toBe(27.5)
+    expect(order.deliveryFee).toBe(5)
+    expect(order.total).toBe(32.5)
 
     // 地址快照（address 对象，收货信息来自下单时快照）
     const address = order.address as Record<string, unknown>

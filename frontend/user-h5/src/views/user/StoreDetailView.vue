@@ -15,7 +15,7 @@ import { useCatalogStore } from '@/stores/catalogStore'
 import { useCartStore } from '@/stores/cartStore'
 import { useSessionStore } from '@/stores/sessionStore'
 import { formatMoney, formatTime, statusText } from '@/services/normalizers'
-import { reviewApi } from '@/services/api'
+import { reviewApi, favoriteApi } from '@/services/api'
 import type { CartLine, Product, ReviewRecord } from '@/services/api/types'
 import { toast } from '@/utils/toast'
 import StoreCover from '@/components/StoreCover.vue'
@@ -118,6 +118,8 @@ onMounted(async () => {
   mainScrollEl?.addEventListener('scroll', updateOuterPinned, { passive: true })
   updateOuterPinned()
   await cartStore.fetchCart(storeId)
+  // 收藏状态（批次⑥）：与详情/分类/商品并行，失败不阻塞浏览
+  void loadFavoriteState()
   // TC-CRT-012：A 店有商品进 B 店 → 提示购物车按店独立保留
   const hint = cartStore.takeCrossStoreHint()
   if (hint) toast('已为您保留原店铺购物车，本店商品独立结算')
@@ -140,6 +142,55 @@ function retryDetail(): void {
 
 function onPlaceholderClick(): void {
   toast('暂未开放')
+}
+
+/**
+ * 商家收藏（批次⑥ TODO-USER-006，PRD 688 行「商家详情收藏/取消，icon 状态切换」、契约 §3.7）
+ * - 设计稿未含收藏入口 → 按设计系统新建（图标按钮，与设计系统圆角/主色一致），已收藏用品牌橙实心
+ * - 状态判定：已登录时读收藏列表比对当前 storeId（契约无「单店收藏状态」查询接口）
+ * - 未登录点收藏 → 引导登录并带 redirect（与加购 T45 同口径，不静默失败）
+ * - 重复收藏由后端幂等；请求中禁用按钮，防重复点击
+ */
+const favorited = ref(false)
+const favoriteBusy = ref(false)
+
+async function loadFavoriteState(): Promise<void> {
+  if (!sessionStore.isLoggedIn) {
+    favorited.value = false
+    return
+  }
+  try {
+    const list = await favoriteApi.listFavorites()
+    favorited.value = list.some((item) => item.storeId === storeId)
+  } catch {
+    // 收藏状态读取失败不阻塞浏览：按未收藏展示，用户点击收藏时仍会走后端幂等
+    favorited.value = false
+  }
+}
+
+async function onToggleFavorite(): Promise<void> {
+  if (favoriteBusy.value) return
+  if (!sessionStore.isLoggedIn) {
+    toast('请先登录')
+    void router.push({ name: 'login', query: { redirect: route.fullPath } })
+    return
+  }
+  favoriteBusy.value = true
+  try {
+    if (favorited.value) {
+      await favoriteApi.removeFavorite(storeId)
+      favorited.value = false
+      toast('已取消收藏')
+    } else {
+      await favoriteApi.addFavorite(storeId)
+      favorited.value = true
+      toast('收藏成功')
+    }
+  } catch {
+    // 失败提示由 http 层统一 toast，按钮状态保持原值（用户可重试）
+  } finally {
+    favoriteBusy.value = false
+  }
 }
 
 /** 右侧商品列表滚动容器：点击定位与滚动高亮都以它为根（.product-list 已设 position: relative） */
@@ -391,6 +442,26 @@ function onCheckout(): void {
               <StoreCover class="store-logo" :name="store.name" :image="storeImageSrc(storeId, store.image)" />
             </span>
             <h1 class="store-name">{{ store.name }}</h1>
+            <!-- 收藏入口（PRD 688：icon 状态切换；设计稿未含，按设计系统新建） -->
+            <button
+              class="store-favorite"
+              type="button"
+              data-testid="favorite-toggle"
+              :aria-pressed="favorited ? 'true' : 'false'"
+              :aria-label="favorited ? '取消收藏' : '收藏商家'"
+              :disabled="favoriteBusy"
+              @click="onToggleFavorite"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 20.3l-1.2-1.1C6.3 15.2 3.5 12.6 3.5 9.4 3.5 6.9 5.5 5 8 5c1.5 0 2.9.7 3.9 1.9C12.9 5.7 14.4 5 15.9 5c2.5 0 4.6 1.9 4.6 4.4 0 3.2-2.9 5.8-7.3 9.8z"
+                  :fill="favorited ? '#ff5a1f' : 'none'"
+                  :stroke="favorited ? '#ff5a1f' : '#666666'"
+                  stroke-width="1.7"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
           </div>
           <p class="store-meta-row">
             <svg class="star-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -774,6 +845,30 @@ function onCheckout(): void {
   display: flex;
   align-items: flex-end;
   column-gap: 12px;
+}
+
+/* 收藏入口（PRD 688）：与店名同行右对齐；已收藏为品牌橙实心（图标 fill 由模板按状态切换） */
+.store-favorite {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-left: auto;
+  padding: 0;
+  border: none;
+  border-radius: 12px;
+  background: none;
+}
+
+.store-favorite svg {
+  width: 22px;
+  height: 22px;
+}
+
+.store-favorite:disabled {
+  opacity: 0.5;
 }
 
 .store-logo-box {

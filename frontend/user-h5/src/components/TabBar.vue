@@ -8,7 +8,7 @@
  * 高度 84px = 1px 顶边框 + 内容 73px + Home Indicator 装饰（设计稿 768→852 段）
  * 非选中态图标设计稿未提供，按选中态描边化处理（1.7px stroke，见 raw 留痕）
  */
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { messageApi } from '@/services/api'
 
@@ -40,6 +40,14 @@ const tabs: TabDef[] = [
   { name: 'orders', label: '订单' },
   { name: 'mine', label: '我的' },
 ]
+
+/**
+ * 当前高亮的 Tab：设计稿「我的收藏页-底部导航」把收藏页归属「我的」高亮，
+ * 而收藏页不是四个一级 Tab 之一，故做归属映射（只影响高亮，不影响路由与请求）
+ */
+const activeTab = computed(() =>
+  route.name === 'favorites' || route.name === 'member' ? 'mine' : String(route.name ?? ''),
+)
 </script>
 
 <template>
@@ -49,15 +57,15 @@ const tabs: TabDef[] = [
       :key="tab.name"
       :to="{ name: tab.name }"
       class="tab-item"
-      :class="{ 'tab-item--active': route.name === tab.name }"
+      :class="{ 'tab-item--active': activeTab === tab.name }"
     >
       <span class="tab-icon">
         <!-- 首页：实心房子（选中态原样；非选中描边化） -->
         <svg v-if="tab.name === 'home'" viewBox="0 0 24 24" aria-hidden="true">
           <path
             d="M12 3.6 3.8 10.5V20.4H9.9V14.9H14.1V20.4H20.2V10.5Z"
-            :fill="route.name === 'home' ? 'var(--color-primary)' : 'none'"
-            :stroke="route.name === 'home' ? 'none' : 'currentColor'"
+            :fill="activeTab === 'home' ? 'var(--color-primary)' : 'none'"
+            :stroke="activeTab === 'home' ? 'none' : 'currentColor'"
             stroke-width="1.7"
             stroke-linejoin="round"
           />

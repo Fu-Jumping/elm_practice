@@ -53,22 +53,25 @@ export const PACKAGING_FEE = 2
 export interface PayableAmountInput {
   itemsTotal?: number
   packagingFee?: number
+  deliveryFee?: number
   payableAmount?: number
 }
 
 /**
- * 实付金额展示归一化（TC-ORD-011/021 展示侧，PRD 7.4）：实付 = 商品小计 + 打包费
- * 口径：后端返回 payableAmount 时原样展示（后端计价为准）；缺失时按小计 + 打包费推导兜底；
+ * 实付金额展示归一化（TC-ORD-011/021 展示侧，PRD 7.4）：实付 = 商品小计 + 打包费 + 配送费
+ * 口径：后端返回 payableAmount 时原样展示（后端计价为准）；缺失时按小计 + 打包费 + 配送费推导兜底
+ * （配送费缺失按 0——店铺未配置配送费时不计入，契约 §3.5）；
  * 全缺给 '0.00'，禁止 undefined/NaN 上屏（normalizers 既有约定）
  */
 export function payableAmountText(input: PayableAmountInput): string {
-  const { itemsTotal, packagingFee, payableAmount } = input
+  const { itemsTotal, packagingFee, deliveryFee, payableAmount } = input
   if (typeof payableAmount === 'number' && Number.isFinite(payableAmount)) {
     return payableAmount.toFixed(2)
   }
   if (typeof itemsTotal === 'number' && Number.isFinite(itemsTotal)) {
-    const fee = typeof packagingFee === 'number' && Number.isFinite(packagingFee) ? packagingFee : 0
-    return (itemsTotal + fee).toFixed(2)
+    const packaging = typeof packagingFee === 'number' && Number.isFinite(packagingFee) ? packagingFee : 0
+    const delivery = typeof deliveryFee === 'number' && Number.isFinite(deliveryFee) ? deliveryFee : 0
+    return (itemsTotal + packaging + delivery).toFixed(2)
   }
   return '0.00'
 }

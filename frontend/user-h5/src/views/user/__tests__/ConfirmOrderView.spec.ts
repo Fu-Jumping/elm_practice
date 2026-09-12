@@ -3,6 +3,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
 import ConfirmOrderView from '../ConfirmOrderView.vue'
+import { orderApi } from '@/services/api'
 import { useSessionStore } from '@/stores/sessionStore'
 import { useCartStore } from '@/stores/cartStore'
 import { onToast } from '@/utils/toast'
@@ -12,12 +13,15 @@ import { clearMockCart } from '@/mocks/cart'
 /**
  * 确认订单页 P0 行为测试 T26–T30（2026-09-07，用例口径来自 TDD 规划矩阵 + PRD 7.4/7.16，AI 辅助脚手架）
  * 依据：PRD 7.4 确认订单与优惠计算、PRD 7.16 确认订单页三行、契约 §3.3/§3.5、TC-ADR-006、TC-ORD-011
- * T26 页面渲染：默认地址卡 + 购物车商品行 + 金额明细（商品小计/打包费/实付，2026-09-07 口径演进：原 9/1 决议不单列打包费行导致金额构成不可见，负责人决定展示明细）+ 去支付可用
+ * T26 页面渲染：默认地址卡 + 购物车商品行 + 金额明细（商品小计/打包费/配送费/实付，2026-09-11 CHG-004 定稿口径）+ 去支付可用
  * T27 未登录进入 → 跳登录带 redirect（PRD：未登录转登录）
  * T28 无地址 → 去支付禁用 + 引导提示（PRD：地址不存在时引导新增）
  * T29 填备注提交成功 → 只走一次创建订单 → 该店购物车清空 + 跳订单列表 + 成功提示
  * T30 storeId 缺失 → 返回商家列表（PRD：参数缺失返回列表）
- * 口径：实付金额展示含打包费（39.00 + 2.00 = 41.00）；金额以后端为准，前端合计仅 expectedTotal 提示
+ * 口径：金额明细「基础四行 + 优惠项按实际发生展示」（PRD 7.4 / 契约 §3.5，2026-09-11 定稿 CHG-004）——
+ * 基础四行恒为商品小计 / 打包费 / 配送费（为 0 仍显示 ¥0.00）/ 实付金额；优惠项金额非 0 才各占一行。
+ * 无优惠时实付 = 商品小计 + 打包费 + 配送费（39.00 + 2.00 + 5.00 = 46.00，配送费取店铺配置 deliveryFee）；
+ * 金额以后端为准，前端合计仅作 expectedTotal 提示（TC-ORD-011/021/022 展示侧）
  */
 describe('ConfirmOrderView（确认订单页 P0）', () => {
   const messages: string[] = []
@@ -80,7 +84,7 @@ describe('ConfirmOrderView（确认订单页 P0）', () => {
     return pinia
   }
 
-  it('T26 渲染默认地址卡、商品行与实付金额（含打包费，不单列打包费行）', async () => {
+  it('T26 渲染默认地址卡、商品行与基础四行金额明细（CHG-004 口径）', async () => {
     const pinia = bootstrapPinia()
     await loginAndFillCart()
     const { wrapper } = await mountConfirm({ storeId: 'm002' }, pinia)
@@ -102,13 +106,21 @@ describe('ConfirmOrderView（确认订单页 P0）', () => {
     const items = wrapper.find('[data-testid="order-items"]')
     expect(items.text()).toContain('19.50')
     expect(items.text()).toContain('2')
-    // 金额明细三行（2026-09-07 口径演进）：商品小计 39.00 + 打包费 2.00 = 实付 41.00
+    // 金额明细基础四行（CHG-004 定稿）：商品小计 39.00 + 打包费 2.00 + 配送费 5.00 (m002) = 实付 46.00
     await vi.waitFor(
-      () => expect(wrapper.find('[data-testid="amount-items-total"]').text()).toContain('39.00'),
+      () => expect(wrapper.find('[data-testid="amount-line"][data-key="payable"]').text()).toContain('46.00'),
       { timeout: 2000 },
     )
-    expect(wrapper.find('[data-testid="amount-packaging"]').text()).toContain('2.00')
-    expect(wrapper.find('[data-testid="payable-amount"]').text()).toContain('41.00')
+    const amountLines = wrapper.findAll('[data-testid="amount-line"]')
+    expect(amountLines.map((line) => line.attributes('data-key'))).toEqual([
+      'items-total',
+      'packaging',
+      'delivery-fee',
+      'payable',
+    ])
+    expect(amountLines[0]!.text()).toContain('商品小计')
+    expect(amountLines[1]!.text()).toContain('打包费')
+    expect(amountLines[2]!.text()).toContain('¥5.00')
     // 检查通过 → 去支付可用
     expect(wrapper.find('[data-testid="submit-order-btn"]').attributes('disabled')).toBeUndefined()
   })
@@ -143,7 +155,7 @@ describe('ConfirmOrderView（确认订单页 P0）', () => {
       { timeout: 2000 },
     )
     await vi.waitFor(
-      () => expect(wrapper.find('[data-testid="payable-amount"]').text()).toContain('41.00'),
+      () => expect(wrapper.find('[data-testid="amount-line"][data-key="payable"]').text()).toContain('46.00'),
       { timeout: 2000 },
     )
     await wrapper.find('[data-testid="remark-input"]').setValue('少放辣')
@@ -249,5 +261,132 @@ describe('ConfirmOrderView（确认订单页 P0）', () => {
     expect(router.currentRoute.value.name).toBe('address-list')
     expect(router.currentRoute.value.query.select).toBe('1')
     expect(router.currentRoute.value.query.storeId).toBe('m002')
+  })
+
+  /**
+   * TA 组：确认订单页金额明细（批次① TODO-USER-001）
+   * 出处：PRD 7.4（基础四行 + 优惠项按实际发生展示，2026-09-11 定稿 CHG-004）、契约 §3.5/§5.2、
+   * TC-ORD-011/021/022；共用口径唯一出口 `normalizers.buildAmountLines`（与订单详情、支付页同源）。
+   * 测试侧口径：基础四行恒显示（配送费为 0 仍显示 ¥0.00）、优惠项金额非 0 才各占一行、顺序固定
+   * 商品小计 → 打包费 → 配送费 → 优惠项 → 实付金额；前端预览不得与后端计价（创建订单结果）不一致。
+   */
+  describe('确认订单页金额明细（批次① TODO-USER-001，CHG-004）', () => {
+    it('TA-1 基础四行恒显示且顺序固定，配送费取店铺配置 deliveryFee', async () => {
+      const pinia = bootstrapPinia()
+      await loginAndFillCart()
+      const { wrapper } = await mountConfirm({ storeId: 'm002' }, pinia)
+      await vi.waitFor(
+        () =>
+          expect(wrapper.find('[data-testid="amount-line"][data-key="payable"]').text()).toContain(
+            '46.00',
+          ),
+        { timeout: 2000 },
+      )
+      const lines = wrapper.findAll('[data-testid="amount-line"]')
+      expect(lines.map((line) => line.attributes('data-key'))).toEqual([
+        'items-total',
+        'packaging',
+        'delivery-fee',
+        'payable',
+      ])
+      // 基础四行均为 base/payable，不含优惠行（data-kind="discount"）
+      expect(lines.map((line) => line.attributes('data-kind'))).toEqual([
+        'base',
+        'base',
+        'base',
+        'payable',
+      ])
+      expect(lines[0]!.text()).toContain('¥39.00')
+      expect(lines[1]!.text()).toContain('¥2.00')
+      expect(lines[2]!.text()).toContain('¥5.00')
+      expect(lines[3]!.text()).toContain('¥46.00')
+    })
+
+    it('TA-2 无优惠事项时不渲染优惠行（未发生则整行不显示）', async () => {
+      const pinia = bootstrapPinia()
+      await loginAndFillCart()
+      const { wrapper } = await mountConfirm({ storeId: 'm002' }, pinia)
+      await vi.waitFor(
+        () =>
+          expect(wrapper.find('[data-testid="amount-line"][data-key="payable"]').text()).toContain(
+            '46.00',
+          ),
+        { timeout: 2000 },
+      )
+      // 批次① 未接入优惠计价前，任何优惠项都不得凭空出现（满减/红包/新客/会员/配送费优惠）
+      expect(wrapper.findAll('[data-testid="amount-line"][data-kind="discount"]')).toHaveLength(0)
+      const amountText = wrapper.findAll('[data-testid="amount-line"]').map((line) => line.text())
+      expect(amountText.join('')).not.toContain('−¥')
+    })
+
+    it('TA-3 店铺配送费缺失时仍显示 ¥0.00，金额区不出现 NaN/undefined', async () => {
+      const pinia = bootstrapPinia()
+      await loginAndFillCart()
+      // m999 不在演示店铺种子内：详情接口失败 → deliveryFee 缺失，按「未配置按 0」兜底
+      const { wrapper } = await mountConfirm({ storeId: 'm999' }, pinia)
+      await vi.waitFor(
+        () =>
+          expect(
+            wrapper.find('[data-testid="amount-line"][data-key="delivery-fee"]').exists(),
+          ).toBe(true),
+        { timeout: 2000 },
+      )
+      const lines = wrapper.findAll('[data-testid="amount-line"]')
+      expect(lines).toHaveLength(4)
+      expect(wrapper.find('[data-testid="amount-line"][data-key="delivery-fee"]').text()).toContain(
+        '¥0.00',
+      )
+      const amountText = lines.map((line) => line.text()).join('')
+      expect(amountText).not.toContain('NaN')
+      expect(amountText).not.toContain('undefined')
+    })
+
+    it('TA-6 金额区标注「预估」并提示以后端计价为准（PRD 7.4：前端合计不作最终金额）', async () => {
+      const pinia = bootstrapPinia()
+      await loginAndFillCart()
+      const { wrapper } = await mountConfirm({ storeId: 'm002' }, pinia)
+      await vi.waitFor(
+        () =>
+          expect(wrapper.find('[data-testid="amount-estimate-tip"]').exists()).toBe(true),
+        { timeout: 2000 },
+      )
+      // 真实后端已实现七步计价（满减/新客立减/免配送费），而下单前前端无法预知这些优惠
+      // （用户端无优惠查询接口）→ 预览必须明确标注为预估，避免被当作最终金额
+      expect(wrapper.find('[data-testid="amount-estimate-tip"]').text()).toContain('预估')
+      expect(wrapper.find('[data-testid="amount-estimate-tip"]').text()).toContain('计价为准')
+    })
+
+    /**
+     * 口径说明（2026-09-12）：本用例锁定的是**前端替身**的计价——替身目前只按「小计 + 打包费 + 配送费」
+     * 的退化口径返回，尚未镜像真实后端已实现的满减/新客立减/免配送费优惠（后端 PR #48 已合并）。
+     * 因此真实后端下「预览 = 下单结果」不再成立，页面已按 TA-6 标注为预估；
+     * 替身是否镜像七步计价另见 `docs/todo/用户端.md` 的 TODO-USER-001 备注（待负责人决定）。
+     */
+    it('TA-4 替身口径：创建订单快照含 deliveryFee 且实付含配送费（TC-ORD-011/021/022）', async () => {
+      const pinia = bootstrapPinia()
+      await loginAndFillCart()
+      const { wrapper, router } = await mountConfirm({ storeId: 'm002' }, pinia)
+      await vi.waitFor(
+        () =>
+          expect(wrapper.find('[data-testid="amount-line"][data-key="payable"]').text()).toContain(
+            '46.00',
+          ),
+        { timeout: 2000 },
+      )
+      // 提交前置：地址就绪（无地址时提交按钮禁用，点击会空转）
+      await vi.waitFor(
+        () => expect(wrapper.find('[data-testid="address-card"]').exists()).toBe(true),
+        { timeout: 2000 },
+      )
+      await wrapper.find('[data-testid="submit-order-btn"]').trigger('click')
+      await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('order-pay'), {
+        timeout: 2000,
+      })
+      const created = await orderApi.getOrder(String(router.currentRoute.value.params.orderId))
+      // 金额快照（契约 §3.5/§10.4）：配送费入快照，实付 = 商品小计 + 打包费 + 配送费（无优惠退化口径）
+      expect(created.deliveryFee).toBe(5)
+      expect(created.packagingFee).toBe(2)
+      expect(created.total).toBe(46)
+    })
   })
 })
