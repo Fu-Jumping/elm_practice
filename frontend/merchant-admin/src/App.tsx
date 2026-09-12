@@ -3,6 +3,7 @@ import {
   App as AntdApp,
   Button,
   Card,
+  Checkbox,
   ConfigProvider,
   Descriptions,
   Drawer,
@@ -21,6 +22,7 @@ import {
   Tabs,
   Tag,
   Typography,
+  Upload,
 } from 'antd'
 import type { TableProps } from 'antd'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -38,15 +40,17 @@ import {
   isRealApiMode,
   merchantApi,
 } from './services/merchantApi'
+import { AnalyticsPage, MessagesPage, OverviewPage, PromotionsPage, ReviewsPage } from './FeaturePages'
+import { buildOrderAmountRows, validateProductImage } from './merchantRules'
 import './App.css'
 
 const { Header, Content, Sider } = Layout
 const { Title, Text } = Typography
 
-type Page = 'orders' | 'products' | 'categories' | 'store' | 'login'
+type Page = 'overview' | 'orders' | 'products' | 'categories' | 'promotions' | 'reviews' | 'messages' | 'analytics' | 'store' | 'login'
 type StoreFormValues = StoreDraft & { status: StoreStatus }
 
-const merchantPages: Page[] = ['orders', 'products', 'categories', 'store']
+const merchantPages: Page[] = ['overview', 'orders', 'products', 'categories', 'promotions', 'reviews', 'messages', 'analytics', 'store']
 
 const statusMeta: Record<StoreStatus, { label: string; color: string }> = {
   OPEN: { label: '营业中', color: 'success' },
@@ -78,6 +82,10 @@ const orderStatusLabels: Record<string, string> = {
   CANCELLED: '已取消',
 }
 
+const nextOrderStatus: Record<string, string> = { PENDING: 'COOKING', COOKING: 'DELIVERING', DELIVERING: 'COMPLETED' }
+const nextOrderAction: Record<string, string> = { PENDING: '接单', COOKING: '出餐', DELIVERING: '完成' }
+
+// oxlint-disable-next-line react/only-export-components -- exported for the status-contract tests
 export function orderStatusLabel(status: string) {
   return orderStatusLabels[status] ?? status
 }
@@ -242,28 +250,48 @@ function LoginPage({
   )
 }
 
-function OrdersPage() {
+function OrdersPage({ onContactCustomer }: { onContactCustomer: (orderId: string) => void }) {
+  const { message } = AntdApp.useApp()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>()
   const [selectedOrder, setSelectedOrder] = useState<Order>()
   const [detailLoading, setDetailLoading] = useState(false)
+  const [advancing, setAdvancing] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<string>()
+  const orderRequestRef = useRef(0)
 
   const loadOrders = useCallback(async () => {
+    const requestId = ++orderRequestRef.current
     setLoading(true)
     setError(undefined)
     try {
-      setOrders(await merchantApi.listOrders())
+      const nextOrders = await merchantApi.listOrders(statusFilter)
+      if (requestId === orderRequestRef.current) setOrders(nextOrders)
     } catch (requestError) {
-      setError(errorMessage(requestError))
+      if (requestId === orderRequestRef.current) setError(errorMessage(requestError))
     } finally {
-      setLoading(false)
+      if (requestId === orderRequestRef.current) setLoading(false)
     }
-  }, [])
+  }, [statusFilter])
 
   useEffect(() => {
     void Promise.resolve().then(loadOrders)
   }, [loadOrders])
+
+  async function advance() {
+    if (!selectedOrder || !nextOrderStatus[selectedOrder.status]) return
+    setAdvancing(true)
+    try {
+      const updated = await merchantApi.advanceOrder(selectedOrder.orderId, nextOrderStatus[selectedOrder.status])
+      setSelectedOrder(updated)
+      await loadOrders()
+      message.success('订单状态已更新')
+    } catch (reason) {
+      message.error(errorMessage(reason))
+      if ((reason as ApiError).status === 409) await openDetail(selectedOrder)
+    } finally { setAdvancing(false) }
+  }
 
   async function openDetail(order: Order) {
     setSelectedOrder(order)
@@ -293,7 +321,7 @@ function OrdersPage() {
           <Title level={2}>订单管理</Title>
           <Text type="secondary">查看当前店铺的订单和下单快照。</Text>
         </div>
-        <Button onClick={() => void loadOrders()}>刷新</Button>
+        <Space><Select aria-label="订单状态筛选" allowClear placeholder="全部状态" style={{ width: 160 }} value={statusFilter} onChange={setStatusFilter} options={['PENDING', 'COOKING', 'DELIVERING', 'COMPLETED', 'CANCELLED'].map((value) => ({ value, label: orderStatusLabel(value) }))} /><Button onClick={() => void loadOrders()}>刷新</Button></Space>
       </div>
       {error && <PageFailure error={error} onRetry={() => void loadOrders()} />}
       <Card>
@@ -318,6 +346,8 @@ function OrdersPage() {
               <Descriptions.Item label="订单状态"><Tag color="processing">{orderStatusLabel(selectedOrder.status)}</Tag></Descriptions.Item>
               <Descriptions.Item label="顾客">{selectedOrder.contactName ?? selectedOrder.customerName ?? '暂无'}</Descriptions.Item>
               <Descriptions.Item label="备注">{selectedOrder.remark || '无'}</Descriptions.Item>
+              {selectedOrder.status === 'CANCELLED' && <Descriptions.Item label="取消原因">{selectedOrder.cancelReason || '暂无'}</Descriptions.Item>}
+              {selectedOrder.status === 'CANCELLED' && <Descriptions.Item label="取消时间">{selectedOrder.cancelledAt || '暂无'}</Descriptions.Item>}
               <Descriptions.Item label="联系电话">{selectedOrder.contactPhone ?? '暂无'}</Descriptions.Item>
               <Descriptions.Item label="配送地址">{selectedOrder.address ?? '暂无'}</Descriptions.Item>
               <Descriptions.Item label="下单时间">{selectedOrder.createdAt ?? '暂无'}</Descriptions.Item>
@@ -336,10 +366,12 @@ function OrdersPage() {
                 ]}
               />
             </Card>
+            <Space>
+              {nextOrderStatus[selectedOrder.status] && <Button type="primary" loading={advancing} onClick={() => void advance()}>{nextOrderAction[selectedOrder.status]}</Button>}
+              <Button onClick={() => onContactCustomer(selectedOrder.orderId)}>联系顾客</Button>
+            </Space>
             <Card size="small" title="金额汇总">
-              <div className="money-line"><span>商品合计</span><strong>{formatMoney(selectedOrder.productTotal)}</strong></div>
-              <div className="money-line"><span>打包费</span><strong>{formatMoney(selectedOrder.packagingFee)}</strong></div>
-              <div className="money-line total"><span>实付金额</span><strong>{formatMoney(selectedOrder.totalAmount)}</strong></div>
+              {buildOrderAmountRows(selectedOrder).map((row) => <div key={row.key} className={`money-line${row.discount ? ' discount' : ''}${row.total ? ' total' : ''}`}><span>{row.label}</span><strong>{row.discount ? '-' : ''}{formatMoney(row.amount)}</strong></div>)}
             </Card>
           </Space>
         )}
@@ -386,6 +418,8 @@ function StorePage({ currentStore, onStoreChange }: { currentStore: Store; onSto
       const savedStore = await merchantApi.updateStore({
         name: values.name.trim(),
         description: values.description?.trim(),
+        startPrice: values.startPrice,
+        deliveryFee: values.deliveryFee,
       })
       const finalStore = savedStore.status === values.status
         ? savedStore
@@ -419,8 +453,10 @@ function StorePage({ currentStore, onStoreChange }: { currentStore: Store; onSto
           <Form.Item label="店铺简介" name="description">
             <Input.TextArea rows={4} maxLength={200} showCount />
           </Form.Item>
-          {/* 联系电话暂不提供编辑：后端 StorePatch 无 contactPhone，保存即假成功（BUG-20260908-012，
-              后端补字段后恢复此表单项） */}
+          <div className="form-grid">
+            <Form.Item label="起送金额（元）" name="startPrice" rules={[{ type: 'number', min: 0, message: '起送金额不能小于 0' }]}><InputNumber min={0} precision={2} className="full-width" /></Form.Item>
+            <Form.Item label="配送费（元）" name="deliveryFee" rules={[{ type: 'number', min: 0, message: '配送费不能小于 0' }]}><InputNumber min={0} precision={2} className="full-width" /></Form.Item>
+          </div>
           <Form.Item label="营业状态" name="status" rules={[{ required: true, message: '请选择营业状态' }]}>
             <Select
               options={(Object.keys(statusMeta) as StoreStatus[]).map((status) => ({
@@ -446,6 +482,9 @@ function CategoriesPage() {
   const [editing, setEditing] = useState<Category>()
   const [editorOpen, setEditorOpen] = useState(false)
   const [deleting, setDeleting] = useState<Category>()
+  const [binding, setBinding] = useState<Category>()
+  const [products, setProducts] = useState<Product[]>([])
+  const [boundProductIds, setBoundProductIds] = useState<string[]>([])
 
   const loadCategories = useCallback(async () => {
     setLoading(true)
@@ -505,6 +544,29 @@ function CategoriesPage() {
     }
   }
 
+  async function openBinding(category: Category) {
+    setBinding(category)
+    setSaving(true)
+    setError(undefined)
+    try {
+      const items = await merchantApi.listProducts()
+      setProducts(items)
+      setBoundProductIds(items.filter((product) => product.categoryId === category.categoryId).map((product) => product.productId))
+    } catch (reason) { setError(errorMessage(reason)); setBinding(undefined) }
+    finally { setSaving(false) }
+  }
+
+  async function saveBinding() {
+    if (!binding) return
+    setSaving(true)
+    try {
+      await merchantApi.bindCategoryProducts(binding.categoryId, boundProductIds)
+      message.success('分类商品绑定已保存')
+      setBinding(undefined)
+    } catch (reason) { setError(errorMessage(reason)) }
+    finally { setSaving(false) }
+  }
+
   const columns: TableProps<Category>['columns'] = [
     { title: '分类名称', dataIndex: 'name', key: 'name' },
     { title: '排序值', dataIndex: 'sortOrder', key: 'sortOrder', align: 'right', render: (value) => value ?? '—' },
@@ -513,6 +575,7 @@ function CategoriesPage() {
       key: 'actions',
       render: (_, record) => (
         <Space>
+          <Button type="link" onClick={() => void openBinding(record)}>绑定商品</Button>
           <Button type="link" onClick={() => openEditor(record)}>编辑</Button>
           <Button type="link" danger onClick={() => setDeleting(record)}>删除</Button>
         </Space>
@@ -558,6 +621,19 @@ function CategoriesPage() {
         </Form>
       </Modal>
       <Modal
+        open={Boolean(binding)}
+        title={`绑定商品${binding ? ` · ${binding.name}` : ''}`}
+        okText="保存绑定"
+        confirmLoading={saving}
+        onCancel={() => setBinding(undefined)}
+        onOk={() => void saveBinding()}
+      >
+        <Checkbox.Group className="binding-list" value={boundProductIds} onChange={(values) => setBoundProductIds(values.map(String))}>
+          {products.map((product) => <Checkbox key={product.productId} value={product.productId}>{product.name}</Checkbox>)}
+        </Checkbox.Group>
+        {!products.length && <Empty description="暂无可绑定商品" image={Empty.PRESENTED_IMAGE_SIMPLE} />}
+      </Modal>
+      <Modal
         open={Boolean(deleting)}
         title="确认删除分类"
         okText="确认删除"
@@ -585,6 +661,7 @@ function ProductsPage() {
   const [editing, setEditing] = useState<Product>()
   const [editorOpen, setEditorOpen] = useState(false)
   const [deleting, setDeleting] = useState<Product>()
+  const [uploading, setUploading] = useState(false)
 
   const loadProducts = useCallback(async (selectedCategoryId?: string) => {
     setLoading(true)
@@ -613,7 +690,7 @@ function ProductsPage() {
 
   function openCreate() {
     setEditing(undefined)
-    form.setFieldsValue({ categoryId: categoryId ?? categories[0]?.categoryId, name: '', description: '', price: 0, stock: 0, onSale: true })
+    form.setFieldsValue({ categoryId: categoryId ?? categories[0]?.categoryId, name: '', description: '', price: 0, stock: 0, onSale: true, image: undefined, memberPrice: undefined, tags: [], specOptions: [] })
     setEditorOpen(true)
   }
 
@@ -640,14 +717,23 @@ function ProductsPage() {
       description: values.description?.trim(),
       price: Number(values.price),
       stock: Number(values.stock),
+      memberPrice: values.memberPrice === undefined || values.memberPrice === null ? undefined : Number(values.memberPrice),
+      tags: values.tags?.map((tag) => tag.trim()).filter(Boolean),
+      specOptions: values.specOptions?.map((option) => ({ name: option.name.trim(), priceDelta: Number(option.priceDelta) })),
     }
     try {
+      const names = draft.specOptions?.map((option) => option.name) ?? []
+      if (new Set(names).size !== names.length) throw new Error('规格名称不能重复。')
+      let saved: Product
       if (editing) {
-        await merchantApi.updateProduct(editing.productId, draft)
+        saved = await merchantApi.updateProduct(editing.productId, draft)
         message.success('商品已保存')
       } else {
-        await merchantApi.createProduct(draft)
+        saved = await merchantApi.createProduct(draft)
         message.success('商品已新增')
+      }
+      if ((draft.specOptions?.length ?? 0) > 0 || (editing?.specOptions?.length ?? 0) > 0) {
+        await merchantApi.updateProductSpecifications(saved.productId, draft.specOptions ?? [])
       }
       setEditorOpen(false)
       await loadProducts(categoryId)
@@ -656,6 +742,22 @@ function ProductsPage() {
     } finally {
       setSaving(false)
     }
+  }
+
+  async function uploadProductImage(file: File) {
+    const validationError = validateProductImage(file)
+    if (validationError) {
+      message.error(validationError)
+      return Upload.LIST_IGNORE
+    }
+    setUploading(true)
+    try {
+      const result = await merchantApi.uploadImage(file)
+      form.setFieldValue('image', result.url)
+      message.success('图片上传成功')
+    } catch (reason) { message.error(errorMessage(reason)) }
+    finally { setUploading(false) }
+    return false
   }
 
   async function changeAvailability(product: Product, onSale: boolean) {
@@ -690,7 +792,8 @@ function ProductsPage() {
   }
 
   const columns: TableProps<Product>['columns'] = [
-    { title: '商品名称', dataIndex: 'name', key: 'name', render: (name, record) => <Space direction="vertical" size={0}><strong>{String(name)}</strong><Text type="secondary">{record.description || '暂无说明'}</Text></Space> },
+    { title: '商品名称', dataIndex: 'name', key: 'name', render: (name, record) => <Space><div className="product-thumb">{record.image ? <img src={record.image} alt="" /> : '无图'}</div><Space direction="vertical" size={0}><strong>{String(name)}</strong><Text type="secondary">{record.description || '暂无说明'}</Text></Space></Space> },
+    { title: '分类', dataIndex: 'categoryId', key: 'categoryId', render: (value) => categories.find((category) => category.categoryId === value)?.name ?? '未分类' },
     { title: '价格', dataIndex: 'price', key: 'price', align: 'right', render: (value) => formatMoney(Number(value)) },
     { title: '库存', dataIndex: 'stock', key: 'stock', align: 'right', render: (value) => Number(value) === 0 ? <Tag color="error">售罄</Tag> : value },
     { title: '状态', key: 'onSale', render: (_, record) => <Switch checked={record.onSale} checkedChildren="上架" unCheckedChildren="下架" onChange={(checked) => void changeAvailability(record, checked)} loading={saving} /> },
@@ -756,6 +859,11 @@ function ProductsPage() {
             <Form.Item label="商品说明" name="description">
               <Input.TextArea rows={3} maxLength={200} showCount />
             </Form.Item>
+            <Form.Item label="商品图片" name="image">
+              <Input type="hidden" />
+            </Form.Item>
+            <Form.Item shouldUpdate noStyle>{() => <Space align="start"><div className="image-preview">{form.getFieldValue('image') ? <img src={form.getFieldValue('image')} alt="商品预览" /> : <span>暂无图片</span>}</div><Space direction="vertical"><Upload accept=".jpg,.jpeg,.png,.webp" maxCount={1} showUploadList={false} beforeUpload={(file) => uploadProductImage(file)}><Button loading={uploading}>上传或替换图片</Button></Upload>{form.getFieldValue('image') && <Button danger onClick={() => form.setFieldValue('image', undefined)}>删除图片</Button>}<Text type="secondary">1 张，jpg/png/webp，≤2MB</Text></Space></Space>}</Form.Item>
+            <Form.Item label="商品标签" name="tags"><Select mode="tags" tokenSeparators={[',', '，']} placeholder="输入标签后回车" /></Form.Item>
             <div className="form-grid">
               <Form.Item label="商品价格（元）" name="price" rules={[{ required: true, message: '请输入商品价格' }, { type: 'number', min: 0, message: '价格不能小于 0' }]}>
                 <InputNumber min={0} precision={2} step={0.01} className="full-width" />
@@ -763,7 +871,9 @@ function ProductsPage() {
               <Form.Item label="商品库存" name="stock" rules={[{ required: true, message: '请输入商品库存' }, { type: 'number', min: 0, message: '库存必须为非负整数' }, { validator: (_, value) => Number.isInteger(Number(value)) ? Promise.resolve() : Promise.reject(new Error('库存必须为整数')) }]}>
                 <InputNumber min={0} precision={0} className="full-width" />
               </Form.Item>
+              <Form.Item label="会员价（元）" name="memberPrice" rules={[{ type: 'number', min: 0, message: '会员价不能小于 0' }]}><InputNumber min={0} precision={2} className="full-width" /></Form.Item>
             </div>
+            <Card size="small" title="商品规格" className="feature-card"><Form.List name="specOptions">{(fields, { add, remove }) => <>{fields.map(({ key, ...field }) => <Space key={key} align="baseline" className="spec-row"><Form.Item {...field} name={[field.name, 'name']} rules={[{ required: true, whitespace: true, message: '请输入规格名称' }]}><Input placeholder="如：大杯" maxLength={30} /></Form.Item><Form.Item {...field} name={[field.name, 'priceDelta']} rules={[{ required: true, message: '请输入价差' }, { type: 'number', min: 0, message: '价差不能小于 0' }]}><InputNumber min={0} precision={2} addonBefore="+¥" /></Form.Item><Button danger onClick={() => remove(field.name)}>删除</Button></Space>)}<Button type="dashed" onClick={() => add({ name: '', priceDelta: 0 })}>新增规格</Button></>}</Form.List></Card>
             <Form.Item label="上架状态" name="onSale" valuePropName="checked">
               <Switch checkedChildren="上架" unCheckedChildren="下架" />
             </Form.Item>
@@ -791,6 +901,7 @@ function MerchantWorkspace() {
   const [session, setSession] = useState<MerchantSession>()
   const [booting, setBooting] = useState(true)
   const [bootError, setBootError] = useState<string>()
+  const [messageOrderId, setMessageOrderId] = useState<string>()
 
   const navigate = useCallback((nextPage: Page) => {
     if (nextPage === 'login') {
@@ -803,11 +914,9 @@ function MerchantWorkspace() {
   }, [])
 
   // 未登录跳登录页前记录当前受保护页，登录成功后回跳（PRD 7.15）
-  const protectedPageRef = useRef<Page | null>(null)
+  const [protectedPage, setProtectedPage] = useState<Page | null>(null)
   const rememberProtectedPage = useCallback(() => {
-    // 仅首次记录：navigate('login') 清空 hash 会触发 hashchange 把 page 重算为 orders，
-    // effect 重跑不能让派生值污染回跳目标；登录成功消费后由 onAuthenticated 清空
-    if (page !== 'login' && protectedPageRef.current === null) protectedPageRef.current = page
+    if (page !== 'login') setProtectedPage((current) => current ?? page)
   }, [page])
 
   const restoreSession = useCallback(async () => {
@@ -831,6 +940,17 @@ function MerchantWorkspace() {
   useEffect(() => {
     void Promise.resolve().then(restoreSession)
   }, [restoreSession])
+
+  useEffect(() => {
+    const expire = () => {
+      rememberProtectedPage()
+      setSession(undefined)
+      setBootError('登录状态已失效，请重新登录')
+      navigate('login')
+    }
+    window.addEventListener('elm-session-expired', expire)
+    return () => window.removeEventListener('elm-session-expired', expire)
+  }, [navigate, rememberProtectedPage])
 
 
   useEffect(() => {
@@ -862,18 +982,23 @@ function MerchantWorkspace() {
 
   if (!session) {
     // PRD 7.15：登录成功后返回原流程——回跳进入前所在的受保护页面，无记录则回订单页
-    const redirectPage = protectedPageRef.current ?? 'orders'
+    const redirectPage = protectedPage ?? 'orders'
     return <LoginPage initialError={bootError} onAuthenticated={(nextSession) => {
       setSession(nextSession)
-      protectedPageRef.current = null
+      setProtectedPage(null)
       navigate(redirectPage)
     }} />
   }
 
   const menuItems = [
+    { key: 'overview', label: '运营概览' },
     { key: 'orders', label: '订单管理' },
     { key: 'products', label: '商品管理' },
     { key: 'categories', label: '分类管理' },
+    { key: 'promotions', label: '优惠配置' },
+    { key: 'reviews', label: '评价管理' },
+    { key: 'messages', label: '消息' },
+    { key: 'analytics', label: '数据统计' },
     { key: 'store', label: '店铺设置' },
   ]
 
@@ -916,9 +1041,14 @@ function MerchantWorkspace() {
               description="真实联调前设置 VITE_API_MODE=real、VITE_API_BASE_URL=<后端地址>/api/v1，并将 VITE_MOCK_FALLBACK=false。真实模式失败时不会回退为演示数据。"
             />
           )}
-          {page === 'orders' && <OrdersPage />}
+          {page === 'overview' && <OverviewPage navigate={(nextPage) => navigate(nextPage as Page)} />}
+          {page === 'orders' && <OrdersPage onContactCustomer={(orderId) => { setMessageOrderId(orderId); navigate('messages') }} />}
           {page === 'products' && <ProductsPage />}
           {page === 'categories' && <CategoriesPage />}
+          {page === 'promotions' && <PromotionsPage />}
+          {page === 'reviews' && <ReviewsPage />}
+          {page === 'messages' && <MessagesPage orderId={messageOrderId} />}
+          {page === 'analytics' && <AnalyticsPage />}
           {page === 'store' && <StorePage currentStore={session.store} onStoreChange={updateSessionStore} />}
         </Content>
       </Layout>
