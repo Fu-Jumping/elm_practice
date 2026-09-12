@@ -23,6 +23,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { couponApi, storeApi } from '@/services/api'
+import BlastOverlay from '@/components/BlastOverlay.vue'
 import { couponExpiryText, formatMoneyCompact } from '@/services/normalizers'
 import { useSessionStore } from '@/stores/sessionStore'
 import { toast } from '@/utils/toast'
@@ -151,13 +152,21 @@ function onPlaceholderClick(): void {
   toast('该红包为演示占位，本期不可用')
 }
 
-/** 爆红包入口（TODO-USER-029 落地过渡态；此处先给占位提示，避免死按钮） */
+/** 爆红包浮层开关（TODO-USER-029） */
+const blastOpen = ref(false)
+
+/** 爆红包入口：无可爆且无免费次数时引导购买，否则打开浮层 */
 function onBlast(): void {
   if (noBlastAvailable.value) {
     openSheet()
     return
   }
-  toast('爆红包动效开发中（TODO-USER-029）')
+  blastOpen.value = true
+}
+
+/** 爆出成功后刷新券列表（新券进入列表） */
+function onBlastDone(): void {
+  void loadCoupons()
 }
 
 function goBack(): void {
@@ -309,6 +318,9 @@ function goBack(): void {
         <button class="cp-retry" type="button" @click="loadCoupons">重试</button>
       </p>
     </main>
+
+    <!-- 爆红包全屏浮层（TODO-USER-029）：过渡态 → 结果卡 / 失败态 -->
+    <BlastOverlay v-if="blastOpen" @close="blastOpen = false" @done="onBlastDone" />
 
     <!-- 买红包浮窗（40% 黑遮罩 + 底部白面板；两档套餐、无退款条款） -->
     <div v-if="sheetOpen" class="cp-mask" data-testid="buy-sheet" @click.self="closeSheet">

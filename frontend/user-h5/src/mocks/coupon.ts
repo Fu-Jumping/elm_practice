@@ -90,6 +90,34 @@ const PACK_CONTENTS: Record<string, Array<{ threshold: number; amount: number }>
   ],
 }
 
+/**
+ * 爆红包档位池 10 档 + 权重（契约 §10.5 第 2 条「档位池与权重（10 档）」逐项镜像，权重合计 100）：
+ * 满30减5 26% / 满30减8 18% / 满25减8 14% / 满40减10 11% / 满25减15 9% / 满40减20 6% /
+ * 满50减25 3% / 无门槛减5 3% / 满30减18.8 5% / 满40减18.8 5%
+ * 顺序与后端 `BlastTierPool` 一致，`tierIndex` 即数组下标 + 1（响应返回命中档位序号）。
+ */
+export const BLAST_TIERS: Array<{ threshold: number; amount: number; weight: number }> = [
+  { threshold: 30, amount: 5, weight: 26 },
+  { threshold: 30, amount: 8, weight: 18 },
+  { threshold: 25, amount: 8, weight: 14 },
+  { threshold: 40, amount: 10, weight: 11 },
+  { threshold: 25, amount: 15, weight: 9 },
+  { threshold: 40, amount: 20, weight: 6 },
+  { threshold: 50, amount: 25, weight: 3 },
+  { threshold: 0, amount: 5, weight: 3 },
+  { threshold: 30, amount: 18.8, weight: 5 },
+  { threshold: 40, amount: 18.8, weight: 5 },
+]
+
+/**
+ * 随机源（契约 §3.10：随机源必须可注入种子，测试用固定种子断言确定档位）。
+ * 测试通过 `blastRandomState.fn = () => 0.99` 之类注入确定值，beforeEach 复位为 Math.random。
+ */
+export const blastRandomState: { fn: () => number } = { fn: Math.random }
+
+/** 当日免费爆已用日期（镜像后端 `users.free_blast_date`；0 点重置口径 = 与今天比较） */
+export const freeBlastState: { date: string } = { date: '' }
+
 export const couponMocks: Record<string, MockHandler> = {
   'GET /me/coupons': ({ params }) => {
     const now = formatDateTime(new Date())
