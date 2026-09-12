@@ -46,9 +46,9 @@ describe('statusText 状态文案（契约：订单 P0 仅 PROCESSING）', () =>
 })
 
 // 订单实付金额展示归一化 T23–T25（2026-09-07，用例口径来自 TDD 规划矩阵 + PRD 7.4，AI 辅助脚手架）
-// 依据：TC-ORD-011（金额以后端计算为准）、TC-ORD-021（实付 = 商品小计 + 打包费 2.00）、
-// PRD 7.4（确认订单页金额行展示实付金额，含打包费，不单独列出打包费行）
-// 口径：后端返回 payableAmount 时原样展示（两位小数）；缺失时按小计 + 打包费推导兜底；
+// 依据：TC-ORD-011（金额以后端计算为准）、TC-ORD-021（实付 = 商品小计 + 打包费 + 配送费）、
+// PRD 7.4 与契约 §3.5（金额明细「基础四行 + 优惠项按实际发生展示」，2026-09-11 定稿 CHG-004）
+// 口径：后端返回 payableAmount 时原样展示（两位小数）；缺失时按小计 + 打包费 + 配送费推导兜底；
 // 全缺给 '0.00'，禁止 undefined/NaN 上屏（normalizers 既有约定）
 describe('payableAmountText 实付金额展示（TC-ORD-011/021 展示侧）', () => {
   it('T23 后端返回实付金额 → 原样两位小数展示（后端计价为准）', () => {
@@ -61,6 +61,13 @@ describe('payableAmountText 实付金额展示（TC-ORD-011/021 展示侧）', (
 
   it('T25 全部缺失 → 返回 0.00，不产生 undefined/NaN（TC-ADR-006 前端侧同款兜底）', () => {
     expect(payableAmountText({})).toBe('0.00')
+  })
+
+  // TA-5（批次① TODO-USER-001）：配送费计入实付兜底（CHG-004 定稿公式的无优惠退化口径）
+  it('TA-5 实付兜底含配送费；配送费缺失或为 0 按 0 计', () => {
+    expect(payableAmountText({ itemsTotal: 39, packagingFee: 2, deliveryFee: 5 })).toBe('46.00')
+    expect(payableAmountText({ itemsTotal: 39, packagingFee: 2, deliveryFee: 0 })).toBe('41.00')
+    expect(payableAmountText({ itemsTotal: 39, packagingFee: 2 })).toBe('41.00')
   })
 })
 

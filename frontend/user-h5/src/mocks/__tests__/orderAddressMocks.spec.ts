@@ -43,8 +43,8 @@ describe('地址/订单 mock（契约 §3.3/§3.5 后端替身行为）', () => 
     expect(res.payload.message).toContain('地址不存在')
   })
 
-  it('M4 创建订单成功：后端计价 41.00、返回订单号、清空该店购物车（TC-ORD-001/003/013/021）', async () => {
-    // 先加购 p101 香辣鸡腿堡 ×2（单价 19.50 → 小计 39.00 + 打包费 2.00 = 实付 41.00）
+  it('M4 创建订单成功：后端计价 46.00、返回订单号、清空该店购物车（TC-ORD-001/003/013/021/022）', async () => {
+    // 先加购 p101 香辣鸡腿堡 ×2（单价 19.50 → 小计 39.00 + 打包费 2.00 + 配送费 5.00(m002) = 实付 46.00）
     const add = await mockDispatch({
       method: 'POST',
       url: '/cart/items',
@@ -55,15 +55,17 @@ describe('地址/订单 mock（契约 §3.3/§3.5 后端替身行为）', () => 
     const res = await mockDispatch({
       method: 'POST',
       url: '/orders',
-      data: { storeId: 'm002', addressId: 'da001', remark: '少放辣', expectedTotal: 41 },
+      data: { storeId: 'm002', addressId: 'da001', remark: '少放辣', expectedTotal: 46 },
     })
     expect(res.status).toBe(200)
     const order = res.payload.data as Record<string, unknown>
     expect(String(order.orderId)).toBeTruthy()
-    // 后端重读购物车计价，实付 = 小计 + 打包费（扁平字段 total，2026-09-07 对齐真实后端形状）
-    expect(order.total).toBe(41)
+    // 后端重读购物车计价，实付 = 小计 + 打包费 + 配送费（契约 §3.5 定稿公式的无优惠退化口径）
+    expect(order.total).toBe(46)
     expect(order.itemSubtotal).toBe(39)
     expect(order.packagingFee).toBe(2)
+    // 金额快照新增 deliveryFee（契约 §3.5/§10.4 定稿命名，TC-ORD-022）
+    expect(order.deliveryFee).toBe(5)
 
     // 事务成功后清空该用户该店购物车（TC-ORD-003）
     const cart = await mockDispatch({
