@@ -36,7 +36,7 @@ describe('第二阶段商家端页面入口', () => {
     await user.click(await screen.findByRole('button', { name: '新增商品' }))
     expect(await screen.findByText('商品图片')).toBeTruthy()
     expect(screen.getByText('商品规格')).toBeTruthy()
-    await user.click(screen.getByRole('button', { name: '取 消' }))
+    await user.click(screen.getByRole('button', { name: /^(取 消|Cancel)$/ }))
 
     await user.click(screen.getByRole('menuitem', { name: '分类管理' }))
     expect((await screen.findAllByRole('button', { name: '绑定商品' })).length).toBeGreaterThan(0)
