@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mockDispatch } from '../index'
-import { COUPON_SEED, couponMockState, formatDateTime } from '../coupon'
+import { BLAST_TIERS, COUPON_SEED, blastRandomState, couponMockState, formatDateTime, freeBlastState } from '../coupon'
 
 /**
  * 红包域 mock（契约 §3.8 + §3.10 后端替身行为，CHG-001）
@@ -76,5 +76,86 @@ describe('红包域 mock（契约 §3.8/§3.10 后端替身行为）', () => {
     expect(Object.keys(data)).toEqual(['packId', 'packKey', 'coupons'])
     expect(JSON.stringify(data)).not.toContain('payment')
     expect(formatDateTime(new Date())).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)
+  })
+})
+
+/**
+ * 爆红包替身（契约 §3.10 + §10.5 第 2~5 条）
+ * RBM-1 档位池与权重：固定种子命中确定档位，权重合计 100（§10.5 第 2 条）
+ * RBM-2 免费爆：新增一张（source=BLAST_OUT、canBlast=false、当天 23:59:59 到期），当日再爆 409（TC-RBP-003/004）
+ * RBM-3 消耗券爆：替换式（同 couponId、门槛与金额同时更新、不新增行、canBlast 置终态）（TC-RBP-005）
+ * RBM-4 爆出来的券再爆 409；未知 couponId 404；无免费次数且无可爆券 409（TC-RBP-006/009）
+ */
+describe('爆红包替身（契约 §3.10）', () => {
+  beforeEach(() => {
+    couponMockState.splice(0, couponMockState.length, ...COUPON_SEED.map((item) => ({ ...item })))
+    freeBlastState.date = ''
+    blastRandomState.fn = Math.random
+  })
+
+  it('RBM-1 档位池 10 档且权重合计 100；固定种子命中确定档位（§10.5 第 2 条、TC-RBP-007）', async () => {
+    expect(BLAST_TIERS).toHaveLength(10)
+    expect(BLAST_TIERS.reduce((sum, tier) => sum + tier.weight, 0)).toBe(100)
+    blastRandomState.fn = () => 0 // 命中第 1 档（满30减5）
+    const first = await mockDispatch({ method: 'POST', url: '/me/coupons/blast', data: {} })
+    const firstData = first.payload.data as Record<string, unknown>
+    expect(firstData.tierIndex).toBe(1)
+    expect((firstData.coupon as Record<string, unknown>).amount).toBe(5)
+    expect((firstData.coupon as Record<string, unknown>).threshold).toBe(30)
+    expect(firstData.free).toBe(true)
+    blastRandomState.fn = () => 0.999 // 命中第 10 档（满40减18.8）
+    freeBlastState.date = '' // 再给一次免费机会用于断言末档
+    const last = await mockDispatch({ method: 'POST', url: '/me/coupons/blast', data: {} })
+    const lastData = last.payload.data as Record<string, unknown>
+    expect(lastData.tierIndex).toBe(10)
+    expect((lastData.coupon as Record<string, unknown>).amount).toBe(18.8)
+  })
+
+  it('RBM-2 免费爆新增一张且不消耗已购券；当日再爆 409（TC-RBP-003/004）', async () => {
+    const before = couponMockState.length
+    const res = await mockDispatch({ method: 'POST', url: '/me/coupons/blast', data: {} })
+    expect(res.status).toBe(200)
+    expect(couponMockState.length).toBe(before + 1)
+    const blasted = couponMockState.find((item) => item.source === 'BLAST_OUT')!
+    expect(blasted.canBlast).toBe(false)
+    expect(blasted.validTo.endsWith('23:59:59')).toBe(true)
+    // 已购券（SEED）未被消耗
+    expect(couponMockState.filter((item) => item.source === 'SEED' && item.used).length).toBe(0)
+    // 同日再爆 → 409
+    const again = await mockDispatch({ method: 'POST', url: '/me/coupons/blast', data: {} })
+    expect(again.status).toBe(409)
+  })
+
+  it('RBM-3 消耗券爆为替换式：同一行更新门槛/金额并置终态，不新增行（TC-RBP-005）', async () => {
+    const pack = await mockDispatch({ method: 'POST', url: '/me/coupon-packs', data: { packKey: 'pack49' } })
+    const target = (pack.payload.data as { coupons: Array<Record<string, unknown>> }).coupons[0]!
+    const countBefore = couponMockState.length
+    blastRandomState.fn = () => 0.999
+    const res = await mockDispatch({
+      method: 'POST',
+      url: '/me/coupons/blast',
+      data: { couponId: String(target.couponId) },
+    })
+    expect(res.status).toBe(200)
+    expect(couponMockState.length).toBe(countBefore) // 替换式不新增行
+    const updated = couponMockState.find((item) => item.couponId === target.couponId)!
+    expect(updated.threshold).toBe(40)
+    expect(updated.amount).toBe(18.8)
+    expect(updated.canBlast).toBe(false)
+    expect(updated.source).toBe('BLAST_OUT')
+  })
+
+  it('RBM-4 爆出的券再爆 409；未知 couponId 404；无免费次数且无可爆券 409（TC-RBP-006/009）', async () => {
+    const free = await mockDispatch({ method: 'POST', url: '/me/coupons/blast', data: {} })
+    const blastedId = String((free.payload.data as { coupon: { couponId: string } }).coupon.couponId)
+    // 爆出来的券 canBlast=false → 再爆 409
+    const reBlast = await mockDispatch({ method: 'POST', url: '/me/coupons/blast', data: { couponId: blastedId } })
+    expect(reBlast.status).toBe(409)
+    // 未知券 → 404
+    const unknown = await mockDispatch({ method: 'POST', url: '/me/coupons/blast', data: { couponId: 'cp-none' } })
+    expect(unknown.status).toBe(404)
+    // 无免费次数（已用）且无可爆券 → 409
+    const exhausted = await mockDispatch({ method: 'POST', url: '/me/coupons/blast', data: {} })
+    expect(exhausted.status).toBe(409)
   })
 })

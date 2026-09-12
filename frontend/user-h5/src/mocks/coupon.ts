@@ -67,6 +67,7 @@ function viewOf(coupon: CouponRecord, now: string): CouponRecord {
   return { ...coupon, status: inWindow(coupon, now) ? 'available' : 'expired' }
 }
 
+let blastCouponSeq = 1
 let packSeq = 1
 let packCouponSeq = 1
 
@@ -90,6 +91,34 @@ const PACK_CONTENTS: Record<string, Array<{ threshold: number; amount: number }>
   ],
 }
 
+/**
+ * 爆红包档位池 10 档 + 权重（契约 §10.5 第 2 条「档位池与权重（10 档）」逐项镜像，权重合计 100）：
+ * 满30减5 26% / 满30减8 18% / 满25减8 14% / 满40减10 11% / 满25减15 9% / 满40减20 6% /
+ * 满50减25 3% / 无门槛减5 3% / 满30减18.8 5% / 满40减18.8 5%
+ * 顺序与后端 `BlastTierPool` 一致，`tierIndex` 即数组下标 + 1（响应返回命中档位序号）。
+ */
+export const BLAST_TIERS: Array<{ threshold: number; amount: number; weight: number }> = [
+  { threshold: 30, amount: 5, weight: 26 },
+  { threshold: 30, amount: 8, weight: 18 },
+  { threshold: 25, amount: 8, weight: 14 },
+  { threshold: 40, amount: 10, weight: 11 },
+  { threshold: 25, amount: 15, weight: 9 },
+  { threshold: 40, amount: 20, weight: 6 },
+  { threshold: 50, amount: 25, weight: 3 },
+  { threshold: 0, amount: 5, weight: 3 },
+  { threshold: 30, amount: 18.8, weight: 5 },
+  { threshold: 40, amount: 18.8, weight: 5 },
+]
+
+/**
+ * 随机源（契约 §3.10：随机源必须可注入种子，测试用固定种子断言确定档位）。
+ * 测试通过 `blastRandomState.fn = () => 0.99` 之类注入确定值，beforeEach 复位为 Math.random。
+ */
+export const blastRandomState: { fn: () => number } = { fn: Math.random }
+
+/** 当日免费爆已用日期（镜像后端 `users.free_blast_date`；0 点重置口径 = 与今天比较） */
+export const freeBlastState: { date: string } = { date: '' }
+
 export const couponMocks: Record<string, MockHandler> = {
   'GET /me/coupons': ({ params }) => {
     const now = formatDateTime(new Date())
@@ -101,6 +130,63 @@ export const couponMocks: Record<string, MockHandler> = {
     // 列表按到期时间升序（先到期的在前，与红包页「今天到期」在前的阅读顺序一致）
     list.sort((a, b) => a.validTo.localeCompare(b.validTo))
     return ok(list)
+  },
+
+  'POST /me/coupons/blast': ({ data }) => {
+    const couponId = String((data as { couponId?: unknown } | undefined)?.couponId ?? '').trim()
+    const today = formatDateTime(new Date()).slice(0, 10)
+    /** 按权重命中档位（累计权重法；随机源可注入种子供测试断言确定档位） */
+    const pickTier = (): { tier: (typeof BLAST_TIERS)[number]; tierIndex: number } => {
+      const point = blastRandomState.fn() * 100
+      let acc = 0
+      for (let i = 0; i < BLAST_TIERS.length; i += 1) {
+        acc += BLAST_TIERS[i]!.weight
+        if (point < acc) return { tier: BLAST_TIERS[i]!, tierIndex: i + 1 }
+      }
+      return { tier: BLAST_TIERS[BLAST_TIERS.length - 1]!, tierIndex: BLAST_TIERS.length }
+    }
+    const tierName = (threshold: number, amount: number): string =>
+      threshold > 0 ? `满${threshold}减${amount}红包` : `无门槛减${amount}红包`
+    const todayEnd = `${today} 23:59:59`
+
+    // 不传 couponId → 走当日免费次数（新增一张，不消耗已购券；0 点重置 = 与今天比较）
+    if (!couponId) {
+      if (freeBlastState.date === today) {
+        return fail(409, 40900, '今日免费次数已用完，可消耗红包再爆或去购买')
+      }
+      const { tier, tierIndex } = pickTier()
+      freeBlastState.date = today
+      const coupon: CouponRecord = {
+        couponId: `cpb${String(blastCouponSeq++).padStart(4, '0')}`,
+        name: tierName(tier.threshold, tier.amount),
+        amount: tier.amount,
+        threshold: tier.threshold,
+        scope: 'ALL',
+        storeId: null,
+        validFrom: formatDateTime(new Date()),
+        validTo: todayEnd,
+        status: 'available',
+        used: false,
+        source: 'BLAST_OUT',
+        canBlast: false,
+      }
+      couponMockState.push({ ...coupon })
+      return ok({ coupon, tierIndex, free: true })
+    }
+
+    // 传 couponId → 消耗并**替换**该券（门槛与金额同时可能变化，不新增行；爆出后为终态）
+    const target = couponMockState.find((item) => item.couponId === couponId)
+    if (!target) return fail(404, 40400, '红包不存在')
+    if (!target.canBlast) return fail(409, 40900, '该红包不可再爆')
+    const { tier, tierIndex } = pickTier()
+    target.name = tierName(tier.threshold, tier.amount)
+    target.threshold = tier.threshold
+    target.amount = tier.amount
+    target.validFrom = formatDateTime(new Date())
+    target.validTo = todayEnd
+    target.source = 'BLAST_OUT'
+    target.canBlast = false
+    return ok({ coupon: { ...target }, tierIndex, free: false })
   },
 
   'POST /me/coupon-packs': ({ data }) => {
