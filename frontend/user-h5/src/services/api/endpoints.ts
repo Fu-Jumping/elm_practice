@@ -66,4 +66,11 @@ export const endpoints = {
   member: {
     me: '/me/member',
   },
+  // 红包（契约 §3.8 + §3.10 CHG-001）：列表（available/expired）/ 当前订单可用 / 买套餐 / 爆一次
+  coupon: {
+    list: '/me/coupons',
+    available: '/me/coupons/available',
+    packs: '/me/coupon-packs',
+    blast: '/me/coupons/blast',
+  },
 } as const

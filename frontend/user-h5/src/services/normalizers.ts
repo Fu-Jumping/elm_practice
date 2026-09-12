@@ -256,3 +256,32 @@ export function formatRelativeTime(input: string | number | Date, now: Date = ne
   const pad = (n: number): string => String(n).padStart(2, '0')
   return `${pad(at.getMonth() + 1)}-${pad(at.getDate())} ${pad(at.getHours())}:${pad(at.getMinutes())}`
 }
+
+/**
+ * 红包到期文案（PRD 7.16.1 红包页行：卡片展示到期时间）：
+ * - 已过期 → 「已失效」
+ * - 当天到期 → 「今天 23:59 到期」（爆出来的券 validTo = 当天 23:59:59，契约 §10.5 第 5 条）
+ * - 其余 → 「还剩 N 天」（按自然日向上取整，避免「还剩 0 天」）
+ * 时间格式按契约 §3.8 为 `yyyy-MM-dd HH:mm:ss`（东八区）；解析失败时返回已失效，不产生 NaN/空文案。
+ */
+export function couponExpiryText(validTo: string, now: Date = new Date()): string {
+  const end = new Date(validTo.replace(' ', 'T'))
+  if (Number.isNaN(end.getTime()) || end.getTime() < now.getTime()) return '已失效'
+  const sameDay =
+    end.getFullYear() === now.getFullYear() &&
+    end.getMonth() === now.getMonth() &&
+    end.getDate() === now.getDate()
+  if (sameDay) return '今天 23:59 到期'
+  const restDays = Math.ceil((end.getTime() - now.getTime()) / (24 * 60 * 60 * 1000))
+  return `还剩 ${restDays} 天`
+}
+
+/**
+ * 红包金额/门槛的紧凑格式化（PRD 7.16.1 红包页行 + 设计稿：卡面为「¥8」「满30可用」等整数形态，
+ * 后端给 8.00 时不应显示为「8.00」；非整数档位（如爆红包的 18.8）保留其小数位）。
+ * 仅用于红包卡面；商家卡与订单金额仍按契约「统一两位小数」使用 formatMoney。
+ */
+export function formatMoneyCompact(amount: number): string {
+  if (!Number.isFinite(amount)) return '0'
+  return String(Number(amount.toFixed(2)))
+}

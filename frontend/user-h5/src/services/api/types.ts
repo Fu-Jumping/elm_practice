@@ -357,3 +357,43 @@ export interface MemberInfo {
   /** 开通时间由种子数据或后台标记，无开通接口；契约未定义有效期字段 */
   activatedAt?: string | null
 }
+
+/**
+ * 红包（契约 §3.8 + CHG-001 §3.10）：`status` 只表达有效期窗口，`used` 独立回显
+ * （已用未过期的券仍在 available 列表里带 `used=true`，但不进 /available 选用查询）。
+ * `source`：SEED 种子 / PACK 购买所得 / BLAST_OUT 爆出来的；`canBlast` 为 0 表示不可再爆（终态）。
+ * 前端一律按接口返回值展示，金额与门槛不自行计算（PRD 875 行检查列）。
+ */
+export interface CouponRecord {
+  couponId: string
+  name: string
+  amount: number
+  threshold: number
+  /** ALL 全场 / STORE 指定商家（本期不做品类范围；品类券为占位展示券，接口不返回） */
+  scope: 'ALL' | 'STORE'
+  storeId?: string | null
+  validFrom: string
+  validTo: string
+  status: 'available' | 'expired'
+  used: boolean
+  source: 'SEED' | 'PACK' | 'BLAST_OUT'
+  canBlast: boolean
+}
+
+/** 买红包套餐（CHG-001 §3.10）：pack49 = 4 张（面额 ¥20）、pack99 = 8 张（面额 ¥45） */
+export type CouponPackKey = 'pack49' | 'pack99'
+
+/** 购买套餐响应：新生成的券列表与购买批次号（前端模拟付费，不落支付记录） */
+export interface CouponPackPurchase {
+  packId: string
+  packKey: CouponPackKey
+  coupons: CouponRecord[]
+}
+
+/** 爆一次响应（CHG-001 §3.10）：结果券 + 命中的档位序号 + 本次是否为免费爆 */
+export interface CouponBlastResult {
+  coupon: CouponRecord
+  /** 命中的档位序号（1–10，档位池见契约 §10.5） */
+  tierIndex: number
+  free: boolean
+}

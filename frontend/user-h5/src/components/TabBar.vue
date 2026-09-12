@@ -46,7 +46,9 @@ const tabs: TabDef[] = [
  * 而收藏页不是四个一级 Tab 之一，故做归属映射（只影响高亮，不影响路由与请求）
  */
 const activeTab = computed(() =>
-  route.name === 'favorites' || route.name === 'member' ? 'mine' : String(route.name ?? ''),
+  route.name === 'favorites' || route.name === 'member' || route.name === 'coupons'
+    ? 'mine'
+    : String(route.name ?? ''),
 )
 </script>
 
