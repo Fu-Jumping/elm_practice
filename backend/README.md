@@ -1,6 +1,6 @@
 # backend
 
-Java 17 + Spring Boot 3.5.5 REST 服务，统一前缀为 `/api/v1`，默认监听 `127.0.0.1:8080`。工程按 Controller/Service/Mapper/Domain 分层；持久化用 MyBatis + MySQL 8（云服务器 `82.157.137.114`），表结构见 `database/schema/schema.sql`。
+Java 17 + Spring Boot 3.5.5 REST 服务，统一前缀为 `/api/v1`，默认监听 `127.0.0.1:4000`（端口口径 4000，见 BUG-20260908-007；服务器由命令行参数同值覆盖）。工程按 Controller/Service/Mapper/Domain 分层；持久化用 MyBatis + MySQL 8（云服务器 `82.157.137.114`），表结构见 `database/schema/schema.sql`。
 
 ## 启动（连服务器 MySQL）
 

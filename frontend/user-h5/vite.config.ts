@@ -8,10 +8,10 @@ import pxToViewport from 'postcss-px-to-viewport-8-plugin'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   // 端口与后端地址经环境变量注入（PR #36 评审建议）：本地开发与服务器部署不再互相覆盖。
-  // 本地默认：5173 + 契约默认后端 8080；服务器部署在 .env.development.local 覆盖
-  // VITE_DEV_PORT=5174、VITE_PROXY_TARGET=http://127.0.0.1:4000（后端实际挂载端口，见 BUG-007 口径）
+  // 本地默认：5173 + 契约默认后端 4000；服务器部署在 .env.development.local 覆盖
+  // VITE_DEV_PORT=5174、VITE_PROXY_TARGET=http://127.0.0.1:4000（端口口径见 BUG-20260908-007）
   const devPort = Number(env.VITE_DEV_PORT) || 5173
-  const proxyTarget = env.VITE_PROXY_TARGET || 'http://127.0.0.1:8080'
+  const proxyTarget = env.VITE_PROXY_TARGET || 'http://127.0.0.1:4000'
 
   return {
     plugins: [
