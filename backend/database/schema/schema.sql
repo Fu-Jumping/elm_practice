@@ -89,4 +89,20 @@ CREATE TABLE IF NOT EXISTS promotion_tiers (
 CREATE TABLE IF NOT EXISTS id_sequence (
   name VARCHAR(32) PRIMARY KEY, next_val BIGINT NOT NULL
 );
+-- 批次⑥ 红包（契约 §3.8 + CHG-001 §3.10）：用户券一行一券；门槛基数=商品小计；scope 仅 ALL/STORE。
+CREATE TABLE IF NOT EXISTS coupons (
+  coupon_id VARCHAR(32) PRIMARY KEY, user_id VARCHAR(32) NOT NULL,
+  name VARCHAR(80) NOT NULL, amount DECIMAL(10,2) NOT NULL, threshold DECIMAL(10,2) NOT NULL,
+  scope VARCHAR(8) NOT NULL DEFAULT 'ALL', store_id VARCHAR(32),
+  valid_from TIMESTAMP NOT NULL, valid_to TIMESTAMP NOT NULL,
+  used BOOLEAN NOT NULL DEFAULT FALSE, used_order_id VARCHAR(32),
+  source VARCHAR(16) NOT NULL DEFAULT 'SEED', can_blast BOOLEAN NOT NULL DEFAULT FALSE, pack_id VARCHAR(32),
+  INDEX idx_coupons_user (user_id), CHECK(scope IN ('ALL','STORE')), CHECK(amount >= 0), CHECK(threshold >= 0)
+);
+-- 红包套餐购买记录（CHG-001；前端模拟付费，不产生支付记录、不新增支付表）。
+CREATE TABLE IF NOT EXISTS coupon_packs (
+  pack_id VARCHAR(32) PRIMARY KEY, pack_key VARCHAR(16) NOT NULL, user_id VARCHAR(32) NOT NULL,
+  price DECIMAL(10,2) NOT NULL, quantity INT NOT NULL, created_at TIMESTAMP NOT NULL,
+  INDEX idx_packs_user (user_id)
+);
 INSERT IGNORE INTO id_sequence(name,next_val) VALUES ('global',1004);

@@ -61,6 +61,21 @@ public final class ViewMapper {
         var m = new LinkedHashMap<String,Object>(); m.put("productId",i.productId); m.put("name",i.name); m.put("image",i.image);
         m.put("categoryId",i.categoryId); m.put("unitPrice",i.unitPrice); m.put("quantity",i.quantity); m.put("subtotal",i.subtotal); return m;
     }
+    /** 红包视图（契约 §3.8 + §3.10）：status 只表达有效期窗口，used 独立回显；source/canBlast 供爆红包 UI。 */
+    public static Map<String,Object> coupon(Domain.Coupon c) {
+        var m = new LinkedHashMap<String,Object>(); m.put("couponId",c.id); m.put("name",c.name);
+        m.put("amount",c.amount); m.put("threshold",c.threshold); m.put("scope",c.scope); m.put("storeId",c.storeId);
+        m.put("validFrom",c.validFrom); m.put("validTo",c.validTo);
+        boolean inWindow = false;
+        try {
+            var now = java.time.LocalDateTime.now();
+            inWindow = !java.time.LocalDateTime.parse(c.validFrom, java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).isAfter(now)
+                    && !java.time.LocalDateTime.parse(c.validTo, java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).isBefore(now);
+        } catch (Exception ignored) { }
+        m.put("status", inWindow ? "available" : "expired");
+        m.put("used",c.used); m.put("source",c.source); m.put("canBlast",c.canBlast);
+        return m;
+    }
     public static Map<String,Object> review(Domain.Review r) {
         var m = new LinkedHashMap<String,Object>(); m.put("reviewId",r.id); m.put("orderId",r.orderId); m.put("storeId",r.storeId);
         m.put("userId",r.userId); m.put("content",r.content); m.put("rating",r.rating); m.put("reply",r.reply);

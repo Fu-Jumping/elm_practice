@@ -2,7 +2,9 @@
 -- 注意：本文件与 backend/database/schema/schema.sql 保持同步，修改需同步两处。
 CREATE TABLE IF NOT EXISTS users (
   user_id VARCHAR(32) PRIMARY KEY, account VARCHAR(64) NOT NULL UNIQUE,
-  password_hash VARCHAR(128) NOT NULL, nickname VARCHAR(80) NOT NULL, created_at TIMESTAMP NOT NULL
+  password_hash VARCHAR(128) NOT NULL, nickname VARCHAR(80) NOT NULL, created_at TIMESTAMP NOT NULL,
+  -- 批次⑥（CHG-001）：当天免费爆占用日期（东八区 yyyy-MM-dd），NULL=从未使用，0 点按日期自然重置。
+  free_blast_date DATE NULL
 );
 CREATE TABLE IF NOT EXISTS merchants (
   merchant_id VARCHAR(32) PRIMARY KEY, account VARCHAR(64) NOT NULL UNIQUE,
@@ -89,5 +91,21 @@ CREATE TABLE IF NOT EXISTS promotion_tiers (
 );
 CREATE TABLE IF NOT EXISTS id_sequence (
   name VARCHAR(32) PRIMARY KEY, next_val BIGINT NOT NULL
+);
+-- 批次⑥ 红包（契约 §3.8 + CHG-001 §3.10）：用户券一行一券；门槛基数=商品小计；scope 仅 ALL/STORE。
+CREATE TABLE IF NOT EXISTS coupons (
+  coupon_id VARCHAR(32) PRIMARY KEY, user_id VARCHAR(32) NOT NULL,
+  name VARCHAR(80) NOT NULL, amount DECIMAL(10,2) NOT NULL, threshold DECIMAL(10,2) NOT NULL,
+  scope VARCHAR(8) NOT NULL DEFAULT 'ALL', store_id VARCHAR(32),
+  valid_from TIMESTAMP NOT NULL, valid_to TIMESTAMP NOT NULL,
+  used BOOLEAN NOT NULL DEFAULT FALSE, used_order_id VARCHAR(32),
+  source VARCHAR(16) NOT NULL DEFAULT 'SEED', can_blast BOOLEAN NOT NULL DEFAULT FALSE, pack_id VARCHAR(32),
+  INDEX idx_coupons_user (user_id), CHECK(scope IN ('ALL','STORE')), CHECK(amount >= 0), CHECK(threshold >= 0)
+);
+-- 红包套餐购买记录（CHG-001；前端模拟付费，不产生支付记录、不新增支付表）。
+CREATE TABLE IF NOT EXISTS coupon_packs (
+  pack_id VARCHAR(32) PRIMARY KEY, pack_key VARCHAR(16) NOT NULL, user_id VARCHAR(32) NOT NULL,
+  price DECIMAL(10,2) NOT NULL, quantity INT NOT NULL, created_at TIMESTAMP NOT NULL,
+  INDEX idx_packs_user (user_id)
 );
 INSERT IGNORE INTO id_sequence(name,next_val) VALUES ('global',1004);
