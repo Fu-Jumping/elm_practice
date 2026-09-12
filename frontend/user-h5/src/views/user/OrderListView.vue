@@ -172,7 +172,7 @@ function goDetail(order: OrderSummary): void {
               去支付
             </button>
             <button
-              v-if="order.status === 'COMPLETED' && order.reviewed"
+              v-if="order.status === 'COMPLETED'"
               class="ol-pay"
               type="button"
               data-testid="order-reorder-entry"
@@ -180,8 +180,10 @@ function goDetail(order: OrderSummary): void {
             >
               再来一单
             </button>
+            <!-- 去评价仅在「已确知未评价」时展示：reviewed 缺失（真实后端暂未返回该字段）时不展示，
+                 避免给出必然 409 的入口（字段缺失只隐藏对应字段，2026-09-12 对接修正） -->
             <button
-              v-if="order.status === 'COMPLETED' && !order.reviewed"
+              v-if="order.status === 'COMPLETED' && order.reviewed === false"
               class="ol-pay"
               type="button"
               data-testid="order-review-entry"

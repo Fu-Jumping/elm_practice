@@ -357,12 +357,14 @@ describe('ConfirmOrderView（确认订单页 P0）', () => {
     })
 
     /**
-     * 口径说明（2026-09-12）：本用例锁定的是**前端替身**的计价——替身目前只按「小计 + 打包费 + 配送费」
-     * 的退化口径返回，尚未镜像真实后端已实现的满减/新客立减/免配送费优惠（后端 PR #48 已合并）。
-     * 因此真实后端下「预览 = 下单结果」不再成立，页面已按 TA-6 标注为预估；
-     * 替身是否镜像七步计价另见 `docs/todo/用户端.md` 的 TODO-USER-001 备注（待负责人决定）。
+     * 口径说明（2026-09-12 修订）：本用例锁定**替身与真实后端一致的七步计价**——
+     * 替身已按 PRD 7.4 与后端 `PricingService` 逐行镜像（满减取最大满足档 / 新客立减 / 免配送费门槛 /
+     * 会员折扣 / 红包 / 实付不小于 0）。m002 小计 39.00 时：− 满减 2.00（满 20 档）− 新客 0（u001 非该店首单）
+     * + 配送费 5.00 − 配送费优惠 5.00（小计 ≥ 30）+ 打包费 2.00 = **39.00**。
+     * 确认订单页的**预览**（TA-1）仍为基础四行 = 46.00：用户端没有优惠查询接口，下单前无法预知这些
+     * 优惠，故页面标注为「预估」（TA-6），真实金额以创建订单结果为准——本用例正是锁定"以后端为准"。
      */
-    it('TA-4 替身口径：创建订单快照含 deliveryFee 且实付含配送费（TC-ORD-011/021/022）', async () => {
+    it('TA-4 替身七步计价：创建订单金额快照含配送费与优惠各字段且实付按定稿公式（TC-ORD-011/021/022）', async () => {
       const pinia = bootstrapPinia()
       await loginAndFillCart()
       const { wrapper, router } = await mountConfirm({ storeId: 'm002' }, pinia)
@@ -383,10 +385,15 @@ describe('ConfirmOrderView（确认订单页 P0）', () => {
         timeout: 2000,
       })
       const created = await orderApi.getOrder(String(router.currentRoute.value.params.orderId))
-      // 金额快照（契约 §3.5/§10.4）：配送费入快照，实付 = 商品小计 + 打包费 + 配送费（无优惠退化口径）
+      // 金额快照（契约 §3.5/§10.4）：配送费入快照，实付按七步定稿公式（39 − 2 + 5 − 5 + 2 = 39.00）
       expect(created.deliveryFee).toBe(5)
       expect(created.packagingFee).toBe(2)
-      expect(created.total).toBe(46)
+      expect(created.fullReductionAmount).toBe(2)
+      expect(created.deliveryFeeDiscount).toBe(5)
+      expect(created.newCustomerAmount).toBe(0)
+      expect(created.total).toBe(39)
+      // 与页面预览（基础四行 46.00）的差额只来自优惠，且预览在上界（后端只可能更便宜）
+      expect(created.total!).toBeLessThanOrEqual(46)
     })
   })
 })

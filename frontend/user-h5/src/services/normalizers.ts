@@ -100,8 +100,13 @@ export function normalizeOrderSummary(raw: OrderRecord): OrderSummary {
     createdAt: raw.createdAt,
     // 待支付倒计时（契约 §3.5）：订单列表对待支付订单展示剩余时间与「已失效」所需
     payDeadline: raw.payDeadline ?? null,
-    // 是否已评价（契约 §3.5 口径补充）：完成未评价时列表展示「待评价」并提供去评价入口
-    reviewed: raw.reviewed ?? false,
+    /**
+     * 是否已评价（契约 §3.5 口径补充）：完成未评价时列表展示「待评价」并提供去评价入口。
+     * **字段缺失保持 undefined（不补 false）**——真实后端尚未返回该字段（后端待办未登记，2026-09-12 已提请），
+     * 若补成 false 会把已评价订单误标为「待评价」并给出必然 409 的去评价入口；
+     * 按「字段缺失只隐藏对应字段」的既有口径，未知时回落状态文案与不展示评价入口。
+     */
+    reviewed: raw.reviewed,
   }
 }
 
@@ -136,7 +141,8 @@ export function normalizeOrderDetail(raw: OrderRecord): OrderDetail {
     discounts: buildDiscounts(raw),
     cancelReason: raw.cancelReason ?? '',
     cancelledAt: raw.cancelledAt ?? null,
-    reviewed: raw.reviewed ?? false,
+    // 同上：缺失保持 undefined，不补 false（避免真实后端未返回时误标「待评价」）
+    reviewed: raw.reviewed,
     // 待支付截止时间（契约 §3.5）：支付页倒计时数据源，缺失表示不可支付（页面据此禁用支付按钮）
     payDeadline: raw.payDeadline ?? null,
     // 支付时间（契约 §3.5）：支付成功页摘要卡展示，缺失显示「暂无时间」

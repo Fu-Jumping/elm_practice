@@ -77,9 +77,9 @@ describe('OrderListView（订单列表页 P0）', () => {
     expect(cards[0]!.text()).toContain('进行中')
     expect(cards[0]!.text()).toContain('32.50')
     expect(cards[0]!.text()).toContain('2026-09-07 11:30:00')
-    // 第二笔（o0001 肯德基宅急送 46.00）
+    // 第二笔（o0001 肯德基宅急送 39.00：小计 39.00 − 满减 2.00 + 配送费 5.00 − 配送费优惠 5.00 + 打包费 2.00）
     await vi.waitFor(() => expect(cards[1]!.text()).toContain('肯德基宅急送'), { timeout: 2000 })
-    expect(cards[1]!.text()).toContain('46.00')
+    expect(cards[1]!.text()).toContain('39.00')
   })
 
   it('T41 无订单显示空态提示', async () => {
@@ -252,5 +252,31 @@ describe('OrderListView（订单列表页 P0）', () => {
     await entries[0]!.trigger('click')
     await flushPromises()
     expect(router.currentRoute.value.name).toBe('order-review')
+  })
+
+  // TV-13（2026-09-12 真实后端对接修正）：契约 §3.5 的 `reviewed` 字段后端尚未返回
+  //（后端待办未登记，已提请）。缺失时不得补成 false —— 否则已评价订单会被误标「待评价」
+  // 并给出必然 409 的去评价入口；按「字段缺失只隐藏对应字段」口径回落「已完成」且不展示评价入口。
+  it('TV-13 reviewed 缺失（真实后端未返回该字段）→ 不误标「待评价」且不给去评价入口', async () => {
+    orderMockState.splice(0, orderMockState.length, {
+      ...ORDER_SEED[0]!,
+      orderId: 'or13',
+      status: 'COMPLETED',
+      storeId: 'm002',
+      createdAt: '2026-09-11 13:00:00',
+      // 刻意不设置 reviewed：模拟真实后端响应缺该字段
+      reviewed: undefined,
+    })
+    const { wrapper } = await mountList()
+    await vi.waitFor(
+      () => expect(wrapper.findAll('[data-testid="order-card"]').length).toBe(1),
+      { timeout: 2000 },
+    )
+    const card = wrapper.findAll('[data-testid="order-card"]')[0]!
+    expect(card.text()).toContain('已完成')
+    expect(card.text()).not.toContain('待评价')
+    // 未知是否已评价时不展示「去评价」；「再来一单」与评价状态无关，仍应展示
+    expect(wrapper.find('[data-testid="order-review-entry"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="order-reorder-entry"]').exists()).toBe(true)
   })
 })
