@@ -19,7 +19,7 @@ public final class Requests {
     public static class AddressRequest { public String contactName, contactSex, contactPhone, region, detail, label; public Boolean isDefault; }
     public static class CartAdd { public String storeId, productId; public Integer quantity; }
     public static class CartPatch { public Integer quantity; }
-    public static class OrderCreate { public String storeId, addressId, remark, idempotencyKey; public BigDecimal expectedTotal; }
+    public static class OrderCreate { public String storeId, addressId, remark, idempotencyKey, couponId; public BigDecimal expectedTotal; }
     public static class Payment { public Boolean success; }
     public static class StatusPatch { public String status; }
     public static class ReviewCreate { public Integer rating; public String content; }
@@ -34,4 +34,8 @@ public final class Requests {
         public BigDecimal freeDeliveryThreshold;
         public BigDecimal memberDiscountRate; public Boolean memberDiscountEnabled;
     }
+    /** 购买红包套餐（CHG-001 §3.10）：packKey 仅 pack49 / pack99；前端模拟付费不落支付记录。 */
+    public static class PackPurchase { public String packKey; }
+    /** 爆一次（CHG-001 §3.10）：couponId 不传=当天免费爆；传=消耗并替换该券。 */
+    public static class BlastRequest { public String couponId; }
 }

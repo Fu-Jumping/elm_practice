@@ -11,6 +11,8 @@ TRUNCATE TABLE products;
 TRUNCATE TABLE categories;
 TRUNCATE TABLE promotions;
 TRUNCATE TABLE promotion_tiers;
+TRUNCATE TABLE coupon_packs;
+TRUNCATE TABLE coupons;
 TRUNCATE TABLE stores;
 TRUNCATE TABLE merchants;
 TRUNCATE TABLE users;
@@ -94,3 +96,13 @@ INSERT INTO order_items(order_id,product_id,name,image,category_id,unit_price,qu
 ('o1002','p102','劲脆鸡腿堡','/demo-images/product-m002-02.jpg','c101',19.50,1),
 ('o1003','p105','九珍果汁','/demo-images/product-m002-05.jpg','c103',9.00,1)
 ON DUPLICATE KEY UPDATE product_id=VALUES(product_id),name=VALUES(name),image=VALUES(image),category_id=VALUES(category_id),unit_price=VALUES(unit_price),quantity=VALUES(quantity);
+
+-- 批次⑥ 红包种子（契约 §3.8，验收第 22 行：全场券 + 指定商家券各至少 1 张；另备已用券/过期券供异常用例）。
+-- cp001 全场满20减2；cp002 指定 m002 满40减5；cp003 已用（used=1，有效期内，列表 used 标记回显）；cp004 已过期。
+INSERT INTO coupons(coupon_id,user_id,name,amount,threshold,scope,store_id,valid_from,valid_to,used,used_order_id,source,can_blast,pack_id) VALUES
+('cp001','u001','满20减2红包',2.00,20.00,'ALL',NULL,DATE_SUB(NOW(),INTERVAL 1 DAY),DATE_ADD(NOW(),INTERVAL 30 DAY),FALSE,NULL,'SEED',FALSE,NULL),
+('cp002','u001','肯德基满40减5红包',5.00,40.00,'STORE','m002',DATE_SUB(NOW(),INTERVAL 1 DAY),DATE_ADD(NOW(),INTERVAL 30 DAY),FALSE,NULL,'SEED',FALSE,NULL),
+('cp003','u001','满20减2红包',2.00,20.00,'ALL',NULL,DATE_SUB(NOW(),INTERVAL 1 DAY),DATE_ADD(NOW(),INTERVAL 30 DAY),TRUE,'o1001','SEED',FALSE,NULL),
+('cp004','u001','满10减3红包',3.00,10.00,'ALL',NULL,DATE_SUB(NOW(),INTERVAL 40 DAY),DATE_SUB(NOW(),INTERVAL 1 DAY),FALSE,NULL,'SEED',FALSE,NULL)
+ON DUPLICATE KEY UPDATE name=VALUES(name),amount=VALUES(amount),threshold=VALUES(threshold),scope=VALUES(scope),store_id=VALUES(store_id),
+  valid_from=VALUES(valid_from),valid_to=VALUES(valid_to),used=VALUES(used),used_order_id=VALUES(used_order_id),source=VALUES(source),can_blast=VALUES(can_blast);

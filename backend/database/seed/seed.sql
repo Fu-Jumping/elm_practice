@@ -75,3 +75,9 @@ ON DUPLICATE KEY UPDATE enabled=VALUES(enabled), new_user_amount=VALUES(new_user
   free_delivery_threshold=VALUES(free_delivery_threshold), member_discount=VALUES(member_discount);
 INSERT IGNORE INTO promotion_tiers(store_id, threshold, amount, sort_order)
 VALUES ('m002', 20.00, 2.00, 1), ('m002', 40.00, 5.00, 2);
+
+-- 批次⑥ 演示红包（契约 §3.8：全场券与指定商家券各至少 1 张；新环境仅在 users 为空时随种子落库）。
+INSERT INTO coupons(coupon_id,user_id,name,amount,threshold,scope,store_id,valid_from,valid_to,used,source,can_blast)
+VALUES ('cp001','u001','满20减2红包',2.00,20.00,'ALL',NULL,DATE_SUB(NOW(),INTERVAL 1 DAY),DATE_ADD(NOW(),INTERVAL 30 DAY),FALSE,'SEED',FALSE),
+       ('cp002','u001','肯德基满40减5红包',5.00,40.00,'STORE','m002',DATE_SUB(NOW(),INTERVAL 1 DAY),DATE_ADD(NOW(),INTERVAL 30 DAY),FALSE,'SEED',FALSE)
+ON DUPLICATE KEY UPDATE name=VALUES(name);

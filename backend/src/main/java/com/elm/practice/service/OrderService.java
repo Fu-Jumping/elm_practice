@@ -29,14 +29,16 @@ public class OrderService {
     private final CartLineMapper cartLines; private final ProductMapper products;
     private final ConversationMapper conversations; private final PromotionMapper promotions;
     private final StoreService stores; private final AddressService addresses; private final IdGenerator ids;
-    private final PricingService pricing;
+    private final PricingService pricing; private final CouponService couponSvc;
 
     public OrderService(OrderMapper orders, OrderItemMapper orderItems, CartLineMapper cartLines,
                         ProductMapper products, ConversationMapper conversations, PromotionMapper promotions,
-                        StoreService stores, AddressService addresses, IdGenerator ids, PricingService pricing) {
+                        StoreService stores, AddressService addresses, IdGenerator ids, PricingService pricing,
+                        CouponService couponSvc) {
         this.orders = orders; this.orderItems = orderItems; this.cartLines = cartLines;
         this.products = products; this.conversations = conversations; this.promotions = promotions;
         this.stores = stores; this.addresses = addresses; this.ids = ids; this.pricing = pricing;
+        this.couponSvc = couponSvc;
     }
 
     /** @Transactional 即真实 DB 事务：任何一步抛错整体回滚（扣库存、清购物车、订单/明细/会话插入原子）。 */
@@ -72,7 +74,14 @@ public class OrderService {
         if (promo == null) promo = new Domain.PromoConfig();
         promo.tiers.addAll(promotions.findTiers(sid));
         boolean isNewCustomer = orders.countByUserAndStore(u.id, sid) == 0;
-        var pr = pricing.price(subtotal, store.deliveryFee, promo, isNewCustomer, false, BigDecimal.ZERO);
+        // 红包选用（批次⑥，契约 §3.8）：事务内行锁 + 归属/有效期/适用范围/门槛校验；并发核销失败由条件更新兜底。
+        BigDecimal couponAmount = BigDecimal.ZERO;
+        Domain.Coupon lockedCoupon = null;
+        if (r.couponId != null && !r.couponId.isBlank()) {
+            lockedCoupon = couponSvc.lockForOrder(u, r.couponId.trim(), sid, subtotal);
+            couponAmount = lockedCoupon.amount.setScale(2);
+        }
+        var pr = pricing.price(subtotal, store.deliveryFee, promo, isNewCustomer, false, couponAmount);
         BigDecimal total = pr.total;
         String id = ids.nextId("o");
         // 支付扩展已选定：订单创建即待支付，15 分钟内支付成功后进入待接单（契约 3.5；状态机修正 BE-002）。
@@ -89,6 +98,9 @@ public class OrderService {
             if (existing != null) return withItems(existing);
             throw e;
         }
+        // 红包核销：条件更新保证并发下同一券只成功一次；失败抛 409，订单插入随事务整体回滚。
+        if (lockedCoupon != null && couponSvc.markUsed(lockedCoupon, id) == 0)
+            throw ApiException.conflict("红包已被使用，请刷新后重试");
         // 会话随订单创建，"联系商家"仅限该订单用户与商家之间。
         if (store.merchantId != null) {
             conversations.insert(new Domain.Conversation(ids.nextId("cv"), id, u.id, store.merchantId));

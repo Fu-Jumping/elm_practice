@@ -21,6 +21,8 @@ public final class Domain {
         public String passwordHash;
         public String nickname;
         public String createdAt;
+        /** 批次⑥：当天已用免费爆的日期（yyyy-MM-dd，东八区），null=从未使用。CHG-001 §3.10。 */
+        public String freeBlastDate;
         public User(String id, String account, String passwordHash, String nickname, String createdAt) {
             this.id = id; this.account = account; this.passwordHash = passwordHash;
             this.nickname = nickname; this.createdAt = createdAt;
@@ -138,6 +140,26 @@ public final class Domain {
         public BigDecimal newUserAmount = BigDecimal.ZERO;        // 新客立减，0=关闭
         public BigDecimal freeDeliveryThreshold = BigDecimal.ZERO; // 免配送费门槛，0=不启用
         public BigDecimal memberDiscountRate = BigDecimal.ONE;     // 会员折扣率，1.00=关闭
+    }
+    /** 用户红包（批次⑥，coupons 表映射；§3.8 + CHG-001 §3.10）。 */
+    public static final class Coupon {
+        public String id, userId, name, storeId, validFrom, validTo, usedOrderId, packId;
+        public BigDecimal amount, threshold;
+        public String scope = "ALL";   // ALL 全场 / STORE 指定商家
+        public boolean used, canBlast;
+        public String source = "SEED"; // SEED 种子 / PACK 购买所得 / BLAST_OUT 爆出来的
+        public Coupon() {}
+    }
+    /** 红包套餐购买记录（批次⑥，coupon_packs 表映射，CHG-001；前端模拟付费不落支付记录）。 */
+    public static final class CouponPack {
+        public String id, userId, packKey, createdAt;
+        public BigDecimal price;
+        public int quantity;
+        public CouponPack() {}
+        public CouponPack(String id, String userId, String packKey, BigDecimal price, int quantity, String createdAt) {
+            this.id=id; this.userId=userId; this.packKey=packKey; this.price=price;
+            this.quantity=quantity; this.createdAt=createdAt;
+        }
     }
     public static final class OrderItem {
         public String productId, name, image, categoryId;
