@@ -146,7 +146,7 @@ public class OrderService {
             throw ApiException.conflict("支付已超时");
         if (success) {
             String paidAt = Times.now();
-            if (orders.markPaid(id, paidAt) > 0) { o.status = Domain.OrderStatus.PROCESSING; o.paidAt = paidAt; }
+            if (orders.markPaid(id, paidAt) > 0) { o.status = Domain.OrderStatus.PENDING; o.paidAt = paidAt; }
         }
         return o;
     }
@@ -158,8 +158,8 @@ public class OrderService {
         try { target = Domain.OrderStatus.valueOf(RequestUtil.required(next, "status")); }
         catch (IllegalArgumentException e) { throw ApiException.badRequest("非法订单状态"); }
         if (o.status == target) return o;
-        boolean valid = (o.status == Domain.OrderStatus.PROCESSING && target == Domain.OrderStatus.PENDING)
-                || (o.status == Domain.OrderStatus.PENDING && target == Domain.OrderStatus.COOKING)
+        // 状态机（TODO-BE-002）：支付成功即 PENDING，商家从 PENDING 起推进；PROCESSING 不再参与流转
+        boolean valid = (o.status == Domain.OrderStatus.PENDING && target == Domain.OrderStatus.COOKING)
                 || (o.status == Domain.OrderStatus.COOKING && target == Domain.OrderStatus.DELIVERING)
                 || (o.status == Domain.OrderStatus.DELIVERING && target == Domain.OrderStatus.COMPLETED);
         if (!valid) throw ApiException.conflict("订单状态不能跳级");
