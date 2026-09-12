@@ -325,3 +325,35 @@ export interface NotificationRecord {
   read: boolean
   createdAt: string
 }
+
+/** 收藏商家（契约 §3.7：列表按收藏时间倒序；(userId, storeId) 唯一，重复收藏幂等） */
+export interface FavoriteItem {
+  favoriteId: string
+  storeId: string
+  storeName: string
+  image?: string
+  rating: number
+  monthlySales: number
+  deliveryFee: number
+  /** 商家关闭后收藏项保留并展示最新状态（契约 §3.7：关闭时用户端不可下单） */
+  storeStatus: StoreStatus
+  createdAt: string
+  /**
+   * 契约缺口（2026-09-12 登记，提请后端 A 确认）：PRD 7.16.1「我的收藏页-收藏商家列表」行要求
+   * 卡片展示**促销标签、配送时长、距离**，而契约 §3.7 收藏对象最小集未含这三个字段。
+   * 前端按「接口返回才展示、缺失即隐藏」实现（不使用演示值补齐）；后端补字段后本节需按 R7 同步。
+   */
+  deliveryMinutes?: number
+  distanceText?: string
+  couponTags?: string[]
+}
+
+/** 会员信息（契约 §3.8：`memberOpened` 标识与权益说明；**开通与续费接口本期不提供**） */
+export interface MemberInfo {
+  memberOpened: boolean
+  /** 演示折扣率 0.95；与商品 `memberPrice` 不叠加（契约 §3.2/§3.5） */
+  discountRate: number
+  discountDesc: string
+  /** 开通时间由种子数据或后台标记，无开通接口；契约未定义有效期字段 */
+  activatedAt?: string | null
+}

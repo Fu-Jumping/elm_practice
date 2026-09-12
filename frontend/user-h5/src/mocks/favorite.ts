@@ -68,4 +68,44 @@ function enrich(favorite: FavoriteItem): FavoriteItem {
   }
 }
 
-export const favoriteMocks: Record<string, MockHandler> = {}
+export const favoriteMocks: Record<string, MockHandler> = {
+  'GET /me/favorites': () =>
+    ok(
+      [...favoriteMockState]
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        .map((item) => enrich(item)),
+    ),
+
+  'POST /me/favorites': (ctx) => {
+    const storeId = String((ctx.data as { storeId?: unknown } | undefined)?.storeId ?? '').trim()
+    if (!storeId) return fail(400, 40000, 'storeId 不能为空')
+    const store = findMockStore(storeId)
+    if (!store) return fail(404, 40400, '商家不存在')
+    // 重复收藏幂等：返回当前收藏，不产生重复记录（契约 §3.7、TC-FAV-003）
+    const existing = favoriteMockState.find((item) => item.storeId === storeId)
+    if (existing) return ok(enrich(existing))
+    const favorite: FavoriteItem = {
+      favoriteId: `f${String(favoriteIdSeq++).padStart(3, '0')}`,
+      storeId,
+      storeName: store.name,
+      image: store.image,
+      rating: store.rating,
+      monthlySales: store.monthlySales,
+      deliveryFee: store.deliveryFee,
+      storeStatus: store.status,
+      createdAt: new Date().toISOString(),
+    }
+    favoriteMockState.push(favorite)
+    return ok(enrich(favorite))
+  },
+
+  'DELETE /me/favorites/:storeId': (ctx) => {
+    const storeId = String(ctx.params?.storeId ?? '')
+    // storeId 本身不存在 → 404（契约 §3.7）
+    if (!findMockStore(storeId)) return fail(404, 40400, '商家不存在')
+    const index = favoriteMockState.findIndex((item) => item.storeId === storeId)
+    // 取消未被收藏的商店 → 幂等 200 空对象，不报错、不产生记录（2026-09-10 定稿）
+    if (index >= 0) favoriteMockState.splice(index, 1)
+    return ok({})
+  },
+}
