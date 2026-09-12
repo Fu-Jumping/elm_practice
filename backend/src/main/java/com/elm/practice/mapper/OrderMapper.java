@@ -77,8 +77,8 @@ public interface OrderMapper {
     int updateStatusConditional(@Param("id") String id, @Param("from") Domain.OrderStatus from,
                                 @Param("to") Domain.OrderStatus to);
 
-    /** 支付成功：仅 PENDING_PAYMENT 可支付，重复调用 affected=0。 */
-    @Update("UPDATE orders SET status = 'PROCESSING', paid_at = STR_TO_DATE(#{paidAt},'%Y-%m-%d %H:%i:%s') "
+    /** 支付成功：仅 PENDING_PAYMENT 可支付，重复调用 affected=0；支付成功即 PENDING（待接单，TODO-BE-002），PROCESSING 仅 P0 历史兼容。 */
+    @Update("UPDATE orders SET status = 'PENDING', paid_at = STR_TO_DATE(#{paidAt},'%Y-%m-%d %H:%i:%s') "
             + "WHERE order_id = #{id} AND status = 'PENDING_PAYMENT'")
     int markPaid(@Param("id") String id, @Param("paidAt") String paidAt);
 
