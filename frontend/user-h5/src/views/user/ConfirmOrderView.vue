@@ -4,10 +4,11 @@
  * 2026-09-07 TDD 落地（T26-T30 + mock M1-M4）：
  * - 登录校验先行（未登录转登录带 redirect）；storeId 缺失返回商家列表（PRD 顶部栏行）
  * - 地址来自地址接口并默认选中默认地址；无地址禁用提交并引导新增（PRD 订单内容区行）
- * - 商品行来自该店购物车；实付金额 = 商品小计 + 打包费 2.00（含打包费、不单列打包费行，
- *   PRD 7.4 2026-09-01 决议覆盖设计稿的"包装费"独立行）
+ * - 商品行来自该店购物车
+ * - 金额明细按「基础四行 + 优惠项按实际发生展示」渲染（PRD 7.4 / 契约 §3.5，2026-09-11 定稿 CHG-004，
+ *   批次① TODO-USER-001）：无优惠时实付 = 商品小计 + 打包费 2.00 + 配送费（店铺配置，未配置按 0）
  * - 金额以后端为准：前端合计仅作 expectedTotal 一致性提示（TC-ORD-011）
- * - 去支付只发一次创建订单请求；成功后清空该店购物车并进入订单列表（PRD 底部结算栏行）
+ * - 去支付只发一次创建订单请求；成功后清空该店购物车并进入支付页（PRD 底部结算栏行）
  * 口径差异备注：设计稿地址卡电话为脱敏展示、备注为弹层交互、支付方式区为 P1 扩展；
  * 本期按测试锁定口径完整号码 + 内联备注输入，支付方式区 P0 不渲染，视觉细化任务再对齐
  * 2026-09-08 缺陷修复：无地址引导块补点击（此前无点击事件，地址删光后只能退出页面新增）
@@ -15,7 +16,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { addressApi, orderApi } from '@/services/api'
-import { PACKAGING_FEE, formatMoney, payableAmountText } from '@/services/normalizers'
+import { PACKAGING_FEE, buildAmountLines, formatMoney, payableAmountText } from '@/services/normalizers'
 import { useCartStore } from '@/stores/cartStore'
 import { useCatalogStore } from '@/stores/catalogStore'
 import { useSessionStore } from '@/stores/sessionStore'
@@ -53,9 +54,35 @@ function pickAddress(): void {
 }
 const storeName = computed(() => catalogStore.storeDetail?.name ?? '')
 
-/** 实付金额展示：商品小计 + 打包费（PRD 7.4 决议；后端计价为准，TC-ORD-011） */
-const payable = computed(() =>
-  payableAmountText({ itemsTotal: cartStore.totalAmount, packagingFee: PACKAGING_FEE }),
+/** 店铺配送费（契约 §3.5：配送费默认 ¥3.00、店铺可配、未配置按 0） */
+const deliveryFee = computed(() => catalogStore.storeDetail?.deliveryFee ?? 0)
+
+/**
+ * 实付金额预览：商品小计 + 打包费 + 配送费（无优惠退化口径；后端计价为准，TC-ORD-011）
+ * 优惠项（满减/红包/新客立减/会员折扣/配送费优惠）待批次① 计价与红包选择接入后按实际发生传入
+ */
+const payableAmount = computed(() =>
+  Number(
+    payableAmountText({
+      itemsTotal: cartStore.totalAmount,
+      packagingFee: PACKAGING_FEE,
+      deliveryFee: deliveryFee.value,
+    }),
+  ),
+)
+
+/**
+ * 金额明细（CHG-004 定稿口径，批次① TODO-USER-001）：基础四行 + 优惠项按实际发生展示，
+ * 与订单详情页、支付页共用 `normalizers.buildAmountLines` 唯一出口（本页暂无优惠数据源，
+ * 未发生则整行不显示）；顺序固定 商品小计 → 打包费 → 配送费 → 优惠项 → 实付金额
+ */
+const amountLines = computed(() =>
+  buildAmountLines({
+    itemsTotal: cartStore.totalAmount,
+    packagingFee: PACKAGING_FEE,
+    deliveryFee: deliveryFee.value,
+    payableAmount: payableAmount.value,
+  }),
 )
 
 /** 店铺休息（CLOSED/TEMPORARILY_CLOSED 均不可下单，TC-ORD-006 前端侧） */
@@ -129,7 +156,7 @@ async function submitOrder(): Promise<void> {
       storeId,
       addressId: defaultAddress.value.addressId,
       remark: remark.value.trim() || undefined,
-      expectedTotal: Number((cartStore.totalAmount + PACKAGING_FEE).toFixed(2)),
+      expectedTotal: payableAmount.value,
     })
     // 成功后由明确前端流程清空该店购物车：经购物车接口重查（mock 后端已清空，TC-ORD-003）
     await cartStore.fetchCart(storeId)
@@ -239,22 +266,26 @@ function goBack(): void {
       </section>
     </main>
 
-    <!-- 底部结算栏（设计稿：全宽橙色去支付；实付含打包费） -->
+    <!-- 底部结算栏（设计稿：全宽橙色去支付；实付含打包费与配送费，标注预估） -->
     <footer class="co-settle">
       <div class="co-settle-main">
         <p v-if="blockReason" class="co-block-tip" data-testid="submit-block-tip">
           {{ blockReason }}
         </p>
+        <!-- 预估提示（PRD 7.4：金额以后端计价为准，前端合计不得作为最终金额）：
+             用户端没有满减/新客立减/免配送费的查询接口，下单前无法预知这些优惠，故此处标注为预估 -->
+        <p class="co-estimate-tip" data-testid="amount-estimate-tip">预估金额，最终以下单时计价为准</p>
         <div class="co-payable-row">
-          <div class="co-amount-detail">
-            <p class="co-amount-line" data-testid="amount-items-total">
-              商品小计 ¥{{ formatMoney(cartStore.totalAmount) }}
-            </p>
-            <p class="co-amount-line" data-testid="amount-packaging">
-              打包费 ¥{{ formatMoney(PACKAGING_FEE) }}
-            </p>
-            <p class="co-payable">
-              实付 <strong data-testid="payable-amount">¥{{ payable }}</strong>
+          <div class="co-amount-detail" data-testid="amount-detail">
+            <p
+              v-for="line in amountLines"
+              :key="line.key"
+              class="co-amount-line"
+              data-testid="amount-line"
+              :data-key="line.key"
+              :data-kind="line.kind"
+            >
+              {{ line.label }} <span class="co-amount-value">{{ line.text }}</span>
             </p>
           </div>
           <button
@@ -535,6 +566,12 @@ function goBack(): void {
   color: #ba1a1a;
 }
 
+.co-estimate-tip {
+  margin: 0;
+  font-size: 12px;
+  color: #999;
+}
+
 .co-payable-row {
   display: flex;
   align-items: center;
@@ -554,12 +591,18 @@ function goBack(): void {
   color: #666;
 }
 
-.co-payable {
-  font-size: 14px;
-  color: #1a1c1c;
+/* 优惠项以品牌橙负数展示（CHG-004，base 行保持次要色） */
+.co-amount-line[data-kind='discount'] .co-amount-value {
+  color: #ff5a1f;
 }
 
-.co-payable strong {
+/* 实付金额行：基础四行的最后一行，品牌橙加粗（与订单详情页、支付页同口径） */
+.co-amount-line[data-kind='payable'] {
+  color: #1a1c1c;
+  font-size: 14px;
+}
+
+.co-amount-line[data-kind='payable'] .co-amount-value {
   font-size: 18px;
   font-weight: 700;
   color: #ff5a1f;
