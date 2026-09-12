@@ -41,6 +41,7 @@ function routerPlugin() {
       { path: '/', name: 'home', component: HomeView },
       { path: '/addresses', name: 'address-list', component: { template: '<div />' } },
       { path: '/login', name: 'login', component: { template: '<div />' } },
+      { path: '/coupons', name: 'coupons', component: { template: '<div />' } },
     ],
   })
   return routerInstance
@@ -287,5 +288,31 @@ describe('HomeView（首页 P0）', () => {
     await wrapper.find('.location').trigger('click')
     await flushPromises()
     expect(routerInstance.currentRoute.value.name).toBe('address-list')
+  })
+
+  // T71（CHG-001 TODO-USER-030）：分类宫格「天天爆红包」由占位装饰改为红包页真实入口；
+  // 其余真实栏目与超范围占位栏目仍提示「暂未开放」（PRD 7.16.1 首页「天天爆红包」入口行）。
+  it('T71 宫格「天天爆红包」→ 跳红包页；其余栏目点击仍提示暂未开放（CHG-001）', async () => {
+    // 该用例断言路由跳转：按 T60-T62 的做法自建 router 插件（mountHome 只装 pinia）
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const wrapper = mount(HomeView, { global: { plugins: [pinia, routerPlugin()] } })
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="cat-grid"]').exists()).toBe(true),
+      { timeout: 2000 },
+    )
+    await flushPromises()
+    const cells = wrapper.findAll('[data-testid="cat-grid"] .cat-cell')
+    const redpacket = cells.find((cell) => cell.text().includes('天天爆红包'))!
+    expect(redpacket.attributes('data-placeholder')).toBeUndefined()
+    await redpacket.trigger('click')
+    await flushPromises()
+    expect(routerInstance.currentRoute.value.name).toBe('coupons')
+    // 其它真实栏目（未接通）与占位栏目仍为占位提示
+    const other = cells.find((cell) => cell.text().includes('超市便利'))!
+    await other.trigger('click')
+    await flushPromises()
+    expect(messages).toContain('暂未开放')
+    expect(routerInstance.currentRoute.value.name).toBe('coupons')
   })
 })
