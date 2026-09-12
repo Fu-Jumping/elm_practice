@@ -9,7 +9,7 @@ public final class Requests {
     public static class Login { public String account, password, role; }
     public static class UserPatch { public String nickname; }
     public static class MerchantRegister { public String account, password, storeName, phone, contactPhone, description; }
-    public static class StorePatch { public String name, description, image; public BigDecimal startPrice, deliveryFee; }
+    public static class StorePatch { public String name, description, image, contactPhone; public BigDecimal startPrice, deliveryFee; }
     public static class StoreStatusPatch { public String status; }
     public static class CategoryCreate { public String name; public Integer sortOrder; }
     public static class CategoryPatch { public String name; public Integer sortOrder; }

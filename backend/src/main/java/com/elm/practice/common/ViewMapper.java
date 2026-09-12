@@ -21,6 +21,10 @@ public final class ViewMapper {
         m.put("monthlySales",s.monthlySales); m.put("deliveryMinutes",s.deliveryMinutes);
         m.put("startPrice",s.startPrice); m.put("deliveryFee",s.deliveryFee); m.put("status",s.status.name()); return m;
     }
+    /** 商家端店铺设置视图：额外回显联系电话（BUG-20260908-012，取自 merchants.phone；不对用户端暴露）。 */
+    public static Map<String,Object> merchantStore(Domain.Store s, String contactPhone) {
+        var m = store(s); m.put("contactPhone", contactPhone); return m;
+    }
     public static Map<String,Object> category(Domain.Category c) {
         var m = new LinkedHashMap<String,Object>(); m.put("categoryId",c.id); m.put("storeId",c.storeId);
         m.put("name",c.name); m.put("sortOrder",c.sortOrder); return m;
