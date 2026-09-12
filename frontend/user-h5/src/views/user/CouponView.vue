@@ -164,9 +164,20 @@ function onBlast(): void {
   blastOpen.value = true
 }
 
+/** 可消耗的已购券（列表内首张 canBlast 券）：免费次数用尽后传给浮层做「消耗一张再爆」 */
+const blastableCouponId = computed(
+  () => coupons.value.find((item) => item.canBlast)?.couponId ?? undefined,
+)
+
 /** 爆出成功后刷新券列表（新券进入列表） */
 function onBlastDone(): void {
   void loadCoupons()
+}
+
+/** 浮层引导购买：关闭浮层并打开买红包浮窗 */
+function onBlastBuy(): void {
+  blastOpen.value = false
+  openSheet()
 }
 
 function goBack(): void {
@@ -320,7 +331,13 @@ function goBack(): void {
     </main>
 
     <!-- 爆红包全屏浮层（TODO-USER-029）：过渡态 → 结果卡 / 失败态 -->
-    <BlastOverlay v-if="blastOpen" @close="blastOpen = false" @done="onBlastDone" />
+    <BlastOverlay
+      v-if="blastOpen"
+      :blastable-coupon-id="blastableCouponId"
+      @close="blastOpen = false"
+      @done="onBlastDone"
+      @buy="onBlastBuy"
+    />
 
     <!-- 买红包浮窗（40% 黑遮罩 + 底部白面板；两档套餐、无退款条款） -->
     <div v-if="sheetOpen" class="cp-mask" data-testid="buy-sheet" @click.self="closeSheet">

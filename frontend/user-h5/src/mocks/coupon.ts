@@ -67,6 +67,7 @@ function viewOf(coupon: CouponRecord, now: string): CouponRecord {
   return { ...coupon, status: inWindow(coupon, now) ? 'available' : 'expired' }
 }
 
+let blastCouponSeq = 1
 let packSeq = 1
 let packCouponSeq = 1
 
@@ -129,6 +130,63 @@ export const couponMocks: Record<string, MockHandler> = {
     // 列表按到期时间升序（先到期的在前，与红包页「今天到期」在前的阅读顺序一致）
     list.sort((a, b) => a.validTo.localeCompare(b.validTo))
     return ok(list)
+  },
+
+  'POST /me/coupons/blast': ({ data }) => {
+    const couponId = String((data as { couponId?: unknown } | undefined)?.couponId ?? '').trim()
+    const today = formatDateTime(new Date()).slice(0, 10)
+    /** 按权重命中档位（累计权重法；随机源可注入种子供测试断言确定档位） */
+    const pickTier = (): { tier: (typeof BLAST_TIERS)[number]; tierIndex: number } => {
+      const point = blastRandomState.fn() * 100
+      let acc = 0
+      for (let i = 0; i < BLAST_TIERS.length; i += 1) {
+        acc += BLAST_TIERS[i]!.weight
+        if (point < acc) return { tier: BLAST_TIERS[i]!, tierIndex: i + 1 }
+      }
+      return { tier: BLAST_TIERS[BLAST_TIERS.length - 1]!, tierIndex: BLAST_TIERS.length }
+    }
+    const tierName = (threshold: number, amount: number): string =>
+      threshold > 0 ? `满${threshold}减${amount}红包` : `无门槛减${amount}红包`
+    const todayEnd = `${today} 23:59:59`
+
+    // 不传 couponId → 走当日免费次数（新增一张，不消耗已购券；0 点重置 = 与今天比较）
+    if (!couponId) {
+      if (freeBlastState.date === today) {
+        return fail(409, 40900, '今日免费次数已用完，可消耗红包再爆或去购买')
+      }
+      const { tier, tierIndex } = pickTier()
+      freeBlastState.date = today
+      const coupon: CouponRecord = {
+        couponId: `cpb${String(blastCouponSeq++).padStart(4, '0')}`,
+        name: tierName(tier.threshold, tier.amount),
+        amount: tier.amount,
+        threshold: tier.threshold,
+        scope: 'ALL',
+        storeId: null,
+        validFrom: formatDateTime(new Date()),
+        validTo: todayEnd,
+        status: 'available',
+        used: false,
+        source: 'BLAST_OUT',
+        canBlast: false,
+      }
+      couponMockState.push({ ...coupon })
+      return ok({ coupon, tierIndex, free: true })
+    }
+
+    // 传 couponId → 消耗并**替换**该券（门槛与金额同时可能变化，不新增行；爆出后为终态）
+    const target = couponMockState.find((item) => item.couponId === couponId)
+    if (!target) return fail(404, 40400, '红包不存在')
+    if (!target.canBlast) return fail(409, 40900, '该红包不可再爆')
+    const { tier, tierIndex } = pickTier()
+    target.name = tierName(tier.threshold, tier.amount)
+    target.threshold = tier.threshold
+    target.amount = tier.amount
+    target.validFrom = formatDateTime(new Date())
+    target.validTo = todayEnd
+    target.source = 'BLAST_OUT'
+    target.canBlast = false
+    return ok({ coupon: { ...target }, tierIndex, free: false })
   },
 
   'POST /me/coupon-packs': ({ data }) => {
