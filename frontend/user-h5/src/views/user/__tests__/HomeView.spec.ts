@@ -149,6 +149,12 @@ describe('HomeView（首页 P0）', () => {
     await vi.waitFor(() => expect(first.text()).toContain('家常豆腐'), { timeout: 2000 })
     // 价格按 PRD 金额口径两位小数（normalizers.formatMoney）
     expect(first.text()).toContain('12.00')
+    // TODO-USER-019：商家卡装饰性标签为纯占位展示（以 data-decorative 标记，不代表真实经营数据）
+    const deco = first.find('[data-decorative="true"]')
+    expect(deco.exists()).toBe(true)
+    expect(deco.text().length).toBeGreaterThan(0)
+    // TODO-USER-021：预估价为独立不可换行单元（样式钩子类）
+    expect(first.find('.product-price-est').text()).toBe('预估价')
   })
 
   it('T46 商品预览从商品接口聚合：每卡最多 3 个、图片为空用占位图', async () => {

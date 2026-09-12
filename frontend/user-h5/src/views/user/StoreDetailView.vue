@@ -1058,6 +1058,8 @@ function onCheckout(): void {
 }
 
 .cat-rail-item--active {
+  /* TODO-USER-015：选中项加外圆角（负责人 9/10 走查，设计系统 8px 圆角阶梯） */
+  border-radius: 8px;
   background: var(--color-surface-white);
   font-weight: 500;
   color: var(--color-text-primary);
@@ -1256,7 +1258,9 @@ function onCheckout(): void {
   list-style: none;
   margin: 0;
   padding: 0;
-  max-height: 40vh;
+  /* TODO-USER-018：展开态可视高度不足（负责人 9/10 走查）→ 40vh 提到 56vh；
+     仍保留内部滚动，避免抽屉顶到吸顶 Tab 线与底部购物车栏 */
+  max-height: 56vh;
   overflow-y: auto;
 }
 
@@ -1396,7 +1400,8 @@ function onCheckout(): void {
   width: 96px;
   height: 40px;
   border: none;
-  border-radius: 20px;
+  /* TODO-USER-020：去掉胶囊形态，改直角（负责人 9/10 走查：对齐真实饿了么底栏） */
+  border-radius: 4px;
   background: var(--color-primary);
   font-size: 15px;
   font-weight: 500;

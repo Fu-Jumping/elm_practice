@@ -379,7 +379,12 @@ function onCloseCard(storeId: string): void {
           </div>
           <div class="merchant-body">
             <div class="merchant-head">
-              <h3 class="merchant-name">{{ store.name }}</h3>
+              <div class="merchant-head-main">
+                <h3 class="merchant-name">{{ store.name }}</h3>
+                <!-- 装饰性标签（TODO-USER-019）：纯占位展示，不代表真实经营数据；
+                     data-decorative 供断言与后续替换识别，不得据此展示为经营结果 -->
+                <span class="merchant-deco-tag" data-decorative="true">品质优选</span>
+              </div>
               <img
                 class="merchant-close"
                 :src="`${ASSETS}/merchant-card-close.png`"
@@ -881,6 +886,25 @@ function onCloseCard(storeId: string): void {
   cursor: pointer;
 }
 
+.merchant-head-main {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* 装饰性标签：与「课程演示配送」同款浅品牌底描边（纯占位） */
+.merchant-deco-tag {
+  flex-shrink: 0;
+  padding: 1px 5px;
+  border: 1px solid #ffd9cc;
+  border-radius: 4px;
+  background: #fff3ed;
+  font-size: 10px;
+  line-height: 16px;
+  color: var(--color-primary);
+}
+
 .merchant-rating-row {
   display: flex;
   align-items: baseline;
@@ -981,6 +1005,8 @@ function onCloseCard(storeId: string): void {
 .product-price-est {
   margin-left: 1px;
   font-size: 9px;
+  /* TODO-USER-021：「预估价」三字不得换行（负责人 9/10 走查：换行观感不佳） */
+  white-space: nowrap;
 }
 
 /* 右缘白色渐隐（linear_fill_15_208），盖住溢出的第三个商品 */

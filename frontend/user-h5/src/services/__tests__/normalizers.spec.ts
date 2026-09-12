@@ -321,3 +321,28 @@ describe('批次⑩ 评价相关归一化 TV-11', () => {
     expect(orderDisplayStatus({ status: 'CANCELLED' })).toBe('已取消')
   })
 })
+
+/**
+ * 批次⑩ 打磨：订单状态文案全覆盖（TODO-USER-009）
+ * 口径：契约 §3.5 全部状态值（含 CANCELLED）都要有中文展示文案，页面不得出现英文原文；
+ * 「已完成未评价」按 003 引入的 reviewed 判定展示为「待评价」。
+ */
+describe('批次⑩ 打磨：订单状态文案全覆盖（TODO-USER-009）', () => {
+  it('T09 全部状态值均有中文映射且不出现英文原文', () => {
+    const cases: Array<[string, string]> = [
+      ['PENDING_PAYMENT', '待支付'],
+      ['PENDING', '待接单'],
+      ['COOKING', '制作中'],
+      ['DELIVERING', '配送中'],
+      ['COMPLETED', '已完成'],
+      ['CANCELLED', '已取消'],
+      ['PROCESSING', '进行中'],
+    ]
+    for (const [raw, text] of cases) {
+      expect(statusText(raw)).toBe(text)
+      expect(statusText(raw)).not.toContain('_')
+    }
+    expect(orderDisplayStatus({ status: 'COMPLETED', reviewed: false })).toBe('待评价')
+    expect(orderDisplayStatus({ status: 'COMPLETED', reviewed: true })).toBe('已完成')
+  })
+})
