@@ -30,7 +30,7 @@ describe('第二阶段商家端页面入口', () => {
     const user = userEvent.setup()
     render(<App />)
     await user.click(await screen.findByRole('menuitem', { name: '订单管理' }))
-    expect(await screen.findByLabelText('订单状态筛选')).toBeTruthy()
+    expect(await screen.findByRole('combobox', { name: '订单状态筛选' })).toBeTruthy()
 
     await user.click(screen.getByRole('menuitem', { name: '商品管理' }))
     await user.click(await screen.findByRole('button', { name: '新增商品' }))
