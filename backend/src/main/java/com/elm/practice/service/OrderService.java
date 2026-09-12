@@ -12,6 +12,7 @@ import com.elm.practice.mapper.ConversationMapper;
 import com.elm.practice.mapper.OrderItemMapper;
 import com.elm.practice.mapper.OrderMapper;
 import com.elm.practice.mapper.ProductMapper;
+import com.elm.practice.mapper.PromotionMapper;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,15 +27,16 @@ public class OrderService {
     private static final BigDecimal PACKAGING_FEE = new BigDecimal("2.00");
     private final OrderMapper orders; private final OrderItemMapper orderItems;
     private final CartLineMapper cartLines; private final ProductMapper products;
-    private final ConversationMapper conversations;
+    private final ConversationMapper conversations; private final PromotionMapper promotions;
     private final StoreService stores; private final AddressService addresses; private final IdGenerator ids;
+    private final PricingService pricing;
 
     public OrderService(OrderMapper orders, OrderItemMapper orderItems, CartLineMapper cartLines,
-                        ProductMapper products, ConversationMapper conversations,
-                        StoreService stores, AddressService addresses, IdGenerator ids) {
+                        ProductMapper products, ConversationMapper conversations, PromotionMapper promotions,
+                        StoreService stores, AddressService addresses, IdGenerator ids, PricingService pricing) {
         this.orders = orders; this.orderItems = orderItems; this.cartLines = cartLines;
-        this.products = products; this.conversations = conversations;
-        this.stores = stores; this.addresses = addresses; this.ids = ids;
+        this.products = products; this.conversations = conversations; this.promotions = promotions;
+        this.stores = stores; this.addresses = addresses; this.ids = ids; this.pricing = pricing;
     }
 
     /** @Transactional 即真实 DB 事务：任何一步抛错整体回滚（扣库存、清购物车、订单/明细/会话插入原子）。 */
@@ -65,12 +67,21 @@ public class OrderService {
         }
         subtotal = subtotal.setScale(2);
         if (subtotal.compareTo(store.startPrice) < 0) throw ApiException.conflict("未达到起送金额 " + store.startPrice);
-        BigDecimal total = subtotal.add(PACKAGING_FEE).setScale(2);
+        // 优惠计价七步（批次①，PRD 7.4）：满减/新客/免配送费随 promotions 配置；会员与红包批次⑥接入，当前非会员、红包 0。
+        var promo = promotions.findConfig(sid);
+        if (promo == null) promo = new Domain.PromoConfig();
+        promo.tiers.addAll(promotions.findTiers(sid));
+        boolean isNewCustomer = orders.countByUserAndStore(u.id, sid) == 0;
+        var pr = pricing.price(subtotal, store.deliveryFee, promo, isNewCustomer, false, BigDecimal.ZERO);
+        BigDecimal total = pr.total;
         String id = ids.nextId("o");
-        // 支付扩展已选定：订单创建即待支付，15 分钟内支付成功后进入 PROCESSING（契约 3.5）。
+        // 支付扩展已选定：订单创建即待支付，15 分钟内支付成功后进入待接单（契约 3.5；状态机修正 BE-002）。
         Domain.Order order = new Domain.Order(id, u.id, sid, aid, r.remark == null ? "" : r.remark.trim(), Times.now(),
-                Domain.OrderStatus.PENDING_PAYMENT, subtotal, PACKAGING_FEE, total,
+                Domain.OrderStatus.PENDING_PAYMENT, pr.itemSubtotal, pr.packagingFee, total,
                 address.copy(), r.idempotencyKey);
+        order.deliveryFee = pr.deliveryFee; order.fullReductionAmount = pr.fullReductionAmount;
+        order.newCustomerAmount = pr.newCustomerAmount; order.memberDiscountAmount = pr.memberDiscountAmount;
+        order.couponAmount = pr.couponAmount; order.deliveryFeeDiscount = pr.deliveryFeeDiscount;
         try { orders.insert(order); }
         catch (DuplicateKeyException e) {
             // 幂等键并发兜底：唯一约束命中则返回既有订单。

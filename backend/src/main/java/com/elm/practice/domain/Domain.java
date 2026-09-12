@@ -108,6 +108,10 @@ public final class Domain {
         public String id, userId, storeId, addressId, remark, createdAt, paidAt;
         public OrderStatus status;
         public BigDecimal itemSubtotal, packagingFee, total;
+        // 金额快照扩展（批次①，契约 §3.5）：历史行/旧构造默认 0。
+        public BigDecimal deliveryFee = BigDecimal.ZERO, fullReductionAmount = BigDecimal.ZERO,
+                newCustomerAmount = BigDecimal.ZERO, memberDiscountAmount = BigDecimal.ZERO,
+                couponAmount = BigDecimal.ZERO, deliveryFeeDiscount = BigDecimal.ZERO;
         public Address addressSnapshot;
         public final List<OrderItem> items = new ArrayList<>();
         public String idempotencyKey;
@@ -120,6 +124,20 @@ public final class Domain {
             this.idempotencyKey=idempotencyKey;
         }
         public Order() {}
+    }
+    /** 满减阶梯行（批次①，promotion_tiers 表映射）。 */
+    public static final class PromoTier {
+        public BigDecimal threshold, amount;
+        public PromoTier() {}
+        public PromoTier(BigDecimal threshold, BigDecimal amount) { this.threshold=threshold; this.amount=amount; }
+    }
+    /** 店铺优惠配置聚合（promotions 扩列 + promotion_tiers），供计价七步使用。 */
+    public static final class PromoConfig {
+        public boolean enabled;
+        public final List<PromoTier> tiers = new ArrayList<>();
+        public BigDecimal newUserAmount = BigDecimal.ZERO;        // 新客立减，0=关闭
+        public BigDecimal freeDeliveryThreshold = BigDecimal.ZERO; // 免配送费门槛，0=不启用
+        public BigDecimal memberDiscountRate = BigDecimal.ONE;     // 会员折扣率，1.00=关闭
     }
     public static final class OrderItem {
         public String productId, name, image, categoryId;

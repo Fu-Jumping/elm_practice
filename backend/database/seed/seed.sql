@@ -54,13 +54,24 @@ INSERT INTO addresses(address_id,user_id,contact_name,contact_sex,contact_phone,
 ON DUPLICATE KEY UPDATE region=VALUES(region),detail=VALUES(detail),is_default=VALUES(is_default);
 
 -- 演示订单：商品快照也必须跟商品目录保持一致。
-INSERT INTO orders(order_id,user_id,store_id,address_id,address_snapshot,remark,status,item_subtotal,packaging_fee,total,created_at,paid_at,idempotency_key) VALUES
-('o1001','u001','m002','da001',JSON_OBJECT('addressId','da001','contactName','张同学','contactSex','先生','contactPhone','13800000001','region','天津大学北洋园校区','detail','12号楼 304室','label','学校','isDefault',TRUE),'少放辣','PROCESSING',19.50,2.00,21.50,DATE_SUB(NOW(),INTERVAL 40 MINUTE),DATE_SUB(NOW(),INTERVAL 40 MINUTE),NULL),
-('o1002','u001','m002','da001',JSON_OBJECT('addressId','da001','contactName','张同学','contactSex','先生','contactPhone','13800000001','region','天津大学北洋园校区','detail','12号楼 304室','label','学校','isDefault',TRUE),'','COMPLETED',19.50,2.00,21.50,DATE_SUB(NOW(),INTERVAL 2 DAY),DATE_SUB(NOW(),INTERVAL 2 DAY),NULL),
-('o1003','u001','m002','da001',JSON_OBJECT('addressId','da001','contactName','张同学','contactSex','先生','contactPhone','13800000001','region','天津大学北洋园校区','detail','12号楼 304室','label','学校','isDefault',TRUE),'','PENDING_PAYMENT',9.00,2.00,11.00,NOW(),NULL,NULL)
-ON DUPLICATE KEY UPDATE status=VALUES(status),item_subtotal=VALUES(item_subtotal),packaging_fee=VALUES(packaging_fee),total=VALUES(total),address_snapshot=VALUES(address_snapshot);
+-- 金额按批次①计价口径（u001 在 m002 非新客、小计 <20 无满减、<30 不免配送费，m002 配送费 5.00）：
+-- 实付 = 小计 + 配送费 5.00 + 打包费 2.00。
+INSERT INTO orders(order_id,user_id,store_id,address_id,address_snapshot,remark,status,item_subtotal,packaging_fee,total,delivery_fee,full_reduction_amount,new_customer_amount,member_discount_amount,coupon_amount,delivery_fee_discount,created_at,paid_at,idempotency_key) VALUES
+('o1001','u001','m002','da001',JSON_OBJECT('addressId','da001','contactName','张同学','contactSex','先生','contactPhone','13800000001','region','天津大学北洋园校区','detail','12号楼 304室','label','学校','isDefault',TRUE),'少放辣','PROCESSING',19.50,2.00,26.50,5.00,0.00,0.00,0.00,0.00,0.00,DATE_SUB(NOW(),INTERVAL 40 MINUTE),DATE_SUB(NOW(),INTERVAL 40 MINUTE),NULL),
+('o1002','u001','m002','da001',JSON_OBJECT('addressId','da001','contactName','张同学','contactSex','先生','contactPhone','13800000001','region','天津大学北洋园校区','detail','12号楼 304室','label','学校','isDefault',TRUE),'','COMPLETED',19.50,2.00,26.50,5.00,0.00,0.00,0.00,0.00,0.00,DATE_SUB(NOW(),INTERVAL 2 DAY),DATE_SUB(NOW(),INTERVAL 2 DAY),NULL),
+('o1003','u001','m002','da001',JSON_OBJECT('addressId','da001','contactName','张同学','contactSex','先生','contactPhone','13800000001','region','天津大学北洋园校区','detail','12号楼 304室','label','学校','isDefault',TRUE),'','PENDING_PAYMENT',9.00,2.00,16.00,5.00,0.00,0.00,0.00,0.00,0.00,NOW(),NULL,NULL)
+ON DUPLICATE KEY UPDATE status=VALUES(status),item_subtotal=VALUES(item_subtotal),packaging_fee=VALUES(packaging_fee),total=VALUES(total),delivery_fee=VALUES(delivery_fee),full_reduction_amount=VALUES(full_reduction_amount),new_customer_amount=VALUES(new_customer_amount),member_discount_amount=VALUES(member_discount_amount),coupon_amount=VALUES(coupon_amount),delivery_fee_discount=VALUES(delivery_fee_discount),address_snapshot=VALUES(address_snapshot);
 INSERT INTO order_items(order_id,product_id,name,image,category_id,unit_price,quantity) VALUES
 ('o1001','p101','香辣鸡腿堡','/demo-images/product-m002-01.jpg','c101',19.50,1),
 ('o1002','p102','劲脆鸡腿堡','/demo-images/product-m002-02.jpg','c101',19.50,1),
 ('o1003','p105','九珍果汁','/demo-images/product-m002-05.jpg','c103',9.00,1)
 ON DUPLICATE KEY UPDATE product_id=VALUES(product_id),name=VALUES(name),image=VALUES(image),category_id=VALUES(category_id),unit_price=VALUES(unit_price),quantity=VALUES(quantity);
+
+-- 批次① 演示促销配置（m002：满 20 减 2、满 40 减 5、新客立减 3、满 30 免配送费、会员 95 折），
+-- 与迁移脚本 20260912-promotion-tiers.sql 步骤 5 保持一致。
+INSERT INTO promotions(store_id, enabled, threshold, amount, new_user_amount, free_delivery_threshold, member_discount)
+VALUES ('m002', TRUE, 0, 0, 3.00, 30.00, 0.95)
+ON DUPLICATE KEY UPDATE enabled=VALUES(enabled), new_user_amount=VALUES(new_user_amount),
+  free_delivery_threshold=VALUES(free_delivery_threshold), member_discount=VALUES(member_discount);
+INSERT IGNORE INTO promotion_tiers(store_id, threshold, amount, sort_order)
+VALUES ('m002', 20.00, 2.00, 1), ('m002', 40.00, 5.00, 2);

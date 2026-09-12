@@ -25,5 +25,13 @@ public final class Requests {
     public static class ReviewCreate { public Integer rating; public String content; }
     public static class ReplyPatch { public String reply; }
     public static class MessageCreate { public String content; }
-    public static class PromotionPatch { public BigDecimal threshold, amount; public Boolean enabled; }
+    public static class PromotionTierItem { public BigDecimal threshold, amount; }
+    /** 优惠配置保存（契约 §6.3）：fullReductions ← promotion_tiers，其余 ← promotions 扩列；deliveryFee 只读（来自店铺）。 */
+    public static class PromotionPatch {
+        public Boolean enabled;
+        public java.util.List<PromotionTierItem> fullReductions;
+        public BigDecimal newCustomerAmount; public Boolean newCustomerEnabled;
+        public BigDecimal freeDeliveryThreshold;
+        public BigDecimal memberDiscountRate; public Boolean memberDiscountEnabled;
+    }
 }
