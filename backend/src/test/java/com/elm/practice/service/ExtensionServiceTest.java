@@ -12,7 +12,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** 商家概览测试：营收口径只算已支付订单（o1001 PROCESSING 21.50 + o1002 COMPLETED 21.50，o1003 待支付不计）。 */
+/** 商家概览测试：营收口径只算已支付订单（批次① 金额：o1001 PROCESSING 26.50 + o1002 COMPLETED 26.50，o1003 待支付不计）。 */
 @SpringBootTest
 @SqlConfig(encoding = "UTF-8")
 @Sql(scripts = "/reset.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -23,6 +23,6 @@ class ExtensionServiceTest {
     @Test void overviewExcludesUnpaidOrders() {
         Map<String,Object> view = extension.overview(merchantMapper.findById("ma001"));
         assertEquals(2L, ((Number) view.get("orderCount")).longValue());
-        assertEquals(0, new BigDecimal("43.00").compareTo((BigDecimal) view.get("salesAmount")));
+        assertEquals(0, new BigDecimal("53.00").compareTo((BigDecimal) view.get("salesAmount")));
     }
 }
