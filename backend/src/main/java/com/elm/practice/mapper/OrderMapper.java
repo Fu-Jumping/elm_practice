@@ -11,7 +11,10 @@ import java.util.Map;
 public interface OrderMapper {
     String COLS = "order_id AS id, user_id AS userId, store_id AS storeId, address_id AS addressId, "
             + "address_snapshot, remark, status, item_subtotal AS itemSubtotal, packaging_fee AS packagingFee, "
-            + "total, DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%s') AS createdAt, "
+            + "total, delivery_fee AS deliveryFee, full_reduction_amount AS fullReductionAmount, "
+            + "new_customer_amount AS newCustomerAmount, member_discount_amount AS memberDiscountAmount, "
+            + "coupon_amount AS couponAmount, delivery_fee_discount AS deliveryFeeDiscount, "
+            + "DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%s') AS createdAt, "
             + "DATE_FORMAT(paid_at,'%Y-%m-%d %H:%i:%s') AS paidAt, idempotency_key AS idempotencyKey";
 
     String SNAPSHOT = " @Result(property = \"addressSnapshot\", column = \"address_snapshot\", "
@@ -55,12 +58,19 @@ public interface OrderMapper {
     List<Domain.Order> listForMerchant(@Param("storeId") String storeId, @Param("status") String status);
 
     @Insert("INSERT INTO orders(order_id, user_id, store_id, address_id, address_snapshot, remark, status, "
-            + "item_subtotal, packaging_fee, total, created_at, paid_at, idempotency_key) "
+            + "item_subtotal, packaging_fee, total, delivery_fee, full_reduction_amount, new_customer_amount, "
+            + "member_discount_amount, coupon_amount, delivery_fee_discount, created_at, paid_at, idempotency_key) "
             + "VALUES(#{id}, #{userId}, #{storeId}, #{addressId}, "
             + "#{addressSnapshot,typeHandler=com.elm.practice.common.AddressSnapshotTypeHandler}, "
             + "#{remark}, #{status}, #{itemSubtotal}, #{packagingFee}, #{total}, "
+            + "#{deliveryFee}, #{fullReductionAmount}, #{newCustomerAmount}, "
+            + "#{memberDiscountAmount}, #{couponAmount}, #{deliveryFeeDiscount}, "
             + "STR_TO_DATE(#{createdAt},'%Y-%m-%d %H:%i:%s'), STR_TO_DATE(#{paidAt},'%Y-%m-%d %H:%i:%s'), #{idempotencyKey})")
     int insert(Domain.Order order);
+
+    /** 店铺新客判定（批次①）：该用户在该店铺的历史订单数（下单即算，含待支付）。 */
+    @Select("SELECT COUNT(*) FROM orders WHERE user_id = #{userId} AND store_id = #{storeId}")
+    int countByUserAndStore(@Param("userId") String userId, @Param("storeId") String storeId);
 
     /** 条件状态推进：WHERE status=from 保证幂等与防跳级的并发安全。 */
     @Update("UPDATE orders SET status = #{to} WHERE order_id = #{id} AND status = #{from}")

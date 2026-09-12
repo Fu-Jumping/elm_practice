@@ -108,31 +108,70 @@ public class ExtensionService {
         return conversationView(c);
     }
 
+    /** 优惠配置视图（契约 §6.3 字段映射）；deliveryFee 只读来自店铺。 */
     public Map<String,Object> promotion(Domain.Merchant m) {
-        stores.requireMerchantStore(m);
-        Map<String,Object> row = promotions.findByStore(m.storeId);
-        if (row != null) return row;
+        var store = stores.requireMerchantStore(m);
+        Domain.PromoConfig cfg = promotions.findConfig(m.storeId);
         var v = new LinkedHashMap<String,Object>();
-        v.put("enabled", false);
-        v.put("threshold", BigDecimal.ZERO.setScale(2));
-        v.put("amount", BigDecimal.ZERO.setScale(2));
+        boolean enabled = cfg != null && cfg.enabled;
+        v.put("enabled", enabled);
+        v.put("fullReductions", promotions.findTiers(m.storeId).stream()
+                .map(t -> Map.of("threshold", t.threshold, "amount", t.amount)).toList());
+        BigDecimal newUser = cfg == null ? BigDecimal.ZERO : cfg.newUserAmount;
+        v.put("newCustomerAmount", newUser.setScale(2));
+        v.put("newCustomerEnabled", newUser.signum() > 0);
+        BigDecimal freeThr = cfg == null ? BigDecimal.ZERO : cfg.freeDeliveryThreshold;
+        v.put("freeDeliveryThreshold", freeThr.setScale(2));
+        BigDecimal rate = cfg == null ? BigDecimal.ONE : cfg.memberDiscountRate;
+        v.put("memberDiscountRate", rate.setScale(2));
+        v.put("memberDiscountEnabled", rate.signum() > 0 && rate.compareTo(BigDecimal.ONE) < 0);
+        v.put("deliveryFee", store.deliveryFee.setScale(2));
         return v;
     }
 
+    /** 保存校验（TC-PRV-008 / 契约 §6.3）：门槛与减额非负、阶梯门槛不重复、折扣率 (0,1]、免配送费门槛非负；非法 400 不落库。 */
     @Transactional
     public Map<String,Object> savePromotion(Domain.Merchant m, Requests.PromotionPatch req) {
         stores.requireMerchantStore(m);
         if (req == null) throw ApiException.badRequest("请求体不能为空");
-        if (req.threshold == null || req.amount == null) throw ApiException.badRequest("threshold 和 amount 不能为空");
-        if (req.threshold.signum() < 0 || req.amount.signum() < 0) throw ApiException.badRequest("优惠金额不能为负");
-        if (req.amount.compareTo(req.threshold) > 0 && req.threshold.signum() > 0) throw ApiException.badRequest("优惠金额不能超过门槛");
         boolean enabled = Boolean.TRUE.equals(req.enabled);
-        promotions.upsert(m.storeId, enabled, req.threshold.setScale(2), req.amount.setScale(2));
-        var v = new LinkedHashMap<String,Object>();
-        v.put("enabled", enabled);
-        v.put("threshold", req.threshold.setScale(2));
-        v.put("amount", req.amount.setScale(2));
-        return v;
+        // 满减阶梯：非负、减额不超门槛、门槛不重复（按门槛取最大满足档的语义要求档位有序）。
+        var tiers = new java.util.ArrayList<Domain.PromoTier>();
+        if (req.fullReductions != null) {
+            for (var t : req.fullReductions) {
+                if (t == null || t.threshold == null || t.amount == null) throw ApiException.badRequest("满减档位不完整");
+                if (t.threshold.signum() < 0 || t.amount.signum() < 0) throw ApiException.badRequest("满减门槛与金额不能为负");
+                if (t.amount.compareTo(t.threshold) > 0) throw ApiException.badRequest("满减金额不能超过门槛");
+                if (tiers.stream().anyMatch(x -> x.threshold.compareTo(t.threshold) == 0))
+                    throw ApiException.badRequest("满减门槛不能重复");
+                tiers.add(new Domain.PromoTier(t.threshold.setScale(2), t.amount.setScale(2)));
+            }
+            tiers.sort(java.util.Comparator.comparing(x -> x.threshold));
+        }
+        // 新客立减：enabled 才生效，金额非负。
+        BigDecimal newUser = BigDecimal.ZERO;
+        if (Boolean.TRUE.equals(req.newCustomerEnabled) && req.newCustomerAmount != null) {
+            if (req.newCustomerAmount.signum() < 0) throw ApiException.badRequest("新客立减金额不能为负");
+            newUser = req.newCustomerAmount.setScale(2);
+        }
+        // 免配送费门槛：非负，0=不启用。
+        BigDecimal freeThr = BigDecimal.ZERO;
+        if (req.freeDeliveryThreshold != null) {
+            if (req.freeDeliveryThreshold.signum() < 0) throw ApiException.badRequest("免配送费门槛不能为负");
+            freeThr = req.freeDeliveryThreshold.setScale(2);
+        }
+        // 会员折扣率：合法范围 (0,1]；0 折等同免单、越界非法，均拒绝；disabled 写 1.00。
+        BigDecimal rate = BigDecimal.ONE;
+        if (Boolean.TRUE.equals(req.memberDiscountEnabled) && req.memberDiscountRate != null) {
+            if (req.memberDiscountRate.signum() <= 0 || req.memberDiscountRate.compareTo(BigDecimal.ONE) > 0)
+                throw ApiException.badRequest("会员折扣率必须在 0 与 1 之间");
+            rate = req.memberDiscountRate.setScale(2);
+        }
+        promotions.upsert(m.storeId, enabled, newUser, freeThr, rate);
+        promotions.deleteTiers(m.storeId);
+        for (int i = 0; i < tiers.size(); i++)
+            promotions.insertTier(m.storeId, tiers.get(i).threshold, tiers.get(i).amount, i + 1);
+        return promotion(m);
     }
 
     public Map<String,Object> overview(Domain.Merchant m) {

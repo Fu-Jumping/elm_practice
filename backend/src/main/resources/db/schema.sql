@@ -39,6 +39,13 @@ CREATE TABLE IF NOT EXISTS orders (
   order_id VARCHAR(32) PRIMARY KEY, user_id VARCHAR(32) NOT NULL, store_id VARCHAR(32) NOT NULL,
   address_id VARCHAR(32) NOT NULL, address_snapshot JSON NOT NULL, remark VARCHAR(500), status VARCHAR(32) NOT NULL,
   item_subtotal DECIMAL(10,2) NOT NULL, packaging_fee DECIMAL(10,2) NOT NULL, total DECIMAL(10,2) NOT NULL,
+  -- 金额快照扩展列（批次①，契约 §3.5）：配送费与各优惠项，历史行 DEFAULT 0。
+  delivery_fee DECIMAL(10,2) NOT NULL DEFAULT 0,
+  full_reduction_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  new_customer_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  member_discount_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  coupon_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  delivery_fee_discount DECIMAL(10,2) NOT NULL DEFAULT 0,
   created_at TIMESTAMP NOT NULL, paid_at TIMESTAMP NULL, idempotency_key VARCHAR(100),
   UNIQUE(user_id, idempotency_key)
 );
@@ -67,7 +74,18 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 CREATE TABLE IF NOT EXISTS promotions (
   store_id VARCHAR(32) PRIMARY KEY, enabled BOOLEAN NOT NULL DEFAULT FALSE,
-  threshold DECIMAL(10,2) NOT NULL DEFAULT 0, amount DECIMAL(10,2) NOT NULL DEFAULT 0
+  -- 旧单档满减列保留仅为迁移脚本读数；计价一律使用 promotion_tiers 与下方扩展列。
+  threshold DECIMAL(10,2) NOT NULL DEFAULT 0, amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  -- 批次① 扩列（契约 §6.3）：新客立减金额（0=关闭）、免配送费门槛（0=不启用）、会员折扣率（1.00=关闭）。
+  new_user_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  free_delivery_threshold DECIMAL(10,2) NOT NULL DEFAULT 0,
+  member_discount DECIMAL(5,2) NOT NULL DEFAULT 1.00
+);
+-- 满减阶梯（批次①）：一店多档，按门槛升序；"满足门槛取最大档"。
+CREATE TABLE IF NOT EXISTS promotion_tiers (
+  store_id VARCHAR(32) NOT NULL, threshold DECIMAL(10,2) NOT NULL,
+  amount DECIMAL(10,2) NOT NULL, sort_order INT NOT NULL DEFAULT 1,
+  PRIMARY KEY(store_id, threshold)
 );
 CREATE TABLE IF NOT EXISTS id_sequence (
   name VARCHAR(32) PRIMARY KEY, next_val BIGINT NOT NULL
