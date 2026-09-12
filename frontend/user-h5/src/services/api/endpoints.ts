@@ -37,6 +37,20 @@ export const endpoints = {
     // 用户取消订单（契约 §3.5：reason 必填 1–50 字；COOKING 及之后 409；重复取消幂等）
     cancel: (orderId: string) => `/orders/${encodeURIComponent(orderId)}/cancel`,
   },
+  // 消息（契约 §6.1）：会话列表/详情/发消息/标记已读（列表支持 orderId 过滤，供订单详情「联系商家」直取会话）
+  conversation: {
+    list: '/conversations',
+    detail: (id: string) => `/conversations/${encodeURIComponent(id)}`,
+    messages: (id: string) => `/conversations/${encodeURIComponent(id)}/messages`,
+    read: (id: string) => `/conversations/${encodeURIComponent(id)}/read`,
+  },
+  // 通知（契约 §3.9）：列表/单条已读/全部已读/未读数（未读数用途即底部导航角标）
+  notification: {
+    list: '/me/notifications',
+    read: (id: string) => `/me/notifications/${encodeURIComponent(id)}/read`,
+    readAll: '/me/notifications/read',
+    unreadCount: '/me/notifications/unread-count',
+  },
   // 评价（契约 §6.2）：用户为已完成订单提交评价 / 查询店铺评价列表
   review: {
     submit: (orderId: string) => `/orders/${encodeURIComponent(orderId)}/review`,

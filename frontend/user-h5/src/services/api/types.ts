@@ -287,3 +287,41 @@ export interface ReviewSubmitPayload {
   tags?: string[]
   images?: string[]
 }
+
+/** 会话（契约 §6.1：必须关联订单、用户与商家；未读按角色分离） */
+export interface ConversationRecord {
+  conversationId: string
+  orderId: string
+  storeId: string
+  /** 最后一条消息摘要与时间（列表展示与按时间倒序的依据） */
+  lastMessage: string
+  lastMessageAt: string
+  /** 用户端未读数（商家端为 merchantUnread，按角色分离） */
+  unread: number
+}
+
+/** 聊天消息（契约 §6.1） */
+export interface ChatMessageRecord {
+  messageId: string
+  conversationId: string
+  /** 发送方：用户 / 商家 */
+  sender: 'USER' | 'MERCHANT'
+  content: string
+  createdAt: string
+}
+
+/** 会话详情（契约 §6.1 GET /conversations/{conversationId}：详情 + 消息时间线） */
+export interface ConversationDetailRecord extends ConversationRecord {
+  messages: ChatMessageRecord[]
+}
+
+/** 通知（契约 §3.9：订单/红包/会员三类；read 为已读标记） */
+export interface NotificationRecord {
+  notificationId: string
+  type: 'ORDER' | 'COUPON' | 'MEMBER'
+  title: string
+  content: string
+  relatedId: string
+  read: boolean
+  createdAt: string
+}

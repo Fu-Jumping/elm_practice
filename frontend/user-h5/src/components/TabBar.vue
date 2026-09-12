@@ -2,22 +2,41 @@
 /**
  * 底部导航共享组件（首页-精细 SVG `project-bottom-nav` 组 exact 转写，2026-09-06）
  * 四 Tab 重绘口径：首页（选中实心 #ff5a1f）/ 消息（含未读红点，语义红 #ff1414）/ 订单 / 我的
+ * 批次⑩ TODO-USER-004a：消息未读红点接真实数据——契约 §3.9 `GET /me/notifications/unread-count`
+ * （用途即底部导航角标）；负责人确认「角标只算通知未读」，会话未读在消息列表会话行单独展示；
+ * 接口失败降级为不显示红点，不阻塞导航。
  * 高度 84px = 1px 顶边框 + 内容 73px + Home Indicator 装饰（设计稿 768→852 段）
  * 非选中态图标设计稿未提供，按选中态描边化处理（1.7px stroke，见 raw 留痕）
  */
+import { onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
+import { messageApi } from '@/services/api'
 
 const route = useRoute()
+
+/** 通知未读数（底部导航角标；失败降级为 0，不阻塞导航） */
+const unreadCount = ref(0)
+
+async function refreshUnread(): Promise<void> {
+  try {
+    unreadCount.value = await messageApi.getNotificationUnreadCount()
+  } catch {
+    unreadCount.value = 0
+  }
+}
+
+onMounted(refreshUnread)
+// 路由切换时刷新（进入/离开消息中心后角标保持最新）
+watch(() => route.name, refreshUnread)
 
 interface TabDef {
   name: string
   label: string
-  badge?: boolean
 }
 
 const tabs: TabDef[] = [
   { name: 'home', label: '首页' },
-  { name: 'messages', label: '消息', badge: true },
+  { name: 'messages', label: '消息' },
   { name: 'orders', label: '订单' },
   { name: 'mine', label: '我的' },
 ]
@@ -75,8 +94,12 @@ const tabs: TabDef[] = [
             stroke-linecap="round"
           />
         </svg>
-        <!-- 未读角标：语义红（AGENTS 允许；PRD 7.16.1 底部导航行） -->
-        <span v-if="tab.badge" class="tab-badge" />
+        <!-- 未读角标：语义红；仅消息 Tab 且通知未读 > 0 时显示（PRD 7.16.1 底部导航行 + 契约 §3.9） -->
+        <span
+          v-if="tab.name === 'messages' && unreadCount > 0"
+          class="tab-badge"
+          data-testid="tab-badge-messages"
+        />
       </span>
       <span class="tab-label">{{ tab.label }}</span>
     </RouterLink>

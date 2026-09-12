@@ -109,9 +109,10 @@ const router = createRouter({
           meta: { title: '编辑地址', priority: 'P0' },
         },
         {
+          // 消息中心（批次⑩ TODO-USER-004a）：通知三类 + 商家会话（契约 §3.9/§6.1）
           path: 'messages',
           name: 'messages',
-          component: () => import('@/views/user/PlaceholderView.vue'),
+          component: () => import('@/views/user/MessageCenterView.vue'),
           meta: { title: '消息', tab: true, auth: true, priority: 'P1' },
         },
         {
