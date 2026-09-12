@@ -45,3 +45,9 @@ Thumbs.db
 
 # 本地 AI 工具产物（与 .repo_memory/ 同类，不入库）
 .memorax-code/
+
+# AI 代理会话工作目录（非交付内容）
+.zcode/
+
+# 讲稿与个人材料：按 AGENTS.md R9 不入 main（保留在本地/个人分支）
+report-prep/
