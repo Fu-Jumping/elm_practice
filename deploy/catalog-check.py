@@ -1,7 +1,7 @@
 """检查演示目录的店铺、分类、商品和图片是否仍然一一对应。
 
 只读公共接口，不需要账号；适合发布后和现场演示前执行：
-    python deploy/catalog-check.py --base-url http://127.0.0.1:4100/user/api/v1
+    python deploy/catalog-check.py --base-url http://127.0.0.1:4001/user/api/v1
 """
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ def get_json(url: str) -> dict | list:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--base-url", default="http://127.0.0.1:4100/user/api/v1")
+    parser.add_argument("--base-url", default="http://127.0.0.1:4001/user/api/v1")
     args = parser.parse_args()
     base = args.base_url.rstrip("/")
     errors: list[str] = []
