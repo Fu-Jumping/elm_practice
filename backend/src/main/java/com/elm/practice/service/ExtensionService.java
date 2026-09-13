@@ -191,6 +191,7 @@ public class ExtensionService {
         stores.requireMerchantStore(m);
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Shanghai"));
         Map<String,Object> agg = orderMapper.statisticsSummary(m.storeId, startOfDay(today));
+        Map<String,Object> allTime = orderMapper.statisticsSummary(m.storeId, "1970-01-01 00:00:00");
         BigDecimal sales = decimal(agg.get("salesAmount"));
         var v = new LinkedHashMap<String,Object>();
         v.put("range", "today");
@@ -202,6 +203,10 @@ public class ExtensionService {
         v.put("pendingOrderCount", number(agg.get("pendingOrderCount")));
         v.put("unrepliedReviewCount", reviews.countUnrepliedByStore(m.storeId));
         v.put("unreadMessageCount", messages.countUnreadForMerchant(m.id));
+        // 保留 P0 概览字段，避免旧调用在迁移期间中断；二阶段页面读取上面的 today* 字段。
+        v.put("orderCount", number(allTime.get("orderCount")));
+        v.put("salesAmount", decimal(allTime.get("salesAmount")));
+        v.put("productCount", productMapper.countByStore(m.storeId));
         return v;
     }
 
