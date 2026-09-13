@@ -26,6 +26,8 @@ import { clearMockCart } from '@/mocks/cart'
  *     确认订单页落地后替换原"确认订单暂未开放"弱提示，见 raw/2026-09-07）
  * T45 未登录点加购 → 引导登录并带 redirect，不静默失败（9/7 联调补，加购需登录口径；
  *     T15 同步演进为登录态加购）
+ * T71 顶部栏应用名为课程口径「轻量外卖」，不出现第三方品牌字样（2026-09-13 保真度巡检脚本
+ *     快照发现：`.detail-brand` 仍渲染设计稿的第三方品牌名）
  */
 describe('StoreDetailView（商家详情页 P0）', () => {
   const messages: string[] = []
@@ -79,6 +81,17 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     expect(banner.text()).toContain('¥20.00')
     expect(banner.text()).toContain('¥5.00')
     await vi.waitFor(() => expect(document.title).toContain('肯德基宅急送'))
+  })
+
+  it('T71 顶部栏不出现第三方品牌字样，应用名为课程口径「轻量外卖」', async () => {
+    const { wrapper } = await mountDetail('/stores/m002')
+    await vi.waitFor(() => expect(wrapper.find('.detail-brand').exists()).toBe(true), {
+      timeout: 10000,
+    })
+    // 口径：设计稿第三方品牌名不作真源，统一替换为课程口径（与批次⑩ 105 的应用标题、
+    // MemberView 的「轻量外卖超级会员」同一处理；由保真度巡检脚本快照发现）
+    expect(wrapper.find('.detail-brand').text()).toBe('轻量外卖')
+    expect(wrapper.text()).not.toContain('饿了么')
   })
 
   it('T12 无效 storeId 显示商家不存在，可返回列表', async () => {
