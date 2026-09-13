@@ -26,6 +26,8 @@ import { clearMockCart } from '@/mocks/cart'
  *     确认订单页落地后替换原"确认订单暂未开放"弱提示，见 raw/2026-09-07）
  * T45 未登录点加购 → 引导登录并带 redirect，不静默失败（9/7 联调补，加购需登录口径；
  *     T15 同步演进为登录态加购）
+ * T71 顶部栏应用名为课程口径「轻量外卖」，不出现第三方品牌字样（2026-09-13 保真度巡检脚本
+ *     快照发现：`.detail-brand` 仍渲染设计稿的第三方品牌名）
  */
 describe('StoreDetailView（商家详情页 P0）', () => {
   const messages: string[] = []
@@ -79,6 +81,17 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     expect(banner.text()).toContain('¥20.00')
     expect(banner.text()).toContain('¥5.00')
     await vi.waitFor(() => expect(document.title).toContain('肯德基宅急送'))
+  })
+
+  it('T71 顶部栏不出现第三方品牌字样，应用名为课程口径「轻量外卖」', async () => {
+    const { wrapper } = await mountDetail('/stores/m002')
+    await vi.waitFor(() => expect(wrapper.find('.detail-brand').exists()).toBe(true), {
+      timeout: 10000,
+    })
+    // 口径：设计稿第三方品牌名不作真源，统一替换为课程口径（与批次⑩ 105 的应用标题、
+    // MemberView 的「轻量外卖超级会员」同一处理；由保真度巡检脚本快照发现）
+    expect(wrapper.find('.detail-brand').text()).toBe('轻量外卖')
+    expect(wrapper.text()).not.toContain('饿了么')
   })
 
   it('T12 无效 storeId 显示商家不存在，可返回列表', async () => {
@@ -570,5 +583,87 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     // 外层先滚到吸顶线（300 - 44 = 256），随后才滚内层列表
     expect(outerScrollTop).toBe(256)
     expect(innerScrollTo).toHaveBeenCalled()
+  })
+
+  it('T73 加购触发抛物线抛球：body 下创建小球，动画结束后移除（TODO-USER-016）', async () => {
+    // jsdom 无 Web Animations API：用替身保留小球以便断言，并手动触发 finish 验证清理
+    const listeners: Array<() => void> = []
+    Element.prototype.animate = (() => ({
+      addEventListener: (_type: string, cb: () => void) => listeners.push(cb),
+    })) as unknown as Element['animate']
+    try {
+      const { wrapper } = await mountDetail('/stores/m002')
+      useSessionStore().user = { account: '13800000001', nickname: '张同学' }
+      await vi.waitFor(
+        () => expect(wrapper.find('[data-testid="add-btn-p101"]').exists()).toBe(true),
+        { timeout: 10000 },
+      )
+      await wrapper.find('[data-testid="add-btn-p101"]').trigger('click')
+      await vi.waitFor(
+        () => expect(document.querySelector('[data-testid="fly-ball"]')).not.toBeNull(),
+        { timeout: 3000 },
+      )
+      // 动画结束（finish）后小球被移除，不留脏节点
+      listeners.forEach((cb) => cb())
+      expect(document.querySelector('[data-testid="fly-ball"]')).toBeNull()
+    } finally {
+      delete (Element.prototype as unknown as { animate?: unknown }).animate
+      document.querySelectorAll('[data-testid="fly-ball"]').forEach((node) => node.remove())
+    }
+  })
+
+  it('T74 吸顶状态带迟滞：阈值附近回退不翻转（SHOW-QA-004）', async () => {
+    // 用带 .app-main 的宿主挂载（同 T70）：吸顶状态刷新发生在「点击分类」的滚动交接路径上，
+    // 该路径需要 .app-main 作为外层滚动容器，mount 裸组件时取不到会静默跳过刷新
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', name: 'home', component: { template: '<div />' } },
+        { path: '/stores/:storeId', name: 'store-detail', component: StoreDetailView },
+        { path: '/login', name: 'login', component: { template: '<div />' } },
+        { path: '/orders/confirm', name: 'order-confirm', component: { template: '<div />' } },
+      ],
+    })
+    await router.push('/stores/m002')
+    await router.isReady()
+    const Host = {
+      components: { StoreDetailView },
+      template: '<div class="app-main"><StoreDetailView /></div>',
+    }
+    const wrapper = mount(Host, { global: { plugins: [pinia, router] } })
+    await vi.waitFor(
+      () => expect(wrapper.findAll('[data-testid="cat-rail-item"]').length).toBe(3),
+      { timeout: 10000 },
+    )
+    const tabsEl = wrapper.find('.store-tabs').element as HTMLElement
+    const headerEl = wrapper.find('.detail-header').element as HTMLElement
+    Object.defineProperty(headerEl, 'offsetHeight', { value: 44, configurable: true })
+    let tabsTop = 100
+    tabsEl.getBoundingClientRect = () => ({ top: tabsTop }) as DOMRect
+    // 通过既有「点击分类」路径触发吸顶状态刷新（组件对外不暴露该函数）
+    const refresh = async () => {
+      await wrapper.findAll('[data-testid="cat-rail-item"]')[0]!.trigger('click')
+      await flushPromises()
+    }
+    const locked = () => wrapper.find('.order-area').classes().includes('order-area--locked')
+
+    tabsTop = 100 // 未到吸顶线（44 + 1）
+    await refresh()
+    expect(locked()).toBe(true)
+
+    tabsTop = 44 // 越过吸顶线 → 吸顶
+    await refresh()
+    expect(locked()).toBe(false)
+
+    // 关键：回退 5px 仍在死区内 → 保持吸顶（无迟滞时会立刻翻转，即 SHOW-QA-004 的抖动）
+    tabsTop = 50
+    await refresh()
+    expect(locked()).toBe(false)
+
+    tabsTop = 80 // 回退幅度超过死区 → 解除吸顶
+    await refresh()
+    expect(locked()).toBe(true)
   })
 })

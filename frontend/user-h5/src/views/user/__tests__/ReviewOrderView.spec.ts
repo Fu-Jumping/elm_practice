@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { flushPromises, mount } from '@vue/test-utils'
+import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
 import ReviewOrderView from '../ReviewOrderView.vue'
 import { useSessionStore } from '@/stores/sessionStore'
 import { onToast } from '@/utils/toast'
-import { orderApi, reviewApi } from '@/services/api'
+import { fileApi, orderApi, reviewApi } from '@/services/api'
 import type { OrderRecord } from '@/services/api/types'
 
 /**
@@ -20,6 +20,7 @@ import type { OrderRecord } from '@/services/api/types'
 vi.mock('@/services/api', () => ({
   orderApi: { getOrder: vi.fn() },
   reviewApi: { submitReview: vi.fn(), getStoreReviews: vi.fn() },
+  fileApi: { uploadImage: vi.fn() },
 }))
 
 function reviewOrder(overrides: Partial<OrderRecord> = {}): OrderRecord {
@@ -182,14 +183,170 @@ describe('ReviewOrderView 评价订单页（批次⑩ TODO-USER-003）', () => {
     await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('orders'), { timeout: 2000 })
   })
 
-  it('TV-7 图片区为占位：点击提示随批次⑧接入，不发起上传与提交', async () => {
-    const { wrapper } = await mountReview(reviewOrder())
-    await vi.waitFor(() => expect(wrapper.find('[data-testid="add-image"]').exists()).toBe(true), {
-      timeout: 2000,
-    })
-    await wrapper.get('[data-testid="add-image"]').trigger('click')
+  // ── 图片上传（TODO-USER-007，批次⑧）：内嵌评价订单页，不新增弹窗或页面（2026-09-11 口径） ──
+  // 口径出处：PRD 7.16.1「评价订单页-评价内容区」检查列（类型/大小/张数立即提示、上传失败保留文字与星级）
+  //          + 契约 §10.1（jpg/jpeg/png/webp、单张 ≤2MB、评价图最多 3 张、失败保留本地预览可重试）
+  /** 选择文件：等表单渲染出 file input 后写入 files 并派发 change（先等就绪，避免空 DOMWrapper） */
+  async function pickFiles(wrapper: VueWrapper, files: File[]): Promise<void> {
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="review-image-input"]').exists()).toBe(true),
+      { timeout: 3000 },
+    )
+    const input = wrapper.find('[data-testid="review-image-input"]').element as HTMLInputElement
+    Object.defineProperty(input, 'files', { value: files, configurable: true })
+    input.dispatchEvent(new Event('change'))
     await flushPromises()
-    expect(messages.join('|')).toContain('批次⑧')
+  }
+
+  function makeFile(name: string, type: string, size: number): File {
+    const file = new File(['x'], name, { type })
+    Object.defineProperty(file, 'size', { value: size, configurable: true })
+    return file
+  }
+
+  it('IMG-1 选择合法图片 → 调上传接口并在页面显示预览；提交时 images 带上传后的 url', async () => {
+    vi.mocked(fileApi.uploadImage).mockImplementation(async () => ({
+      url: '/uploads/review-1.jpg',
+      fileName: 'review-1.jpg',
+      size: 1024,
+      contentType: 'image/jpeg',
+    }))
+    const { wrapper } = await mountReview(reviewOrder())
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="star-btn"]').exists()).toBe(true),
+      { timeout: 3000 },
+    )
+    await wrapper.findAll('[data-testid="star-btn"]')[4]!.trigger('click')
+    await pickFiles(wrapper, [makeFile('a.jpg', 'image/jpeg', 1024)])
+    await vi.waitFor(() =>
+      expect(wrapper.findAll('[data-testid="review-image-item"]')).toHaveLength(1),
+    )
+    await vi.waitFor(() =>
+      expect(wrapper.get('[data-testid="review-image-item"]').attributes('data-status')).toBe(
+        'success',
+      ),
+    )
+    expect(fileApi.uploadImage).toHaveBeenCalledTimes(1)
+    await wrapper.get('[data-testid="submit-review-btn"]').trigger('click')
+    await vi.waitFor(() => expect(reviewApi.submitReview).toHaveBeenCalled())
+    expect(vi.mocked(reviewApi.submitReview).mock.calls[0]![1]).toMatchObject({
+      images: ['/uploads/review-1.jpg'],
+    })
+  })
+
+  it('IMG-3a 类型不支持：立即提示且不调用上传接口', async () => {
+    const { wrapper } = await mountReview(reviewOrder())
+    await pickFiles(wrapper, [makeFile('a.gif', 'image/gif', 1024)])
+    await flushPromises()
+    expect(messages.join('|')).toContain('jpg')
+    expect(fileApi.uploadImage).not.toHaveBeenCalled()
+    expect(wrapper.findAll('[data-testid="review-image-item"]')).toHaveLength(0)
+  })
+
+  it('IMG-3b 单张超过 2MB：立即提示且不调用上传接口', async () => {
+    const { wrapper } = await mountReview(reviewOrder())
+    await pickFiles(wrapper, [makeFile('big.jpg', 'image/jpeg', 2 * 1024 * 1024 + 1)])
+    await flushPromises()
+    expect(messages.join('|')).toContain('2MB')
+    expect(fileApi.uploadImage).not.toHaveBeenCalled()
+  })
+
+  it('IMG-4 上传失败：保留本地预览并给出重试，重试成功后转为成功态', async () => {
+    vi.mocked(fileApi.uploadImage)
+      .mockRejectedValueOnce(new Error('服务器开小差了'))
+      .mockResolvedValueOnce({
+        url: '/uploads/review-2.png',
+        fileName: 'review-2.png',
+        size: 2048,
+        contentType: 'image/png',
+      })
+    const { wrapper } = await mountReview(reviewOrder())
+    await pickFiles(wrapper, [makeFile('b.png', 'image/png', 2048)])
+    await vi.waitFor(() =>
+      expect(wrapper.get('[data-testid="review-image-item"]').attributes('data-status')).toBe(
+        'failed',
+      ),
+    )
+    // 失败仍保留本地预览（PRD：上传失败保留文字和星级；契约：保留本地预览并允许重试）
+    expect(wrapper.find('[data-testid="review-image-item"] img').exists()).toBe(true)
+    await wrapper.get('[data-testid="review-image-retry"]').trigger('click')
+    await vi.waitFor(() =>
+      expect(wrapper.get('[data-testid="review-image-item"]').attributes('data-status')).toBe(
+        'success',
+      ),
+    )
+    expect(fileApi.uploadImage).toHaveBeenCalledTimes(2)
+  })
+
+  it('IMG-6 删除图片只删除本地选择，不调用任何接口', async () => {
+    vi.mocked(fileApi.uploadImage).mockResolvedValue({
+      url: '/uploads/review-3.webp',
+      fileName: 'review-3.webp',
+      size: 512,
+      contentType: 'image/webp',
+    })
+    const { wrapper } = await mountReview(reviewOrder())
+    await pickFiles(wrapper, [makeFile('c.webp', 'image/webp', 512)])
+    await vi.waitFor(() =>
+      expect(wrapper.findAll('[data-testid="review-image-item"]')).toHaveLength(1),
+    )
+    await wrapper.get('[data-testid="review-image-remove"]').trigger('click')
+    await flushPromises()
+    expect(wrapper.findAll('[data-testid="review-image-item"]')).toHaveLength(0)
+    // 上传成功后删除属本地操作：不再产生额外的上传/删除请求（契约 §10.1 无删除接口）
+    expect(fileApi.uploadImage).toHaveBeenCalledTimes(1)
+  })
+
+  it('IMG-7 张数上限：已选 3 张时添加入口消失（不再允许选择第 4 张）', async () => {
+    vi.mocked(fileApi.uploadImage).mockImplementation(async () => ({
+      url: '/uploads/review-x.jpg',
+      fileName: 'review-x.jpg',
+      size: 1024,
+      contentType: 'image/jpeg',
+    }))
+    const { wrapper } = await mountReview(reviewOrder())
+    await pickFiles(wrapper, [
+      makeFile('1.jpg', 'image/jpeg', 1024),
+      makeFile('2.jpg', 'image/jpeg', 1024),
+      makeFile('3.jpg', 'image/jpeg', 1024),
+    ])
+    await vi.waitFor(
+      () => expect(wrapper.findAll('[data-testid="review-image-item"]')).toHaveLength(3),
+      { timeout: 3000 },
+    )
+    expect(wrapper.find('[data-testid="add-image"]').exists()).toBe(false)
+  })
+
+  it('IMG-2b 图片仍在上传时提交被阻止并提示（避免静默丢图）', async () => {
+    let release: (() => void) | undefined
+    vi.mocked(fileApi.uploadImage).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          release = () =>
+            resolve({
+              url: '/uploads/review-slow.jpg',
+              fileName: 'review-slow.jpg',
+              size: 1024,
+              contentType: 'image/jpeg',
+            })
+        }),
+    )
+    const { wrapper } = await mountReview(reviewOrder())
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="star-btn"]').exists()).toBe(true),
+      { timeout: 3000 },
+    )
+    await wrapper.findAll('[data-testid="star-btn"]')[4]!.trigger('click')
+    await pickFiles(wrapper, [makeFile('slow.jpg', 'image/jpeg', 1024)])
+    await vi.waitFor(() =>
+      expect(wrapper.get('[data-testid="submit-review-btn"]').attributes('aria-disabled')).toBe(
+        'true',
+      ),
+    )
+    await wrapper.get('[data-testid="submit-review-btn"]').trigger('click')
+    await flushPromises()
     expect(reviewApi.submitReview).not.toHaveBeenCalled()
+    release?.()
+    await flushPromises()
   })
 })

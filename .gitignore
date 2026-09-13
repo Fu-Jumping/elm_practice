@@ -16,6 +16,8 @@ tmp/
 .uploads/
 !.env.example
 !.env.development
+# E2E 专用 mock 模式（Playwright webServer 以 `vite --mode mock` 启动，避免被本机 .env.development.local 的 real 模式覆盖）
+!.env.mock
 
 # 参考导出与工具目录（不入库）
 .figma/

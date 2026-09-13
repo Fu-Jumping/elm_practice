@@ -18,6 +18,7 @@ import { formatMoney, formatTime, statusText } from '@/services/normalizers'
 import { reviewApi, favoriteApi } from '@/services/api'
 import type { CartLine, Product, ReviewRecord } from '@/services/api/types'
 import { toast } from '@/utils/toast'
+import { flyToCart } from '@/utils/flyToCart'
 import StoreCover from '@/components/StoreCover.vue'
 import { productImageSrc, storeImageSrc } from '@/utils/demoImages'
 
@@ -25,6 +26,8 @@ const ASSETS = '/design-assets/首页-精细'
 /** 商品图契约暂无图片字段：用固定素材占位（PRD：图片为空显示占位图） */
 const route = useRoute()
 const router = useRouter()
+/** 底部购物车栏元素（加购抛球的终点；用 ref 而非 querySelector，见 animateAddToCart 注释） */
+const cartBarEl = ref<HTMLElement | null>(null)
 const catalogStore = useCatalogStore()
 const cartStore = useCartStore()
 const sessionStore = useSessionStore()
@@ -212,12 +215,31 @@ let spy: IntersectionObserver | null = null
 const outerPinned = ref(false)
 let mainScrollEl: HTMLElement | null = null
 
+/** 吸顶判定的容差（px）：抵消 px→vw 换算带来的亚像素误差 */
+const PIN_TOLERANCE = 1
+/**
+ * 解除吸顶的**滞后死区**（px，SHOW-QA-004，2026-09-13 修复）：
+ * 原实现是单阈值判定（`top <= 顶部栏高 + 1`），Tab 栏 top 在吸顶线附近来回时锁定态反复翻转；
+ * 而翻转会同时切换右侧商品列表的可滚状态（`.order-area--locked` 控制 overflow），
+ * 导致滚轮时而作用外层、时而作用内层——这就是负责人 9/10 走查到的「抖动」。
+ * 现改为：越过吸顶线才锁定，锁定后必须回退超过该死区才解除。
+ * ⚠️ **死区取值属交互口径**：暂定 8px（问题记录建议 8–16px），待负责人/测试联调确认后可调整。
+ */
+const PIN_RELEASE_DEADBAND = 8
+
 function updateOuterPinned(): void {
   const tabs = storeTabsEl.value
   const header = detailHeaderEl.value
   if (!tabs || !header) return
-  // jsdom 无布局（矩形与高度均为 0）时恒判定为已吸顶，不影响既有单测
-  outerPinned.value = tabs.getBoundingClientRect().top <= header.offsetHeight + 1
+  const line = header.offsetHeight + PIN_TOLERANCE
+  const top = tabs.getBoundingClientRect().top
+  if (outerPinned.value) {
+    // 已吸顶：只有明显回退（超过死区）才解除，避免阈值附近抖动
+    if (top > line + PIN_RELEASE_DEADBAND) outerPinned.value = false
+    return
+  }
+  // 未吸顶：越过吸顶线即锁定；jsdom 无布局（矩形与高度均为 0）时恒判定为已吸顶，不影响既有单测
+  outerPinned.value = top <= line
 }
 
 /**
@@ -336,7 +358,7 @@ function isSoldOut(product: Product): boolean {
   return !product.onSale || product.stock <= 0
 }
 
-async function onAdd(product: Product): Promise<void> {
+async function onAdd(product: Product, event?: MouseEvent): Promise<void> {
   if (isClosed.value || isSoldOut(product)) return
   // 加购需登录（后端 401 口径）：未登录引导登录并回跳商家详情，不静默失败
   // （PRD 校验顺序"登录先行"；9/7 联调修正，用例 T45）
@@ -345,10 +367,30 @@ async function onAdd(product: Product): Promise<void> {
     void router.push({ name: 'login', query: { redirect: route.fullPath } })
     return
   }
+  // 加购动画（TODO-USER-016）：从「加号」抛球到购物车栏，先给即时反馈，不等接口返回
+  animateAddToCart(event?.currentTarget as HTMLElement | null)
   // 已加购 → 步进 +1（PATCH）；未加购 → 加购 1 件（POST，同商品合并由后端保证）
   const line = lineOf(product.productId)
   if (line) await cartStore.incrementLine(line.cartLineId)
   else await cartStore.addItem(storeId, product.productId)
+}
+
+/**
+ * 加购抛物线抛球（TODO-USER-016，PRD 7.3 加购交互）：
+ * 起点取被点按钮中心、终点取购物车栏左侧图标区。
+ * 终点用**模板 ref**而不是 document.querySelector：组件在单测中可能挂载于游离容器
+ * （vue-test-utils 默认不 attachTo document），querySelector 会取不到而静默跳过动画。
+ * 动画本身由 `utils/flyToCart` 负责（挂 body + 内联样式 + WAAPI 三关键帧 + 兜底清理）。
+ */
+function animateAddToCart(source: HTMLElement | null): void {
+  const bar = cartBarEl.value
+  if (!source || !bar) return
+  const from = source.getBoundingClientRect()
+  const to = bar.getBoundingClientRect()
+  flyToCart(
+    { x: from.left + from.width / 2, y: from.top + from.height / 2 },
+    { x: to.left + to.width * 0.18, y: to.top + to.height / 2 },
+  )
 }
 
 /** 步进 -（T49）：减 1；减到 0 由 cartStore 转删除请求（契约 §3.4） */
@@ -404,7 +446,8 @@ function onCheckout(): void {
           <path d="M15 4.5L7.5 12L15 19.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
         </svg>
       </button>
-      <span class="detail-brand">饿了么</span>
+      <!-- 应用名按课程口径，不沿用设计稿的第三方品牌名（与批次⑩ 105 的应用标题、MemberView 会员页同一处理） -->
+      <span class="detail-brand">轻量外卖</span>
       <button class="header-btn" type="button" aria-label="搜索" @click="onPlaceholderClick">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8" />
@@ -629,7 +672,7 @@ function onCheckout(): void {
                       :data-testid="`add-btn-${product.productId}`"
                       :disabled="isClosed || isSoldOut(product) || cartStore.isAdding(product.productId)"
                       :aria-label="`增加数量 ${product.name}`"
-                      @click="onAdd(product)"
+                      @click="onAdd(product, $event)"
                     >
                       <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
@@ -643,7 +686,7 @@ function onCheckout(): void {
                     :data-testid="`add-btn-${product.productId}`"
                     :disabled="isClosed || isSoldOut(product) || cartStore.isAdding(product.productId)"
                     :aria-label="`加入购物车 ${product.name}`"
-                    @click="onAdd(product)"
+                    @click="onAdd(product, $event)"
                   >
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
@@ -661,7 +704,7 @@ function onCheckout(): void {
       </div>
 
       <!-- 底部购物车栏（PRD：商品数/合计来自购物车接口；店铺休息结算禁用） -->
-      <div class="cart-bar" data-testid="cart-bar" @click="toggleCartPopup">
+      <div ref="cartBarEl" class="cart-bar" data-testid="cart-bar" @click="toggleCartPopup">
         <button
           class="cart-icon-btn"
           type="button"
@@ -1135,8 +1178,9 @@ function onCheckout(): void {
   flex: none;
   width: 84px;
   overflow-y: auto;
-  /* 底部购物车栏（固定 64px）遮挡留白，最后一项可滚到栏上沿之上 */
-  padding-bottom: 64px;
+  /* 底部购物车栏遮挡留白，最后一项可滚到栏上沿之上；
+     底栏高度含安全区（min-height 64px + env(safe-area-inset-bottom)），故留白同步计入 */
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
   background: var(--color-surface-container);
 }
 
@@ -1166,7 +1210,7 @@ function onCheckout(): void {
   min-width: 0;
   overflow-y: auto;
   /* 底部留白同左栏：避开固定购物车栏，最后一件商品可完整滚到栏上沿之上 */
-  padding: 0 12px 64px;
+  padding: 0 12px calc(64px + env(safe-area-inset-bottom));
   background: var(--color-surface-white);
 }
 
@@ -1424,11 +1468,13 @@ function onCheckout(): void {
   align-items: center;
   width: 100%;
   max-width: 430px;
-  height: 64px;
-  padding: 0 12px;
+  /* SHOW-QA-001 真机安全区（2026-09-13）：原为固定 height: 64px + padding-bottom: env(...)，
+     box-sizing 为 border-box 时安全区会把内容区压扁（iPhone 底部指示条约 34px → 内容仅余 30px）。
+     改为 min-height：安全区只让整栏变高、不压缩内容，与 TabBar 与下单页底栏的写法一致。 */
+  min-height: 64px;
+  padding: 0 12px env(safe-area-inset-bottom);
   background: var(--color-surface-white);
   border-top: 1px solid var(--color-border-light);
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .cart-icon-btn {

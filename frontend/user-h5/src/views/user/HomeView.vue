@@ -179,6 +179,15 @@ function onPlaceholderClick(): void {
   toast('暂未开放')
 }
 
+/**
+ * 搜索框入口（PRD 7.16.1「首页-搜索框」：点击搜索框进入**搜索页**）。
+ * 历史：批次⑤ 前为「暂未开放」占位 → TODO-USER-005 曾直连结果页 → TODO-USER-107 按 PRD
+ * 改为先进搜索页（关键词输入 + 最近搜索 + 热门搜索），由搜索页提交后进结果页。
+ */
+function goSearch(): void {
+  void router.push({ name: 'search-entry' })
+}
+
 // PRD 商家卡行：点击商家卡携带 storeId 进入商家详情
 function onOpenStore(storeId: string): void {
   void router.push({ name: 'store-detail', params: { storeId } })
@@ -227,14 +236,14 @@ function onCloseCard(storeId: string): void {
       </button>
     </header>
 
-    <!-- 搜索框（PRD：P0 只承担入口，不发起请求） -->
+    <!-- 搜索框（PRD 7.16.1「首页-搜索框」：点击搜索框进入搜索结果页；批次⑤ TODO-USER-005 起为真入口） -->
     <section class="search-section" data-testid="search-bar">
       <div
         class="search-box"
         data-placeholder="搜索"
         role="button"
         tabindex="0"
-        @click="onPlaceholderClick"
+        @click="goSearch"
       >
         <svg class="search-scan" viewBox="0 0 20 20" aria-hidden="true">
           <path

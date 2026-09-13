@@ -17,6 +17,16 @@ export const endpoints = {
     categories: (storeId: string) => `/stores/${storeId}/categories`,
     products: (storeId: string) => `/stores/${storeId}/products`,
   },
+  // 搜索（契约 §3.6）：关键词搜索同时返回商家与商品汇总；排序 综合/销量/距离；分页 page/size
+  search: {
+    query: '/search',
+  },
+  // 文件上传（契约 §10.1）：单张 multipart（字段 file，可选 scene=product/review）；
+  // 读取经静态映射 /uploads/** 提供，业务侧只保存返回的 url
+  file: {
+    upload: '/files/images',
+    read: (fileName: string) => `/files/images/${fileName}`,
+  },
   cart: {
     list: '/cart',
     add: '/cart/items',
