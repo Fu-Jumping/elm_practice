@@ -49,11 +49,11 @@ describe('flyToCart（加购抛物线抛球）', () => {
   it('FT-2 动画关键帧含中点抬升（抛物线）且结束事件后移除小球', () => {
     const { fire, calls } = stubAnimate()
     flyToCart({ x: 0, y: 0 }, { x: 200, y: 300 })
-    const keyframes = (calls[0] as { keyframes: Array<{ transform: string }> }).keyframes
+    const keyframes = (calls[0] as { keyframes: Array<{ transform: string }> }).keyframes!
     expect(keyframes).toHaveLength(3)
-    expect(keyframes[1].transform).toContain('translate(100px')
+    expect(keyframes[1]!.transform).toContain('translate(100px')
     // 中点 y = dy/2 - arc，arc 为正 → 中点应高于直线中点
-    const midY = Number(/translate\([^,]+,\s*(-?[\d.]+)px\)/.exec(keyframes[1].transform)![1])
+    const midY = Number(/translate\([^,]+,\s*(-?[\d.]+)px\)/.exec(keyframes[1]!.transform)![1])
     expect(midY).toBeLessThan(150)
     fire('finish')
     expect(document.querySelectorAll(BALL)).toHaveLength(0)
