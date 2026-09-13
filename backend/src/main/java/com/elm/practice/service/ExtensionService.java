@@ -17,6 +17,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -183,20 +189,82 @@ public class ExtensionService {
 
     public Map<String,Object> overview(Domain.Merchant m) {
         stores.requireMerchantStore(m);
-        // 概览只统计已支付订单（PENDING_PAYMENT 不计入营收口径）。
-        Map<String,Object> agg = orderMapper.overviewByStore(m.storeId);
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Shanghai"));
+        Map<String,Object> agg = orderMapper.statisticsSummary(m.storeId, startOfDay(today));
+        BigDecimal sales = decimal(agg.get("salesAmount"));
         var v = new LinkedHashMap<String,Object>();
-        v.put("orderCount", ((Number) agg.get("orderCount")).longValue());
-        v.put("salesAmount", new BigDecimal(agg.get("salesAmount").toString()).setScale(2));
-        v.put("productCount", productMapper.countByStore(m.storeId));
+        v.put("range", "today");
+        v.put("startDate", today.toString());
+        v.put("endDate", today.toString());
+        v.put("todaySalesAmount", sales);
+        v.put("validOrderCount", number(agg.get("orderCount")));
+        v.put("expectedIncome", sales);
+        v.put("pendingOrderCount", number(agg.get("pendingOrderCount")));
+        v.put("unrepliedReviewCount", reviews.countUnrepliedByStore(m.storeId));
+        v.put("unreadMessageCount", messages.countUnreadForMerchant(m.id));
         return v;
     }
 
-    public Map<String,Object> analytics(Domain.Merchant m, String range) {
-        var v = overview(m);
-        v.put("range", range == null || range.isBlank() ? "7d" : range);
-        v.put("daily", List.of());
+    public Map<String,Object> analytics(Domain.Merchant m, String requestedRange) {
+        stores.requireMerchantStore(m);
+        String range = requestedRange == null || requestedRange.isBlank() ? "7d" : requestedRange;
+        if (!Set.of("today", "7d", "30d").contains(range))
+            throw ApiException.badRequest("range 只支持 today、7d 或 30d");
+
+        int days = "today".equals(range) ? 1 : Integer.parseInt(range.substring(0, range.length() - 1));
+        LocalDate endDate = LocalDate.now(ZoneId.of("Asia/Shanghai"));
+        LocalDate startDate = endDate.minusDays(days - 1L);
+        String startAt = startOfDay(startDate);
+        Map<String,Object> agg = orderMapper.statisticsSummary(m.storeId, startAt);
+        long orderCount = number(agg.get("orderCount"));
+
+        Map<String,Map<String,Object>> daily = new HashMap<>();
+        for (Map<String,Object> row : orderMapper.statisticsTrend(m.storeId, startAt))
+            daily.put(row.get("date").toString(), row);
+        var trend = new ArrayList<Map<String,Object>>();
+        for (int index = 0; index < days; index++) {
+            String date = startDate.plusDays(index).toString();
+            Map<String,Object> row = daily.get(date);
+            var item = new LinkedHashMap<String,Object>();
+            item.put("date", date);
+            item.put("salesAmount", row == null ? BigDecimal.ZERO.setScale(2) : decimal(row.get("salesAmount")));
+            item.put("orderCount", row == null ? 0L : number(row.get("orderCount")));
+            trend.add(item);
+        }
+
+        var statusDistribution = orderMapper.statisticsByStatus(m.storeId, startAt).stream().map(row -> {
+            var item = new LinkedHashMap<String,Object>();
+            item.put("name", row.get("name").toString());
+            item.put("value", number(row.get("value")));
+            return item;
+        }).toList();
+        List<Map<String,Object>> channelDistribution = orderCount == 0 ? List.of()
+                : List.of(Map.of("name", "外卖", "value", orderCount));
+
+        var v = new LinkedHashMap<String,Object>();
+        v.put("range", range);
+        v.put("startDate", startDate.toString());
+        v.put("endDate", endDate.toString());
+        v.put("salesAmount", decimal(agg.get("salesAmount")));
+        v.put("orderCount", orderCount);
+        v.put("avgOrderAmount", decimal(agg.get("avgOrderAmount")));
+        v.put("trend", trend);
+        v.put("channelDistribution", channelDistribution);
+        v.put("statusDistribution", statusDistribution);
         return v;
+    }
+
+    private String startOfDay(LocalDate date) {
+        return date + " 00:00:00";
+    }
+
+    private BigDecimal decimal(Object value) {
+        if (value == null) return BigDecimal.ZERO.setScale(2);
+        return new BigDecimal(value.toString()).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private long number(Object value) {
+        return value == null ? 0L : ((Number) value).longValue();
     }
 
     private List<String> validateTags(List<String> tags) {

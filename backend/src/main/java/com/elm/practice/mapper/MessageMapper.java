@@ -18,4 +18,8 @@ public interface MessageMapper {
             + "VALUES(#{id}, #{conversationId}, #{senderId}, #{senderRole}, #{content}, "
             + "STR_TO_DATE(#{createdAt},'%Y-%m-%d %H:%i:%s'))")
     int insert(Domain.Message message);
+
+    @Select("SELECT COUNT(*) FROM messages m JOIN conversations c ON c.conversation_id=m.conversation_id "
+            + "WHERE c.merchant_id=#{merchantId} AND c.merchant_read=FALSE AND m.sender_role='USER'")
+    long countUnreadForMerchant(String merchantId);
 }
