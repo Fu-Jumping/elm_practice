@@ -440,7 +440,13 @@ function onCloseCard(storeId: string): void {
                   <span class="product-price-est">预估价</span>
                 </p>
               </div>
-              <span class="product-fade" aria-hidden="true" />
+              <!-- 右缘渐隐用于暗示「右侧还有更多商品」，只有展示 3 张（右侧仍有溢出）时才渲染；
+                   不足三张仍渲染会让人以为图片被裁切（SHOW-QA-005，PRD 7.2 按实际数量展示） -->
+              <span
+                v-if="previewsFor(store).length >= 3"
+                class="product-fade"
+                aria-hidden="true"
+              />
             </div>
           </div>
         </article>
