@@ -17,7 +17,7 @@ public interface OrderMapper {
             + "DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%s') AS createdAt, "
             + "DATE_FORMAT(paid_at,'%Y-%m-%d %H:%i:%s') AS paidAt, idempotency_key AS idempotencyKey, "
             + "cancel_reason AS cancelReason, DATE_FORMAT(cancelled_at,'%Y-%m-%d %H:%i:%s') AS cancelledAt, "
-            + "cancelled_by AS cancelledBy";
+            + "cancelled_by AS cancelledBy, EXISTS(SELECT 1 FROM reviews r WHERE r.order_id=orders.order_id) AS reviewed";
 
     String SNAPSHOT = " @Result(property = \"addressSnapshot\", column = \"address_snapshot\", "
             + "typeHandler = com.elm.practice.common.AddressSnapshotTypeHandler.class)";

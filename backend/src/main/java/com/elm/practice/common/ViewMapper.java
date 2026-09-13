@@ -56,6 +56,7 @@ public final class ViewMapper {
         m.put("addressId",o.addressId); m.put("remark",o.remark); m.put("status",o.status.name()); m.put("createdAt",o.createdAt);
         m.put("itemSubtotal",o.itemSubtotal); m.put("packagingFee",o.packagingFee); m.put("total",o.total); m.put("paidAt",o.paidAt);
         m.put("cancelReason",o.cancelReason); m.put("cancelledAt",o.cancelledAt); m.put("cancelledBy",o.cancelledBy);
+        m.put("reviewed",o.reviewed);
         // 金额快照扩展（批次①，契约 §3.5「基础四行 + 优惠项按实际发生展示」）。
         m.put("deliveryFee",o.deliveryFee); m.put("fullReductionAmount",o.fullReductionAmount);
         m.put("newCustomerAmount",o.newCustomerAmount); m.put("memberDiscountAmount",o.memberDiscountAmount);
@@ -87,7 +88,13 @@ public final class ViewMapper {
     }
     public static Map<String,Object> review(Domain.Review r) {
         var m = new LinkedHashMap<String,Object>(); m.put("reviewId",r.id); m.put("orderId",r.orderId); m.put("storeId",r.storeId);
-        m.put("userId",r.userId); m.put("content",r.content); m.put("rating",r.rating); m.put("reply",r.reply);
+        m.put("userId",r.userId); m.put("userNickname",maskedNickname(r.userNickname));
+        m.put("content",r.content); m.put("rating",r.rating);
+        m.put("tags",JsonLists.tags(r.tagsJson)); m.put("images",JsonLists.tags(r.imagesJson)); m.put("reply",r.reply);
         m.put("createdAt",r.createdAt); m.put("repliedAt",r.repliedAt); return m;
+    }
+    private static String maskedNickname(String nickname) {
+        if (nickname == null || nickname.isBlank()) return "匿名用户";
+        return nickname.substring(0, 1) + "**";
     }
 }

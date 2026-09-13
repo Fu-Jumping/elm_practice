@@ -36,6 +36,7 @@ public class DatabaseInitializer implements ApplicationRunner {
             ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-coupons-blast.sql"), StandardCharsets.UTF_8));
             ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-catalog-stage2.sql"), StandardCharsets.UTF_8));
             ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-order-cancellation.sql"), StandardCharsets.UTF_8));
+            ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-reviews-stage2.sql"), StandardCharsets.UTF_8));
             if (users.count() == 0) {
                 ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/seed.sql"), StandardCharsets.UTF_8));
             }

@@ -2,6 +2,7 @@ package com.elm.practice.service;
 
 import com.elm.practice.common.ApiException;
 import com.elm.practice.common.IdGenerator;
+import com.elm.practice.common.JsonLists;
 import com.elm.practice.common.RequestUtil;
 import com.elm.practice.common.Times;
 import com.elm.practice.common.ViewMapper;
@@ -51,6 +52,9 @@ public class ExtensionService {
         String content = RequestUtil.required(req.content, "content");
         if (content.length() > 500) throw ApiException.badRequest("评价内容不能超过 500 字");
         Domain.Review r = new Domain.Review(ids.nextId("rv"), orderId, order.storeId, user.id, content, req.rating, Times.now());
+        r.userNickname = user.nickname;
+        r.tagsJson = JsonLists.toJson(validateTags(req.tags));
+        r.imagesJson = JsonLists.toJson(validateReviewImages(req.images));
         try { reviews.insert(r); }
         catch (DuplicateKeyException e) { throw ApiException.conflict("同一订单只能评价一次"); }
         return r;
@@ -190,6 +194,34 @@ public class ExtensionService {
         v.put("range", range == null || range.isBlank() ? "7d" : range);
         v.put("daily", List.of());
         return v;
+    }
+
+    private List<String> validateTags(List<String> tags) {
+        if (tags == null) return List.of();
+        var result = new java.util.ArrayList<String>();
+        var seen = new java.util.HashSet<String>();
+        for (String raw : tags) {
+            String value = RequestUtil.required(raw, "tag");
+            if (value.length() > 20) throw ApiException.badRequest("单个标签不能超过20个字符");
+            if (seen.add(value)) result.add(value);
+        }
+        if (result.size() > 10) throw ApiException.badRequest("标签最多10个");
+        return result;
+    }
+
+    private List<String> validateReviewImages(List<String> images) {
+        if (images == null) return List.of();
+        if (images.size() > 3) throw ApiException.badRequest("评价图片最多3张");
+        var result = new java.util.ArrayList<String>();
+        for (String raw : images) {
+            String value = RequestUtil.required(raw, "image");
+            String lower = value.toLowerCase(java.util.Locale.ROOT);
+            if (!value.startsWith("/uploads/") ||
+                    !(lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png") || lower.endsWith(".webp")))
+                throw ApiException.badRequest("评价图片必须来自平台上传接口且类型为jpg/jpeg/png/webp");
+            result.add(value);
+        }
+        return result;
     }
 
     private boolean visible(Domain.Conversation c, Domain.Principal p) {

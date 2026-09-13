@@ -119,6 +119,7 @@ public final class Domain {
     public static final class Order {
         public String id, userId, storeId, addressId, remark, createdAt, paidAt;
         public String cancelReason, cancelledAt, cancelledBy;
+        public boolean reviewed;
         public OrderStatus status;
         public BigDecimal itemSubtotal, packagingFee, total;
         // 金额快照扩展（批次①，契约 §3.5）：历史行/旧构造默认 0。
@@ -186,7 +187,8 @@ public final class Domain {
         public OrderItem() {}
     }
     public static final class Review {
-        public String id, orderId, storeId, userId, content, reply, createdAt, repliedAt;
+        public String id, orderId, storeId, userId, userNickname, content, reply, createdAt, repliedAt;
+        public String tagsJson = "[]", imagesJson = "[]";
         public int rating;
         public Review(String id, String orderId, String storeId, String userId, String content,
                       int rating, String createdAt) {

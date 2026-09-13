@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS order_items (
 CREATE TABLE IF NOT EXISTS reviews (
   review_id VARCHAR(32) PRIMARY KEY, order_id VARCHAR(32) NOT NULL UNIQUE,
   store_id VARCHAR(32) NOT NULL, user_id VARCHAR(32) NOT NULL,
-  content VARCHAR(500) NOT NULL, rating INT NOT NULL, reply VARCHAR(500),
+  content VARCHAR(500) NOT NULL, rating INT NOT NULL, tags JSON NULL, images JSON NULL, reply VARCHAR(500),
   created_at TIMESTAMP NOT NULL, replied_at TIMESTAMP NULL,
   CHECK(rating BETWEEN 1 AND 5)
 );
