@@ -584,4 +584,31 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     expect(outerScrollTop).toBe(256)
     expect(innerScrollTo).toHaveBeenCalled()
   })
+
+  it('T73 加购触发抛物线抛球：body 下创建小球，动画结束后移除（TODO-USER-016）', async () => {
+    // jsdom 无 Web Animations API：用替身保留小球以便断言，并手动触发 finish 验证清理
+    const listeners: Array<() => void> = []
+    Element.prototype.animate = (() => ({
+      addEventListener: (_type: string, cb: () => void) => listeners.push(cb),
+    })) as unknown as Element['animate']
+    try {
+      const { wrapper } = await mountDetail('/stores/m002')
+      useSessionStore().user = { account: '13800000001', nickname: '张同学' }
+      await vi.waitFor(
+        () => expect(wrapper.find('[data-testid="add-btn-p101"]').exists()).toBe(true),
+        { timeout: 10000 },
+      )
+      await wrapper.find('[data-testid="add-btn-p101"]').trigger('click')
+      await vi.waitFor(
+        () => expect(document.querySelector('[data-testid="fly-ball"]')).not.toBeNull(),
+        { timeout: 3000 },
+      )
+      // 动画结束（finish）后小球被移除，不留脏节点
+      listeners.forEach((cb) => cb())
+      expect(document.querySelector('[data-testid="fly-ball"]')).toBeNull()
+    } finally {
+      delete (Element.prototype as unknown as { animate?: unknown }).animate
+      document.querySelectorAll('[data-testid="fly-ball"]').forEach((node) => node.remove())
+    }
+  })
 })
