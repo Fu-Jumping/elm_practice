@@ -138,7 +138,7 @@ describe('SearchResultView（搜索结果页，批次⑤）', () => {
     expect((wrapper.find('[data-testid="search-input"]').element as HTMLInputElement).value).toBe(
       '肯德基',
     )
-    const first = wrapper.findAll('[data-testid="search-merchant-card"]')[0]
+    const first = wrapper.findAll('[data-testid="search-merchant-card"]')[0]!
     expect(first.text()).toContain('肯德基宅急送')
     expect(first.text()).toContain('4.8')
     expect(first.text()).toContain('月售3500')
@@ -171,7 +171,7 @@ describe('SearchResultView（搜索结果页，批次⑤）', () => {
     await vi.waitFor(() =>
       expect(wrapper.findAll('[data-testid="search-merchant-card"]')).toHaveLength(1),
     )
-    expect(calls.at(-1)?.keyword).toBe('麦当劳')
+    expect(calls[calls.length - 1]?.keyword).toBe('麦当劳')
     expect(wrapper.find('[data-testid="search-merchant-card"]').text()).toContain('老王小店')
   })
 
@@ -183,7 +183,7 @@ describe('SearchResultView（搜索结果页，批次⑤）', () => {
     expect(wrapper.find('[data-testid="sort-综合"]').classes()).toContain('is-active')
 
     await wrapper.find('[data-testid="sort-销量"]').trigger('click')
-    await vi.waitFor(() => expect(calls.at(-1)?.sort).toBe('销量'))
+    await vi.waitFor(() => expect(calls[calls.length - 1]?.sort).toBe('销量'))
     expect(wrapper.find('[data-testid="sort-销量"]').classes()).toContain('is-active')
     expect(wrapper.find('[data-testid="sort-综合"]').classes()).not.toContain('is-active')
   })
@@ -247,9 +247,9 @@ describe('SearchResultView（搜索结果页，批次⑤）', () => {
       expect(wrapper.findAll('[data-testid="search-merchant-card"]')).toHaveLength(3),
     )
     const cards = wrapper.findAll('[data-testid="search-merchant-card"]')
-    expect(cards[0].findAll('[data-testid="search-merchant-tag"]')).toHaveLength(1)
-    expect(cards[2].findAll('[data-testid="search-merchant-tag"]')).toHaveLength(0)
-    expect(cards[2].text()).not.toContain('km')
+    expect(cards[0]!.findAll('[data-testid="search-merchant-tag"]')).toHaveLength(1)
+    expect(cards[2]!.findAll('[data-testid="search-merchant-tag"]')).toHaveLength(0)
+    expect(cards[2]!.text()).not.toContain('km')
     expect(wrapper.text()).not.toContain('undefined')
   })
 
@@ -259,7 +259,7 @@ describe('SearchResultView（搜索结果页，批次⑤）', () => {
     await vi.waitFor(() =>
       expect(wrapper.findAll('[data-testid="search-merchant-card"]')).toHaveLength(3),
     )
-    await wrapper.findAll('[data-testid="search-merchant-card"]')[1].trigger('click')
+    await wrapper.findAll('[data-testid="search-merchant-card"]')[1]!.trigger('click')
     await flushPromises()
     expect(router.currentRoute.value.name).toBe('store-detail')
     expect(router.currentRoute.value.params.storeId).toBe('m001')

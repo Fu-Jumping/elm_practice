@@ -32,7 +32,7 @@ describe('搜索替身规则（契约 §3.6）', () => {
   it('SM-2 关键词命中商品名：返回该商品所属商家，并在 products 中返回命中的商品', async () => {
     const data = await okData({ keyword: '香辣鸡腿堡' })
     expect(data.products.list.length).toBeGreaterThan(0)
-    expect(data.products.list[0].storeId).toBe('m002')
+    expect(data.products.list[0]!.storeId).toBe('m002')
     expect(data.merchants.list.map((s) => s.storeId)).toContain('m002')
   })
 
@@ -76,7 +76,7 @@ describe('搜索替身规则（契约 §3.6）', () => {
     const p2 = await okData({ keyword: '老', page: 2, size: 1 })
     expect(p1.merchants.list).toHaveLength(1)
     expect(p2.merchants.list).toHaveLength(1)
-    expect(p1.merchants.list[0].storeId).not.toBe(p2.merchants.list[0].storeId)
+    expect(p1.merchants.list[0]!.storeId).not.toBe(p2.merchants.list[0]!.storeId)
     expect(p1.merchants.total).toBe(all.merchants.total)
   })
 
