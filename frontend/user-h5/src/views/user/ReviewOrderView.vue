@@ -18,6 +18,12 @@ import { normalizeOrderDetail } from '@/services/normalizers'
 import { useCatalogStore } from '@/stores/catalogStore'
 import { toast } from '@/utils/toast'
 import type { OrderDetail } from '@/services/api/types'
+import { fileApi } from '@/services/api'
+import {
+  REVIEW_IMAGE_LIMIT,
+  REVIEW_IMAGE_TYPE_LABEL,
+  validateReviewImage,
+} from '@/utils/reviewImage'
 
 const route = useRoute()
 const router = useRouter()
@@ -33,6 +39,30 @@ const submitting = ref(false)
 const ratingTip = ref('')
 const errorTip = ref('')
 
+/**
+ * 评价图片（TODO-USER-007，批次⑧；口径：内嵌本页，不新增弹窗或页面）：
+ * 每项先以本地预览入列（status=uploading），上传成功后记录 url；失败保留本地预览并可重试。
+ * 提交时只发送**上传成功**的 url（契约 §10.1：上传成功后才把 url 提交给评价接口）。
+ */
+interface ReviewImageItem {
+  key: number
+  file: File
+  previewUrl: string
+  status: 'uploading' | 'success' | 'failed'
+  url?: string
+}
+const imageItems = ref<ReviewImageItem[]>([])
+const fileInput = ref<HTMLInputElement | null>(null)
+let imageKeySeq = 0
+
+/** 达到张数上限后不再提供添加入口（口径：评价图最多 3 张） */
+const canAddImage = computed(() => imageItems.value.length < REVIEW_IMAGE_LIMIT)
+/** 是否有图片仍在上传：上传中禁止提交，避免静默丢图 */
+const uploadingImages = computed(() => imageItems.value.some((item) => item.status === 'uploading'))
+const uploadedImageUrls = computed(() =>
+  imageItems.value.filter((item) => item.status === 'success' && item.url).map((item) => item.url!),
+)
+
 /** 评价标签（设计稿 08-评价/01-评价订单 四枚） */
 const REVIEW_TAGS = ['配送快', '味道好', '包装完整', '分量足'] as const
 /** 星级文案（设计稿给出五星「非常好」；其余档位为展示补充） */
@@ -41,7 +71,7 @@ const MAX_CONTENT_LENGTH = 200
 
 const storeName = computed(() => catalogStore.storeDetail?.name ?? order.value?.storeId ?? '')
 const ratingLabel = computed(() => (rating.value > 0 ? RATING_LABELS[rating.value] ?? '' : ''))
-const canSubmit = computed(() => rating.value > 0 && !submitting.value)
+const canSubmit = computed(() => rating.value > 0 && !submitting.value && !uploadingImages.value)
 
 function blockAndBack(reason: string): void {
   blockTip.value = reason
@@ -80,13 +110,82 @@ function toggleTag(tag: string): void {
   else pickedTags.value.push(tag)
 }
 
-/** 图片上传属 TODO-USER-007（批次⑧，依赖契约 §10.1）：本批仅占位提示 */
+/** 打开系统文件选择（accept 仅作提示，实际校验在 onFilesPicked） */
 function onAddImage(): void {
-  toast('图片上传将随批次⑧接入')
+  fileInput.value?.click()
+}
+
+/** 生成本地预览地址（jsdom 无 createObjectURL 时降级为空串，不影响列表渲染与状态） */
+function makePreviewUrl(file: File): string {
+  return typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function'
+    ? URL.createObjectURL(file)
+    : ''
+}
+
+function releasePreviewUrl(url: string): void {
+  if (url && typeof URL !== 'undefined' && typeof URL.revokeObjectURL === 'function') {
+    URL.revokeObjectURL(url)
+  }
+}
+
+/** 选择文件：逐张本地校验（类型/大小/张数）——不合法立即提示且不入列，合法则入列并上传 */
+function onFilesPicked(event: Event): void {
+  const input = event.target as HTMLInputElement
+  const files = Array.from(input.files ?? [])
+  input.value = ''
+  for (const file of files) {
+    const error = validateReviewImage(file, imageItems.value.length)
+    if (error) {
+      toast(error)
+      continue
+    }
+    const item: ReviewImageItem = {
+      key: ++imageKeySeq,
+      file,
+      previewUrl: makePreviewUrl(file),
+      status: 'uploading',
+    }
+    imageItems.value.push(item)
+    void uploadImageItem(item.key)
+  }
+}
+
+/**
+ * 上传单张（按 key 取响应式数组中的代理对象再改状态——直接改裸对象不会触发视图更新）。
+ * 失败保留本地预览（status=failed），由用户重试或删除。
+ */
+async function uploadImageItem(key: number): Promise<void> {
+  const item = imageItems.value.find((entry) => entry.key === key)
+  if (!item) return
+  item.status = 'uploading'
+  try {
+    const uploaded = await fileApi.uploadImage(item.file, 'review')
+    item.url = uploaded.url
+    item.status = 'success'
+  } catch {
+    // 失败原因已由 http 层 toast；此处只标记状态以提供重试入口（PRD：上传失败保留文字和星级）
+    item.status = 'failed'
+  }
+}
+
+function retryImage(item: ReviewImageItem): void {
+  void uploadImageItem(item.key)
+}
+
+/** 删除图片只删除本地选择，不调用任何接口（契约 §10.1 无删除接口） */
+function removeImage(key: number): void {
+  const index = imageItems.value.findIndex((item) => item.key === key)
+  if (index < 0) return
+  releasePreviewUrl(imageItems.value[index]!.previewUrl)
+  imageItems.value.splice(index, 1)
 }
 
 async function onSubmit(): Promise<void> {
   if (submitting.value) return
+  if (uploadingImages.value) {
+    toast('图片上传中，请稍候')
+    return
+  }
   if (!canSubmit.value) {
     ratingTip.value = '请先选择星级'
     return
@@ -95,11 +194,12 @@ async function onSubmit(): Promise<void> {
   ratingTip.value = ''
   errorTip.value = ''
   try {
-    // 未选图片时不传 images 字段（图片为可选字段，契约 §6.2）
+    // 图片可选：仅在有上传成功的图片时带 images（契约 §6.2 未选图片不传该字段；§10.1 只提交成功 url）
     await reviewApi.submitReview(orderId, {
       rating: rating.value,
       content: content.value,
       tags: [...pickedTags.value],
+      ...(uploadedImageUrls.value.length ? { images: uploadedImageUrls.value } : {}),
     })
     toast('评价成功')
     void router.replace({ name: 'orders' })
@@ -201,15 +301,67 @@ function goBack(): void {
               :maxlength="MAX_CONTENT_LENGTH"
               placeholder="说说本次用餐体验，分享给更多想吃的朋友吧"
             />
-            <button class="rv-add-image" type="button" data-testid="add-image" @click="onAddImage">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.4" />
-                <circle cx="9" cy="10.5" r="1.6" fill="currentColor" />
-                <path d="M5 17l4.5-4.5 3 3 3-2.5L19 17" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
-              </svg>
-              <span>添加图片</span>
-            </button>
-            <p class="rv-image-hint">图片可选，最多 3 张（上传随批次⑧接入）</p>
+            <div class="rv-images" data-testid="review-images">
+              <div
+                v-for="item in imageItems"
+                :key="item.key"
+                class="rv-image-item"
+                data-testid="review-image-item"
+                :data-status="item.status"
+              >
+                <img :src="item.previewUrl" alt="评价图片预览" />
+                <span v-if="item.status === 'uploading'" class="rv-image-mask" data-testid="review-image-uploading">
+                  上传中…
+                </span>
+                <template v-else-if="item.status === 'failed'">
+                  <span class="rv-image-mask rv-image-mask--failed">上传失败</span>
+                  <button
+                    class="rv-image-retry"
+                    type="button"
+                    data-testid="review-image-retry"
+                    @click="retryImage(item)"
+                  >
+                    重试
+                  </button>
+                </template>
+                <button
+                  class="rv-image-remove"
+                  type="button"
+                  aria-label="删除该图片"
+                  data-testid="review-image-remove"
+                  @click="removeImage(item.key)"
+                >
+                  ✕
+                </button>
+              </div>
+              <!-- 达到 3 张上限后不再提供添加入口（口径：评价图最多 3 张） -->
+              <button
+                v-if="canAddImage"
+                class="rv-add-image"
+                type="button"
+                data-testid="add-image"
+                @click="onAddImage"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.4" />
+                  <circle cx="9" cy="10.5" r="1.6" fill="currentColor" />
+                  <path d="M5 17l4.5-4.5 3 3 3-2.5L19 17" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
+                </svg>
+                <span>添加图片</span>
+              </button>
+            </div>
+            <input
+              ref="fileInput"
+              class="rv-file-input"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              data-testid="review-image-input"
+              @change="onFilesPicked"
+            />
+            <p class="rv-image-hint">
+              图片可选，最多 {{ REVIEW_IMAGE_LIMIT }} 张、单张不超过 2MB（{{ REVIEW_IMAGE_TYPE_LABEL }}）
+            </p>
           </section>
 
           <p v-if="errorTip" class="rv-error" data-testid="review-error-tip" role="alert">{{ errorTip }}</p>
@@ -449,6 +601,71 @@ function goBack(): void {
   color: #999999;
 }
 
+.rv-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.rv-image-item {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--color-surface-container);
+}
+.rv-image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.rv-image-mask {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--color-surface-white);
+  background: rgba(0, 0, 0, 0.45);
+}
+.rv-image-mask--failed {
+  align-items: flex-start;
+  padding-top: 14px;
+  background: rgba(0, 0, 0, 0.55);
+}
+.rv-image-retry {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  padding: 1px 8px;
+  border: 1px solid var(--color-surface-white);
+  border-radius: 10px;
+  background: none;
+  color: var(--color-surface-white);
+  font-size: 11px;
+  cursor: pointer;
+}
+.rv-image-remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--color-surface-white);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+}
+.rv-file-input {
+  display: none;
+}
 .rv-add-image {
   display: flex;
   flex-direction: column;

@@ -79,6 +79,9 @@ export const reviewMocks: Record<string, MockHandler> = {
     // 正文首尾空白由服务端裁剪（TC-REV-006）
     const content = String(body.content ?? '').trim()
     if (content.length > MAX_CONTENT_LENGTH) return fail(400, 40000, '评价内容过长')
+    // 评价图片张数上限（契约 §10.1 定稿 + TC-IMG-007）：前端最多选 3 张，后端兜底拒绝第 4 张
+    const submittedImages = Array.isArray(body.images) ? body.images : []
+    if (submittedImages.length > 3) return fail(400, 40000, '评价图片最多 3 张')
     const review: ReviewRecord = {
       reviewId: `rv${1000 + reviewMockState.length + 1}`,
       orderId: order.orderId,
