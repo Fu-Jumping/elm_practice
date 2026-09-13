@@ -47,7 +47,7 @@
 | 商家端 tsc / Vite | 通过 | 默认 real，API=/api/v1；AntD 大 chunk 为构建提示，未阻塞运行 |
 | 后端 Maven package | 25 passed，0 failed/error/skipped | Java 17，MySQL 独立测试库；构建 jar 后启动业务库 |
 | 真实 API 验收 | 50/50 HTTP 状态检查 + 业务断言全部通过 | 见 `evidence/api-smoke.json` 与 `deploy/smoke.py`；50 是请求检查数，不是 50 个独立用户场景 |
-| 目录一致性验收 | 5 店 / 15 商品 / 20 张目录图片通过 | `python deploy/catalog-check.py --base-url http://82.157.137.114:4001/user/api/v1` 输出 `CATALOG_CHECK_OK` |
+| 目录一致性验收 | 5 店 / 15 商品 / 20 张目录图片通过 | `python deploy/catalog-check.py --base-url http://82.157.137.114:4100/user/api/v1` 输出 `CATALOG_CHECK_OK` |
 
 接口覆盖：未登录 401、错误密码、双角色注册登录及会话隔离、跨角色 403、店铺状态有效值/无效值、分类排序与重名、非空分类删除、在售商品删除、负价格、加购合并、数量/库存越界、服务器重新计价、订单幂等、清空购物车、扣库存、未支付商家不可见、支付失败/成功/重复、越级 409、逐步推进、上下架不覆盖库存、删除商品后订单快照、跨用户/商家订单 404。
 
@@ -72,9 +72,11 @@
 
 ## 5. 发布与恢复
 
-- 用户端：http://82.157.137.114:4001/user/
-- 商家端：http://82.157.137.114:4001/
-- 互动汇报：http://82.157.137.114:4001/demo/
+- 用户端：http://82.157.137.114:4100/user/
+- 商家端：http://82.157.137.114:4100/
+- 互动汇报：http://82.157.137.114:4100/demo/
+
+> 端口说明：以上地址已于 2026-09-13 由 4001 调整为 4100（原 4001 被同服务器另一项目占用），服务器侧需放行安全组并重新发布后生效。
 - 发布源码：`/home/ubuntu/releases/elm-20260908-508889e`
 - Nginx 静态目录：`/srv/elm-releases/20260908-508889e`，符号链接 `/srv/elm-current`。
 - 后端 PM2：elm-backend，监听 `127.0.0.1:4000`，继续使用原业务库；旧 elm-h5/elm-merchant 已退役，PM2 状态已保存。回滚用备份目录中的 restore-frontends.json 重建旧前端。

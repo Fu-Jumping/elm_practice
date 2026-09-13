@@ -57,7 +57,7 @@ try:
     retired = [p['name'] for p in existing if p['name'] in ('elm-merchant', 'elm-h5')]
     if retired: run('pm2', 'stop', *retired, '--watch')
     run('sudo','systemctl','reload','nginx')
-    for url in ('http://127.0.0.1:4001/','http://127.0.0.1:4001/user/','http://127.0.0.1:4001/user/api/v1/stores'):
+    for url in ('http://127.0.0.1:4100/','http://127.0.0.1:4100/user/','http://127.0.0.1:4100/user/api/v1/stores'):
         last_error=None
         for _ in range(30):
             try:

@@ -6,9 +6,9 @@
 
 | 服务 | 地址 |
 | --- | --- |
-| 用户 H5 | http://82.157.137.114:4001/user/ |
-| 商家端 | http://82.157.137.114:4001/ |
-| 互动汇报 | http://82.157.137.114:4001/demo/ |
+| 用户 H5 | http://82.157.137.114:4100/user/ |
+| 商家端 | http://82.157.137.114:4100/ |
+| 互动汇报 | http://82.157.137.114:4100/demo/ |
 | 后端 | 仅本机 127.0.0.1:4000，由 Nginx 两条 API 路径代理 |
 
 当前 release：`/home/ubuntu/releases/elm-20260910-e41444c`（提交 `99a646d`），static release：`/srv/elm-releases/20260910-99a646d`（`/srv/elm-current` 指向它）。上一版本 `/home/ubuntu/releases/elm-20260908-508889e` 与其 static release 保留作回滚点。
@@ -51,8 +51,8 @@ Windows PowerShell 使用 `$env:VITE_API_MODE='real'` 等独立赋值。后端�
 ```bash
 python deploy/smoke.py
 sudo nginx -t
-curl -f http://127.0.0.1:4001/user/api/v1/stores
-curl -f http://127.0.0.1:4001/demo/
+curl -f http://127.0.0.1:4100/user/api/v1/stores
+curl -f http://127.0.0.1:4100/demo/
 ```
 
 smoke.py 会注册合成用户/商家、创建并完成合成订单，关闭临时测试店，保留证据；不是纯只读监控。重复运行会新增合成数据。`smoke-result.json` 保留上次运行摘要，人工执行还须确认 Python 退出码为 0 与全部业务断言通过。

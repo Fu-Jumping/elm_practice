@@ -1,6 +1,7 @@
 """真实接口验收：合成账号/临时店铺，保留订单证据，结束后关闭测试店。"""
 import urllib.request, urllib.error, http.cookiejar, json, time, pathlib
-base='http://82.157.137.114:4001'
+# 2026-09-13：演示入口端口 4001 → 4100（见 deploy/nginx.conf 注释）
+base='http://82.157.137.114:4100'
 jar=http.cookiejar.CookieJar(); client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
 results=[]
 def call(role, method, path, body=None, expected=200):
