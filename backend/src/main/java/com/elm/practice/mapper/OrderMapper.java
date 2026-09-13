@@ -15,7 +15,9 @@ public interface OrderMapper {
             + "new_customer_amount AS newCustomerAmount, member_discount_amount AS memberDiscountAmount, "
             + "coupon_amount AS couponAmount, delivery_fee_discount AS deliveryFeeDiscount, "
             + "DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%s') AS createdAt, "
-            + "DATE_FORMAT(paid_at,'%Y-%m-%d %H:%i:%s') AS paidAt, idempotency_key AS idempotencyKey";
+            + "DATE_FORMAT(paid_at,'%Y-%m-%d %H:%i:%s') AS paidAt, idempotency_key AS idempotencyKey, "
+            + "cancel_reason AS cancelReason, DATE_FORMAT(cancelled_at,'%Y-%m-%d %H:%i:%s') AS cancelledAt, "
+            + "cancelled_by AS cancelledBy";
 
     String SNAPSHOT = " @Result(property = \"addressSnapshot\", column = \"address_snapshot\", "
             + "typeHandler = com.elm.practice.common.AddressSnapshotTypeHandler.class)";
@@ -26,6 +28,13 @@ public interface OrderMapper {
                     typeHandler = AddressSnapshotTypeHandler.class)
     })
     Domain.Order findById(String id);
+
+    @Select("SELECT " + COLS + " FROM orders WHERE order_id = #{id} FOR UPDATE")
+    @Results({
+            @Result(property = "addressSnapshot", column = "address_snapshot",
+                    typeHandler = AddressSnapshotTypeHandler.class)
+    })
+    Domain.Order findByIdForUpdate(String id);
 
     @Select("SELECT " + COLS + " FROM orders WHERE user_id = #{userId} AND idempotency_key = #{key}")
     @Results({
@@ -81,6 +90,12 @@ public interface OrderMapper {
     @Update("UPDATE orders SET status = 'PENDING', paid_at = STR_TO_DATE(#{paidAt},'%Y-%m-%d %H:%i:%s') "
             + "WHERE order_id = #{id} AND status = 'PENDING_PAYMENT'")
     int markPaid(@Param("id") String id, @Param("paidAt") String paidAt);
+
+    @Update("UPDATE orders SET status='CANCELLED', cancel_reason=#{reason}, "
+            + "cancelled_at=STR_TO_DATE(#{cancelledAt},'%Y-%m-%d %H:%i:%s'), cancelled_by='USER' "
+            + "WHERE order_id=#{id} AND status=#{expected}")
+    int cancelConditional(@Param("id") String id, @Param("expected") Domain.OrderStatus expected,
+                          @Param("reason") String reason, @Param("cancelledAt") String cancelledAt);
 
     /** 测试辅助：构造"支付超时"场景数据（正常业务不修改 created_at）。 */
     @Update("UPDATE orders SET created_at = STR_TO_DATE(#{createdAt},'%Y-%m-%d %H:%i:%s') WHERE order_id = #{id}")

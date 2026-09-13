@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS orders (
   coupon_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
   delivery_fee_discount DECIMAL(10,2) NOT NULL DEFAULT 0,
   created_at TIMESTAMP NOT NULL, paid_at TIMESTAMP NULL, idempotency_key VARCHAR(100),
+  cancel_reason VARCHAR(50) NULL, cancelled_at TIMESTAMP NULL, cancelled_by VARCHAR(16) NULL,
   UNIQUE(user_id, idempotency_key)
 );
 CREATE TABLE IF NOT EXISTS order_items (

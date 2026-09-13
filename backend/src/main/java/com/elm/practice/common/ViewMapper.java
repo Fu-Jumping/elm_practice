@@ -55,6 +55,7 @@ public final class ViewMapper {
         var m = new LinkedHashMap<String,Object>(); m.put("orderId",o.id); m.put("userId",o.userId); m.put("storeId",o.storeId);
         m.put("addressId",o.addressId); m.put("remark",o.remark); m.put("status",o.status.name()); m.put("createdAt",o.createdAt);
         m.put("itemSubtotal",o.itemSubtotal); m.put("packagingFee",o.packagingFee); m.put("total",o.total); m.put("paidAt",o.paidAt);
+        m.put("cancelReason",o.cancelReason); m.put("cancelledAt",o.cancelledAt); m.put("cancelledBy",o.cancelledBy);
         // 金额快照扩展（批次①，契约 §3.5「基础四行 + 优惠项按实际发生展示」）。
         m.put("deliveryFee",o.deliveryFee); m.put("fullReductionAmount",o.fullReductionAmount);
         m.put("newCustomerAmount",o.newCustomerAmount); m.put("memberDiscountAmount",o.memberDiscountAmount);

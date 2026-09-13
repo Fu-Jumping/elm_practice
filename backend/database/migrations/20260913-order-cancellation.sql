@@ -1,0 +1,11 @@
+-- 二阶段订单取消字段幂等升级。
+SET @db := DATABASE();
+SET @ddl := (SELECT IF(COUNT(*)=0,'ALTER TABLE orders ADD COLUMN cancel_reason VARCHAR(50) NULL','SELECT 1')
+  FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='orders' AND COLUMN_NAME='cancel_reason');
+PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
+SET @ddl := (SELECT IF(COUNT(*)=0,'ALTER TABLE orders ADD COLUMN cancelled_at TIMESTAMP NULL','SELECT 1')
+  FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='orders' AND COLUMN_NAME='cancelled_at');
+PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
+SET @ddl := (SELECT IF(COUNT(*)=0,'ALTER TABLE orders ADD COLUMN cancelled_by VARCHAR(16) NULL','SELECT 1')
+  FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='orders' AND COLUMN_NAME='cancelled_by');
+PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;

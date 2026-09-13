@@ -35,6 +35,7 @@ public class DatabaseInitializer implements ApplicationRunner {
             // 批次⑥：红包与爆红包（users.free_blast_date + coupons + coupon_packs + 演示券种子），幂等可重复执行。
             ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-coupons-blast.sql"), StandardCharsets.UTF_8));
             ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-catalog-stage2.sql"), StandardCharsets.UTF_8));
+            ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-order-cancellation.sql"), StandardCharsets.UTF_8));
             if (users.count() == 0) {
                 ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/seed.sql"), StandardCharsets.UTF_8));
             }

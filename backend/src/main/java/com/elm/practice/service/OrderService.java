@@ -146,6 +146,7 @@ public class OrderService {
     @Transactional
     public Domain.Order pay(Domain.User u, String id, boolean success) {
         Domain.Order o = get(u, id);
+        if (o.status == Domain.OrderStatus.CANCELLED) throw ApiException.conflict("订单已取消，不能支付");
         if (o.status != Domain.OrderStatus.PENDING_PAYMENT) return o;
         if (LocalDateTime.now().minusMinutes(15).isAfter(LocalDateTime.parse(o.createdAt, Times.TIME)))
             throw ApiException.conflict("支付已超时");
@@ -154,6 +155,29 @@ public class OrderService {
             if (orders.markPaid(id, paidAt) > 0) { o.status = Domain.OrderStatus.PENDING; o.paidAt = paidAt; }
         }
         return o;
+    }
+
+    @Transactional
+    public Domain.Order cancel(Domain.User u, String id, Requests.CancelOrder request) {
+        if (request == null) throw ApiException.badRequest("请求体不能为空");
+        String reason = RequestUtil.required(request.reason, "reason");
+        if (reason.length() > 50) throw ApiException.badRequest("reason长度必须为1-50个字符");
+        Domain.Order order = orders.findByIdForUpdate(id);
+        if (order == null || !u.id.equals(order.userId)) throw ApiException.notFound("订单不存在");
+        if (order.status == Domain.OrderStatus.CANCELLED) return withItems(order);
+        Domain.OrderStatus expected = order.status;
+        if (expected != Domain.OrderStatus.PENDING_PAYMENT && expected != Domain.OrderStatus.PENDING)
+            throw ApiException.conflict("当前订单状态不可取消");
+        String cancelledAt = Times.now();
+        if (orders.cancelConditional(id, expected, reason, cancelledAt) == 0)
+            throw ApiException.conflict("订单状态已变化，请刷新后重试");
+        order.status = Domain.OrderStatus.CANCELLED;
+        order.cancelReason = reason;
+        order.cancelledAt = cancelledAt;
+        order.cancelledBy = "USER";
+        order.items.addAll(orderItems.findByOrder(id));
+        for (Domain.OrderItem item : order.items) products.restoreStock(item.productId, item.quantity);
+        return order;
     }
 
     @Transactional

@@ -11,7 +11,7 @@ public final class Domain {
 
     public enum Role { USER, MERCHANT }
     public enum StoreStatus { OPEN, CLOSED, TEMPORARILY_CLOSED }
-    public enum OrderStatus { PENDING_PAYMENT, PROCESSING, PENDING, COOKING, DELIVERING, COMPLETED }
+    public enum OrderStatus { PENDING_PAYMENT, PROCESSING, PENDING, COOKING, DELIVERING, COMPLETED, CANCELLED }
 
     public record Principal(String id, Role role) {}
 
@@ -118,6 +118,7 @@ public final class Domain {
     }
     public static final class Order {
         public String id, userId, storeId, addressId, remark, createdAt, paidAt;
+        public String cancelReason, cancelledAt, cancelledBy;
         public OrderStatus status;
         public BigDecimal itemSubtotal, packagingFee, total;
         // 金额快照扩展（批次①，契约 §3.5）：历史行/旧构造默认 0。
