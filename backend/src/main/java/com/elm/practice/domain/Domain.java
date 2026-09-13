@@ -198,7 +198,7 @@ public final class Domain {
         public Review() {}
     }
     public static final class Conversation {
-        public String id, orderId, userId, merchantId;
+        public String id, orderId, userId, merchantId, userNickname;
         public boolean userRead, merchantRead;
         public final List<Message> messages = new ArrayList<>();
         public Conversation(String id, String orderId, String userId, String merchantId) {
@@ -207,7 +207,7 @@ public final class Domain {
         public Conversation() {}
     }
     public static final class Message {
-        public String id, senderId, senderRole, content, createdAt;
+        public String id, conversationId, senderId, senderRole, content, createdAt;
         public Message(String id, String senderId, String senderRole, String content, String createdAt) {
             this.id=id; this.senderId=senderId; this.senderRole=senderRole; this.content=content; this.createdAt=createdAt;
         }

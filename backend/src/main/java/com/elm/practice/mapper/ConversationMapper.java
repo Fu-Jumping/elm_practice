@@ -8,6 +8,7 @@ import java.util.List;
 @Mapper
 public interface ConversationMapper {
     String COLS = "conversation_id AS id, order_id AS orderId, user_id AS userId, merchant_id AS merchantId, "
+            + "(SELECT nickname FROM users u WHERE u.user_id=conversations.user_id) AS userNickname, "
             + "user_read AS userRead, merchant_read AS merchantRead";
 
     @Select("SELECT " + COLS + " FROM conversations WHERE conversation_id = #{id}")

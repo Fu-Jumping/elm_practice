@@ -75,17 +75,20 @@ public class ExtensionService {
         return r;
     }
 
-    public List<Map<String,Object>> conversations(Domain.Principal principal) {
+    public List<Map<String,Object>> conversations(Domain.Principal principal, String orderId) {
         List<Domain.Conversation> list = principal.role() == Domain.Role.USER
                 ? conversations.listForUser(principal.id())
                 : conversations.listForMerchant(principal.id());
-        return list.stream().map(this::conversationView).toList();
+        return list.stream()
+                .filter(c -> orderId == null || orderId.isBlank() || orderId.equals(c.orderId))
+                .map(c -> conversationView(c, principal))
+                .toList();
     }
 
     public Map<String,Object> conversation(Domain.Principal principal, String id) {
         Domain.Conversation c = conversations.findById(id);
         if (c == null || !visible(c, principal)) throw ApiException.notFound("会话不存在");
-        return conversationView(c);
+        return conversationView(c, principal);
     }
 
     @Transactional
@@ -95,12 +98,12 @@ public class ExtensionService {
         String content = RequestUtil.required(req == null ? null : req.content, "content");
         if (content.length() > 1000) throw ApiException.badRequest("消息不能超过 1000 字");
         Domain.Message m = new Domain.Message(ids.nextId("msg"), principal.id(), principal.role().name(), content, Times.now());
+        m.conversationId = id;
         messages.insert(m);
-        c.messages.add(m);
         c.userRead = principal.role() == Domain.Role.USER;
         c.merchantRead = principal.role() == Domain.Role.MERCHANT;
         conversations.updateReadFlags(id, c.userRead, c.merchantRead);
-        return conversationView(c);
+        return conversationView(c, principal);
     }
 
     @Transactional
@@ -109,7 +112,7 @@ public class ExtensionService {
         if (c == null || !visible(c, principal)) throw ApiException.notFound("会话不存在");
         if (principal.role() == Domain.Role.USER) c.userRead = true; else c.merchantRead = true;
         conversations.updateReadFlags(id, c.userRead, c.merchantRead);
-        return conversationView(c);
+        return conversationView(c, principal);
     }
 
     /** 优惠配置视图（契约 §6.3 字段映射）；deliveryFee 只读来自店铺。 */
@@ -228,11 +231,39 @@ public class ExtensionService {
         return p.role() == Domain.Role.USER ? c.userId.equals(p.id()) : c.merchantId.equals(p.id());
     }
 
-    private Map<String,Object> conversationView(Domain.Conversation c) {
+    private Map<String,Object> conversationView(Domain.Conversation c, Domain.Principal principal) {
+        List<Domain.Message> allMessages = messages.findByConversation(c.id);
+        var messageViews = allMessages.stream().map(message -> {
+            var item = new LinkedHashMap<String,Object>();
+            item.put("messageId", message.id);
+            item.put("senderId", message.senderId);
+            item.put("senderRole", message.senderRole);
+            item.put("content", message.content);
+            item.put("createdAt", message.createdAt);
+            return item;
+        }).toList();
+        Domain.Message last = allMessages.isEmpty() ? null : allMessages.get(allMessages.size() - 1);
+        boolean read = principal.role() == Domain.Role.USER ? c.userRead : c.merchantRead;
+        String peerRole = principal.role() == Domain.Role.USER ? Domain.Role.MERCHANT.name() : Domain.Role.USER.name();
+        long unreadCount = read ? 0 : allMessages.stream().filter(message -> peerRole.equals(message.senderRole)).count();
+
         var v = new LinkedHashMap<String,Object>();
-        v.put("conversationId", c.id); v.put("orderId", c.orderId); v.put("userId", c.userId);
-        v.put("merchantId", c.merchantId); v.put("userRead", c.userRead); v.put("merchantRead", c.merchantRead);
-        v.put("messages", c.messages.isEmpty() ? messages.findByConversation(c.id) : c.messages);
+        v.put("conversationId", c.id);
+        v.put("orderId", c.orderId);
+        v.put("userId", c.userId);
+        v.put("userNickname", maskNickname(c.userNickname));
+        v.put("merchantId", c.merchantId);
+        v.put("userRead", c.userRead);
+        v.put("merchantRead", c.merchantRead);
+        v.put("unreadCount", unreadCount);
+        v.put("lastMessage", last == null ? "" : last.content);
+        v.put("updatedAt", last == null ? "" : last.createdAt);
+        v.put("messages", messageViews);
         return v;
+    }
+
+    private String maskNickname(String nickname) {
+        if (nickname == null || nickname.isBlank()) return "匿名用户";
+        return nickname.substring(0, 1) + "**";
     }
 }
