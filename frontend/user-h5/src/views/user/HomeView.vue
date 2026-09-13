@@ -180,12 +180,12 @@ function onPlaceholderClick(): void {
 }
 
 /**
- * 搜索框入口（PRD 7.16.1「首页-搜索框」：点击搜索框进入搜索结果页）。
- * 批次⑤ 前该入口为「暂未开放」占位，随 TODO-USER-005 落地演进为真入口；
- * 进入结果页时关键词为空 → 结果页只提示输入关键词、不发起请求（契约 §3.6）。
+ * 搜索框入口（PRD 7.16.1「首页-搜索框」：点击搜索框进入**搜索页**）。
+ * 历史：批次⑤ 前为「暂未开放」占位 → TODO-USER-005 曾直连结果页 → TODO-USER-107 按 PRD
+ * 改为先进搜索页（关键词输入 + 最近搜索 + 热门搜索），由搜索页提交后进结果页。
  */
 function goSearch(): void {
-  void router.push({ name: 'search' })
+  void router.push({ name: 'search-entry' })
 }
 
 // PRD 商家卡行：点击商家卡携带 storeId 进入商家详情
