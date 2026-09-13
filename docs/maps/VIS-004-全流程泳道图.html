@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>VIS-004 全流程泳道图</title>
+<style>
+  :root {
+    --brand: #ff5a1f;
+    --brand-deep: #ae3200;
+    --ink: #1f2329;
+    --ink-2: #5b6270;
+    --line: #e4e6eb;
+    --bg-soft: #fafbfc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #fff; color: var(--ink);
+    font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", sans-serif;
+    font-size: 12px; line-height: 1.45;
+  }
+  .canvas { width: 1260px; margin: 0 auto; padding: 26px 30px 30px; }
+  header { border-bottom: 2px solid var(--brand); padding-bottom: 10px; margin-bottom: 16px; }
+  h1 { margin: 0 0 5px; font-size: 22px; }
+  h1 small { font-size: 12px; font-weight: 400; color: var(--ink-2); margin-left: 8px; }
+  .scope { font-size: 11px; color: var(--ink-2); }
+  .scope b { color: var(--brand-deep); }
+
+  .swim { display: grid; grid-template-columns: repeat(6, 1fr); column-gap: 30px; }
+  .row { display: contents; }
+
+  .lanehead { padding: 6px 8px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 6px; text-align: center; font-weight: 700; font-size: 12px; }
+  .lanehead span { display: block; font-weight: 400; font-size: 10px; color: var(--ink-2); }
+
+  .seghead { grid-column: 1 / -1; margin: 16px 0 8px; padding: 6px 10px; border-left: 4px solid var(--brand); background: #fff6f1; border-radius: 4px; font-weight: 700; font-size: 13px; color: var(--brand-deep); }
+  .seghead em { font-style: normal; font-weight: 400; color: var(--ink-2); font-size: 11px; margin-left: 8px; }
+
+  .cell { position: relative; display: flex; align-items: center; padding: 2px 0; }
+  .box { width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; background: #fff; }
+  .box b { color: var(--brand-deep); }
+  .box .ep { display: block; font-size: 10px; color: var(--ink-2); font-family: Consolas, "Courier New", monospace; }
+  .box.p1 { border-style: dashed; border-color: #ffd2be; background: #fffaf7; }
+  .box.err { border-style: dashed; border-color: #f0b8b8; background: #fff8f8; }
+
+  .arrow-out::after { content: "→"; position: absolute; right: -22px; top: 50%; transform: translateY(-50%); color: var(--brand); font-size: 15px; font-weight: 700; }
+  .arrow-out-l::after { content: "←"; position: absolute; left: -22px; top: 50%; transform: translateY(-50%); color: var(--brand); font-size: 15px; font-weight: 700; }
+
+  .legend { display: flex; gap: 18px; font-size: 11px; color: var(--ink-2); margin: 10px 0 0; }
+  .legend i { display: inline-block; width: 26px; height: 0; border-top: 2px solid var(--brand); vertical-align: middle; margin-right: 5px; }
+  .legend i.dash { border-top-style: dashed; border-color: #ffd2be; }
+  .legend i.err { border-top-style: dashed; border-color: #f0b8b8; }
+
+  .wide { grid-column: 1 / -1; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: #fff; }
+  .wide h4 { margin: 0 0 8px; font-size: 12px; color: var(--brand-deep); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { border: 1px solid var(--line); border-radius: 18px; padding: 3px 9px; font-size: 11px; background: #fff; }
+  .chip em { font-style: normal; font-family: Consolas, monospace; color: var(--ink-2); }
+  .chip.err { border-style: dashed; border-color: #f0b8b8; background: #fff8f8; }
+
+  footer { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 9px; font-size: 10px; color: var(--ink-2); display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <header>
+    <h1>VIS-004 全流程泳道图<small>轻量外卖 · 用户端 H5 ↔ Java 后端 ↔ MySQL ↔ 商家端桌面后台</small></h1>
+    <div class="scope">
+      实线 = P0 主链路；<b>虚线 = 本期 P1/P2 扩展（2026-09-09 决议，已实施）</b>；红色虚线 = 异常与回滚分支。
+      真源：<code>docs/SRS-工程版.md</code>、<code>docs/backend/后端接口契约.md</code>（§3.5 计价与状态机、§7 事务与幂等）；配送由订单状态表达（CHG-002，无配送页与配送表）。
+    </div>
+    <div class="legend">
+      <span><i></i>P0 主线（实线）</span>
+      <span><i class="dash"></i>本期扩展支线（虚线）</span>
+      <span><i class="err"></i>异常 / 回滚分支（虚线）</span>
+      <span>①②③… 为执行顺序；箭头方向即调用方向</span>
+    </div>
+  </header>
+
+  <div class="swim">
+    <div class="row">
+      <div class="lanehead" style="grid-column:1">用户<span>移动端浏览器</span></div>
+      <div class="lanehead" style="grid-column:2">用户端前端<span>Vue 3 + Pinia + Axios</span></div>
+      <div class="lanehead" style="grid-column:3">Java 后端<span>Spring Boot 3.5.5 · :4000</span></div>
+      <div class="lanehead" style="grid-column:4">MySQL / 数据层<span>MySQL 8 · MyBatis</span></div>
+      <div class="lanehead" style="grid-column:5">商家端前端<span>React 18 + AntD 5</span></div>
+      <div class="lanehead" style="grid-column:6">商家<span>桌面浏览器 ≥1280px</span></div>
+    </div>
+
+    <!-- 段 1 -->
+    <div class="row"><div class="seghead" style="grid-column:1/-1">段 1 · 登录与下单（P0 主链路，含模拟支付与库存一致性支线）<em>库存检查与模拟支付属本期 P1，以虚线支线标注</em></div></div>
+
+    <div class="row">
+      <div class="cell arrow-out" style="grid-column:1"><div class="box">① 打开应用、浏览店铺与商品</div></div>
+      <div class="cell" style="grid-column:2"><div class="box">② 路由守卫检查会话；渲染首页 / 店铺 / 商品<span class="ep">GET /stores、GET /stores/{id}</span></div></div>
+    </div>
+    <div class="row">
+      <div class="cell arrow-out" style="grid-column:2"><div class="box">③ 提交登录、加购与地址<span class="ep">POST /auth/login · POST /cart/items（同店限制）· GET/POST /addresses</span></div></div>
+      <div class="cell" style="grid-column:3"><div class="box">④ 校验账号与角色；建立 Session（Cookie）；校验商品上下架与数量</div></div>
+    </div>
+    <div class="row">
+      <div class="cell arrow-out" style="grid-column:3"><div class="box">⑤ 读写账号、店铺、商品、购物车、地址</div></div>
+      <div class="cell" style="grid-column:4"><div class="box">⑥ <b>users / merchants / stores / products / categories / cart_lines / addresses</b></div></div>
+    </div>
+    <div class="row">
+      <div class="cell arrow-out" style="grid-column:2"><div class="box">⑦ 确认订单页提交下单<span class="ep">POST /orders（含 couponId、idempotencyKey）</span></div></div>
+      <div class="cell" style="grid-column:3"><div class="box">⑧ <b>单事务</b>：校验营业状态 / 上下架 / 库存 / 起送 → <b>七步优惠计价</b> → 扣库存 → 写订单头 + 明细 + 金额快照 → 清空购物车</div></div>
+    </div>
+    <div class="row">
+      <div class="cell arrow-out" style="grid-column:3"><div class="box">⑨ 事务提交（订单头、明细快照、购物车变更同时生效）</div></div>
+      <div class="cell" style="grid-column:4"><div class="box">⑩ <b>orders / order_items / cart_lines</b> 同事务写入；订单保存商品、地址与金额快照</div></div>
+    </div>
+    <div class="row">
+      <div class="cell" style="grid-column:2"><div class="box">⑫ 渲染订单：状态「待支付」+ 倒计时；跳转支付页</div></div>
+      <div class="cell arrow-out-l" style="grid-column:3"><div class="box">⑪ 返回订单（<b>PENDING_PAYMENT</b> + payDeadline，金额以后端计价为准）</div></div>
+    </div>
+    <div class="row">
+      <div class="cell arrow-out" style="grid-column:2"><div class="box p1">⑭ 支付页倒计时结束前「立即支付」<span class="ep">POST /orders/{orderId}/payment（本期 P1）</span></div></div>
+      <div class="cell" style="grid-column:3"><div class="box p1">⑮ 置「待接单」并写订单通知；<b>库存只在⑧扣减一次</b>，支付不重复扣减也不回补</div></div>
+    </div>
+
+    <div class="row"><div class="seghead" style="grid-column:1/-1;background:#fff8f8;border-left-color:#d9534f;color:#a33">P0 必画异常分支（虚线）<em>未登录 / 越权、价格变化、事务失败、重复请求</em></div></div>
+    <div class="row">
+      <div class="cell" style="grid-column:3"><div class="box err">未登录访问受保护接口返回 <b>401</b>；访问非本人订单 / 非本店资源返回 <b>403</b>（前端按守卫跳登录）</div></div>
+      <div class="cell arrow-out-l" style="grid-column:2"><div class="box err">前端按 401 引导登录；按 403 提示无权访问</div></div>
+    </div>
+    <div class="row">
+      <div class="cell arrow-out" style="grid-column:3"><div class="box err">价格变化：后端按当前商品价与优惠配置<b>重新计价</b>，前端传入金额只作提示（PRD 7.4）</div></div>
+      <div class="cell" style="grid-column:4"><div class="box err">以数据库当前数据为准（商品价、促销、券门槛）</div></div>
+    </div>
+    <div class="row">
+      <div class="cell" style="grid-column:4"><div class="box err">事务失败 → <b>整体回滚</b></div></div>
+      <div class="cell arrow-out-l" style="grid-column:3"><div class="box err">购物车保持原状，不出现半成功；返回 <b>400 / 409</b> 并提示</div></div>
+    </div>
+    <div class="row">
+      <div class="cell" style="grid-column:3"><div class="box err">重复请求：<b>idempotencyKey</b> + 条件更新（<code>stock &gt;= quantity</code>、券 <code>used=false</code>）保证只生效一次</div></div>
+      <div class="cell" style="grid-column:4"><div class="box err">并发下同一库存 / 同一红包只允许一个订单成功</div></div>
+    </div>
+
+    <!-- 段 2 -->
+    <div class="row"><div class="seghead" style="grid-column:1/-1">段 2 · 商家处理（P0 主线 + 商家订单推进支线）<em>接单 / 制作 / 配送 / 完成属本期 P1，以虚线标注；配送进度由订单状态表达</em></div></div>
+
+    <div class="row">
+      <div class="cell" style="grid-column:6"><div class="box">① 商家登录后台</div></div>
+      <div class="cell arrow-out-l" style="grid-column:5"><div class="box">② 登录页与会话守卫（角色 = 商家）</div></div>
+    </div>
+    <div class="row">
+      <div class="cell arrow-out" style="grid-column:5"><div class="box">③ 查询本店订单与经营数据<span class="ep">POST /auth/login · GET /merchant/orders · GET /merchant/overview、/merchant/analytics</span></div></div>
+      <div class="cell" style="grid-column:3"><div class="box">④ 校验商家身份，按 <b>storeId</b> 过滤本店数据（支付前订单对商家不可见）</div></div>
+    </div>
+    <div class="row">
+      <div class="cell arrow-out" style="grid-column:3"><div class="box">⑤ 查询本店订单、（可选）聚合统计只计「已支付且未取消」的有效订单</div></div>
+      <div class="cell" style="grid-column:4"><div class="box">⑥ <b>orders / order_items</b>（商家视图不含他店数据）</div></div>
+    </div>
+    <div class="row">
+      <div class="cell arrow-out" style="grid-column:5"><div class="box p1">⑦ 推进订单状态：待接单 → 制作中 → 配送中 → 已完成<span class="ep">PATCH /merchant/orders/{orderId}/status（跳级 409、重复提交幂等）</span></div></div>
+      <div class="cell" style="grid-column:3"><div class="box p1">⑧ 校验当前状态与订单归属，只允许按顺序推进；成功后写订单通知</div></div>
+    </div>
+    <div class="row">
+      <div class="cell arrow-out" style="grid-column:3"><div class="box p1">⑨ 更新订单状态（同事务记录通知）</div></div>
+      <div class="cell" style="grid-column:4"><div class="box p1">⑩ <b>orders.status</b> 落库</div></div>
+    </div>
+    <div class="row">
+      <div class="cell" style="grid-column:2"><div class="box">⑫ 用户端重新查询即见新状态与时间线<span class="ep">GET /orders/{orderId}</span></div></div>
+      <div class="cell arrow-out-l" style="grid-column:3"><div class="box">⑪ 返回最新状态（跨端同步：两端读同一份订单数据）</div></div>
+    </div>
+
+    <!-- 段 3 -->
+    <div class="row"><div class="seghead" style="grid-column:1/-1">段 3 · 扩展闭环（本期 P1/P2 全项，均落在下表能力 ↔ 接口 ↔ 数据三层）<em>2026-09-09 决议：P1 全项 + P2 保留项（简化取消订单、图片上传、设置与 FAQ）</em></div></div>
+    <div class="row">
+      <div class="wide" style="grid-column:1/-1">
+        <h4>扩展能力（已实施 / 进行中）与数据落点</h4>
+        <div class="chips">
+          <span class="chip">模拟支付与库存一致性 <em>POST /orders/{id}/payment</em></span>
+          <span class="chip">商家订单推进与跨端同步 <em>PATCH /merchant/orders/{id}/status</em></span>
+          <span class="chip">优惠与统一计价 <em>PUT /merchant/promotions</em> → <b>promotions / promotion_tiers</b> + 订单金额快照</span>
+          <span class="chip">评价与商家回复 <em>POST /orders/{id}/review · GET /stores/{id}/reviews · POST /merchant/reviews/{id}/reply</em> → <b>reviews</b></span>
+          <span class="chip">双端消息与通知 <em>GET /conversations · /me/notifications · /me/notifications/unread-count</em> → <b>conversations / messages</b></span>
+          <span class="chip">搜索排序与分页 <em>GET /search</em>（综合 / 销量 / 距离，page + size）</span>
+          <span class="chip">收藏 / 会员 / 红包与天天必爆 <em>/me/favorites · /me/member · /me/coupons、/available、/blast</em> → <b>coupons / coupon_packs</b></span>
+          <span class="chip">商品规格 <em>PUT /merchant/products/{id}/specifications</em>；购物车行唯一范围 = 用户 + 店铺 + 商品 + 规格</span>
+          <span class="chip">简化取消订单 <em>POST /orders/{id}/cancel</em>：同事务置已取消并<b>回补库存</b>，重复取消幂等</span>
+          <span class="chip">图片上传：≤2MB，商品 1 张 / 评价 3 张，静态映射 <em>/uploads/**</em></span>
+          <span class="chip">设置与 FAQ；商家店铺设置（营业状态、联系电话、配送费）<em>PATCH /merchant/store</em></span>
+          <span class="chip">配送由订单状态表达（CHG-002）：<b>不建配送页、不建配送单与配送表</b>，配送中为课程演示状态</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>VIS-004 全流程泳道图 · 泳道：用户 / 用户端前端 / Java 后端 / MySQL 数据层 / 商家端前端 / 商家 · 三段：登录与下单、商家处理、扩展闭环</span>
+    <span>生成日期 2026-09-13 · 可编辑源文件：<code>docs/maps/VIS-004-全流程泳道图.html</code></span>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>VIS-001 全流程产品结构图</title>
+<style>
+  :root {
+    --brand: #ff5a1f;
+    --brand-deep: #ae3200;
+    --ink: #1f2329;
+    --ink-2: #5b6270;
+    --line: #e4e6eb;
+    --bg-soft: #fafbfc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #ffffff;
+    color: var(--ink);
+    font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Source Han Sans SC", sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .canvas { width: 1260px; margin: 0 auto; padding: 28px 32px 32px; background: #ffffff; }
+  header { border-bottom: 2px solid var(--brand); padding-bottom: 12px; margin-bottom: 20px; }
+  h1 { margin: 0 0 6px; font-size: 24px; letter-spacing: .5px; }
+  h1 small { font-size: 13px; font-weight: 400; color: var(--ink-2); margin-left: 10px; }
+  .scope { font-size: 12px; color: var(--ink-2); }
+  .scope b { color: var(--brand-deep); }
+
+  .layer { display: grid; grid-template-columns: 132px 1fr; gap: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; }
+  .layer > .tag { background: var(--bg-soft); border-right: 1px solid var(--line); padding: 12px 10px; display: flex; flex-direction: column; justify-content: center; }
+  .tag .no { font-size: 12px; color: var(--brand); font-weight: 700; letter-spacing: 1px; }
+  .tag .name { font-size: 14px; font-weight: 700; margin-top: 2px; }
+  .tag .tech { font-size: 11px; color: var(--ink-2); margin-top: 4px; line-height: 1.4; }
+  .layer > .body { padding: 12px 14px; }
+  .rowtitle { font-size: 12px; color: var(--ink-2); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { border: 1px solid var(--line); border-radius: 20px; padding: 3px 10px; font-size: 12px; background: #fff; }
+  .chip.hot { border-color: #ffd2be; background: #fff6f1; color: var(--brand-deep); }
+  .chip.grp { border: 0; background: transparent; padding-left: 0; font-weight: 700; color: var(--ink); }
+
+  .conn { display: flex; align-items: center; gap: 10px; padding: 6px 0 6px 132px; color: var(--ink-2); font-size: 12px; }
+  .conn .bar { width: 2px; height: 18px; background: var(--brand); border-radius: 2px; }
+  .conn .lbl { background: #fff6f1; border: 1px dashed #ffd2be; color: var(--brand-deep); border-radius: 20px; padding: 2px 10px; }
+
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .deliver { border: 1px dashed var(--line); border-radius: 8px; padding: 10px 12px; }
+  .deliver h4 { margin: 0 0 6px; font-size: 12px; color: var(--brand-deep); }
+  .deliver ul { margin: 0; padding-left: 16px; font-size: 12px; color: var(--ink-2); }
+  .deliver li { margin: 2px 0; }
+  footer { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 10px; font-size: 11px; color: var(--ink-2); display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <header>
+    <h1>VIS-001 全流程产品结构图<small>轻量外卖（课程项目 · 用户端 H5 + 商家端桌面后台 + Java 后端）</small></h1>
+    <div class="scope">
+      本期范围（2026-09-09 范围决议）：除平台管理员外全部 P1 与 P2 —— P1 全项，P2 保留项（简化取消订单、图片上传、设置与 FAQ）；
+      <b>配送由订单状态表达（CHG-002，不建配送页与配送表）</b>。真源：<code>docs/PRD.md</code> §6.1 / <code>docs/SRS-工程版.md</code> / <code>docs/backend/后端接口契约.md</code>。
+    </div>
+  </header>
+
+  <!-- ① 用户端 -->
+  <div class="layer">
+    <div class="tag">
+      <span class="no">① 用户端</span>
+      <span class="name">移动 H5</span>
+      <span class="tech">Vue 3 + Vite + Pinia + Vue Router + Axios<br /><code>frontend/user-h5/</code></span>
+    </div>
+    <div class="body">
+      <div class="rowtitle">功能域（PRD 7.2–7.10、7.16.1）</div>
+      <div class="chips">
+        <span class="chip">账号（注册 / 登录 / 个人信息）</span>
+        <span class="chip">浏览与搜索（首页 / 搜索 / 分类商家列表）</span>
+        <span class="chip">商家与商品（店铺详情 / 点餐区 / 规格选择）</span>
+        <span class="chip">购物车（同店限制 / 抽屉）</span>
+        <span class="chip">地址管理</span>
+        <span class="chip">订单（确认 / 支付 / 列表 / 详情含时间线 / 取消 / 再来一单）</span>
+        <span class="chip">评价（评价订单页 / 店铺评价）</span>
+        <span class="chip">消息（通知 / 会话 / 聊天详情）</span>
+        <span class="chip hot">用户资产（收藏 / 会员权益 / 红包与天天必爆）</span>
+        <span class="chip">设置与 FAQ</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="conn"><span class="bar"></span><span class="lbl">两端共用同一套前端公共能力与后端 RESTful 接口</span></div>
+
+  <!-- ② 商家端 -->
+  <div class="layer">
+    <div class="tag">
+      <span class="no">② 商家端</span>
+      <span class="name">桌面 Web 后台</span>
+      <span class="tech">React 18 + Vite + Ant Design 5<br />≥1280px，不做移动端<br /><code>frontend/merchant-admin/</code></span>
+    </div>
+    <div class="body">
+      <div class="rowtitle">功能域（PRD 7.11–7.14、7.16.2）</div>
+      <div class="chips">
+        <span class="chip">账号（注册 / 登录 / 会话）</span>
+        <span class="chip">运营概览（今日经营数据 / 待处理事项）</span>
+        <span class="chip">订单（列表 / 已取消筛选 / 详情含红包抵扣 / 状态推进）</span>
+        <span class="chip">商品与分类（含上下架、分类绑定商品）</span>
+        <span class="chip hot">商品规格维护</span>
+        <span class="chip">店铺设置（营业状态、联系电话、配送费）</span>
+        <span class="chip hot">优惠配置（满减阶梯 / 新客立减 / 免配送费门槛 / 会员折扣）</span>
+        <span class="chip hot">评价管理与回复</span>
+        <span class="chip hot">消息（顾客会话 / 聊天详情）</span>
+        <span class="chip hot">数据统计（只统计有效订单）</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="conn"><span class="bar"></span><span class="lbl">页面 → 服务层 → 接口（无业务规则直连数据库）</span></div>
+
+  <!-- ③ 前端公共能力 -->
+  <div class="layer">
+    <div class="tag">
+      <span class="no">③ 前端公共能力</span>
+      <span class="name">两端共用</span>
+      <span class="tech">约定与适配层<br />真源：前端架构设计与工程约定</span>
+    </div>
+    <div class="body">
+      <div class="rowtitle">横切能力</div>
+      <div class="chips">
+        <span class="chip">路由与守卫（登录态 / 角色 / redirect）</span>
+        <span class="chip">状态管理（Pinia / 组件状态）</span>
+        <span class="chip">Axios 适配层（端点集中 <code>endpoints.ts</code>）</span>
+        <span class="chip hot">Mock / real 双模式切换（真实后端联调开关）</span>
+        <span class="chip">响应归一化（<code>normalizers.ts</code>：状态文案、金额明细、时间）</span>
+        <span class="chip">金额明细唯一出口 <code>buildAmountLines</code>（CHG-004）</span>
+        <span class="chip">设计规范与令牌（品牌橙 #ff5a1f，exact 复刻约定）</span>
+        <span class="chip">前端测试（Vitest：用户端 301 用例 / 商家端 20 用例）</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="conn"><span class="bar"></span><span class="lbl">HTTP(S) · RESTful <code>/api/v1/**</code> · JSON · 会话 Cookie（HttpSession，<code>withCredentials</code>）</span></div>
+
+  <!-- ④ 后端服务 -->
+  <div class="layer">
+    <div class="tag">
+      <span class="no">④ 后端服务</span>
+      <span class="name">单体分层应用</span>
+      <span class="tech">Java 17 + Spring Boot 3.5.5 + MyBatis 3.0.4<br />Controller → Service → Mapper<br />端口 4000<br /><code>backend/</code></span>
+    </div>
+    <div class="body">
+      <div class="rowtitle">P0 六类能力 + 本期扩展能力（均已实施，非接口预留）</div>
+      <div class="chips">
+        <span class="chip">认证与会话（注册 / 登录 / 角色权限 / Session+Cookie）</span>
+        <span class="chip">商家与商品（店铺、分类、商品、上下架）</span>
+        <span class="chip">购物车（同店限制、行唯一范围 = 用户+店铺+商品+规格）</span>
+        <span class="chip">地址管理</span>
+        <span class="chip hot">订单事务（单事务内：营业状态与库存校验 → 七步优惠计价 → 扣库存 → 订单头/明细/金额快照 → 清空购物车；失败整体回滚）</span>
+        <span class="chip hot">优惠与统一计价（七步：小计 → 满减取最大档 → 新客立减 → 免配送费门槛 → 会员折扣 → 红包 → 实付不小于 0）</span>
+        <span class="chip hot">订单状态机与跨端同步（待支付 → 待接单 → 制作中 → 配送中 → 已完成；已取消；跳级 409、重复幂等）</span>
+        <span class="chip hot">取消订单（同事务回补库存）</span>
+        <span class="chip hot">评价与商家回复</span>
+        <span class="chip hot">双端消息与通知（会话 / 消息 / 已读、三类通知、用户端与商家端未读分离）</span>
+        <span class="chip hot">搜索（商家名 / 商品名 / 分类，综合·销量·距离排序与分页）</span>
+        <span class="chip hot">收藏 / 会员 / 红包与天天必爆（一单一红包、行锁 + 条件更新核销）</span>
+        <span class="chip hot">图片上传与静态映射</span>
+        <span class="chip hot">统计聚合（只统计有效订单）</span>
+        <span class="chip">统一响应与统一异常（400 / 401 / 403 / 404 / 409）</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="conn"><span class="bar"></span><span class="lbl">MyBatis 映射 · SQL 事务（<code>@Transactional</code>、条件更新 / 行锁 <code>FOR UPDATE</code>）</span></div>
+
+  <!-- ⑤ 数据库 -->
+  <div class="layer">
+    <div class="tag">
+      <span class="no">⑤ 数据库</span>
+      <span class="name">MySQL 8</span>
+      <span class="tech">建表 / 种子 / 迁移脚本双份同步<br /><code>backend/database/**</code> + <code>resources/db/**</code><br />测试库 <code>elm_practice_test</code></span>
+    </div>
+    <div class="body">
+      <div class="rowtitle">已建表（与建表脚本一致；表名真源：<code>database/schema/schema.sql</code>）</div>
+      <div class="chips">
+        <span class="chip grp">账号与店铺：</span>
+        <span class="chip">users</span>
+        <span class="chip">merchants</span>
+        <span class="chip">stores</span>
+        <span class="chip grp">商品：</span>
+        <span class="chip">categories</span>
+        <span class="chip">products</span>
+        <span class="chip grp">交易：</span>
+        <span class="chip">cart_lines</span>
+        <span class="chip">addresses</span>
+        <span class="chip">orders（含金额快照与状态）</span>
+        <span class="chip">order_items（下单商品与地址快照）</span>
+        <span class="chip grp">扩展（本期）：</span>
+        <span class="chip">promotions</span>
+        <span class="chip">promotion_tiers</span>
+        <span class="chip">coupons</span>
+        <span class="chip">coupon_packs</span>
+        <span class="chip">reviews</span>
+        <span class="chip">conversations</span>
+        <span class="chip">messages</span>
+        <span class="chip">id_sequence</span>
+      </div>
+      <div class="rowtitle" style="margin-top:8px">随批次建表（本期进行中，未收口前如实标注）：收藏、通知、会员相关表；配送不建表（CHG-002）</div>
+    </div>
+  </div>
+
+  <div class="conn"><span class="bar"></span><span class="lbl">成果出口：可运行产品 + 可复跑的测试与部署证据</span></div>
+
+  <!-- ⑥ 工程交付 -->
+  <div class="layer">
+    <div class="tag">
+      <span class="no">⑥ 工程交付</span>
+      <span class="name">质量与材料</span>
+      <span class="tech">课程硬节点：9/15 冻结、9/16 交叉验收、9/17–18 最终验收</span>
+    </div>
+    <div class="body">
+      <div class="duo">
+        <div class="deliver">
+          <h4>测试与联调</h4>
+          <ul>
+            <li>用户端 Vitest 301 用例、商家端 20 用例；后端 JUnit + 集成测试（连服务器测试库）</li>
+            <li>Mock / real 双模式：替身与真实后端计价逐分一致（交叉验证用例锁定）</li>
+            <li>TDD 红绿纪律：<code>test:</code> 仅测试代码先红 → <code>feat:</code> 转绿</li>
+          </ul>
+        </div>
+        <div class="deliver">
+          <h4>CI 与部署</h4>
+          <ul>
+            <li>CI 5 个作业：提交规范检查 / 用户端 / 商家端 / 后端构建 / 后端集成测试</li>
+            <li>发布脚本 + 回滚点 + 联调冒烟（服务器用户端 4001、后端 4000）</li>
+            <li>演示数据重置脚本：重置后可复现</li>
+          </ul>
+        </div>
+        <div class="deliver">
+          <h4>需求与证据链</h4>
+          <ul>
+            <li>PRD v1.3 → SRS（交付版 / 工程版）→ 契约 → TDD 用例矩阵</li>
+            <li>变更台账 CHG-001~004；口径变更同一 PR 同步（R7）</li>
+            <li>缺陷台账、问题记录、raw 留痕与每日记录</li>
+          </ul>
+        </div>
+        <div class="deliver">
+          <h4>展示材料</h4>
+          <ul>
+            <li>报告、PPT、演示脚本、截图包与录屏（9/15 冻结后制作）</li>
+            <li>系统说明图：VIS-001 产品结构图（本图）、VIS-002 技术架构图、VIS-003 ER 图、VIS-004 泳道图</li>
+            <li>交叉验收包（匿名化：不写姓名与组号）</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>VIS-001 全流程产品结构图 · 六层：用户端 / 商家端 / 前端公共能力 / 后端服务 / 数据库 / 工程交付</span>
+    <span>生成日期 2026-09-13 · 可编辑源文件：<code>docs/maps/VIS-001-全流程产品结构图.html</code></span>
+  </footer>
+</div>
+</body>
+</html>
