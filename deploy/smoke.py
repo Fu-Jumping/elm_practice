@@ -51,14 +51,30 @@ try:
     call('u','PATCH','/cart/items/'+cart[0]['cartLineId'],{'quantity':99},409)
     body={'storeId':sid,'addressId':a['addressId'],'expectedTotal':999,'idempotencyKey':'audit-'+stamp,'remark':'工程验收合成订单'}
     order=call('u','POST','/orders',body); oid=order['orderId']
-    assert float(order['total'])==60 and order['status']=='PENDING_PAYMENT'
+    # 2026-09-13：金额断言改为**按契约 §3.5 公式核对**，不再硬编码固定值。
+    # 原因：批次① 七步计价接入后（后端 PR #48），实付含配送费与各项优惠，
+    # 原 `total == 60`（= 小计 58 + 打包费 2，无配送费/无优惠的旧口径）必然失效；
+    # 硬编码金额也会随计价规则或店铺配置变化而反复过期（不把固定演示数值当真实数据）。
+    subtotal=float(order.get('itemSubtotal') or sum(float(i.get('unitPrice',0))*float(i.get('quantity',0)) for i in order.get('items',[])))
+    packaging=float(order.get('packagingFee') or 0)
+    delivery=float(order.get('deliveryFee') or 0)
+    def _amount(key): return float(order.get(key) or 0)
+    expected_total=(subtotal - _amount('fullReductionAmount') - _amount('newCustomerAmount')
+                    - _amount('couponAmount') - _amount('memberDiscountAmount')
+                    + delivery - _amount('deliveryFeeDiscount') + packaging)
+    assert abs(subtotal-58)<0.01, subtotal  # 脚本自建商品：2 × ¥29
+    assert abs(float(order['total'])-expected_total)<=0.01, (order['total'], expected_total)
+    assert float(order['total'])>=0, order['total']
+    assert order['status']=='PENDING_PAYMENT'
     assert call('u','POST','/orders',body)['orderId']==oid
     assert call('u','GET','/cart?storeId='+sid)==[]
     assert call('m','GET','/merchant/products/'+pid)['stock']==1
     call('m','GET','/merchant/orders/'+oid,expected=404)
     assert call('u','POST','/orders/'+oid+'/payment',{'success':False})['status']=='PENDING_PAYMENT'
-    assert call('u','POST','/orders/'+oid+'/payment',{'success':True})['status']=='PROCESSING'
-    assert call('u','POST','/orders/'+oid+'/payment',{'success':True})['status']=='PROCESSING'
+    # 2026-09-13：支付成功即「待接单」`PENDING`（契约 §3.5 定稿、后端 PR #51 修正状态机；
+    # 原断言 `PROCESSING` 为 P0 阶段遗留口径，已随该修正作废）
+    assert call('u','POST','/orders/'+oid+'/payment',{'success':True})['status']=='PENDING'
+    assert call('u','POST','/orders/'+oid+'/payment',{'success':True})['status']=='PENDING'
     assert call('m','GET','/merchant/orders/'+oid)['orderId']==oid
     call('m','PATCH','/merchant/orders/'+oid+'/status',{'status':'COMPLETED'},409)
     for state in ('PENDING','PENDING','COOKING','DELIVERING','COMPLETED'):
