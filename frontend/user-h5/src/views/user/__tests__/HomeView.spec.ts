@@ -32,6 +32,19 @@ function stripImages<T>(data: T): T {
 const dispatchStripped: typeof mockDispatch = async (config) =>
   stripImages(await actualMocks.mockDispatch(config))
 
+/** SHOW-QA-005 复现用：把 m002（肯德基，种子 5 个商品）的商品截断为 2 个，构造「不足三张」的商家卡 */
+const TWO_PRODUCT_STORE = 'm002'
+const dispatchTwoProducts: typeof mockDispatch = async (config) => {
+  const res = await actualMocks.mockDispatch(config)
+  if ((config.url ?? '').includes(`/stores/${TWO_PRODUCT_STORE}/products`)) {
+    const data = res.payload.data
+    if (Array.isArray(data)) {
+      return { ...res, payload: { ...res.payload, data: data.slice(0, 2) } }
+    }
+  }
+  return res
+}
+
 /** T60-T62 用定位跳转：自建 router 并暴露实例供断言 */
 let routerInstance: ReturnType<typeof createRouter>
 function routerPlugin() {
@@ -62,6 +75,8 @@ function routerPlugin() {
  *     （PRD 7.16.1：预览来自商家商品接口；图片为空用占位图；口径演进见 raw 用户端-1428.md）
  * T67/T68 real 形状图片兜底（2026-09-08）：接口 image 为空时首页店招/预览商品图走演示映射
  *     （与详情页同一 utils/demoImages 兜底链；缺陷由 real 模式冒烟暴露，mock 填图曾掩盖）
+ * T72/T72b 商品图羽化条件（2026-09-13，SHOW-QA-005）：右缘渐隐仅在展示 3 张（右侧有溢出）时渲染，
+ *     不足三张时不渲染（负责人 9/10 走查：仅 2 张时仍渲染羽化，视觉像被裁切）
  */
 describe('HomeView（首页 P0）', () => {
   const messages: string[] = []
@@ -172,6 +187,30 @@ describe('HomeView（首页 P0）', () => {
     expect(firstImg.attributes('src')).toContain('/demo-images/product-m002-01.jpg')
     // 空态兜底：无商品也不出现 undefined
     expect(wrapper.text()).not.toContain('undefined')
+  })
+
+  // SHOW-QA-005（负责人 2026-09-10 走查；问题记录 docs/testing/问题记录/2026-09-10-首页商家卡片商品图羽化.md）
+  // 口径：右缘渐隐用于暗示「右侧还有更多商品」（盖住溢出的第 3 个），因此只有展示 3 张时渲染；
+  // 不足三张（右侧已无更多内容）时不得渲染，否则视觉上像被裁切（PRD 7.2 商品图按实际数量展示）。
+  it('T72 商品图三张（右侧仍有溢出内容）时渲染右缘渐隐', async () => {
+    const wrapper = mountHome()
+    await vi.waitFor(() => expect(wrapper.findAll('.merchant-card')).toHaveLength(5), {
+      timeout: 2000,
+    })
+    const kfc = wrapper.findAll('.merchant-card').find((c) => c.text().includes('肯德基'))!
+    await vi.waitFor(() => expect(kfc.findAll('.product-cell')).toHaveLength(3), { timeout: 2000 })
+    expect(kfc.find('.product-fade').exists()).toBe(true)
+  })
+
+  it('T72b 商品图仅两张（右侧无更多内容）时不渲染右缘渐隐（SHOW-QA-005）', async () => {
+    vi.mocked(mockDispatch).mockImplementation(dispatchTwoProducts)
+    const wrapper = mountHome()
+    await vi.waitFor(() => expect(wrapper.findAll('.merchant-card')).toHaveLength(5), {
+      timeout: 2000,
+    })
+    const kfc = wrapper.findAll('.merchant-card').find((c) => c.text().includes('肯德基'))!
+    await vi.waitFor(() => expect(kfc.findAll('.product-cell')).toHaveLength(2), { timeout: 2000 })
+    expect(kfc.find('.product-fade').exists()).toBe(false)
   })
 
   // T67/T68（2026-09-08 real 模式冒烟发现，负责人报"店图/食物图没了"）：mock 数据层填图掩盖了
