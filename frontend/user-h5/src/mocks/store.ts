@@ -17,7 +17,8 @@ const THUMB_3 = '/design-assets/首页-精细/product-thumb-3.png'
 // previewProducts 已于 2026-09-07 从 mock 列表移除——对齐真实后端 /stores 响应（无该字段），
 // 首页商品预览改由前端从商品接口聚合（PRD 7.16.1：预览来自商家商品接口，用例 T46）
 // m003 刻意缺配，供"字段缺失整块隐藏"用例（T8）与降级路径验证
-const STORES: StoreSummary[] = [
+/** 店铺种子（m001–m005）：搜索域 mock 复用（2026-09-13 TODO-USER-005） */
+export const STORES: StoreSummary[] = [
   {
     storeId: 'm001',
     image: '/demo-images/store-m001.jpg',
@@ -164,7 +165,8 @@ const PRODUCTS_M002: Product[] = [
 ]
 
 // 其余店铺演示分类/商品（数量精简，满足浏览链路演示与 T13/T14/T16 用例）
-const CATEGORIES_BY_STORE: Record<string, StoreCategory[]> = {
+/** 各店分类（店铺自身 categories）：搜索的分类条件与分类商家列表复用 */
+export const CATEGORIES_BY_STORE: Record<string, StoreCategory[]> = {
   m001: [
     { categoryId: 'c201', name: '招牌' },
     { categoryId: 'c202', name: '配菜' },
@@ -196,7 +198,8 @@ const PRODUCTS_GENERIC: Product[] = [
   { productId: 'p209', image: '/demo-images/product-m005-02.jpg', storeId: 'm005', categoryId: 'c502', name: '手切鲜羊肉', price: 46, stock: 18, onSale: true },
 ]
 
-const ALL_PRODUCTS: Product[] = [
+/** 全部商品种子：搜索的「商品名命中」与商品结果复用 */
+export const ALL_PRODUCTS: Product[] = [
   ...PRODUCTS_M002.map((p) => ({
     ...p,
     monthlySalesText: p.productId === 'p101' ? '月售1200+' : undefined,

@@ -14,6 +14,7 @@ import { messageMocks } from './message'
 import { favoriteMocks } from './favorite'
 import { memberMocks } from './member'
 import { couponMocks } from './coupon'
+import { searchMocks } from './search'
 
 export interface MockResponse<T = unknown> {
   status: number
@@ -42,6 +43,7 @@ const handlers = new Map<string, MockHandler>([
   ...Object.entries(favoriteMocks),
   ...Object.entries(memberMocks),
   ...Object.entries(couponMocks),
+  ...Object.entries(searchMocks),
 ])
 
 /** 动态路径注册表：含 `:param` 段的 key 在加载期拆解为分段模板，请求期逐段比对 */

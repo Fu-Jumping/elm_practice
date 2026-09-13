@@ -399,3 +399,30 @@ export interface CouponBlastResult {
   tierIndex: number
   free: boolean
 }
+
+/** 搜索排序取值（契约 §3.6 定稿：综合 / 销量 / 距离，默认综合） */
+export type SearchSort = '综合' | '销量' | '距离'
+
+/** 排序选项顺序（搜索头部与筛选栏共用，契约 §3.6） */
+export const SEARCH_SORT_OPTIONS: SearchSort[] = ['综合', '销量', '距离']
+
+/**
+ * 分页列表对象（契约 §1.3 的列表约定唯一例外）：
+ * 请求与响应统一 `page`/`size`，默认 `page=1&size=10`，字段为 list/page/size/total。
+ */
+export interface PagedList<T> {
+  list: T[]
+  page: number
+  size: number
+  total: number
+}
+
+/**
+ * 搜索结果（契约 §3.6）：同时返回商家与商品汇总。
+ * 排序口径（2026-09-09 定稿）：综合 = 销量优先、评分次之；销量 = monthlySales 倒序；
+ * 距离 = 种子固定字段 distanceKm 升序（不引入地图与定位服务）。
+ */
+export interface SearchResult {
+  merchants: PagedList<StoreSummary>
+  products: PagedList<Product>
+}

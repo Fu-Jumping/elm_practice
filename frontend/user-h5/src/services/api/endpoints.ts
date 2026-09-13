@@ -17,6 +17,10 @@ export const endpoints = {
     categories: (storeId: string) => `/stores/${storeId}/categories`,
     products: (storeId: string) => `/stores/${storeId}/products`,
   },
+  // 搜索（契约 §3.6）：关键词搜索同时返回商家与商品汇总；排序 综合/销量/距离；分页 page/size
+  search: {
+    query: '/search',
+  },
   cart: {
     list: '/cart',
     add: '/cart/items',
