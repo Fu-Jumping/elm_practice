@@ -331,6 +331,35 @@ test.describe('保真度巡检 · 结构断言（通栏无壳 / 按稿圆角 / �
   }
 })
 
+test.describe('保真度巡检 · 桌面预览壳宽（SHOW-QA-002）', () => {
+  // SHOW-QA-002（问题记录 docs/testing/问题记录/2026-09-08-用户端页面壳430px居中失效.md）：
+  // `.app-shell` 的 `max-width: 430px` 被 postcss-px-to-viewport（viewportWidth 390）换算成 110.256vw，
+  // 宽度上限随视口放大失效（390 视口 429.998px、1280 视口 1411px），桌面预览的 430px 居中约束形同虚设。
+  // 期望：桌面视口（>430）下壳宽恒为 430px 且水平居中；移动端 320–430 不受影响（上限大于视口，不会触发）。
+  test('桌面 1280 视口 · 壳宽应为 430px 且水平居中（当前实现随视口放大而失效）', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.goto('/')
+    await page.waitForSelector('.merchant-card, .home-empty', { timeout: 15_000 })
+
+    const metrics = await page.evaluate(() => {
+      const shell = document.querySelector('.app-shell') as HTMLElement
+      const rect = shell.getBoundingClientRect()
+      return {
+        shellWidth: +rect.width.toFixed(2),
+        shellLeft: +rect.left.toFixed(2),
+        viewportWidth: window.innerWidth,
+      }
+    })
+
+    expect(metrics.shellWidth, '桌面预览壳宽应为 430px（而非随视口放大）').toBeCloseTo(430, 1)
+    const expectedLeft = (metrics.viewportWidth - 430) / 2
+    expect(
+      Math.abs(metrics.shellLeft - expectedLeft),
+      '壳应水平居中（左缘 = (视口宽 - 430) / 2）',
+    ).toBeLessThanOrEqual(1)
+  })
+})
+
 test.describe('保真度巡检 · 多视口断言（320 / 360 / 375 / 390 / 430）', () => {
   for (const viewport of VIEWPORTS) {
     test(`视口 ${viewport.width}×${viewport.height} · 无横向溢出 / 壳宽 / 底栏贴底 / 文字不裁切`, async ({
