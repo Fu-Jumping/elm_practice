@@ -123,6 +123,13 @@ const router = createRouter({
           meta: { title: '消息', tab: true, auth: true, priority: 'P1' },
         },
         {
+          // 搜索页（输入页，TODO-USER-107）：关键词输入 + 最近搜索 + 热门搜索（PRD 7.16.1 首页-搜索框行）
+          path: 'search-entry',
+          name: 'search-entry',
+          component: () => import('@/views/user/SearchEntryView.vue'),
+          meta: { title: '搜索', priority: 'P1' },
+        },
+        {
           // 搜索结果页（批次⑤ TODO-USER-005）：关键词/分类条件 + 排序（综合·销量·距离）+ 分页（契约 §3.6）
           path: 'search',
           name: 'search',
