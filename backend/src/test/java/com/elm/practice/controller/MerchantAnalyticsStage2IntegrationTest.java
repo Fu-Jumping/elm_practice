@@ -81,7 +81,7 @@ class MerchantAnalyticsStage2IntegrationTest {
 
     @Test
     void anEmptyNewStoreReturnsZeroInsteadOfDemoNumbers() throws Exception {
-        mvc.perform(post("/api/v1/merchant/auth/register")
+        mvc.perform(post("/api/v1/merchants")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"account\":\"stats-empty\",\"password\":\"123456\",\"storeName\":\"Empty\",\"phone\":\"13800009999\"}"))
                 .andExpect(status().isOk());
