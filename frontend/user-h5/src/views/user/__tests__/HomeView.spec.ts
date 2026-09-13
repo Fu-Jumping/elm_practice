@@ -56,6 +56,7 @@ function routerPlugin() {
       { path: '/login', name: 'login', component: { template: '<div />' } },
       { path: '/coupons', name: 'coupons', component: { template: '<div />' } },
       { path: '/search', name: 'search', component: { template: '<div />' } },
+      { path: '/search-entry', name: 'search-entry', component: { template: '<div />' } },
     ],
   })
   return routerInstance
@@ -140,7 +141,7 @@ describe('HomeView（首页 P0）', () => {
     expect(new Set(messages)).toEqual(new Set(['暂未开放']))
   })
 
-  it('T4 搜索框进入搜索结果页（PRD 7.16.1：关键词搜索本期实现，搜索框进入搜索结果页）', async () => {
+  it('T4 搜索框进入搜索页（PRD 7.16.1：搜索框进入搜索页；最近搜索与热门搜索本期实现）', async () => {
     const pinia = createPinia()
     setActivePinia(pinia)
     const wrapper = mount(HomeView, { global: { plugins: [pinia, routerPlugin()] } })
@@ -148,8 +149,8 @@ describe('HomeView（首页 P0）', () => {
     expect(searchBox.exists()).toBe(true)
     await searchBox.trigger('click')
     await flushPromises()
-    expect(routerInstance.currentRoute.value.name).toBe('search')
-    // 入口不再是占位提示（原口径「点击提示暂未开放」随批次⑤ 实现演进而作废）
+    expect(routerInstance.currentRoute.value.name).toBe('search-entry')
+    // 入口不再是占位提示（原口径「点击提示暂未开放」随批次⑤/⑦ 实现演进：搜索框 → 搜索页 → 结果页）
     expect(messages).toEqual([])
   })
 
