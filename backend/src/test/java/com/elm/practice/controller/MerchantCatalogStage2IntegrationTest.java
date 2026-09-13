@@ -144,7 +144,7 @@ class MerchantCatalogStage2IntegrationTest {
                 .content("{\"storeId\":\"m002\",\"productId\":\"p101\",\"quantity\":1,\"specOptions\":[{\"name\":\"大份\",\"priceDelta\":999}]}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.unitPrice").value(22.5))
                 .andReturn().getResponse().getContentAsString();
-        assertNotEquals(String.valueOf(JsonPath.read(normal, "$.data.cartLineId")), String.valueOf(JsonPath.read(large, "$.data.cartLineId")));
+        assertNotEquals((Object) JsonPath.read(normal, "$.data.cartLineId"), (Object) JsonPath.read(large, "$.data.cartLineId"));
 
         mvc.perform(get("/api/v1/cart").param("storeId", "m002").session(user))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(2));
