@@ -61,6 +61,12 @@ export default defineConfig(({ mode }) => {
             fontViewportUnit: 'vw',
             minPixelValue: 1,
             mediaQuery: false,
+            // SHOW-QA-002（2026-09-13 修复）：max-width 不参与换算。
+            // `.app-shell`/`.cart-bar` 等 5 处 `max-width: 430px` 的语义是「桌面预览时居中约束」，
+            // 换算成 110.256vw 后上限随视口放大而失效（1280 视口实测 1411px），
+            // 而 430px 在移动端验收视口 320–430 内根本不会触发，故排除该属性对移动端零影响。
+            // 全库 px `max-width` 仅此 5 处且取值一致（430px），排除后行为唯一。
+            propList: ['*', '!max-width'],
           }),
         ],
       },
