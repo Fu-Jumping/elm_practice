@@ -18,6 +18,7 @@ import { formatMoney, formatTime, statusText } from '@/services/normalizers'
 import { reviewApi, favoriteApi } from '@/services/api'
 import type { CartLine, Product, ReviewRecord } from '@/services/api/types'
 import { toast } from '@/utils/toast'
+import { flyToCart } from '@/utils/flyToCart'
 import StoreCover from '@/components/StoreCover.vue'
 import { productImageSrc, storeImageSrc } from '@/utils/demoImages'
 
@@ -25,6 +26,8 @@ const ASSETS = '/design-assets/首页-精细'
 /** 商品图契约暂无图片字段：用固定素材占位（PRD：图片为空显示占位图） */
 const route = useRoute()
 const router = useRouter()
+/** 底部购物车栏元素（加购抛球的终点；用 ref 而非 querySelector，见 animateAddToCart 注释） */
+const cartBarEl = ref<HTMLElement | null>(null)
 const catalogStore = useCatalogStore()
 const cartStore = useCartStore()
 const sessionStore = useSessionStore()
@@ -336,7 +339,7 @@ function isSoldOut(product: Product): boolean {
   return !product.onSale || product.stock <= 0
 }
 
-async function onAdd(product: Product): Promise<void> {
+async function onAdd(product: Product, event?: MouseEvent): Promise<void> {
   if (isClosed.value || isSoldOut(product)) return
   // 加购需登录（后端 401 口径）：未登录引导登录并回跳商家详情，不静默失败
   // （PRD 校验顺序"登录先行"；9/7 联调修正，用例 T45）
@@ -345,10 +348,30 @@ async function onAdd(product: Product): Promise<void> {
     void router.push({ name: 'login', query: { redirect: route.fullPath } })
     return
   }
+  // 加购动画（TODO-USER-016）：从「加号」抛球到购物车栏，先给即时反馈，不等接口返回
+  animateAddToCart(event?.currentTarget as HTMLElement | null)
   // 已加购 → 步进 +1（PATCH）；未加购 → 加购 1 件（POST，同商品合并由后端保证）
   const line = lineOf(product.productId)
   if (line) await cartStore.incrementLine(line.cartLineId)
   else await cartStore.addItem(storeId, product.productId)
+}
+
+/**
+ * 加购抛物线抛球（TODO-USER-016，PRD 7.3 加购交互）：
+ * 起点取被点按钮中心、终点取购物车栏左侧图标区。
+ * 终点用**模板 ref**而不是 document.querySelector：组件在单测中可能挂载于游离容器
+ * （vue-test-utils 默认不 attachTo document），querySelector 会取不到而静默跳过动画。
+ * 动画本身由 `utils/flyToCart` 负责（挂 body + 内联样式 + WAAPI 三关键帧 + 兜底清理）。
+ */
+function animateAddToCart(source: HTMLElement | null): void {
+  const bar = cartBarEl.value
+  if (!source || !bar) return
+  const from = source.getBoundingClientRect()
+  const to = bar.getBoundingClientRect()
+  flyToCart(
+    { x: from.left + from.width / 2, y: from.top + from.height / 2 },
+    { x: to.left + to.width * 0.18, y: to.top + to.height / 2 },
+  )
 }
 
 /** 步进 -（T49）：减 1；减到 0 由 cartStore 转删除请求（契约 §3.4） */
@@ -630,7 +653,7 @@ function onCheckout(): void {
                       :data-testid="`add-btn-${product.productId}`"
                       :disabled="isClosed || isSoldOut(product) || cartStore.isAdding(product.productId)"
                       :aria-label="`增加数量 ${product.name}`"
-                      @click="onAdd(product)"
+                      @click="onAdd(product, $event)"
                     >
                       <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
@@ -644,7 +667,7 @@ function onCheckout(): void {
                     :data-testid="`add-btn-${product.productId}`"
                     :disabled="isClosed || isSoldOut(product) || cartStore.isAdding(product.productId)"
                     :aria-label="`加入购物车 ${product.name}`"
-                    @click="onAdd(product)"
+                    @click="onAdd(product, $event)"
                   >
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
@@ -662,7 +685,7 @@ function onCheckout(): void {
       </div>
 
       <!-- 底部购物车栏（PRD：商品数/合计来自购物车接口；店铺休息结算禁用） -->
-      <div class="cart-bar" data-testid="cart-bar" @click="toggleCartPopup">
+      <div ref="cartBarEl" class="cart-bar" data-testid="cart-bar" @click="toggleCartPopup">
         <button
           class="cart-icon-btn"
           type="button"
