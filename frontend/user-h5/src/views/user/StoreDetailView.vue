@@ -404,7 +404,8 @@ function onCheckout(): void {
           <path d="M15 4.5L7.5 12L15 19.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
         </svg>
       </button>
-      <span class="detail-brand">饿了么</span>
+      <!-- 应用名按课程口径，不沿用设计稿的第三方品牌名（与批次⑩ 105 的应用标题、MemberView 会员页同一处理） -->
+      <span class="detail-brand">轻量外卖</span>
       <button class="header-btn" type="button" aria-label="搜索" @click="onPlaceholderClick">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8" />
