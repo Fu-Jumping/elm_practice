@@ -1178,8 +1178,9 @@ function onCheckout(): void {
   flex: none;
   width: 84px;
   overflow-y: auto;
-  /* 底部购物车栏（固定 64px）遮挡留白，最后一项可滚到栏上沿之上 */
-  padding-bottom: 64px;
+  /* 底部购物车栏遮挡留白，最后一项可滚到栏上沿之上；
+     底栏高度含安全区（min-height 64px + env(safe-area-inset-bottom)），故留白同步计入 */
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
   background: var(--color-surface-container);
 }
 
@@ -1209,7 +1210,7 @@ function onCheckout(): void {
   min-width: 0;
   overflow-y: auto;
   /* 底部留白同左栏：避开固定购物车栏，最后一件商品可完整滚到栏上沿之上 */
-  padding: 0 12px 64px;
+  padding: 0 12px calc(64px + env(safe-area-inset-bottom));
   background: var(--color-surface-white);
 }
 
@@ -1467,11 +1468,13 @@ function onCheckout(): void {
   align-items: center;
   width: 100%;
   max-width: 430px;
-  height: 64px;
-  padding: 0 12px;
+  /* SHOW-QA-001 真机安全区（2026-09-13）：原为固定 height: 64px + padding-bottom: env(...)，
+     box-sizing 为 border-box 时安全区会把内容区压扁（iPhone 底部指示条约 34px → 内容仅余 30px）。
+     改为 min-height：安全区只让整栏变高、不压缩内容，与 TabBar 与下单页底栏的写法一致。 */
+  min-height: 64px;
+  padding: 0 12px env(safe-area-inset-bottom);
   background: var(--color-surface-white);
   border-top: 1px solid var(--color-border-light);
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .cart-icon-btn {
