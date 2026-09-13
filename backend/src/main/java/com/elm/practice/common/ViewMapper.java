@@ -33,7 +33,8 @@ public final class ViewMapper {
         var m = new LinkedHashMap<String,Object>(); m.put("productId",p.id); m.put("storeId",p.storeId);
         m.put("categoryId",p.categoryId); m.put("name",p.name); m.put("description",p.description);
         m.put("image",p.image); m.put("price",p.price); m.put("stock",p.stock); m.put("onSale",p.onSale);
-        m.put("sales",p.sales); return m;
+        m.put("sales",p.sales); m.put("memberPrice",p.memberPrice);
+        m.put("tags",JsonLists.tags(p.tagsJson)); m.put("specOptions",JsonLists.specs(p.specOptionsJson)); return m;
     }
     public static Map<String,Object> address(Domain.Address a) {
         var m = new LinkedHashMap<String,Object>(); m.put("addressId",a.id); m.put("contactName",a.contactName);
@@ -44,8 +45,9 @@ public final class ViewMapper {
     }
     public static Map<String,Object> cart(Domain.CartLine line, Domain.Product p) {
         var m = new LinkedHashMap<String,Object>(); m.put("cartLineId",line.id); m.put("storeId",line.storeId);
-        m.put("productId",line.productId); m.put("quantity",line.quantity); m.put("unitPrice",p == null ? line.unitPrice : p.price);
-        m.put("subtotal",(p == null ? line.unitPrice : p.price).multiply(java.math.BigDecimal.valueOf(line.quantity)).setScale(2));
+        m.put("productId",line.productId); m.put("quantity",line.quantity); m.put("specOptions",JsonLists.specs(line.specOptionsJson));
+        m.put("unitPrice",line.unitPrice);
+        m.put("subtotal",line.unitPrice.multiply(java.math.BigDecimal.valueOf(line.quantity)).setScale(2));
         if (p != null) { m.put("name",p.name); m.put("image",p.image); m.put("stock",p.stock); m.put("onSale",p.onSale); }
         return m;
     }
@@ -63,7 +65,8 @@ public final class ViewMapper {
     }
     private static Map<String,Object> orderItem(Domain.OrderItem i) {
         var m = new LinkedHashMap<String,Object>(); m.put("productId",i.productId); m.put("name",i.name); m.put("image",i.image);
-        m.put("categoryId",i.categoryId); m.put("unitPrice",i.unitPrice); m.put("quantity",i.quantity); m.put("subtotal",i.subtotal); return m;
+        m.put("categoryId",i.categoryId); m.put("specOptions",JsonLists.specs(i.specOptionsJson));
+        m.put("unitPrice",i.unitPrice); m.put("quantity",i.quantity); m.put("subtotal",i.subtotal); return m;
     }
     /** 红包视图（契约 §3.8 + §3.10）：status 只表达有效期窗口，used 独立回显；source/canBlast 供爆红包 UI。 */
     public static Map<String,Object> coupon(Domain.Coupon c) {

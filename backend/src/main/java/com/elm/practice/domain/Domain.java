@@ -65,9 +65,18 @@ public final class Domain {
         }
         public Category() {}
     }
+    public static final class SpecOption {
+        public String name;
+        public BigDecimal priceDelta = BigDecimal.ZERO;
+        public SpecOption() {}
+        public SpecOption(String name, BigDecimal priceDelta) {
+            this.name = name; this.priceDelta = priceDelta;
+        }
+    }
     public static final class Product {
         public String id, storeId, categoryId, name, description, image;
-        public BigDecimal price;
+        public BigDecimal price, memberPrice;
+        public String tagsJson = "[]", specOptionsJson = "[]";
         public int stock, sales;
         public boolean onSale;
         public Product(String id, String storeId, String categoryId, String name, String description,
@@ -96,6 +105,7 @@ public final class Domain {
     }
     public static final class CartLine {
         public String id, userId, storeId, productId;
+        public String specKey = "", specOptionsJson = "[]";
         public int quantity;
         public BigDecimal unitPrice;
         public LocalDateTime updatedAt;
@@ -163,6 +173,7 @@ public final class Domain {
     }
     public static final class OrderItem {
         public String productId, name, image, categoryId;
+        public String specKey = "", specOptionsJson = "[]";
         public BigDecimal unitPrice, subtotal;
         public int quantity;
         public OrderItem(String productId, String name, String image, String categoryId,

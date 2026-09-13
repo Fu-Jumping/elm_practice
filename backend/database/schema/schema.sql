@@ -20,8 +20,9 @@ CREATE TABLE IF NOT EXISTS categories (
 CREATE TABLE IF NOT EXISTS products (
   product_id VARCHAR(32) PRIMARY KEY, store_id VARCHAR(32) NOT NULL, category_id VARCHAR(32) NOT NULL,
   name VARCHAR(120) NOT NULL, description VARCHAR(500), image VARCHAR(500), price DECIMAL(10,2) NOT NULL,
+  member_price DECIMAL(10,2) NULL, tags JSON NULL, spec_options JSON NULL,
   stock INT NOT NULL DEFAULT 0, on_sale BOOLEAN NOT NULL DEFAULT TRUE, sales INT NOT NULL DEFAULT 0,
-  CHECK(price >= 0), CHECK(stock >= 0)
+  CHECK(price >= 0), CHECK(member_price IS NULL OR member_price >= 0), CHECK(stock >= 0)
 );
 CREATE TABLE IF NOT EXISTS addresses (
   address_id VARCHAR(32) PRIMARY KEY, user_id VARCHAR(32) NOT NULL, contact_name VARCHAR(80) NOT NULL,
@@ -30,8 +31,9 @@ CREATE TABLE IF NOT EXISTS addresses (
 );
 CREATE TABLE IF NOT EXISTS cart_lines (
   cart_line_id VARCHAR(32) PRIMARY KEY, user_id VARCHAR(32) NOT NULL, store_id VARCHAR(32) NOT NULL,
-  product_id VARCHAR(32) NOT NULL, quantity INT NOT NULL, unit_price DECIMAL(10,2) NOT NULL, updated_at TIMESTAMP NOT NULL,
-  UNIQUE(user_id,store_id,product_id), CHECK(quantity > 0)
+  product_id VARCHAR(32) NOT NULL, spec_key VARCHAR(500) NOT NULL DEFAULT '', spec_options JSON NULL,
+  quantity INT NOT NULL, unit_price DECIMAL(10,2) NOT NULL, updated_at TIMESTAMP NOT NULL,
+  CONSTRAINT uk_cart_spec UNIQUE(user_id,store_id,product_id,spec_key), CHECK(quantity > 0)
 );
 CREATE TABLE IF NOT EXISTS orders (
   order_id VARCHAR(32) PRIMARY KEY, user_id VARCHAR(32) NOT NULL, store_id VARCHAR(32) NOT NULL,
@@ -49,8 +51,9 @@ CREATE TABLE IF NOT EXISTS orders (
 );
 CREATE TABLE IF NOT EXISTS order_items (
   order_id VARCHAR(32) NOT NULL, product_id VARCHAR(32) NOT NULL, name VARCHAR(120) NOT NULL,
-  image VARCHAR(500), category_id VARCHAR(32), unit_price DECIMAL(10,2) NOT NULL, quantity INT NOT NULL,
-  PRIMARY KEY(order_id,product_id)
+  image VARCHAR(500), category_id VARCHAR(32), spec_key VARCHAR(500) NOT NULL DEFAULT '', spec_options JSON NULL,
+  unit_price DECIMAL(10,2) NOT NULL, quantity INT NOT NULL,
+  PRIMARY KEY(order_id,product_id,spec_key)
 );
 -- 以下 5 张表为 MyBatis 持久化接入新增（评价、会话、消息、店铺促销、应用侧 ID 序列）。
 -- 注意：本文件与 backend/src/main/resources/db/schema.sql 保持同步，修改需同步两处。

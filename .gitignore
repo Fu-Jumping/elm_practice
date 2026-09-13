@@ -51,3 +51,7 @@ Thumbs.db
 
 # 讲稿与个人材料：按 AGENTS.md R9 不入 main（保留在本地/个人分支）
 report-prep/
+
+# 后端本地上传文件不入库
+backend/uploads/*
+!backend/uploads/.gitkeep

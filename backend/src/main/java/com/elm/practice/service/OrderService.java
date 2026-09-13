@@ -2,6 +2,7 @@ package com.elm.practice.service;
 
 import com.elm.practice.common.ApiException;
 import com.elm.practice.common.IdGenerator;
+import com.elm.practice.common.JsonLists;
 import com.elm.practice.common.RequestUtil;
 import com.elm.practice.common.Times;
 import com.elm.practice.common.ViewMapper;
@@ -63,9 +64,13 @@ public class OrderService {
             if (p == null || !p.onSale) throw ApiException.conflict("商品已下架");
             if (line.quantity > p.stock) throw new ApiException(org.springframework.http.HttpStatus.CONFLICT, 40901,
                     "商品库存不足", Map.of("productId", p.id, "reason", "库存最多为 " + p.stock));
-            BigDecimal unit = p.price.setScale(2);
+            var selectedSpecs = CartService.validatedSelection(p, JsonLists.specs(line.specOptionsJson));
+            BigDecimal unit = CartService.unitPrice(p, selectedSpecs);
             subtotal = subtotal.add(unit.multiply(BigDecimal.valueOf(line.quantity)));
-            snapshots.add(new Domain.OrderItem(p.id, p.name, p.image, p.categoryId, unit, line.quantity));
+            var snapshot = new Domain.OrderItem(p.id, p.name, p.image, p.categoryId, unit, line.quantity);
+            snapshot.specKey = line.specKey;
+            snapshot.specOptionsJson = JsonLists.toJson(selectedSpecs);
+            snapshots.add(snapshot);
         }
         subtotal = subtotal.setScale(2);
         if (subtotal.compareTo(store.startPrice) < 0) throw ApiException.conflict("未达到起送金额 " + store.startPrice);
