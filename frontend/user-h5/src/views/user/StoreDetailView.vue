@@ -215,12 +215,31 @@ let spy: IntersectionObserver | null = null
 const outerPinned = ref(false)
 let mainScrollEl: HTMLElement | null = null
 
+/** 吸顶判定的容差（px）：抵消 px→vw 换算带来的亚像素误差 */
+const PIN_TOLERANCE = 1
+/**
+ * 解除吸顶的**滞后死区**（px，SHOW-QA-004，2026-09-13 修复）：
+ * 原实现是单阈值判定（`top <= 顶部栏高 + 1`），Tab 栏 top 在吸顶线附近来回时锁定态反复翻转；
+ * 而翻转会同时切换右侧商品列表的可滚状态（`.order-area--locked` 控制 overflow），
+ * 导致滚轮时而作用外层、时而作用内层——这就是负责人 9/10 走查到的「抖动」。
+ * 现改为：越过吸顶线才锁定，锁定后必须回退超过该死区才解除。
+ * ⚠️ **死区取值属交互口径**：暂定 8px（问题记录建议 8–16px），待负责人/测试联调确认后可调整。
+ */
+const PIN_RELEASE_DEADBAND = 8
+
 function updateOuterPinned(): void {
   const tabs = storeTabsEl.value
   const header = detailHeaderEl.value
   if (!tabs || !header) return
-  // jsdom 无布局（矩形与高度均为 0）时恒判定为已吸顶，不影响既有单测
-  outerPinned.value = tabs.getBoundingClientRect().top <= header.offsetHeight + 1
+  const line = header.offsetHeight + PIN_TOLERANCE
+  const top = tabs.getBoundingClientRect().top
+  if (outerPinned.value) {
+    // 已吸顶：只有明显回退（超过死区）才解除，避免阈值附近抖动
+    if (top > line + PIN_RELEASE_DEADBAND) outerPinned.value = false
+    return
+  }
+  // 未吸顶：越过吸顶线即锁定；jsdom 无布局（矩形与高度均为 0）时恒判定为已吸顶，不影响既有单测
+  outerPinned.value = top <= line
 }
 
 /**
