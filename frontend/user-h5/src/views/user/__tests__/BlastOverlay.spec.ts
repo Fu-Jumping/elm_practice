@@ -225,4 +225,44 @@ describe('爆红包浮层（CHG-001 TODO-USER-029）', () => {
       ;(window as { AudioContext?: unknown }).AudioContext = originalContext
     }
   })
+
+  it('RB-8 消耗券爆遇到业务拒绝（券已不存在 → 404）：回到可继续操作的阻塞态，不落"网络异常"失败态', async () => {
+    const { wrapper } = await mountCoupon()
+    // 先买一份套餐拿到可爆券（种子券均 canBlast=false，见 RB-3 同口径）
+    await wrapper.find('[data-testid="promo-buy-btn"]').trigger('click')
+    await flushPromises()
+    await wrapper.find('[data-testid="pack-confirm-btn"]').trigger('click')
+    await vi.waitFor(() => expect(couponMockState.some((item) => item.canBlast)).toBe(true), {
+      timeout: 2000,
+    })
+
+    // 免费次数已用 → 爆被拒 409 → 进入阻塞态，提供「消耗一张红包再爆」
+    freeBlastState.date = new Date().toISOString().slice(0, 10)
+    await openOverlay(wrapper)
+    await wrapper.find('[data-testid="blast-burst-btn"]').trigger('click')
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="blast-blocked"]').exists()).toBe(true),
+      { timeout: 3000 },
+    )
+
+    // 模拟「页面持有的券已不存在」：后端对不存在的券返回 404（契约 §3.10：他人券或不存在 404）
+    const staleIds = new Set(couponMockState.filter((item) => item.canBlast).map((item) => item.couponId))
+    expect(staleIds.size).toBeGreaterThan(0)
+    for (let i = couponMockState.length - 1; i >= 0; i -= 1) {
+      if (staleIds.has(couponMockState[i]!.couponId)) couponMockState.splice(i, 1)
+    }
+
+    await wrapper.find('[data-testid="blast-spend-btn"]').trigger('click')
+    await vi.waitFor(
+      () =>
+        expect(
+          wrapper.find('[data-testid="blast-failed"]').exists() ||
+            wrapper.find('[data-testid="blast-blocked"]').exists(),
+        ).toBe(true),
+      { timeout: 3000 },
+    )
+    // 业务拒绝 ≠ 网络异常：应留在阻塞态（可继续消耗另一张或去购买），不得显示"网络异常，请重试"
+    expect(wrapper.find('[data-testid="blast-failed"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="blast-blocked"]').exists()).toBe(true)
+  })
 })
