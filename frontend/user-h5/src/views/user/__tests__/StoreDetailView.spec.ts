@@ -685,21 +685,27 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     expect(locked()).toBe(true)
   })
 
-  it('T75 分区标题行「同类商家」入口按分类编号与分类名进入分类商家列表（TODO-USER-107 ② 入口）', async () => {
+  it('T75 店名旁「同类商家」入口按当前分类进入分类商家列表（TODO-USER-107 ② 入口）', async () => {
     const { wrapper, router } = await mountDetail('/stores/m002')
     await vi.waitFor(
       () => expect(wrapper.findAll('[data-testid="cat-rail-item"]').length).toBe(3),
       { timeout: 10000 },
     )
-    const entry = wrapper.find('[data-testid="section-more-c101"]')
+    const banner = wrapper.find('[data-testid="store-banner"]')
+    const entry = banner.find('[data-testid="store-similar-btn"]')
     expect(entry.exists()).toBe(true)
     expect(entry.text()).toContain('同类商家')
+    // 位置口径（2026-09-14 负责人要求）：入口紧邻店名，且**不再**出现在各食物分类标题旁
+    expect(banner.html().indexOf('store-name')).toBeLessThan(
+      banner.html().indexOf('store-similar-btn'),
+    )
+    expect(wrapper.findAll('[data-testid^="section-more-"]')).toHaveLength(0)
 
     await entry.trigger('click')
     await flushPromises()
     expect(router.currentRoute.value.name).toBe('category-store-list')
+    // 参数取当前选中分类（m002 默认选中第一个有商品的分类 c101 主食）
     expect(router.currentRoute.value.params.categoryId).toBe('c101')
-    // 页面标题依赖页面参数（契约无「按分类编号取分类名」接口）
     expect(router.currentRoute.value.query.name).toBe('主食')
   })
 
