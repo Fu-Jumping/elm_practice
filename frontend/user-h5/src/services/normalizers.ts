@@ -309,3 +309,36 @@ export function normalizeBlastResult(
     free: Boolean(freeBlast),
   }
 }
+
+/**
+ * 会话卡片归一化（契约 §6.1）
+ *
+ * 线上真后端（`20260914-a2f15b1` 实测）返回 `merchantId` / `updatedAt` / `unreadCount`，
+ * **不带** `storeId` / `lastMessageAt` / `unread`；契约 §6.1 尚未定义会话列表对象字段
+ * （BUG-20260914-005，字段口径待 R7 裁定）→ 此处按「别名兼容 + 缺失降级」处理：
+ * 任一字段缺失都给确定默认值，禁止 undefined 上屏（架构约定 §3.3）。
+ */
+export interface ConversationCard {
+  conversationId: string
+  orderId: string
+  /** 店铺 id：缺失时退回 `merchantId`（线上形状），两者都缺为空串（展示层给占位文案） */
+  storeId: string
+  lastMessage: string
+  /** 最后消息时间：缺失时退回 `updatedAt` */
+  lastMessageAt: string
+  /** 未读数：缺失时退回 `unreadCount`，再缺为 0 */
+  unread: number
+}
+
+export function normalizeConversation(raw: unknown): ConversationCard {
+  const source = (raw ?? {}) as Record<string, unknown>
+  const text = (value: unknown): string => (typeof value === 'string' ? value : '')
+  return {
+    conversationId: text(source.conversationId),
+    orderId: text(source.orderId),
+    storeId: text(source.storeId) || text(source.merchantId),
+    lastMessage: text(source.lastMessage),
+    lastMessageAt: text(source.lastMessageAt) || text(source.updatedAt),
+    unread: toFiniteNumber(source.unread ?? source.unreadCount),
+  }
+}
