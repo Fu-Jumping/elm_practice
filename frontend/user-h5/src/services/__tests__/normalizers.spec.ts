@@ -11,8 +11,9 @@ import {
   remainingSeconds,
   formatCountdown,
   orderDisplayStatus,
+  normalizeBlastResult,
 } from '../normalizers'
-import type { OrderRecord } from '../api/types'
+import type { CouponBlastRecord, OrderRecord } from '../api/types'
 // 把被测函数引进来。'../normalizers' 是相对路径：测试文件在 __tests__ 里，往上一层就是它
 describe('formatMoney 金额格式化', () => {
   // 这一组都在测金额格式化
@@ -351,5 +352,51 @@ describe('批次⑩ 打磨：订单状态文案全覆盖（TODO-USER-009）', ()
     }
     expect(orderDisplayStatus({ status: 'COMPLETED', reviewed: false })).toBe('待评价')
     expect(orderDisplayStatus({ status: 'COMPLETED', reviewed: true })).toBe('已完成')
+  })
+})
+
+describe('normalizeBlastResult 爆红包响应归一化（契约 §3.10）', () => {
+  it('BL-1 真实后端的扁平响应（券字段 + tierIndex + freeBlast）归一化为 { coupon, tierIndex, free }', () => {
+    // 取自 2026-09-14 线上实测响应（POST /me/coupons/blast 传 couponId，200）
+    const flat: CouponBlastRecord = {
+      couponId: 'c1231',
+      name: '无门槛减5红包',
+      amount: 8,
+      threshold: 25,
+      scope: 'ALL',
+      storeId: null,
+      validFrom: '2026-09-14 15:53:27',
+      validTo: '2026-09-14 23:59:59',
+      status: 'available',
+      used: false,
+      source: 'BLAST_OUT',
+      canBlast: false,
+      tierIndex: 3,
+      freeBlast: false,
+    }
+    const result = normalizeBlastResult(flat)
+    expect(result.coupon.couponId).toBe('c1231')
+    expect(result.coupon.amount).toBe(8)
+    expect(result.coupon.threshold).toBe(25)
+    expect(result.coupon.source).toBe('BLAST_OUT')
+    expect(result.coupon.canBlast).toBe(false)
+    expect(result.tierIndex).toBe(3)
+    expect(result.free).toBe(false)
+  })
+
+  it('BL-2 免费爆（扁平响应）→ free 为 true', () => {
+    const flat: CouponBlastRecord = { couponId: 'cpb0001', name: '满30减5红包', amount: 5, threshold: 30, scope: 'ALL', validFrom: '2026-09-14 15:00:00', validTo: '2026-09-14 23:59:59', status: 'available', used: false, source: 'BLAST_OUT', canBlast: false, tierIndex: 4, freeBlast: true }
+    const result = normalizeBlastResult(flat)
+    expect(result.free).toBe(true)
+    expect(result.coupon.amount).toBe(5)
+  })
+
+  it('BL-3 兼容替身既有的嵌套响应（原样透传，避免同批改动波及既有用例）', () => {
+    const nested = {
+      coupon: { couponId: 'cpb0001', name: '满30减5红包', amount: 5, threshold: 30, scope: 'ALL' as const, validFrom: '2026-09-14 15:00:00', validTo: '2026-09-14 23:59:59', status: 'available' as const, used: false, source: 'BLAST_OUT' as const, canBlast: false },
+      tierIndex: 2,
+      free: true,
+    }
+    expect(normalizeBlastResult(nested)).toEqual(nested)
   })
 })
