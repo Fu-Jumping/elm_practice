@@ -174,6 +174,11 @@ async function loadFavoriteState(): Promise<void> {
 async function onToggleFavorite(): Promise<void> {
   if (favoriteBusy.value) return
   if (!sessionStore.isLoggedIn) {
+    // 商家详情是公开页（路由 meta 无 auth）：整页刷新或直接开深链后守卫不会探活，客户端会话态为空；
+    // 服务端会话可能仍有效 → 先探活再判定，避免把已登录用户当未登录拦下（BUG-20260914-003）
+    await sessionStore.checkLogin()
+  }
+  if (!sessionStore.isLoggedIn) {
     toast('请先登录')
     void router.push({ name: 'login', query: { redirect: route.fullPath } })
     return
@@ -383,6 +388,11 @@ async function onAdd(product: Product, event?: MouseEvent): Promise<void> {
   // 加购需登录（后端 401 口径）：未登录引导登录并回跳商家详情，不静默失败
   // （PRD 校验顺序"登录先行"；9/7 联调修正，用例 T45）
   if (!sessionStore.isLoggedIn) {
+    // 商家详情是公开页（路由 meta 无 auth）：整页刷新或直接开深链后守卫不会探活，客户端会话态为空；
+    // 服务端会话可能仍有效 → 先探活再判定，避免把已登录用户当未登录拦下（BUG-20260914-003）
+    await sessionStore.checkLogin()
+  }
+  if (!sessionStore.isLoggedIn) {
     toast('请先登录')
     void router.push({ name: 'login', query: { redirect: route.fullPath } })
     return
@@ -436,7 +446,12 @@ function toggleCartPopup(): void {
 }
 
 /** 去结算校验顺序：登录 → 购物车非空 → 店铺营业 → 达起送价（PRD 点餐内容区行） */
-function onCheckout(): void {
+async function onCheckout(): Promise<void> {
+  if (!sessionStore.isLoggedIn) {
+    // 商家详情是公开页（路由 meta 无 auth）：整页刷新或直接开深链后守卫不会探活，客户端会话态为空；
+    // 服务端会话可能仍有效 → 先探活再判定，避免把已登录用户当未登录拦下（BUG-20260914-003）
+    await sessionStore.checkLogin()
+  }
   if (!sessionStore.isLoggedIn) {
     void router.push({ name: 'login', query: { redirect: route.fullPath } })
     return

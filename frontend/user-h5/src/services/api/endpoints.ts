@@ -83,4 +83,9 @@ export const endpoints = {
     packs: '/me/coupon-packs',
     blast: '/me/coupons/blast',
   },
+  // AI 点餐助手（契约 §10.6）：非流式 /chat；流式 /stream-chat（text/event-stream 文本分片）
+  ai: {
+    chat: '/ai/chat',
+    streamChat: '/ai/stream-chat',
+  },
 } as const

@@ -44,6 +44,7 @@ describe('MineView（我的页 P0）', () => {
         { path: '/member', name: 'member', component: { template: '<div />' } },
         { path: '/coupons', name: 'coupons', component: { template: '<div />' } },
         { path: '/mine', name: 'mine', component: MineView },
+        { path: '/ai-chat', name: 'ai-chat', component: { template: '<div />' } },
       ],
     })
     await router.push('/mine')
@@ -119,5 +120,37 @@ describe('MineView（我的页 P0）', () => {
     await wrapper.find('[data-testid="entry-coupons"]').trigger('click')
     await flushPromises()
     expect(router.currentRoute.value.name).toBe('coupons')
+  })
+})
+
+/**
+ * 我的页 AI 点餐助手入口用例 MINE-AI-1（AI点餐助手前端PRD §2.3，2026-09-14）
+ * PRD §2.3：「我的」页面功能列表新增「AI 点餐助手」条目（带对话图标），点击进入 AI 对话页。
+ * 本组在 feat: 实现前必须红（条目由 feat: 加入 MineView.vue）。
+ */
+describe('MineView（AI 点餐助手入口，AI点餐助手前端PRD §2.3）', () => {
+  it('MINE-AI-1 我的页显示「AI 点餐助手」条目并跳转对话页', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', name: 'home', component: { template: '<div />' } },
+        { path: '/mine', name: 'mine', component: MineView },
+        { path: '/ai-chat', name: 'ai-chat', component: { template: '<div />' } },
+      ],
+    })
+    await router.push('/mine')
+    await router.isReady()
+    // 常用功能列表仅在已登录时渲染（PRD 862 列：未登录显示「去登录」引导）
+    useSessionStore().user = { account: '13800000001', nickname: '张同学' }
+    const wrapper = mount(MineView, { global: { plugins: [pinia, router] } })
+    await flushPromises()
+    const entry = wrapper.find('[data-testid="entry-ai-chat"]')
+    expect(entry.exists()).toBe(true)
+    expect(entry.text()).toContain('AI 点餐助手')
+    await entry.trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('ai-chat')
   })
 })

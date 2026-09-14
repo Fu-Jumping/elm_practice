@@ -14,3 +14,8 @@ export * as memberApi from './member'
 export * as couponApi from './coupon'
 export * as searchApi from './search'
 export * as fileApi from './file'
+export * as aiApi from './ai'
+
+// AI 域错误类型与结果类型（页面按 PRD §6.3 异常表分流时需要区分）
+export { AI_TIMEOUT_MS, AiTimeoutError, AiUnavailableError } from './ai'
+export type { AiChatMessage, AiChatPayload, AiChatResult } from './types'

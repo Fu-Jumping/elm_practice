@@ -14,41 +14,74 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { messageApi } from '@/services/api'
-import { formatRelativeTime } from '@/services/normalizers'
+import { formatRelativeTime, normalizeConversation } from '@/services/normalizers'
+import type { ConversationCard } from '@/services/normalizers'
 import { useCatalogStore } from '@/stores/catalogStore'
 import { toast } from '@/utils/toast'
-import type { ConversationRecord, NotificationRecord } from '@/services/api/types'
+import type { NotificationRecord } from '@/services/api/types'
 
 const router = useRouter()
 const catalogStore = useCatalogStore()
 
 const notifications = ref<NotificationRecord[]>([])
-const conversations = ref<ConversationRecord[]>([])
+const conversations = ref<ConversationCard[]>([])
 const loading = ref(false)
+/** 数据源独立失败标记（BUG-20260914-004）：任一源失败不得拖垮另一个 */
+const notificationsFailed = ref(false)
+const conversationsFailed = ref(false)
 
 const storeNameMap = computed(() => new Map(catalogStore.stores.map((s) => [s.storeId, s.name])))
 const isEmpty = computed(
-  () => !loading.value && notifications.value.length === 0 && conversations.value.length === 0,
+  () =>
+    !loading.value &&
+    !notificationsFailed.value &&
+    !conversationsFailed.value &&
+    notifications.value.length === 0 &&
+    conversations.value.length === 0,
 )
 
 function storeName(storeId: string): string {
-  return storeNameMap.value.get(storeId) ?? storeId
+  const mapped = storeNameMap.value.get(storeId)
+  if (mapped) return mapped
+  // 缺 storeId（线上返回 merchantId）时退回该 id；两者都缺给占位文案，禁止 undefined 上屏
+  return storeId !== '' ? storeId : '未知商家'
 }
 
+/** 会话头像取店名首字（storeName 恒返回字符串，缺失也不抛错——BUG-20260914-005） */
+function avatarText(storeId: string): string {
+  return storeName(storeId).trim().slice(0, 1) || '店'
+}
+
+/** 通知列表（独立失败标记 + 局部重试，BUG-20260914-004） */
+async function loadNotifications(): Promise<void> {
+  try {
+    notifications.value = await messageApi.listNotifications()
+    notificationsFailed.value = false
+  } catch {
+    // 失败提示由 http 层统一 toast；页面在通知区给局部失败态与重试入口
+    notificationsFailed.value = true
+  }
+}
+
+/** 会话列表（独立失败标记 + 本地归一化降级，BUG-20260914-004/005） */
+async function loadConversations(): Promise<void> {
+  try {
+    const list = await messageApi.listConversations()
+    conversations.value = list.map(normalizeConversation)
+    conversationsFailed.value = false
+  } catch {
+    conversationsFailed.value = true
+  }
+}
+
+/**
+ * 加载两个数据源：**不得用 Promise.all 合并**（BUG-20260914-004）——
+ * 线上通知接口未实现返回 404 时，会连带把正常返回的会话列表一起丢弃。
+ */
 async function loadAll(): Promise<void> {
   loading.value = true
-  try {
-    const [notificationList, conversationList] = await Promise.all([
-      messageApi.listNotifications(),
-      messageApi.listConversations(),
-    ])
-    notifications.value = notificationList
-    conversations.value = conversationList
-  } catch {
-    // 加载失败由 http 层统一 toast；此处保持空态可用
-  } finally {
-    loading.value = false
-  }
+  await Promise.allSettled([loadNotifications(), loadConversations()])
+  loading.value = false
 }
 
 onMounted(async () => {
@@ -80,7 +113,7 @@ async function onOpenNotification(item: NotificationRecord): Promise<void> {
 }
 
 /** 进入商家会话（聊天详情页） */
-function onOpenConversation(item: ConversationRecord): void {
+function onOpenConversation(item: ConversationCard): void {
   void router.push({ name: 'chat-detail', params: { conversationId: item.conversationId } })
 }
 </script>
@@ -100,6 +133,19 @@ function onOpenConversation(item: ConversationRecord): void {
       <p v-else-if="isEmpty" class="msg-empty" data-testid="message-empty">暂无消息</p>
 
       <template v-else>
+        <!-- 通知加载失败（BUG-20260914-004）：局部失败态 + 重试，**不影响下方会话区渲染** -->
+        <div v-if="notificationsFailed" class="msg-error" data-testid="notification-error">
+          <span class="msg-error-text">通知加载失败，请稍后重试</span>
+          <button
+            class="msg-error-retry"
+            type="button"
+            data-testid="notification-retry"
+            @click="loadNotifications"
+          >
+            重试
+          </button>
+        </div>
+
         <!-- 通知区（契约 §3.9 三类，按时间倒序） -->
         <section v-if="notifications.length > 0" class="msg-card">
           <div
@@ -153,6 +199,19 @@ function onOpenConversation(item: ConversationRecord): void {
           </div>
         </section>
 
+        <!-- 会话加载失败（BUG-20260914-004）：局部失败态 + 重试 -->
+        <div v-if="conversationsFailed" class="msg-error" data-testid="conversation-error">
+          <span class="msg-error-text">会话加载失败，请稍后重试</span>
+          <button
+            class="msg-error-retry"
+            type="button"
+            data-testid="conversation-retry"
+            @click="loadConversations"
+          >
+            重试
+          </button>
+        </div>
+
         <!-- 商家会话区（契约 §6.1：以订单维度组织） -->
         <section v-if="conversations.length > 0" class="msg-conversations">
           <p class="msg-section-title">商家会话</p>
@@ -165,7 +224,7 @@ function onOpenConversation(item: ConversationRecord): void {
               @click="onOpenConversation(item)"
             >
               <span class="msg-conversation-logo" aria-hidden="true">
-                {{ storeName(item.storeId).slice(0, 1) }}
+                {{ avatarText(item.storeId) }}
               </span>
               <div class="msg-conversation-body">
                 <div class="msg-conversation-head">
@@ -403,5 +462,30 @@ function onOpenConversation(item: ConversationRecord): void {
   text-align: center;
   font-size: 14px;
   color: #999999;
+}
+
+/* 局部失败态（BUG-20260914-004）：单个数据源失败时给出提示与重试，不拖垮另一个数据源 */
+.msg-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff7f5;
+}
+
+.msg-error-text {
+  color: #d4380d;
+  font-size: 13px;
+}
+
+.msg-error-retry {
+  padding: 4px 12px;
+  border: 1px solid var(--color-primary);
+  border-radius: 14px;
+  background: none;
+  color: var(--color-primary);
+  font-size: 13px;
 }
 </style>

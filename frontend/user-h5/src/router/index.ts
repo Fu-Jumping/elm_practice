@@ -144,6 +144,14 @@ const router = createRouter({
           meta: { title: '分类商家', priority: 'P1' },
         },
         {
+          // AI 点餐助手对话页（AI点餐助手前端PRD §2.1：首页悬浮球/搜索框/我的三处入口进入；
+          // 无底部导航、页面内自带返回；未登录可用，与「未登录可浏览」口径一致）
+          path: 'ai-chat',
+          name: 'ai-chat',
+          component: () => import('@/views/user/AiChatView.vue'),
+          meta: { title: 'AI 点餐助手', priority: 'P2' },
+        },
+        {
           path: 'orders',
           name: 'orders',
           component: () => import('@/views/user/OrderListView.vue'),
