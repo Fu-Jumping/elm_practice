@@ -41,7 +41,7 @@ import {
   merchantApi,
 } from './services/merchantApi'
 import { AnalyticsPage, MessagesPage, OverviewPage, PromotionsPage, ReviewsPage } from './FeaturePages'
-import { buildOrderAmountRows, validateProductImage } from './merchantRules'
+import { buildOrderAmountRows, orderStatusLabel, validateProductImage } from './merchantRules'
 import './App.css'
 
 const { Header, Content, Sider } = Layout
@@ -71,24 +71,11 @@ function formatMoney(value: number) {
   return `¥${Number(value || 0).toFixed(2)}`
 }
 
-// 覆盖后端 Domain.OrderStatus 全部枚举；新增状态须同步此处（PR #36 评审缺口1）
-const orderStatusLabels: Record<string, string> = {
-  PENDING_PAYMENT: '待支付',
-  PENDING: '待接单',
-  COOKING: '制作中',
-  DELIVERING: '配送中',
-  PROCESSING: '进行中',
-  COMPLETED: '已完成',
-  CANCELLED: '已取消',
-}
-
 const nextOrderStatus: Record<string, string> = { PENDING: 'COOKING', COOKING: 'DELIVERING', DELIVERING: 'COMPLETED' }
 const nextOrderAction: Record<string, string> = { PENDING: '接单', COOKING: '出餐', DELIVERING: '完成' }
 
-// oxlint-disable-next-line react/only-export-components -- exported for the status-contract tests
-export function orderStatusLabel(status: string) {
-  return orderStatusLabels[status] ?? status
-}
+// oxlint-disable-next-line react/only-export-components -- re-exported for the status-contract tests
+export { orderStatusLabel }
 
 function StoreStatusTag({ status }: { status: StoreStatus }) {
   const meta = statusMeta[status] ?? { label: status, color: 'default' }
