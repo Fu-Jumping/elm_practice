@@ -4,7 +4,8 @@
  * 口径：金额与门槛一律按后端返回展示，前端不自行计算；一单一红包在确认订单页选用 `couponId`。
  */
 import { request } from '@/services/http'
-import type { CouponBlastResult, CouponPackKey, CouponPackPurchase, CouponRecord } from './types'
+import { normalizeBlastResult } from '@/services/normalizers'
+import type { CouponBlastRecord, CouponBlastResult, CouponPackKey, CouponPackPurchase, CouponRecord } from './types'
 import { endpoints } from './endpoints'
 
 /** 当前用户红包列表（`status` 只表达有效期窗口；不传则返回全部） */
@@ -41,10 +42,16 @@ export function buyPack(packKey: CouponPackKey): Promise<CouponPackPurchase> {
  * 爆一次（CHG-001 §3.10）：不传 `couponId` 用当日免费次数（不消耗券）；
  * 传则消耗并**替换**该券（阈值与金额同时可能变化，不新增行）
  */
-export function blastCoupon(couponId?: string): Promise<CouponBlastResult> {
-  return request<CouponBlastResult>({
+/**
+ * 爆一次（CHG-001 §3.10）：不传 `couponId` 用当日免费次数（不消耗券）；
+ * 传则消耗并**替换**该券（阈值与金额同时可能变化，不新增行）。
+ * 响应形状经 `normalizeBlastResult` 统一（真实后端为契约 §3.10 的扁平对象）。
+ */
+export async function blastCoupon(couponId?: string): Promise<CouponBlastResult> {
+  const data = await request<CouponBlastRecord | CouponBlastResult>({
     method: 'POST',
     url: endpoints.coupon.blast,
     data: couponId ? { couponId } : {},
   })
+  return normalizeBlastResult(data)
 }

@@ -354,7 +354,13 @@ export const orderMocks: Record<string, MockHandler> = {
     if (order.status !== 'PENDING_PAYMENT') return ok(copy)
     const success = (data as { success?: boolean } | undefined)?.success === true
     if (!success) return ok(copy)
-    if (remainingSeconds(order.payDeadline, new Date()) <= 0) {
+    // 超时判定基准（契约 §3.5）：真实后端由 `createdAt` + 15 分钟派生，**不依赖 `payDeadline` 字段是否返回**；
+    // 替身原先直接用 `payDeadline`（缺失 → remainingSeconds 返回 0 → 误判超时），与后端不一致，2026-09-14 修正。
+    const createdMs = Date.parse(String(order.createdAt).replace(' ', 'T'))
+    const deadlineMs = order.payDeadline
+      ? Date.parse(String(order.payDeadline).replace(' ', 'T'))
+      : createdMs + 15 * 60 * 1000
+    if (Number.isFinite(deadlineMs) && deadlineMs - Date.now() <= 0) {
       return fail(409, 40900, '支付已超时，订单已失效')
     }
     order.status = 'PENDING'

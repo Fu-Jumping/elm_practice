@@ -137,6 +137,13 @@ const router = createRouter({
           meta: { title: '搜索', priority: 'P1' },
         },
         {
+          // 分类商家列表页（TODO-USER-107 ②）：分类来自店铺自身 categories，`GET /stores?categoryId=&sort=`（契约 §3.2）
+          path: 'category/:categoryId',
+          name: 'category-store-list',
+          component: () => import('@/views/user/CategoryStoreListView.vue'),
+          meta: { title: '分类商家', priority: 'P1' },
+        },
+        {
           path: 'orders',
           name: 'orders',
           component: () => import('@/views/user/OrderListView.vue'),

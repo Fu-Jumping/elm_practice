@@ -400,6 +400,18 @@ export interface CouponBlastResult {
   free: boolean
 }
 
+/**
+ * 契约 §3.10 爆一次的**真实响应形状（扁平）**：券字段直接铺在响应上，另加 `tierIndex` 与 `freeBlast`。
+ * 2026-09-14 线上实测确认（`POST /me/coupons/blast` 传 `couponId` → 200，data 为扁平券对象 + 两个控制字段）；
+ * 由 `normalizeBlastResult` 统一适配为 `CouponBlastResult` 供页面使用，页面不直接消费本形状。
+ */
+export interface CouponBlastRecord extends CouponRecord {
+  /** 命中的档位序号（1–10）；后端返回 */
+  tierIndex?: number
+  /** 本次是否为免费爆（后端字段名，对应前端 `free`） */
+  freeBlast?: boolean
+}
+
 /** 搜索排序取值（契约 §3.6 定稿：综合 / 销量 / 距离，默认综合） */
 export type SearchSort = '综合' | '销量' | '距离'
 

@@ -57,6 +57,9 @@ public final class ViewMapper {
         m.put("itemSubtotal",o.itemSubtotal); m.put("packagingFee",o.packagingFee); m.put("total",o.total); m.put("paidAt",o.paidAt);
         m.put("cancelReason",o.cancelReason); m.put("cancelledAt",o.cancelledAt); m.put("cancelledBy",o.cancelledBy);
         m.put("reviewed",o.reviewed);
+        // 待支付倒计时（契约 §3.5）：payDeadline = createdAt + 15 分钟，供前端支付页倒计时；
+        // 派生于 createdAt，与订单状态无关（前端只在待支付订单上使用）。
+        m.put("payDeadline", o.createdAt == null ? null : Times.plusMinutes(o.createdAt, 15));
         // 金额快照扩展（批次①，契约 §3.5「基础四行 + 优惠项按实际发生展示」）。
         m.put("deliveryFee",o.deliveryFee); m.put("fullReductionAmount",o.fullReductionAmount);
         m.put("newCustomerAmount",o.newCustomerAmount); m.put("memberDiscountAmount",o.memberDiscountAmount);

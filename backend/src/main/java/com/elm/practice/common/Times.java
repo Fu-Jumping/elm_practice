@@ -22,4 +22,13 @@ public final class Times {
     public static String endOfTodayCn() { return LocalDate.now(CN).atTime(23, 59, 59).format(TIME); }
     /** 东八区当前时刻 + n 天的同时刻（购买所得券 7 天有效）。 */
     public static String plusDaysCn(int days) { return LocalDateTime.now(CN).plusDays(days).format(TIME); }
+
+    /**
+     * 给定时刻文本 + n 分钟（同一文本口径）。
+     * 用途：契约 §3.5 待支付倒计时 `payDeadline` = `createdAt` + 15 分钟；`createdAt` 已由 SQL
+     * 按 `DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%s')` 取为文本（库连接时区为东八区），此处只做加法，不改时区。
+     */
+    public static String plusMinutes(String time, int minutes) {
+        return LocalDateTime.parse(time, TIME).plusMinutes(minutes).format(TIME);
+    }
 }

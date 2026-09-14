@@ -56,6 +56,12 @@ describe('StoreDetailView（商家详情页 P0）', () => {
       routes: [
         { path: '/', name: 'home', component: { template: '<div />' } },
         { path: '/stores/:storeId', name: 'store-detail', component: StoreDetailView },
+        // 分类商家列表页（TODO-USER-107 ② 入口的跳转目标）
+        {
+          path: '/category/:categoryId',
+          name: 'category-store-list',
+          component: { template: '<div />' },
+        },
         { path: '/orders/confirm', name: 'order-confirm', component: { template: '<div />' } },
         { path: '/login', name: 'login', component: { template: '<div />' } },
       ],
@@ -520,6 +526,12 @@ describe('StoreDetailView（商家详情页 P0）', () => {
       routes: [
         { path: '/', name: 'home', component: { template: '<div />' } },
         { path: '/stores/:storeId', name: 'store-detail', component: StoreDetailView },
+        // 分类商家列表页（TODO-USER-107 ② 入口的跳转目标）
+        {
+          path: '/category/:categoryId',
+          name: 'category-store-list',
+          component: { template: '<div />' },
+        },
         { path: '/orders/confirm', name: 'order-confirm', component: { template: '<div />' } },
         { path: '/login', name: 'login', component: { template: '<div />' } },
       ],
@@ -544,6 +556,12 @@ describe('StoreDetailView（商家详情页 P0）', () => {
       routes: [
         { path: '/', name: 'home', component: { template: '<div />' } },
         { path: '/stores/:storeId', name: 'store-detail', component: StoreDetailView },
+        // 分类商家列表页（TODO-USER-107 ② 入口的跳转目标）
+        {
+          path: '/category/:categoryId',
+          name: 'category-store-list',
+          component: { template: '<div />' },
+        },
         { path: '/orders/confirm', name: 'order-confirm', component: { template: '<div />' } },
         { path: '/login', name: 'login', component: { template: '<div />' } },
       ],
@@ -665,5 +683,43 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     tabsTop = 80 // 回退幅度超过死区 → 解除吸顶
     await refresh()
     expect(locked()).toBe(true)
+  })
+
+  it('T75 店名旁「同类商家」入口按当前分类进入分类商家列表（TODO-USER-107 ② 入口）', async () => {
+    const { wrapper, router } = await mountDetail('/stores/m002')
+    await vi.waitFor(
+      () => expect(wrapper.findAll('[data-testid="cat-rail-item"]').length).toBe(3),
+      { timeout: 10000 },
+    )
+    const banner = wrapper.find('[data-testid="store-banner"]')
+    const entry = banner.find('[data-testid="store-similar-btn"]')
+    expect(entry.exists()).toBe(true)
+    expect(entry.text()).toContain('同类商家')
+    // 位置口径（2026-09-14 负责人要求）：入口紧邻店名，且**不再**出现在各食物分类标题旁
+    expect(banner.html().indexOf('store-name')).toBeLessThan(
+      banner.html().indexOf('store-similar-btn'),
+    )
+    expect(wrapper.findAll('[data-testid^="section-more-"]')).toHaveLength(0)
+
+    await entry.trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('category-store-list')
+    // 参数取当前选中分类（m002 默认选中第一个有商品的分类 c101 主食）
+    expect(router.currentRoute.value.params.categoryId).toBe('c101')
+    expect(router.currentRoute.value.query.name).toBe('主食')
+  })
+
+  it('T76 点左分类栏仍只做滚动定位、不发生路由跳转（锁住入口新增不破坏 §5 联动）', async () => {
+    const { wrapper, router } = await mountDetail('/stores/m002')
+    await vi.waitFor(
+      () => expect(wrapper.findAll('[data-testid="cat-rail-item"]').length).toBe(3),
+      { timeout: 10000 },
+    )
+    await wrapper.findAll('[data-testid="cat-rail-item"]')[1]!.trigger('click')
+    await flushPromises()
+    expect(wrapper.findAll('[data-testid="cat-rail-item"]')[1]!.classes()).toContain(
+      'cat-rail-item--active',
+    )
+    expect(router.currentRoute.value.name).toBe('store-detail')
   })
 })

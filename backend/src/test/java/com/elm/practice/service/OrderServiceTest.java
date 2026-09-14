@@ -1,6 +1,7 @@
 package com.elm.practice.service;
 
 import com.elm.practice.common.ApiException;
+import com.elm.practice.common.Times;
 import com.elm.practice.domain.Domain;
 import com.elm.practice.dto.Requests;
 import com.elm.practice.mapper.*;
@@ -119,5 +120,20 @@ class OrderServiceTest {
         assertThrows(ApiException.class, () -> orders.advance(merchant(), "o1001", "COMPLETED"));
         assertEquals(Domain.OrderStatus.PENDING, orders.advance(merchant(), "o1001", "PENDING").status);
         assertEquals(Domain.OrderStatus.PENDING, orders.advance(merchant(), "o1001", "PENDING").status);
+    }
+
+    /**
+     * 契约 §3.5：订单响应返回 payDeadline = createdAt + 15 分钟（东八区、yyyy-MM-dd HH:mm:ss）。
+     * 前端支付页据此倒计时；缺失会被当成"未返回"而禁用支付（线上即整页点不动），故断言必须存在且值正确。
+     */
+    @Test void orderViewCarriesPayDeadlineFifteenMinutesAfterCreatedAt() {
+        Domain.Order order = createFromCart();
+        var view = orders.list(user(), null).stream()
+                .filter(row -> order.id.equals(row.get("orderId")))
+                .findFirst().orElseThrow();
+        String createdAt = String.valueOf(view.get("createdAt"));
+        String payDeadline = String.valueOf(view.get("payDeadline"));
+        assertNotEquals("null", payDeadline, "payDeadline 不能缺失");
+        assertEquals(LocalDateTime.parse(createdAt, Times.TIME).plusMinutes(15).format(Times.TIME), payDeadline);
     }
 }

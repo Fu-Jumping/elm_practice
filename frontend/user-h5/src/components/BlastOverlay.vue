@@ -111,9 +111,17 @@ async function burst(couponId?: string): Promise<void> {
     phase.value = 'result'
     emit('done')
   } catch (err) {
-    // 免费次数用尽（409）→ 阻塞态引导消耗券爆或去购买；其它失败 → 失败态可重试
+    // 业务拒绝（4xx）→ 阻塞态：免费/券不可用都是"这次爆不成"，应给出可继续操作的入口
+    // （409 免费次数用尽、404 券不存在/他人券、400 参数非法等），并让页面重读券列表，
+    // 避免用户拿着已失效的券反复重试；只有网络异常或服务端 5xx 才落"失败态可重试"
+    // （2026-09-14 线上复现：过期券被当成"网络异常，请重试"，用户只能干等）
     const status = (err as { status?: number }).status ?? 0
-    phase.value = status === 409 ? 'blocked' : 'failed'
+    if (status >= 400 && status < 500) {
+      emit('done')
+      phase.value = 'blocked'
+    } else {
+      phase.value = 'failed'
+    }
   } finally {
     clearTimers()
   }

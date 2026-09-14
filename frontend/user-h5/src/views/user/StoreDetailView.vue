@@ -16,7 +16,7 @@ import { useCartStore } from '@/stores/cartStore'
 import { useSessionStore } from '@/stores/sessionStore'
 import { formatMoney, formatTime, statusText } from '@/services/normalizers'
 import { reviewApi, favoriteApi } from '@/services/api'
-import type { CartLine, Product, ReviewRecord } from '@/services/api/types'
+import type { CartLine, Product, ReviewRecord, StoreCategory } from '@/services/api/types'
 import { toast } from '@/utils/toast'
 import { flyToCart } from '@/utils/flyToCart'
 import StoreCover from '@/components/StoreCover.vue'
@@ -263,6 +263,26 @@ function onSelectCategory(categoryId: string): void {
 }
 
 /**
+ * 进入分类商家列表（TODO-USER-107 ② 的入口，位于店名旁）：
+ * 参数取**当前选中分类**（默认第一个有商品的分类，见 activeCategoryId 的默认选中口径）；
+ * 同时把分类名作为页面参数传出——契约没有「按分类编号取分类名」的用户端接口，
+ * 分类名只在店铺分类接口里返回，故由入口负责传递（缺失时目标页回退通用标题）。
+ */
+function goCategoryList(category: StoreCategory): void {
+  void router.push({
+    name: 'category-store-list',
+    params: { categoryId: category.categoryId },
+    query: { name: category.name },
+  })
+}
+
+/** 当前选中分类对象（店名旁入口用；无分类时入口不渲染） */
+const activeCategory = computed<StoreCategory | undefined>(() => {
+  const list = catalogStore.categories
+  return list.find((cat) => cat.categoryId === activeCategoryId.value) ?? list[0]
+})
+
+/**
  * 把外层滚动容器（.app-main，MainLayout 的内容区）滚到 Tab 吸顶线：
  * 目标 = 当前滚动量 + Tab 相对视口的位置 - 顶部栏高度（吸顶线在顶部栏下沿）。
  * 已在吸顶线以下（外层无法再滚）时不动；jsdom 无布局（矩形与高度均为 0）时自然无操作。
@@ -485,6 +505,17 @@ function onCheckout(): void {
               <StoreCover class="store-logo" :name="store.name" :image="storeImageSrc(storeId, store.image)" />
             </span>
             <h1 class="store-name">{{ store.name }}</h1>
+            <!-- 同类商家入口（TODO-USER-107 ②）：放在店名旁；参数取当前选中分类（默认第一个有商品的分类），
+                 进入分类商家列表；左分类栏仍保持「点击滚动定位」不变（项目规则 §5，锁于 T76） -->
+            <button
+              v-if="activeCategory"
+              class="store-similar"
+              type="button"
+              data-testid="store-similar-btn"
+              @click="goCategoryList(activeCategory)"
+            >
+              同类商家 ›
+            </button>
             <!-- 收藏入口（PRD 688：icon 状态切换；设计稿未含，按设计系统新建） -->
             <button
               class="store-favorite"
@@ -1225,6 +1256,20 @@ function onCheckout(): void {
   font-size: 18px;
   font-weight: 500;
   color: var(--color-text-primary);
+}
+
+/* 店名旁的「同类商家」入口（TODO-USER-107 ②）：低视觉权重的文字链，紧邻店名、不与收藏 icon 抢位 */
+.store-similar {
+  flex: none;
+  padding: 2px 8px;
+  border: 1px solid var(--color-primary);
+  border-radius: 10px;
+  background: none;
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--color-primary);
+  cursor: pointer;
 }
 
 .product-item {

@@ -1,0 +1,77 @@
+# 用户端 real 模式联调清单（评价 / 消息 / 评价图片上传）
+
+日期：2026-09-14（戴宇涵，与 `TODO-USER-107 ②` 同批产出）
+覆盖：`TODO-USER-003`（评价提交与「待评价」判定）、`TODO-USER-004`（消息中心与聊天详情）、`TODO-USER-007`（评价图片上传）
+接口真源：契约 §3.5（订单与 `reviewed`）、§6.1（会话与通知）、§6.2（评价）、§10.1（图片上传）
+
+## 0. 先决条件（未满足则必然失败，不是缺陷）
+
+| # | 先决条件 | 现状 | 归口 |
+| --- | --- | --- | --- |
+| 1 | **完成一次重新发布** | 线上为 `20260913-707f234`，**不含**批次③④⑧；未发布前 real 模式下评价接口、消息收发、图片上传全部不可用 | `TODO-OPS-009`（林晨） |
+| 2 | **nginx 补 `/uploads/` 代理** | `deploy/nginx.conf` 只有 `/api/`、`/user/api/`、`/demo-images/`、`/design-assets/`，**没有 `/uploads/`**；后端静态映射是 `/uploads/**` 且只监听 `127.0.0.1:4000` → 浏览器请求 `/uploads/xxx.png` 会落到 `location /` 的 SPA 回退，**图片显示不出来**（返回 HTML 而非图片）。修法：加 `location /uploads/ { proxy_pass http://127.0.0.1:4000/uploads/; }` | 部署（林晨） |
+| 3 | `client_max_body_size 2m` 偏紧 | 上传单张上限 2MB，但 multipart 还有 boundary/头部开销，**恰好 2MB 的图片可能被 nginx 以 413 拒掉**；建议放宽到 3–4m（应用侧 2MB 校验仍是权威） | 部署（林晨） |
+
+> **红线**：`VITE_MOCK_FALLBACK=false`（2026-09-07 起关闭回退）。**不要**为了让流程「看起来能跑」而打开回退——它会把真实失败伪装成成功，正是 BUG-20260908-001 的教训。
+> **本地后端不可用**（R8：开发机不安装 MySQL），real 模式只能指向服务器环境。
+
+## 1. 环境与开关
+
+| 方式 | 怎么做 | 适用 |
+| --- | --- | --- |
+| **A. 线上部署版（推荐，即验收口径）** | 浏览器打开 `http://82.157.137.114:4001/user/`，演示账号 `13800000001 / 123456` | 交叉验收、演示；与最终交付同一构建 |
+| B. 本地 dev + 直连远端接口 | `frontend/user-h5/.env.development.local` 设 `VITE_API_MODE=real`、`VITE_API_BASE_URL=http://82.157.137.114:4001/api/v1` 后 `npm run dev` | 需要边改边验；后端 CORS 已放行 `http://localhost:*` |
+| C. 本地 dev + vite 代理 | 同上但 `VITE_API_BASE_URL=/api/v1` 且 `VITE_PROXY_TARGET=http://82.157.137.114:4001`（经 dev server 服务端转发，完全绕开 CORS） | B 被 CORS/Cookie 挡住时的兜底 |
+
+> 方式 A 下图片类验证依赖上面先决条件 2；先决条件 2 未修复前，用户端只能验证「上传成功、`url` 已写进提交」，无法验证「图片能显示」。若要先行确认后端映射本身是否生效，可在服务器上 `curl -I http://127.0.0.1:4000/uploads/<fileName>`（本机无法直连 4000）。
+
+## 2. `TODO-USER-003` 评价提交与「待评价」判定
+
+**前置数据**：一个 `COMPLETED` 且未评价的订单。没有的话：用户端下单 → 支付 → 登录商家端把订单推进到「已完成」。
+
+| 步 | 操作 | 期望 | 失败时先看什么 |
+| --- | --- | --- | --- |
+| 1 | 打开订单列表 | 已完成且未评价的订单显示「待评价」入口 | 依据 `reviewed` 字段（后端 `OrderMapper` 以 `EXISTS(SELECT 1 FROM reviews …)` 派生）；不显示就看 `GET /api/v1/orders/{orderId}` 响应里 `reviewed` 是否为 `false` |
+| 2 | 进入评价页 | 星级、标签、文字、图片区可用 | `GET /api/v1/orders/{orderId}` 是否 200 |
+| 3 | 提交评价 | 200；返回列表后该订单「待评价」消失 | `POST /api/v1/orders/{orderId}/review` 响应码与 `code` |
+| 4 | 对同一订单再次提交 | **409**（一单一评） | 若返回 200 说明一单一评没兜住 → 记缺陷 |
+| 5 | 商家端 → 评价管理 → 回复 | 回复后用户端商家详情「评价」Tab 可见回复；`repliedAt` 回显 | `PATCH /merchant/reviews/{id}/reply` |
+
+**证据**：`reviewed` 前后两次响应截图 + 提交请求/响应；若走方式 A，附页面截图（订单列表「待评价」消失前后）。
+
+## 3. `TODO-USER-004` 消息中心与聊天详情
+
+| 步 | 操作 | 期望 | 失败时先看什么 |
+| --- | --- | --- | --- |
+| 1 | 登录后点底部「消息」 | 通知三类 + 商家会话列表 + 会话未读角标；红点角标取真实未读数 | `GET /api/v1/me/notifications`、`/me/notifications/unread-count`、`GET /api/v1/conversations` |
+| 2 | 未登录时点「消息」 | 跳登录并带 `redirect`，登录后回到消息页 | 路由守卫 `meta.auth` |
+| 3 | 进入某个会话 | 头部状态卡 + 消息时间线；进入即标记已读 | `GET /api/v1/conversations/{id}`；`PATCH /conversations/{id}/read` 后 `userRead` 为 `true` |
+| 4 | 发送消息 | 发送成功置底清空；失败保留输入可重试 | `POST /api/v1/conversations/{id}/messages`；空/超长应 **400**、非本人会话 **404** |
+| 5 | 商家端「消息」页查看并回复 | 用户端刷新后可见商家回复 | 同上，注意双端未读字段分离（`userRead` / `merchantRead`） |
+| 6 | 从订单详情点「联系商家」 | 按 `orderId` 定位到该订单会话；无会话给提示 | `GET /api/v1/conversations?orderId={orderId}` 无会话返回空数组（不新建） |
+
+**已知问题**：`BUG-20260914-002`（`POST /conversations/{id}/messages` 返回 500）预期随本次发布消失；**若仍 500，按回归失败记录并回填缺陷台账**（台账状态流转写权归测试联调同学）。
+
+## 4. `TODO-USER-007` 评价图片上传
+
+| 步 | 操作 | 期望 | 失败时先看什么 |
+| --- | --- | --- | --- |
+| 1 | 评价页图片区选择本地图片 | 逐张上传；缩略图三态（上传中 / 成功 / 失败） | `POST /api/v1/files/images`（`multipart/form-data`，字段 `file`，`scene=review`） |
+| 2 | 上传失败项 | 保留本地预览并可重试；可单项删除 | 400（类型/大小不合法）时 `details` 应说明限制 |
+| 3 | 选择第 4 张 / 超过 2MB / 非白名单类型 | 前端立即提示且**不发请求**；后端同样拒绝 | 前端 `utils/reviewImage` 纯函数校验 + 后端兜底 |
+| 4 | 已达 3 张 | 添加入口消失 | — |
+| 5 | 有图仍在上传时点提交 | 阻止提交（避免静默丢图） | — |
+| 6 | 提交后打开返回的 `url` | 图片可正常显示 | 见先决条件 2（nginx 缺 `/uploads/` 代理）；另查服务器 `backend/uploads/` 是否存在且可写、`file.upload-dir` 配置 |
+| 7 | 未登录 / 越权 | 401 / 403 | 契约 §10.1 权限条 |
+
+**证据**：上传请求与响应（含 `fileName`、`size`、`contentType`）、三态截图、提交后评价详情页图片展示截图。
+
+## 5. 记录表（联调时逐行填写）
+
+| 项 | 用例编号 | 结果 | 证据位置 | 缺陷编号（如失败） |
+| --- | --- | --- | --- | --- |
+| 评价提交与「待评价」 | TC-REV 组 | | | |
+| 消息收发与未读 | TC-MSG 组 | | | |
+| 评价图片上传 | TC-IMG 组 | | | |
+
+> 失败项按 `docs/testing/问题记录/README.md` 落盘并在 `docs/testing/缺陷跟踪表.md` 登记编号；本清单只做执行指引，不替代台账。

@@ -3,7 +3,7 @@
  * 单测必测对象（TDD 规划 §4.2）；缺字段给确定默认值，禁止多键名试探式解包
  * 本文件 9/4 起按 TDD 实现（测试场景由人设计，AI 只辅助脚手架）
  */
-import type { OrderAmountLine, OrderDetail, OrderDiscountItem, OrderRecord, OrderSummary } from '@/services/api/types'
+import type { CouponBlastRecord, CouponBlastResult, OrderAmountLine, OrderDetail, OrderDiscountItem, OrderRecord, OrderSummary } from '@/services/api/types'
 
 /** 金额：后端返回数字元，展示保留两位小数（契约：金额后端保留两位小数） */
 export function formatMoney(amount: number): string {
@@ -284,4 +284,28 @@ export function couponExpiryText(validTo: string, now: Date = new Date()): strin
 export function formatMoneyCompact(amount: number): string {
   if (!Number.isFinite(amount)) return '0'
   return String(Number(amount.toFixed(2)))
+}
+
+/**
+ * 爆一次（`POST /me/coupons/blast`）响应归一化 —— 契约 §3.10。
+ *
+ * 真实后端按契约返回**扁平对象**：券字段（couponId/amount/threshold/…/canBlast）直接铺在 `data` 上，
+ * 另加 `tierIndex`（命中档位序号）与 `freeBlast`（本次是否免费爆）；
+ * 而组件与替身既有形态是 `{ coupon, tierIndex, free }`。此处做**唯一出口**适配，不把适配散进页面；
+ * 已是嵌套形态的响应原样透传（替身与既有用例不受影响）。
+ *
+ * 2026-09-14 线上实测：真实后端为扁平形态；未适配前结果卡拿不到金额（用户侧表现为「爆不出数额」）。
+ */
+export function normalizeBlastResult(
+  raw: CouponBlastRecord | CouponBlastResult,
+): CouponBlastResult {
+  if (raw && typeof raw === 'object' && 'coupon' in raw && raw.coupon) {
+    return raw as CouponBlastResult
+  }
+  const { tierIndex, freeBlast, ...coupon } = raw as CouponBlastRecord
+  return {
+    coupon: coupon as CouponBlastResult['coupon'],
+    tierIndex: tierIndex ?? 0,
+    free: Boolean(freeBlast),
+  }
 }

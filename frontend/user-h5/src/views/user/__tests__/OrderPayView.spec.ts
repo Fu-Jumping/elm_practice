@@ -4,6 +4,7 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
 import OrderPayView from '../OrderPayView.vue'
 import { useSessionStore } from '@/stores/sessionStore'
+import { onToast } from '@/utils/toast'
 import { ORDER_SEED, orderMockState } from '@/mocks/order'
 import type { OrderRecord } from '@/services/api/types'
 
@@ -151,12 +152,17 @@ describe('OrderPayView 支付页（批次⑩ TODO-USER-105）', () => {
     expect(expired.find('[data-testid="pay-order"]').attributes('disabled')).toBeDefined()
   })
 
-  it('TD-3 payDeadline 缺失（后端未返回）→ 支付禁用但不显示「已失效」', async () => {
-    const { wrapper } = await mountPay('op03')
+  it('TD-3 payDeadline 缺失（后端未返回）→ 只不显示倒计时（--:--）不禁用支付，能正常走支付（2026-09-14 口径修订）', async () => {
+    const { wrapper, router } = await mountPay('op03')
     const text = wrapper.find('[data-testid="order-pay"]').text()
     expect(text).toContain('支付剩余时间')
     expect(text).not.toContain('已失效')
-    expect(wrapper.find('[data-testid="pay-order"]').attributes('disabled')).toBeDefined()
+    // 口径修订（负责人 2026-09-14）：字段缺失不得阻断支付——曾因此让线上支付页整页点不动
+    expect(wrapper.find('[data-testid="pay-order"]').attributes('disabled')).toBeUndefined()
+    await wrapper.find('[data-testid="pay-order"]').trigger('click')
+    await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('pay-success'), {
+      timeout: 3000,
+    })
   })
 
   it('TD-4 点「立即支付」模拟成功 → 进入支付成功页（订单转待接单）', async () => {
@@ -213,5 +219,30 @@ describe('OrderPayView 支付页（批次⑩ TODO-USER-105）', () => {
     await wrapper.find('[data-testid="copy-order-btn"]').trigger('click')
     await flushPromises()
     expect(wrapper.find('[data-testid="copy-order-tip"]').exists()).toBe(true)
+  })
+
+  it('TP-11 取消被拒（填原因期间商家已接单 → 409）：关弹层并给出可见提示，不静默无反馈', async () => {
+    const messages: string[] = []
+    const off = onToast((message) => messages.push(message))
+    try {
+      const { wrapper } = await mountPay('op01')
+      await wrapper.find('[data-testid="pay-cancel-entry"]').trigger('click')
+      await vi.waitFor(() => expect(wrapper.find('[data-testid="cancel-sheet"]').exists()).toBe(true))
+      await wrapper.findAll('[data-testid="reason-chip"]')[0]!.trigger('click')
+
+      // 模拟「正在填原因时商家接单」：订单状态已变化，取消必被拒（契约 §3.5 → 409）
+      const target = orderMockState.find((order) => order.orderId === 'op01')!
+      const original = target.status
+      target.status = 'COOKING'
+
+      await wrapper.find('[data-testid="cancel-confirm-btn"]').trigger('click')
+
+      await vi.waitFor(() => expect(wrapper.find('[data-testid="cancel-sheet"]').exists()).toBe(false))
+      await vi.waitFor(() => expect(messages.join(' | ')).toContain('商家已接单，无法取消'))
+
+      target.status = original
+    } finally {
+      off()
+    }
   })
 })
