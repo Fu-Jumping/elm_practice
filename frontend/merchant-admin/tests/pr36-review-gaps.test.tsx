@@ -64,12 +64,14 @@ describe('登录成功后回跳原页面（评审缺口3，PRD 7.15）', () => {
   })
 })
 
-describe('店铺设置移除后端不支持的联系电话字段（评审缺口4，BUG-20260908-012）', () => {
-  it('店铺设置表单不应再渲染联系电话输入框', async () => {
+// BUG-20260908-012 处置更新（2026-09-14）：原断言「不应渲染联系电话」系后端无该字段时的临时处置，
+// 后端 `StorePatch.contactPhone` 已随 PR #61 落入 main，按缺陷单说明恢复字段，断言随之反转为「应提供」。
+describe('店铺设置联系电话字段（评审缺口4，BUG-20260908-012 恢复）', () => {
+  it('店铺设置表单应提供联系电话输入框', async () => {
     window.location.hash = '#store'
     render(<App />)
 
     expect(await screen.findByRole('heading', { name: '店铺设置' })).toBeTruthy()
-    expect(screen.queryByLabelText(/联系电话/)).toBeNull()
+    expect(await screen.findByLabelText(/联系电话/)).toBeTruthy()
   })
 })

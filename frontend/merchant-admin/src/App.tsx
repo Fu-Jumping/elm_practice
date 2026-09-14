@@ -405,6 +405,8 @@ function StorePage({ currentStore, onStoreChange }: { currentStore: Store; onSto
       const savedStore = await merchantApi.updateStore({
         name: values.name.trim(),
         description: values.description?.trim(),
+        // 空值不提交：后端把空串视为非法（契约 §4.1）
+        contactPhone: values.contactPhone?.trim() || undefined,
         startPrice: values.startPrice,
         deliveryFee: values.deliveryFee,
       })
@@ -439,6 +441,15 @@ function StorePage({ currentStore, onStoreChange }: { currentStore: Store; onSto
           </Form.Item>
           <Form.Item label="店铺简介" name="description">
             <Input.TextArea rows={4} maxLength={200} showCount />
+          </Form.Item>
+          {/* 契约 §4.1（L364）：contactPhone 为可选字段，传入时必须为 11 位手机号；
+              空串会被后端判 400，故提交时空值不发送（见 saveStore） */}
+          <Form.Item
+            label="联系电话"
+            name="contactPhone"
+            rules={[{ pattern: /^1\d{10}$/, message: '请输入 11 位手机号' }]}
+          >
+            <Input maxLength={11} placeholder="11 位手机号" allowClear />
           </Form.Item>
           <div className="form-grid">
             <Form.Item label="起送金额（元）" name="startPrice" rules={[{ type: 'number', min: 0, message: '起送金额不能小于 0' }]}><InputNumber min={0} precision={2} className="full-width" /></Form.Item>
