@@ -4,9 +4,10 @@
  * 注册为纯数据映射：模块加载期零调用（无 ESM 循环依赖陷阱）
  * TODO(9/4 起按 docs/backend/后端联调验收用例.md)：补全各店分类/商品与筛选参数行为
  */
-import type { Product, StoreCategory, StoreSummary } from '@/services/api/types'
+import type { Product, SearchSort, StoreCategory, StoreSummary } from '@/services/api/types'
 import type { MockHandler } from './index'
-import { ok } from './index'
+import { fail, ok } from './index'
+import { STORE_SORT_VALUES, sortStores } from './storeSort'
 
 // 商品预览缩略图（素材清单 docs/frontend/首页复刻素材清单.md；门店封面 9/6 起走渐变占位，不设 image 字段）
 const THUMB_1 = '/design-assets/首页-精细/product-thumb-1.png'
@@ -221,8 +222,41 @@ export function findMockStore(storeId: string): StoreSummary | undefined {
 
 /** 注册表：key = `METHOD path` */
 export const storeMocks: Record<string, MockHandler> = {
-  // 列表：暂无 keyword/categoryId/sort 过滤行为，全量返回（后续按验收用例补）
-  'GET /stores': () => ok<StoreSummary[]>(STORES),
+  /**
+   * 列表（契约 §3.2）：可选参数 `keyword`、`categoryId`、`sort`（综合/销量/距离）。
+   * 列表成功返回数组、无结果返回空数组，不当作错误（§1.3；分页唯一例外是 §3.6 搜索）。
+   * `sort` 未提供时保持种子顺序——首页（无参调用）与演示默认顺序不被改变；
+   * 分类商家列表页按契约显式传 `sort`，故「综合」语义由请求方确定（2026-09-14 TODO-USER-107 ②）。
+   */
+  'GET /stores': ({ params }) => {
+    const categoryId = params?.categoryId ? String(params.categoryId) : ''
+    const keyword = String(params?.keyword ?? '').trim().toLowerCase()
+    const sortRaw =
+      params?.sort === undefined || params?.sort === null || params?.sort === ''
+        ? ''
+        : String(params.sort)
+
+    if (sortRaw && !STORE_SORT_VALUES.includes(sortRaw as SearchSort)) {
+      return fail(400, 40000, '排序取值不合法（综合/销量/距离）')
+    }
+
+    let list = STORES.filter((store) => {
+      if (
+        categoryId &&
+        !(CATEGORIES_BY_STORE[store.storeId] ?? []).some((c) => c.categoryId === categoryId)
+      ) {
+        return false
+      }
+      if (!keyword) return true
+      if (store.name.toLowerCase().includes(keyword)) return true
+      return ALL_PRODUCTS.some(
+        (p) => p.storeId === store.storeId && p.name.toLowerCase().includes(keyword),
+      )
+    })
+
+    if (sortRaw) list = sortStores(list, sortRaw as SearchSort)
+    return ok<StoreSummary[]>(list)
+  },
 
   ...Object.fromEntries(
     STORES.map((store) => [`GET /stores/${store.storeId}`, () => ok<StoreSummary>(store)]),

@@ -14,8 +14,9 @@ import type { Product, SearchResult, SearchSort, StoreSummary } from '@/services
 import type { MockHandler } from './index'
 import { fail, ok } from './index'
 import { ALL_PRODUCTS, CATEGORIES_BY_STORE, STORES } from './store'
+import { STORE_SORT_VALUES, sortStores } from './storeSort'
 
-const SORT_VALUES: SearchSort[] = ['综合', '销量', '距离']
+const SORT_VALUES = STORE_SORT_VALUES
 const DEFAULT_PAGE = 1
 const DEFAULT_SIZE = 10
 
@@ -33,22 +34,6 @@ function isInvalidIntParam(value: unknown): boolean {
 function intParamOr(value: unknown, fallback: number): number {
   if (value === undefined || value === null || value === '') return fallback
   return Number(value)
-}
-
-/** 距离数值：真实后端取种子 distanceKm；替身按 distanceText 解析，缺字段视为无穷（排最后） */
-function distanceValue(store: StoreSummary): number {
-  const parsed = Number.parseFloat(store.distanceText ?? '')
-  return Number.isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY
-}
-
-function sortStores(stores: StoreSummary[], sort: SearchSort): StoreSummary[] {
-  const list = [...stores]
-  if (sort === '销量') return list.sort((a, b) => b.monthlySales - a.monthlySales)
-  if (sort === '距离') return list.sort((a, b) => distanceValue(a) - distanceValue(b))
-  // 综合（契约 §3.6）：销量优先、评分次之，不做加权公式
-  return list.sort(
-    (a, b) => b.monthlySales - a.monthlySales || b.rating - a.rating,
-  )
 }
 
 function paginate<T>(list: T[], page: number, size: number) {
