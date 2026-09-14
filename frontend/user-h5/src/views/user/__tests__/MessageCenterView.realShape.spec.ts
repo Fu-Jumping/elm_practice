@@ -166,9 +166,13 @@ describe('MessageCenterView 真后端健壮性（BUG-20260914-004 / 005）', () 
       () => expect(wrapper.findAll('[data-testid="conversation-item"]').length).toBe(2),
       { timeout: 10000 },
     )
+    // 店名映射依赖页面挂载时异步拉取的商家列表：等映射生效后再断言（CI 慢机上曾先于列表返回 → 误判为失败）
+    await vi.waitFor(
+      () => expect(wrapper.get('[data-testid="conversation-item"]').text()).toContain('麦当劳'),
+      { timeout: 10000 },
+    )
     const text = wrapper.get('[data-testid="conversation-item"]').text()
     // 标准形状仍按 storeId 映射店铺名（m003 麦当劳），不显示内部 id
-    expect(text).toContain('麦当劳')
     expect(text).not.toContain('m003')
   })
 })
