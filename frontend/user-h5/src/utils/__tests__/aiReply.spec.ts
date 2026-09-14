@@ -11,7 +11,13 @@ import { parseAiReply, type AiBlock, type AiRun } from '../aiReply'
  */
 const bold = (value: string): AiRun => ({ kind: 'bold', text: value })
 const text = (value: string): AiRun => ({ kind: 'text', text: value })
-const store = (storeId: string): AiRun => ({ kind: 'store', text: storeId, storeId })
+/** 商家可跳转片段：text = 展示文案（新口径为商家名），storeId = 路由参数 */
+const store = (name: string, storeId: string): AiRun => ({ kind: 'store', text: name, storeId })
+/** 用例内的商家列表（供按名匹配） */
+const STORES_REF = [
+  { storeId: 'm002', name: '肯德基宅急送' },
+  { storeId: 'm003', name: '麦当劳' },
+]
 
 describe('AI 回复解析（AI点餐助手前端PRD §4.1/§4.2）', () => {
   it('AR-1 多行文本拆为多个段落块，空行只分段不产生空块', () => {
@@ -43,22 +49,61 @@ describe('AI 回复解析（AI点餐助手前端PRD §4.1/§4.2）', () => {
     })
   })
 
-  it('AR-4 商家编号 `[m002]` 解析为可跳转片段；Markdown 链接语法不当作编号', () => {
-    const blocks = parseAiReply('推荐肯德基宅急送 [m002] 的香辣鸡腿堡')
+  it('AR-4 商家名匹配为可跳转片段（PRD §4.2：回复不出现商家编号，前端按店名匹配 storeId）', () => {
+    const blocks = parseAiReply('推荐肯德基宅急送的香辣鸡腿堡', STORES_REF)
     expect(blocks[0]).toEqual<AiBlock>({
       kind: 'paragraph',
-      runs: [text('推荐肯德基宅急送 '), store('m002'), text(' 的香辣鸡腿堡')],
+      runs: [text('推荐'), store('肯德基宅急送', 'm002'), text('的香辣鸡腿堡')],
     })
+  })
 
-    const link = parseAiReply('见 [官网](https://example.com)')
+  it('AR-4b 加粗的商家名同样成为可跳转片段（AI 常用 **店名** 强调，不得只加粗不可点）', () => {
+    const blocks = parseAiReply('**肯德基宅急送** 有香辣鸡腿堡 ¥19.50', STORES_REF)
+    expect(blocks[0]).toEqual<AiBlock>({
+      kind: 'paragraph',
+      runs: [store('肯德基宅急送', 'm002'), text(' 有香辣鸡腿堡 ¥19.50')],
+    })
+  })
+
+  it('AR-4c 旧编号标记 `[m002]` 仍解析为跳转（后端提示词回退时的防御），Markdown 链接不误判', () => {
+    const blocks = parseAiReply('推荐肯德基宅急送 [m002] 的香辣鸡腿堡', STORES_REF)
+    const firstBlock = blocks[0]
+    const runs = firstBlock && firstBlock.kind === 'paragraph' ? firstBlock.runs : []
+    expect(runs.some((run) => run.kind === 'store' && run.storeId === 'm002')).toBe(true)
+
+    const link = parseAiReply('见 [官网](https://example.com)', STORES_REF)
     expect(link[0]).toEqual<AiBlock>({ kind: 'paragraph', runs: [text('见 [官网](https://example.com)')] })
   })
 
-  it('AR-5 列表条目内的加粗与商家编号同样解析（混合行）', () => {
-    const blocks = parseAiReply('- **肯德基宅急送** [m002] 香辣鸡腿堡 ¥19.50')
-    expect(blocks).toEqual<AiBlock[]>([
-      { kind: 'list', items: [[bold('肯德基宅急送'), text(' '), store('m002'), text(' 香辣鸡腿堡 ¥19.50')]] },
+  it('AR-4d 不在商家列表中的名字不生成跳转（只按已知商家匹配，不猜 storeId）', () => {
+    const blocks = parseAiReply('推荐老王面馆的红烧肉', STORES_REF)
+    expect(blocks[0]).toEqual<AiBlock>({ kind: 'paragraph', runs: [text('推荐老王面馆的红烧肉')] })
+  })
+
+  it('AR-4e 名称前缀重叠时取最长匹配（老王小店 vs 老王）', () => {
+    const blocks = parseAiReply('去老王小店看看', [
+      { storeId: 'm001', name: '老王小店' },
+      { storeId: 'mx', name: '老王' },
     ])
+    expect(blocks[0]).toEqual<AiBlock>({
+      kind: 'paragraph',
+      runs: [text('去'), store('老王小店', 'm001'), text('看看')],
+    })
+  })
+
+  it('AR-5 列表条目内的商家名同样解析为可跳转片段（混合行）', () => {
+    const blocks = parseAiReply('- **肯德基宅急送** 香辣鸡腿堡 ¥19.50', STORES_REF)
+    expect(blocks).toEqual<AiBlock[]>([
+      { kind: 'list', items: [[store('肯德基宅急送', 'm002'), text(' 香辣鸡腿堡 ¥19.50')]] },
+    ])
+  })
+
+  it('AR-5b 未提供商家列表时，加粗仍按加粗渲染（不因缺少索引而丢样式）', () => {
+    const blocks = parseAiReply('**肯德基宅急送** 有香辣鸡腿堡')
+    expect(blocks[0]).toEqual<AiBlock>({
+      kind: 'paragraph',
+      runs: [bold('肯德基宅急送'), text(' 有香辣鸡腿堡')],
+    })
   })
 
   it('AR-6 原文中的 HTML 只作为纯文本片段出现（解析结果不含 HTML 字符串）', () => {

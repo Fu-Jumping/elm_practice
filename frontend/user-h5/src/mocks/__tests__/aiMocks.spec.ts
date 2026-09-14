@@ -55,21 +55,24 @@ describe('AI 点餐助手替身（契约 §10.6）', () => {
     const res = await chat('肯德基有什么')
     const reply = (res.payload.data as { reply: string }).reply
     expect(reply).toContain('肯德基宅急送')
-    expect(reply).toContain('[m002]')
     expect(reply).toContain('香辣鸡腿堡')
+    // 新口径（PRD §4.2 / main 5848651）：回复文本不出现商家编号
+    expect(reply).not.toContain('m002')
     expect(reply).toContain('¥19.50')
   })
 
   it('AM-5 多轮记忆：同一 sessionId 内追问时记得上一轮的店铺', async () => {
     const first = await chat('我想吃辣的', 'sid-memory')
     const firstReply = (first.payload.data as { reply: string }).reply
-    expect(firstReply).toContain('[m002]')
+    expect(firstReply).toContain('肯德基宅急送')
+    expect(firstReply).not.toContain('m002')
 
     const second = await chat('还有什么喝的', 'sid-memory')
     const secondReply = (second.payload.data as { reply: string }).reply
     // 记得上一轮说的是 m002 → 直接给该店饮品（九珍果汁），而不是全平台泛推荐
-    expect(secondReply).toContain('[m002]')
+    expect(secondReply).toContain('肯德基宅急送')
     expect(secondReply).toContain('九珍果汁')
+    expect(secondReply).not.toContain('m002')
 
     // 另起会话则不带上一轮上下文（不得串会话）
     const other = await chat('还有什么喝的', 'sid-other')
@@ -81,6 +84,7 @@ describe('AI 点餐助手替身（契约 §10.6）', () => {
     const reply = (res.payload.data as { reply: string }).reply
     expect(reply).toContain('暂时没有')
     expect(reply).not.toMatch(/\[m\d+/)
+    expect(reply).not.toMatch(/m\d{3}/)
   })
 
   it('AM-7 只推荐在售商品（下架商品不出现在推荐里）', async () => {

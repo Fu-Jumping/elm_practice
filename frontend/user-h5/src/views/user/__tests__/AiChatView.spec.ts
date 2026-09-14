@@ -151,12 +151,19 @@ describe('AiChatView（AI 点餐助手对话页）', () => {
     expect(items.map((node) => node.text())).toEqual(['香辣鸡腿堡 ¥19.50', '九珍果汁 ¥9.00'])
   })
 
-  it('AI-5 商家编号可点击并跳转商家详情（AI-FE-07）', async () => {
-    streamOk('推荐肯德基宅急送 [m002] 的香辣鸡腿堡')
+  it('AI-5 商家名可点击并跳转商家详情，且回复不出现商家编号（AI-FE-07，PRD §4.2 新口径）', async () => {
+    streamOk('推荐**肯德基宅急送**的香辣鸡腿堡')
     const wrapper = await mountChat()
     await sendMessage(wrapper, '推荐点吃的')
+    const replyText = wrapper.findAll('[data-testid="ai-message"][data-role="ai"]')[1]!.text()
+    expect(replyText).not.toContain('m002')
+    // 商家名 → storeId 的匹配依赖商家列表（页面挂载时异步拉取）→ 等链接渲染出来
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="ai-store-link"]').exists()).toBe(true),
+      { timeout: 10000 },
+    )
     const link = wrapper.get('[data-testid="ai-store-link"]')
-    expect(link.text()).toBe('m002')
+    expect(link.text()).toBe('肯德基宅急送')
     await link.trigger('click')
     await flushPromises()
     expect(router.currentRoute.value.name).toBe('store-detail')

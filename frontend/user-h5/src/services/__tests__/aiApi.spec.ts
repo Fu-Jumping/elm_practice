@@ -41,7 +41,7 @@ describe('AI 对话接口层（契约 §10.6）', () => {
       { sessionId: 'sid-multi', prompt: '我想吃辣的' },
       { onChunk: () => undefined },
     )
-    expect(first.reply).toContain('[m002]')
+    expect(first.reply).toContain('肯德基宅急送')
 
     const second = await aiApi.streamChat(
       { sessionId: 'sid-multi', prompt: '还有什么喝的' },
