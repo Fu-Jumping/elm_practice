@@ -4,7 +4,9 @@
  * 口径出处：PRD 7.5（模拟支付与结果页跳转）+ 7.16.1 支付页三行、契约 §3.5（payDeadline 与支付接口）
  * 关键口径：
  * - 倒计时数据源为后端 `payDeadline`（契约 §3.5 = createdAt + 15 分钟）；归零显示「已失效」并禁用支付
- *   （2026-09-11 负责人确认：仅前端禁用，不回查后端）；`payDeadline` 未返回时禁用支付但显示「--:--」
+ *   （2026-09-11 负责人确认：仅前端禁用，不回查后端）；
+ *   **`payDeadline` 未返回时只显示「--:--」、不再禁用支付**（2026-09-14 负责人裁定：后端缺该字段曾导致
+ *   线上整页点不动、支付主链路断死，改为「字段缺失不阻断支付」；契约已同步为已实现）
  * - 金额明细走 normalizers.buildAmountLines（CHG-004 唯一出口）；商品与金额一律按后端返回展示，前端不自行计算
  * - 卡内「取消订单」为文字入口（不与底部按钮并排）；弹层与取消接口归 TODO-USER-002，本批给占位提示
  * - 应用标题用「轻量外卖」（负责人口径；设计稿的英文 CampusBites 与全库「不出现英文界面」口径冲突，不作真源）
@@ -46,8 +48,8 @@ const storeName = computed(() => catalogStore.storeDetail?.name ?? order.value?.
 const amountText = computed(() => formatMoney(order.value?.amounts.payableAmount ?? 0))
 const isPendingPayment = computed(() => order.value?.status === 'PENDING_PAYMENT')
 const expired = computed(() => remain.value !== null && remain.value <= 0)
-/** 支付可用条件：待支付状态 + payDeadline 已返回 + 未失效 */
-const payDisabled = computed(() => !isPendingPayment.value || remain.value === null || expired.value)
+/** 支付可用条件：待支付状态 + 未失效（`payDeadline` 未返回时只不显示倒计时，不再禁用支付，2026-09-14 裁定） */
+const payDisabled = computed(() => !isPendingPayment.value || expired.value)
 const countdownText = computed(() => {
   if (remain.value === null) return '--:--'
   return expired.value ? '已失效' : formatCountdown(remain.value)
