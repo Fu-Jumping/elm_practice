@@ -438,3 +438,26 @@ export interface SearchResult {
   merchants: PagedList<StoreSummary>
   products: PagedList<Product>
 }
+
+/**
+ * AI 点餐助手（契约 §10.6 / AI点餐助手前端PRD §5.1）：
+ * - 请求：`sessionId` 由前端生成并持久化后随每次请求携带（契约允许传入；不传则后端基于 HttpSession 生成）
+ * - 非流式响应 `{sessionId, reply}`；流式 `/stream-chat` 只返回文本分片，sessionId 由请求方持有
+ */
+export interface AiChatPayload {
+  sessionId: string
+  prompt: string
+}
+
+export interface AiChatResult {
+  sessionId: string
+  reply: string
+}
+
+/** 本机消息记录（PRD §5.2，localStorage 承载；status 为展示态、不持久化） */
+export interface AiChatMessage {
+  id: string
+  role: 'user' | 'ai'
+  text: string
+  createdAt: number
+}
