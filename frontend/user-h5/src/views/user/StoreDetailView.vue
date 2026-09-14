@@ -263,8 +263,9 @@ function onSelectCategory(categoryId: string): void {
 }
 
 /**
- * 进入分类商家列表（TODO-USER-107 ② 的入口）：
- * 携带分类编号；同时把分类名作为页面参数传出——契约没有「按分类编号取分类名」的用户端接口，
+ * 进入分类商家列表（TODO-USER-107 ② 的入口，位于店名旁）：
+ * 参数取**当前选中分类**（默认第一个有商品的分类，见 activeCategoryId 的默认选中口径）；
+ * 同时把分类名作为页面参数传出——契约没有「按分类编号取分类名」的用户端接口，
  * 分类名只在店铺分类接口里返回，故由入口负责传递（缺失时目标页回退通用标题）。
  */
 function goCategoryList(category: StoreCategory): void {
@@ -274,6 +275,12 @@ function goCategoryList(category: StoreCategory): void {
     query: { name: category.name },
   })
 }
+
+/** 当前选中分类对象（店名旁入口用；无分类时入口不渲染） */
+const activeCategory = computed<StoreCategory | undefined>(() => {
+  const list = catalogStore.categories
+  return list.find((cat) => cat.categoryId === activeCategoryId.value) ?? list[0]
+})
 
 /**
  * 把外层滚动容器（.app-main，MainLayout 的内容区）滚到 Tab 吸顶线：
@@ -498,6 +505,17 @@ function onCheckout(): void {
               <StoreCover class="store-logo" :name="store.name" :image="storeImageSrc(storeId, store.image)" />
             </span>
             <h1 class="store-name">{{ store.name }}</h1>
+            <!-- 同类商家入口（TODO-USER-107 ②）：放在店名旁；参数取当前选中分类（默认第一个有商品的分类），
+                 进入分类商家列表；左分类栏仍保持「点击滚动定位」不变（项目规则 §5，锁于 T76） -->
+            <button
+              v-if="activeCategory"
+              class="store-similar"
+              type="button"
+              data-testid="store-similar-btn"
+              @click="goCategoryList(activeCategory)"
+            >
+              同类商家 ›
+            </button>
             <!-- 收藏入口（PRD 688：icon 状态切换；设计稿未含，按设计系统新建） -->
             <button
               class="store-favorite"
@@ -639,21 +657,9 @@ function onCheckout(): void {
             class="product-section"
             :data-section-id="cat.categoryId"
           >
-            <div class="product-section-head">
-              <h2 class="product-list-title" :data-testid="`product-section-${cat.categoryId}`">
-                {{ cat.name }}
-              </h2>
-              <!-- 同类商家入口（TODO-USER-107 ②）：按店铺自身分类进入分类商家列表；
-                   左分类栏保持「点击滚动定位」不变（项目规则 §5，锁于 T76） -->
-              <button
-                class="product-list-more"
-                type="button"
-                :data-testid="`section-more-${cat.categoryId}`"
-                @click.stop="goCategoryList(cat)"
-              >
-                同类商家 ›
-              </button>
-            </div>
+            <h2 class="product-list-title" :data-testid="`product-section-${cat.categoryId}`">
+              {{ cat.name }}
+            </h2>
             <div
               v-for="product in productsByCategory.get(cat.categoryId) ?? []"
               :key="product.productId"
@@ -1239,20 +1245,11 @@ function onCheckout(): void {
   background: var(--color-surface-white);
 }
 
-/* 分区标题行：吸顶容器（设计稿导出 sticky top-0）+ 右侧「同类商家」入口；
-   吸顶由容器承担，标题自身不再 sticky——保证标题文本与偏移几何与改动前一致（T13/T70 与滚动交接 E2E） */
-.product-section-head {
+.product-list-title {
+  /* 分区标题吸顶（设计稿导出 sticky top-0）：滚动列表时当前分类标题常驻列表顶部 */
   position: sticky;
   top: 0;
   z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  background: var(--color-surface-white);
-}
-
-.product-list-title {
   margin: 0;
   padding: 12px 0;
   background: var(--color-surface-white);
@@ -1261,13 +1258,16 @@ function onCheckout(): void {
   color: var(--color-text-primary);
 }
 
-.product-list-more {
+/* 店名旁的「同类商家」入口（TODO-USER-107 ②）：低视觉权重的文字链，紧邻店名、不与收藏 icon 抢位 */
+.store-similar {
   flex: none;
-  padding: 4px 0;
-  border: none;
+  padding: 2px 8px;
+  border: 1px solid var(--color-primary);
+  border-radius: 10px;
   background: none;
   font-family: inherit;
-  font-size: 12px;
+  font-size: 11px;
+  line-height: 16px;
   color: var(--color-primary);
   cursor: pointer;
 }
