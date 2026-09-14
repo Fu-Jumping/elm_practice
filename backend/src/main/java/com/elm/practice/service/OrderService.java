@@ -2,6 +2,7 @@ package com.elm.practice.service;
 
 import com.elm.practice.common.ApiException;
 import com.elm.practice.common.IdGenerator;
+import com.elm.practice.common.JsonLists;
 import com.elm.practice.common.RequestUtil;
 import com.elm.practice.common.Times;
 import com.elm.practice.common.ViewMapper;
@@ -63,9 +64,13 @@ public class OrderService {
             if (p == null || !p.onSale) throw ApiException.conflict("商品已下架");
             if (line.quantity > p.stock) throw new ApiException(org.springframework.http.HttpStatus.CONFLICT, 40901,
                     "商品库存不足", Map.of("productId", p.id, "reason", "库存最多为 " + p.stock));
-            BigDecimal unit = p.price.setScale(2);
+            var selectedSpecs = CartService.validatedSelection(p, JsonLists.specs(line.specOptionsJson));
+            BigDecimal unit = CartService.unitPrice(p, selectedSpecs);
             subtotal = subtotal.add(unit.multiply(BigDecimal.valueOf(line.quantity)));
-            snapshots.add(new Domain.OrderItem(p.id, p.name, p.image, p.categoryId, unit, line.quantity));
+            var snapshot = new Domain.OrderItem(p.id, p.name, p.image, p.categoryId, unit, line.quantity);
+            snapshot.specKey = line.specKey;
+            snapshot.specOptionsJson = JsonLists.toJson(selectedSpecs);
+            snapshots.add(snapshot);
         }
         subtotal = subtotal.setScale(2);
         if (subtotal.compareTo(store.startPrice) < 0) throw ApiException.conflict("未达到起送金额 " + store.startPrice);
@@ -141,6 +146,7 @@ public class OrderService {
     @Transactional
     public Domain.Order pay(Domain.User u, String id, boolean success) {
         Domain.Order o = get(u, id);
+        if (o.status == Domain.OrderStatus.CANCELLED) throw ApiException.conflict("订单已取消，不能支付");
         if (o.status != Domain.OrderStatus.PENDING_PAYMENT) return o;
         if (LocalDateTime.now().minusMinutes(15).isAfter(LocalDateTime.parse(o.createdAt, Times.TIME)))
             throw ApiException.conflict("支付已超时");
@@ -149,6 +155,29 @@ public class OrderService {
             if (orders.markPaid(id, paidAt) > 0) { o.status = Domain.OrderStatus.PENDING; o.paidAt = paidAt; }
         }
         return o;
+    }
+
+    @Transactional
+    public Domain.Order cancel(Domain.User u, String id, Requests.CancelOrder request) {
+        if (request == null) throw ApiException.badRequest("请求体不能为空");
+        String reason = RequestUtil.required(request.reason, "reason");
+        if (reason.length() > 50) throw ApiException.badRequest("reason长度必须为1-50个字符");
+        Domain.Order order = orders.findByIdForUpdate(id);
+        if (order == null || !u.id.equals(order.userId)) throw ApiException.notFound("订单不存在");
+        if (order.status == Domain.OrderStatus.CANCELLED) return withItems(order);
+        Domain.OrderStatus expected = order.status;
+        if (expected != Domain.OrderStatus.PENDING_PAYMENT && expected != Domain.OrderStatus.PENDING)
+            throw ApiException.conflict("当前订单状态不可取消");
+        String cancelledAt = Times.now();
+        if (orders.cancelConditional(id, expected, reason, cancelledAt) == 0)
+            throw ApiException.conflict("订单状态已变化，请刷新后重试");
+        order.status = Domain.OrderStatus.CANCELLED;
+        order.cancelReason = reason;
+        order.cancelledAt = cancelledAt;
+        order.cancelledBy = "USER";
+        order.items.addAll(orderItems.findByOrder(id));
+        for (Domain.OrderItem item : order.items) products.restoreStock(item.productId, item.quantity);
+        return order;
     }
 
     @Transactional

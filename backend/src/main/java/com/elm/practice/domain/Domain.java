@@ -11,7 +11,7 @@ public final class Domain {
 
     public enum Role { USER, MERCHANT }
     public enum StoreStatus { OPEN, CLOSED, TEMPORARILY_CLOSED }
-    public enum OrderStatus { PENDING_PAYMENT, PROCESSING, PENDING, COOKING, DELIVERING, COMPLETED }
+    public enum OrderStatus { PENDING_PAYMENT, PROCESSING, PENDING, COOKING, DELIVERING, COMPLETED, CANCELLED }
 
     public record Principal(String id, Role role) {}
 
@@ -65,9 +65,18 @@ public final class Domain {
         }
         public Category() {}
     }
+    public static final class SpecOption {
+        public String name;
+        public BigDecimal priceDelta = BigDecimal.ZERO;
+        public SpecOption() {}
+        public SpecOption(String name, BigDecimal priceDelta) {
+            this.name = name; this.priceDelta = priceDelta;
+        }
+    }
     public static final class Product {
         public String id, storeId, categoryId, name, description, image;
-        public BigDecimal price;
+        public BigDecimal price, memberPrice;
+        public String tagsJson = "[]", specOptionsJson = "[]";
         public int stock, sales;
         public boolean onSale;
         public Product(String id, String storeId, String categoryId, String name, String description,
@@ -96,6 +105,7 @@ public final class Domain {
     }
     public static final class CartLine {
         public String id, userId, storeId, productId;
+        public String specKey = "", specOptionsJson = "[]";
         public int quantity;
         public BigDecimal unitPrice;
         public LocalDateTime updatedAt;
@@ -108,6 +118,8 @@ public final class Domain {
     }
     public static final class Order {
         public String id, userId, storeId, addressId, remark, createdAt, paidAt;
+        public String cancelReason, cancelledAt, cancelledBy;
+        public boolean reviewed;
         public OrderStatus status;
         public BigDecimal itemSubtotal, packagingFee, total;
         // 金额快照扩展（批次①，契约 §3.5）：历史行/旧构造默认 0。
@@ -163,6 +175,7 @@ public final class Domain {
     }
     public static final class OrderItem {
         public String productId, name, image, categoryId;
+        public String specKey = "", specOptionsJson = "[]";
         public BigDecimal unitPrice, subtotal;
         public int quantity;
         public OrderItem(String productId, String name, String image, String categoryId,
@@ -174,7 +187,8 @@ public final class Domain {
         public OrderItem() {}
     }
     public static final class Review {
-        public String id, orderId, storeId, userId, content, reply, createdAt, repliedAt;
+        public String id, orderId, storeId, userId, userNickname, content, reply, createdAt, repliedAt;
+        public String tagsJson = "[]", imagesJson = "[]";
         public int rating;
         public Review(String id, String orderId, String storeId, String userId, String content,
                       int rating, String createdAt) {
@@ -184,7 +198,7 @@ public final class Domain {
         public Review() {}
     }
     public static final class Conversation {
-        public String id, orderId, userId, merchantId;
+        public String id, orderId, userId, merchantId, userNickname;
         public boolean userRead, merchantRead;
         public final List<Message> messages = new ArrayList<>();
         public Conversation(String id, String orderId, String userId, String merchantId) {
@@ -193,7 +207,7 @@ public final class Domain {
         public Conversation() {}
     }
     public static final class Message {
-        public String id, senderId, senderRole, content, createdAt;
+        public String id, conversationId, senderId, senderRole, content, createdAt;
         public Message(String id, String senderId, String senderRole, String content, String createdAt) {
             this.id=id; this.senderId=senderId; this.senderRole=senderRole; this.content=content; this.createdAt=createdAt;
         }

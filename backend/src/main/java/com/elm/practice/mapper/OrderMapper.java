@@ -15,7 +15,9 @@ public interface OrderMapper {
             + "new_customer_amount AS newCustomerAmount, member_discount_amount AS memberDiscountAmount, "
             + "coupon_amount AS couponAmount, delivery_fee_discount AS deliveryFeeDiscount, "
             + "DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%s') AS createdAt, "
-            + "DATE_FORMAT(paid_at,'%Y-%m-%d %H:%i:%s') AS paidAt, idempotency_key AS idempotencyKey";
+            + "DATE_FORMAT(paid_at,'%Y-%m-%d %H:%i:%s') AS paidAt, idempotency_key AS idempotencyKey, "
+            + "cancel_reason AS cancelReason, DATE_FORMAT(cancelled_at,'%Y-%m-%d %H:%i:%s') AS cancelledAt, "
+            + "cancelled_by AS cancelledBy, EXISTS(SELECT 1 FROM reviews r WHERE r.order_id=orders.order_id) AS reviewed";
 
     String SNAPSHOT = " @Result(property = \"addressSnapshot\", column = \"address_snapshot\", "
             + "typeHandler = com.elm.practice.common.AddressSnapshotTypeHandler.class)";
@@ -26,6 +28,13 @@ public interface OrderMapper {
                     typeHandler = AddressSnapshotTypeHandler.class)
     })
     Domain.Order findById(String id);
+
+    @Select("SELECT " + COLS + " FROM orders WHERE order_id = #{id} FOR UPDATE")
+    @Results({
+            @Result(property = "addressSnapshot", column = "address_snapshot",
+                    typeHandler = AddressSnapshotTypeHandler.class)
+    })
+    Domain.Order findByIdForUpdate(String id);
 
     @Select("SELECT " + COLS + " FROM orders WHERE user_id = #{userId} AND idempotency_key = #{key}")
     @Results({
@@ -82,11 +91,33 @@ public interface OrderMapper {
             + "WHERE order_id = #{id} AND status = 'PENDING_PAYMENT'")
     int markPaid(@Param("id") String id, @Param("paidAt") String paidAt);
 
+    @Update("UPDATE orders SET status='CANCELLED', cancel_reason=#{reason}, "
+            + "cancelled_at=STR_TO_DATE(#{cancelledAt},'%Y-%m-%d %H:%i:%s'), cancelled_by='USER' "
+            + "WHERE order_id=#{id} AND status=#{expected}")
+    int cancelConditional(@Param("id") String id, @Param("expected") Domain.OrderStatus expected,
+                          @Param("reason") String reason, @Param("cancelledAt") String cancelledAt);
+
     /** 测试辅助：构造"支付超时"场景数据（正常业务不修改 created_at）。 */
     @Update("UPDATE orders SET created_at = STR_TO_DATE(#{createdAt},'%Y-%m-%d %H:%i:%s') WHERE order_id = #{id}")
     int updateCreatedAt(@Param("id") String id, @Param("createdAt") String createdAt);
 
-    @Select("SELECT COUNT(*) AS orderCount, COALESCE(SUM(total), 0) AS salesAmount FROM orders "
-            + "WHERE store_id = #{storeId} AND status != 'PENDING_PAYMENT'")
-    Map<String, Object> overviewByStore(String storeId);
+    String VALID_STATUSES = "'PENDING','PROCESSING','COOKING','DELIVERING','COMPLETED'";
+
+    @Select("SELECT COUNT(*) AS orderCount, COALESCE(SUM(total), 0) AS salesAmount, "
+            + "COALESCE(AVG(total), 0) AS avgOrderAmount, "
+            + "SUM(CASE WHEN status='PENDING' THEN 1 ELSE 0 END) AS pendingOrderCount "
+            + "FROM orders WHERE store_id=#{storeId} AND status IN (" + VALID_STATUSES + ") "
+            + "AND created_at >= #{startAt}")
+    Map<String, Object> statisticsSummary(@Param("storeId") String storeId, @Param("startAt") String startAt);
+
+    @Select("SELECT DATE_FORMAT(created_at,'%Y-%m-%d') AS date, COALESCE(SUM(total),0) AS salesAmount, "
+            + "COUNT(*) AS orderCount FROM orders WHERE store_id=#{storeId} "
+            + "AND status IN (" + VALID_STATUSES + ") AND created_at >= #{startAt} "
+            + "GROUP BY DATE_FORMAT(created_at,'%Y-%m-%d') ORDER BY date")
+    List<Map<String, Object>> statisticsTrend(@Param("storeId") String storeId, @Param("startAt") String startAt);
+
+    @Select("SELECT status AS name, COUNT(*) AS value FROM orders WHERE store_id=#{storeId} "
+            + "AND status IN (" + VALID_STATUSES + ") AND created_at >= #{startAt} "
+            + "GROUP BY status ORDER BY status")
+    List<Map<String, Object>> statisticsByStatus(@Param("storeId") String storeId, @Param("startAt") String startAt);
 }
