@@ -109,4 +109,25 @@ CREATE TABLE IF NOT EXISTS coupon_packs (
   price DECIMAL(10,2) NOT NULL, quantity INT NOT NULL, created_at TIMESTAMP NOT NULL,
   INDEX idx_packs_user (user_id)
 );
+
+-- AI 点餐助手会话与消息（会话记忆复用 MySQL，替代 Redis）
+CREATE TABLE IF NOT EXISTS ai_chat_sessions (
+  session_id VARCHAR(64) PRIMARY KEY,
+  user_id VARCHAR(32),
+  title VARCHAR(100),
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL,
+  INDEX idx_ai_session_user (user_id)
+);
+
+CREATE TABLE IF NOT EXISTS ai_chat_messages (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  session_id VARCHAR(64) NOT NULL,
+  role VARCHAR(16) NOT NULL,
+  content MEDIUMTEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  INDEX idx_ai_msg_session (session_id, created_at),
+  CHECK(role IN ('SYSTEM','USER','ASSISTANT','TOOL'))
+);
+
 INSERT IGNORE INTO id_sequence(name,next_val) VALUES ('global',1004);
