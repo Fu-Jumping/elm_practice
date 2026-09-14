@@ -152,12 +152,17 @@ describe('OrderPayView 支付页（批次⑩ TODO-USER-105）', () => {
     expect(expired.find('[data-testid="pay-order"]').attributes('disabled')).toBeDefined()
   })
 
-  it('TD-3 payDeadline 缺失（后端未返回）→ 支付禁用但不显示「已失效」', async () => {
-    const { wrapper } = await mountPay('op03')
+  it('TD-3 payDeadline 缺失（后端未返回）→ 只不显示倒计时（--:--）不禁用支付，能正常走支付（2026-09-14 口径修订）', async () => {
+    const { wrapper, router } = await mountPay('op03')
     const text = wrapper.find('[data-testid="order-pay"]').text()
     expect(text).toContain('支付剩余时间')
     expect(text).not.toContain('已失效')
-    expect(wrapper.find('[data-testid="pay-order"]').attributes('disabled')).toBeDefined()
+    // 口径修订（负责人 2026-09-14）：字段缺失不得阻断支付——曾因此让线上支付页整页点不动
+    expect(wrapper.find('[data-testid="pay-order"]').attributes('disabled')).toBeUndefined()
+    await wrapper.find('[data-testid="pay-order"]').trigger('click')
+    await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('pay-success'), {
+      timeout: 3000,
+    })
   })
 
   it('TD-4 点「立即支付」模拟成功 → 进入支付成功页（订单转待接单）', async () => {
