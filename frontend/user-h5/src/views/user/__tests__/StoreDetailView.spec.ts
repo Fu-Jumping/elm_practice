@@ -9,6 +9,15 @@ import { useSessionStore } from '@/stores/sessionStore'
 import { useCartStore } from '@/stores/cartStore'
 import { onToast } from '@/utils/toast'
 import { clearMockCart } from '@/mocks/cart'
+import { FAVORITE_SEED, favoriteMockState } from '@/mocks/favorite'
+import { mockDispatch } from '@/mocks'
+
+// 原始 mock 分发器保留引用：BUG-20260914-003 用例需要伪造「服务端会话有效」的 GET /me 响应
+const actualMocks = await vi.importActual<typeof import('@/mocks')>('@/mocks')
+vi.mock('@/mocks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/mocks')>()
+  return { ...actual, mockDispatch: vi.fn() }
+})
 
 /**
  * 商家详情页 P0 行为测试（2026-09-06 负责人拍板清单 T11-T18）
@@ -28,6 +37,10 @@ import { clearMockCart } from '@/mocks/cart'
  *     T15 同步演进为登录态加购）
  * T71 顶部栏应用名为课程口径「轻量外卖」，不出现第三方品牌字样（2026-09-13 保真度巡检脚本
  *     快照发现：`.detail-brand` 仍渲染设计稿的第三方品牌名）
+ * T77 公开页整页加载后（客户端会话态为空、服务端会话有效）点加购 → 先探活、不被误判未登录
+ *     （BUG-20260914-003，2026-09-14 真后端复验发现）
+ * T78 真未登录（探活 401）点加购 → 仍提示请先登录并跳登录带 redirect（回归锁：不得因探活改动放宽口径）
+ * T79 同根因另两处：刷新后点收藏/去结算同样先探活（BUG-20260914-003 覆盖范围）
  */
 describe('StoreDetailView（商家详情页 P0）', () => {
   const messages: string[] = []
@@ -39,6 +52,9 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     // 购物车 mock 为模块级内存态：每条用例清空，隔离跨用例数量累加（同 ConfirmOrderView.spec）
     clearMockCart('m002')
     clearMockCart('m003')
+    favoriteMockState.splice(0, favoriteMockState.length, ...FAVORITE_SEED.map((item) => ({ ...item })))
+    // 默认走真实替身；T77/T79 用例内再覆写为「服务端会话有效」的实现
+    vi.mocked(mockDispatch).mockImplementation(actualMocks.mockDispatch)
   })
 
   afterEach(() => {
@@ -181,8 +197,8 @@ describe('StoreDetailView（商家详情页 P0）', () => {
       { timeout: 10000 },
     )
     await wrapper.find('[data-testid="add-btn-p101"]').trigger('click')
-    await flushPromises()
-    expect(router.currentRoute.value.name).toBe('login')
+    // BUG-20260914-003 起未登录路径先探活（替身 200–500ms 延迟），断言随之改为等待重定向
+    await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('login'), { timeout: 10000 })
     expect(String(router.currentRoute.value.query.redirect)).toContain('/stores/m002')
     // 未登录不产生加购数据
     const cart = useCartStore()
@@ -265,10 +281,9 @@ describe('StoreDetailView（商家详情页 P0）', () => {
       () => expect(wrapper.find('[data-testid="checkout-btn"]').exists()).toBe(true),
       { timeout: 10000 },
     )
-    // 未登录：登录校验先行（PRD 去结算校验顺序）
+    // 未登录：登录校验先行（PRD 去结算校验顺序）；BUG-20260914-003 起该路径先探活（替身 200–500ms）
     await wrapper.find('[data-testid="checkout-btn"]').trigger('click')
-    await flushPromises()
-    expect(router.currentRoute.value.name).toBe('login')
+    await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('login'), { timeout: 10000 })
     expect(String(router.currentRoute.value.query.redirect)).toContain('/stores/m003')
     // 已登录 + 购物车非空：校验通过，确认订单页未实现 → 弱提示
     const session = useSessionStore()
@@ -721,5 +736,129 @@ describe('StoreDetailView（商家详情页 P0）', () => {
       'cat-rail-item--active',
     )
     expect(router.currentRoute.value.name).toBe('store-detail')
+  })
+})
+
+/**
+ * BUG-20260914-003（2026-09-14 真后端复验）+ 回归锁：
+ * 公开页（商家详情）整页加载后客户端会话态为空，但服务端会话可能仍有效——加购/收藏/去结算必须先探活
+ * （与 CouponView / OrderListView 同口径），不得直接按 isLoggedIn 判未登录。
+ */
+describe('StoreDetailView（公开页刷新后的会话探活，BUG-20260914-003）', () => {
+  const messages: string[] = []
+  let offToast: (() => void) | undefined
+
+  beforeEach(() => {
+    messages.length = 0
+    offToast = onToast((message) => messages.push(message))
+    clearMockCart('m002')
+    favoriteMockState.splice(0, favoriteMockState.length, ...FAVORITE_SEED.map((item) => ({ ...item })))
+    // 默认走真实替身（未登录 401）；T77/T79 用例内覆写为「服务端会话有效」
+    vi.mocked(mockDispatch).mockImplementation(actualMocks.mockDispatch)
+  })
+
+  afterEach(() => {
+    offToast?.()
+  })
+
+  /** 模拟「服务端会话仍有效」（GET /me 200），而客户端 sessionStore 未恢复（整页刷新后的真实状态） */
+  function useValidServerSession(): void {
+    vi.mocked(mockDispatch).mockImplementation(async (config) => {
+      if ((config.method ?? 'get').toUpperCase() === 'GET' && config.url === '/me') {
+        return {
+          status: 200,
+          payload: {
+            code: 0,
+            message: 'success',
+            data: { account: '13800000001', nickname: '张同学' },
+            details: null,
+          },
+        }
+      }
+      return actualMocks.mockDispatch(config)
+    })
+  }
+
+  async function mountFresh(path = '/stores/m002') {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', name: 'home', component: { template: '<div />' } },
+        { path: '/stores/:storeId', name: 'store-detail', component: StoreDetailView },
+        { path: '/orders/confirm', name: 'order-confirm', component: { template: '<div />' } },
+        { path: '/login', name: 'login', component: { template: '<div />' } },
+      ],
+    })
+    await router.push(path)
+    await router.isReady()
+    const wrapper = mount(StoreDetailView, { global: { plugins: [pinia, router] } })
+    // 等商品列表就绪（加购按钮出现）后再断言与点击
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="add-btn-p101"]').exists()).toBe(true),
+      { timeout: 10000 },
+    )
+    await flushPromises()
+    // 前提断言：整页加载后客户端会话态为空（缺陷触发条件）
+    expect(useSessionStore().isLoggedIn).toBe(false)
+    return { wrapper, router }
+  }
+
+  it('T77 服务端会话有效时会先探活：点加购不被误判未登录、不跳登录页（BUG-20260914-003）', async () => {
+    useValidServerSession()
+    const { wrapper, router } = await mountFresh()
+    await wrapper.get('[data-testid="add-btn-p101"]').trigger('click')
+    // 探活（替身 200–500ms）通过后才继续加购
+    await vi.waitFor(
+      () => expect(useCartStore().lines.some((line) => line.productId === 'p101')).toBe(true),
+      { timeout: 10000 },
+    )
+
+    expect(router.currentRoute.value.name).toBe('store-detail')
+    expect(messages).not.toContain('请先登录')
+    expect(useSessionStore().isLoggedIn).toBe(true)
+  })
+
+  it('T78 探活失败（真未登录）仍引导登录并带 redirect（回归锁，不放宽口径）', async () => {
+    const { wrapper, router } = await mountFresh()
+    await wrapper.get('[data-testid="add-btn-p101"]').trigger('click')
+    await flushPromises()
+
+    // 探活带 200–500ms 替身延迟：等重定向发生后再断言（BUG-20260914-003 起该路径为异步探活）
+    await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('login'), { timeout: 10000 })
+    expect(messages).toContain('请先登录')
+    expect(router.currentRoute.value.query.redirect).toBe('/stores/m002')
+  })
+
+  it('T79 同根因另两处：服务端会话有效时，收藏与去结算同样先探活（BUG-20260914-003 覆盖范围）', async () => {
+    useValidServerSession()
+    const { wrapper, router } = await mountFresh()
+
+    // 收藏：探活通过后应成功收藏，不跳登录
+    await wrapper.get('[data-testid="favorite-toggle"]').trigger('click')
+    await vi.waitFor(
+      () => expect(wrapper.get('[data-testid="favorite-toggle"]').attributes('aria-pressed')).toBe('true'),
+      { timeout: 10000 },
+    )
+    expect(messages).not.toContain('请先登录')
+    expect(router.currentRoute.value.name).toBe('store-detail')
+    expect(useSessionStore().isLoggedIn).toBe(true)
+
+    // 去结算：探活通过 + 购物车达起送价（m002 起送 ¥20）→ 进入确认订单页
+    await wrapper.get('[data-testid="add-btn-p101"]').trigger('click')
+    await vi.waitFor(
+      () => expect(wrapper.get('[data-testid="cart-bar-count"]').text()).toBe('1'),
+      { timeout: 10000 },
+    )
+    await wrapper.get('[data-testid="add-btn-p101"]').trigger('click')
+    await vi.waitFor(
+      () => expect(wrapper.get('[data-testid="cart-bar-count"]').text()).toBe('2'),
+      { timeout: 10000 },
+    )
+    await wrapper.get('[data-testid="checkout-btn"]').trigger('click')
+    await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('order-confirm'), {
+      timeout: 10000,
+    })
   })
 })

@@ -42,6 +42,11 @@ function goMember(): void {
 }
 
 /** 红包页（批次⑥/CHG-001 TODO-USER-028）：天天红包 = 加量通栏 + 天天必爆活动卡 + 可用红包列表 */
+/** AI 点餐助手（AI点餐助手前端PRD §2.3）：无底部导航的对话页，页面内自带返回 */
+function goAiChat(): void {
+  void router.push({ name: 'ai-chat' })
+}
+
 function goCoupons(): void {
   void router.push({ name: 'coupons' })
 }
@@ -111,6 +116,21 @@ async function onLogout(): Promise<void> {
         </button>
         <button class="mn-item" type="button" data-testid="entry-coupons" @click="goCoupons">
           <span>红包卡券</span>
+          <span class="mn-arrow" aria-hidden="true">›</span>
+        </button>
+        <button class="mn-item" type="button" data-testid="entry-ai-chat" @click="goAiChat">
+          <span class="mn-item-label">
+            <svg class="mn-item-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M4 5.5h16v11H9.5L5.5 20v-3.5H4v-11Z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linejoin="round"
+              />
+            </svg>
+            AI 点餐助手
+          </span>
           <span class="mn-arrow" aria-hidden="true">›</span>
         </button>
       </section>
@@ -291,5 +311,18 @@ async function onLogout(): Promise<void> {
   font-size: 10px;
   line-height: 14px;
   color: #999999;
+}
+
+/* AI 点餐助手条目（AI点餐助手前端PRD §2.3）：带对话图标 */
+.mn-item-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mn-item-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--color-primary);
 }
 </style>

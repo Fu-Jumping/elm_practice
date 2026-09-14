@@ -188,6 +188,14 @@ function goSearch(): void {
   void router.push({ name: 'search-entry' })
 }
 
+/**
+ * AI 点餐助手入口（AI点餐助手前端PRD §2.1/§2.2）：
+ * 悬浮球直接进对话页；搜索框「AI 推荐」按钮带预填提示词进对话页（是否发送由对话页决定，此处只预填）。
+ */
+function goAiChat(prompt?: string): void {
+  void router.push({ name: 'ai-chat', query: prompt ? { prompt } : undefined })
+}
+
 // PRD 商家卡行：点击商家卡携带 storeId 进入商家详情
 function onOpenStore(storeId: string): void {
   void router.push({ name: 'store-detail', params: { storeId } })
@@ -258,6 +266,16 @@ function onCloseCard(storeId: string): void {
         <span class="search-divider" aria-hidden="true" />
         <span class="search-placeholder">相关推荐商品的搜索…</span>
         <button class="search-btn" type="button">搜索</button>
+        <!-- AI 点餐助手辅助入口（AI点餐助手前端PRD §2.2）：亮橙文字 + 图标，点击进对话页并预填提示词 -->
+        <button class="search-ai" type="button" data-testid="search-ai-btn" @click.stop="goAiChat('帮我推荐今天吃什么')">
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <path
+              d="M10 2.5l1.6 4.4 4.4 1.6-4.4 1.6L10 14.5 8.4 10.1 4 8.5l4.4-1.6L10 2.5Z"
+              fill="currentColor"
+            />
+          </svg>
+          AI 推荐
+        </button>
       </div>
     </section>
 
@@ -461,6 +479,27 @@ function onCloseCard(storeId: string): void {
         </article>
       </template>
     </section>
+
+    <!-- AI 点餐助手主入口（AI点餐助手前端PRD §2.1）：首页右下角悬浮球，
+         亮橙 #ff5a1f、直径 56px，位置在底部 TabBar 上方 16px（TabBar 高 64px + 安全区）。
+         悬浮球只在首页渲染（本组件即首页），商家详情/购物车/订单等页不显示，避免遮挡操作。 -->
+    <button
+      class="ai-float"
+      type="button"
+      data-testid="ai-float-btn"
+      aria-label="AI 点餐助手"
+      @click="goAiChat()"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M4 5.5h16v11H9.5L5.5 20v-3.5H4v-11Z"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
   </div>
 </template>
 
@@ -1089,5 +1128,46 @@ function onCloseCard(storeId: string): void {
   margin-left: 8px;
   color: var(--color-primary);
   cursor: pointer;
+}
+
+/* AI 点餐助手入口（AI点餐助手前端PRD §2.1/§2.2）：亮橙 #ff5a1f 品牌色 */
+.search-ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 6px;
+  padding: 0 2px;
+  border: none;
+  background: none;
+  color: var(--color-primary);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.search-ai svg {
+  width: 14px;
+  height: 14px;
+}
+
+.ai-float {
+  position: fixed;
+  right: 16px;
+  bottom: calc(64px + 16px + env(safe-area-inset-bottom));
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgb(255 90 31 / 35%);
+}
+
+.ai-float svg {
+  width: 28px;
+  height: 28px;
 }
 </style>
