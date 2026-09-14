@@ -57,6 +57,7 @@ function routerPlugin() {
       { path: '/coupons', name: 'coupons', component: { template: '<div />' } },
       { path: '/search', name: 'search', component: { template: '<div />' } },
       { path: '/search-entry', name: 'search-entry', component: { template: '<div />' } },
+      { path: '/ai-chat', name: 'ai-chat', component: { template: '<div />' } },
     ],
   })
   return routerInstance
@@ -360,5 +361,36 @@ describe('HomeView（首页 P0）', () => {
     await flushPromises()
     expect(messages).toContain('暂未开放')
     expect(routerInstance.currentRoute.value.name).toBe('coupons')
+  })
+})
+
+/**
+ * 首页 AI 点餐助手入口用例 HOME-AI-1~HOME-AI-2（AI点餐助手前端PRD §2，2026-09-14，AI-FE-01）
+ * PRD §2.1 首页右下角悬浮球（56px、亮橙 #ff5a1f、点击进入对话页）；§2.2 搜索框右侧「AI 推荐」按钮（预填提示词）。
+ * 视觉尺寸/配色属几何断言，按工程约定 §6 由 E2E 与复刻对照覆盖，本组只锁入口存在与跳转行为。
+ * 本组在 feat: 实现前必须红（入口由 feat: 加入 HomeView.vue）。
+ */
+describe('HomeView（AI 点餐助手入口，AI点餐助手前端PRD §2）', () => {
+  it('HOME-AI-1 首页右下角显示 AI 悬浮球，点击进入对话页（AI-FE-01）', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const wrapper = mount(HomeView, { global: { plugins: [pinia, routerPlugin()] } })
+    const ball = wrapper.find('[data-testid="ai-float-btn"]')
+    expect(ball.exists()).toBe(true)
+    await ball.trigger('click')
+    await flushPromises()
+    expect(routerInstance.currentRoute.value.name).toBe('ai-chat')
+  })
+
+  it('HOME-AI-2 搜索框「AI 推荐」按钮带预填提示词进对话页，且不触发搜索跳转（§2.2）', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const wrapper = mount(HomeView, { global: { plugins: [pinia, routerPlugin()] } })
+    const aiButton = wrapper.find('[data-testid="search-ai-btn"]')
+    expect(aiButton.exists()).toBe(true)
+    await aiButton.trigger('click')
+    await flushPromises()
+    expect(routerInstance.currentRoute.value.name).toBe('ai-chat')
+    expect(routerInstance.currentRoute.value.query.prompt).toBe('帮我推荐今天吃什么')
   })
 })
