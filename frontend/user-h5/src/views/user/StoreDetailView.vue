@@ -16,7 +16,7 @@ import { useCartStore } from '@/stores/cartStore'
 import { useSessionStore } from '@/stores/sessionStore'
 import { formatMoney, formatTime, statusText } from '@/services/normalizers'
 import { reviewApi, favoriteApi } from '@/services/api'
-import type { CartLine, Product, ReviewRecord } from '@/services/api/types'
+import type { CartLine, Product, ReviewRecord, StoreCategory } from '@/services/api/types'
 import { toast } from '@/utils/toast'
 import { flyToCart } from '@/utils/flyToCart'
 import StoreCover from '@/components/StoreCover.vue'
@@ -260,6 +260,19 @@ function onSelectCategory(categoryId: string): void {
   } else {
     list.scrollTop = section.offsetTop
   }
+}
+
+/**
+ * 进入分类商家列表（TODO-USER-107 ② 的入口）：
+ * 携带分类编号；同时把分类名作为页面参数传出——契约没有「按分类编号取分类名」的用户端接口，
+ * 分类名只在店铺分类接口里返回，故由入口负责传递（缺失时目标页回退通用标题）。
+ */
+function goCategoryList(category: StoreCategory): void {
+  void router.push({
+    name: 'category-store-list',
+    params: { categoryId: category.categoryId },
+    query: { name: category.name },
+  })
 }
 
 /**
@@ -626,9 +639,21 @@ function onCheckout(): void {
             class="product-section"
             :data-section-id="cat.categoryId"
           >
-            <h2 class="product-list-title" :data-testid="`product-section-${cat.categoryId}`">
-              {{ cat.name }}
-            </h2>
+            <div class="product-section-head">
+              <h2 class="product-list-title" :data-testid="`product-section-${cat.categoryId}`">
+                {{ cat.name }}
+              </h2>
+              <!-- 同类商家入口（TODO-USER-107 ②）：按店铺自身分类进入分类商家列表；
+                   左分类栏保持「点击滚动定位」不变（项目规则 §5，锁于 T76） -->
+              <button
+                class="product-list-more"
+                type="button"
+                :data-testid="`section-more-${cat.categoryId}`"
+                @click.stop="goCategoryList(cat)"
+              >
+                同类商家 ›
+              </button>
+            </div>
             <div
               v-for="product in productsByCategory.get(cat.categoryId) ?? []"
               :key="product.productId"
@@ -1214,17 +1239,37 @@ function onCheckout(): void {
   background: var(--color-surface-white);
 }
 
-.product-list-title {
-  /* 分区标题吸顶（设计稿导出 sticky top-0）：滚动列表时当前分类标题常驻列表顶部 */
+/* 分区标题行：吸顶容器（设计稿导出 sticky top-0）+ 右侧「同类商家」入口；
+   吸顶由容器承担，标题自身不再 sticky——保证标题文本与偏移几何与改动前一致（T13/T70 与滚动交接 E2E） */
+.product-section-head {
   position: sticky;
   top: 0;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--color-surface-white);
+}
+
+.product-list-title {
   margin: 0;
   padding: 12px 0;
   background: var(--color-surface-white);
   font-size: 18px;
   font-weight: 500;
   color: var(--color-text-primary);
+}
+
+.product-list-more {
+  flex: none;
+  padding: 4px 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--color-primary);
+  cursor: pointer;
 }
 
 .product-item {
