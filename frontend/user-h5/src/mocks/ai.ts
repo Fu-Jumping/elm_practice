@@ -54,9 +54,13 @@ function storeOf(storeId: string): StoreSummary | undefined {
   return STORES.find((store) => store.storeId === storeId)
 }
 
+/**
+ * 店铺展示文案：**只给店名**（PRD §4.2 新口径：回复文本不出现商家编号，前端按店名匹配 storeId）；
+ * 店铺缺失时给占位文案，不把内部 id 露给用户。
+ */
 function storeLabel(storeId: string): string {
   const store = storeOf(storeId)
-  return store ? `**${store.name}** [${store.storeId}]` : `[${storeId}]`
+  return store ? `**${store.name}**` : '（店铺信息暂缺）'
 }
 
 function productLine(product: Product, withStore = false): string {

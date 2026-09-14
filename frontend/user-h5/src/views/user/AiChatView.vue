@@ -29,8 +29,10 @@
           <p v-if="message.status === 'pending' && message.text === ''" class="ai-thinking" data-testid="ai-thinking">
             正在思考<span class="ai-dot">.</span><span class="ai-dot">.</span><span class="ai-dot">.</span>
           </p>
+          <!-- 用户消息按纯文本渲染：用户输入不做 Markdown/链接解析（只解析 AI 回复） -->
+          <p v-else-if="message.role === 'user'" class="ai-block">{{ message.text }}</p>
           <template v-else>
-            <template v-for="(block, blockIndex) in parseAiReply(message.text)" :key="blockIndex">
+            <template v-for="(block, blockIndex) in parseAiReply(message.text, storeRefs)" :key="blockIndex">
               <ul v-if="block.kind === 'list'" class="ai-block ai-block--list">
                 <li v-for="(runs, itemIndex) in block.items" :key="itemIndex">
                   <template v-for="(run, runIndex) in runs" :key="runIndex">
@@ -137,11 +139,12 @@
  *   网络失败 → 输入框上方提示；其余 → 气泡「出了点小问题，请换个说法试试」。
  * - 组件本地状态即可（工程约定 §3.4：新增域不新增常驻 store）。
  */
-import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { AiTimeoutError, AiUnavailableError, aiApi } from '@/services/api'
 import type { AiChatMessage } from '@/services/api/types'
 import { parseAiReply } from '@/utils/aiReply'
+import { useCatalogStore } from '@/stores/catalogStore'
 import {
   clearAiChat,
   readAiMessages,
@@ -183,6 +186,10 @@ interface ChatMessage extends AiChatMessage {
 
 const route = useRoute()
 const router = useRouter()
+const catalogStore = useCatalogStore()
+
+/** 商家索引（PRD §4.2：按回复里的商家名匹配 storeId，供可点击跳转） */
+const storeRefs = computed(() => catalogStore.stores.map((store) => ({ storeId: store.storeId, name: store.name })))
 
 const sessionId = ref('')
 const messages = ref<ChatMessage[]>([])
@@ -354,6 +361,8 @@ function goStore(storeId: string): void {
 }
 
 onMounted(() => {
+  // 商家名 → storeId 的匹配索引（失败不阻塞对话，回复里的店名退化为纯文本）
+  void catalogStore.fetchStores().catch(() => undefined)
   sessionId.value = readAiSessionId()
   const stored = readAiMessages(sessionId.value)
   if (stored.length === 0) {
@@ -522,17 +531,15 @@ onBeforeUnmount(() => {
   list-style: disc;
 }
 
+/* 商家名可点击（PRD §4.2：亮橙色文字；回复文本不出现商家编号） */
 .ai-store-link {
   padding: 0 2px;
   border: none;
   background: none;
   color: var(--color-primary);
   font-size: inherit;
-  text-decoration: underline;
-}
-
-.ai-message--user .ai-store-link {
-  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
 }
 
 .ai-thinking {
