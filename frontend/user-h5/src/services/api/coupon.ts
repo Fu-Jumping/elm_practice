@@ -45,10 +45,11 @@ export function buyPack(packKey: CouponPackKey): Promise<CouponPackPurchase> {
 /**
  * 爆一次（CHG-001 §3.10）：不传 `couponId` 用当日免费次数（不消耗券）；
  * 传则消耗并**替换**该券（阈值与金额同时可能变化，不新增行）。
- * 响应形状经 `normalizeBlastResult` 统一（真实后端为契约 §3.10 的扁平对象）。
+ * 响应为契约 §3.10 的扁平对象（券字段 + `tierIndex` + `freeBlast`；替身 `mocks/coupon.ts` 同形状），
+ * 经 `normalizeBlastResult` 统一为页面视图模型。
  */
 export async function blastCoupon(couponId?: string): Promise<CouponBlastResult> {
-  const data = await request<CouponBlastRecord | CouponBlastResult>({
+  const data = await request<CouponBlastRecord>({
     method: 'POST',
     url: endpoints.coupon.blast,
     data: couponId ? { couponId } : {},
