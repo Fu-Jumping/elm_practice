@@ -585,8 +585,15 @@ function lineOf(productId: string): CartLine | undefined {
   return cartStore.lines.find((line) => line.productId === productId)
 }
 
+/**
+ * 卡片已加数量（PRD 7.16.1：加购成功后购物车栏数量与金额立即刷新）。
+ * 同一商品不同规格在购物车中是**不同行**（契约 §3.4 行唯一范围），因此按 productId
+ * 汇总各规格行的件数——有规格商品加购后卡片同样要有数量反馈，不能只剩"未加购"外观。
+ */
 function qtyOf(productId: string): number {
-  return lineOf(productId)?.quantity ?? 0
+  return cartStore.lines
+    .filter((line) => line.productId === productId)
+    .reduce((sum, line) => sum + line.quantity, 0)
 }
 
 /** 购物车弹层（T50，PRD：点击购物车栏展开弹层） */
@@ -881,10 +888,12 @@ async function onCheckout(): Promise<void> {
                     <span class="price-int">{{ formatMoney(product.price) }}</span>
                   </span>
                   <!-- 行内步进器（T47-T49）：已加购显示 "- 数量 +"，未加购仅 + 按钮。
-                       有规格商品不在此处步进——同一商品的不同规格在购物车中是不同行（contract §3.4），
+                       有规格商品同样显示数量（同一商品各规格行的合计），但不显示减号——同一商品的
+                       不同规格在购物车中是不同行（contract §3.4），行内无法确定该减哪一行，
                        数量增减统一在规格弹层与购物车弹层内完成（PRD 850 行：点加号打开规格弹层） -->
-                  <span v-if="!hasSpecs(product) && qtyOf(product.productId) > 0" class="product-stepper">
+                  <span v-if="qtyOf(product.productId) > 0" class="product-stepper">
                     <button
+                      v-if="!hasSpecs(product)"
                       class="stepper-btn"
                       type="button"
                       :data-testid="`minus-btn-${product.productId}`"

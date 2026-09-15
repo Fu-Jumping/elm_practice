@@ -49,6 +49,9 @@ public class DatabaseInitializer implements ApplicationRunner {
             ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-stage3.sql"), StandardCharsets.UTF_8));
             // 搜索词条字典（2026-09-15 搜索增强，TODO-BE-025）：别名联想 + 检索重映射，幂等。
             ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-search-terms.sql"), StandardCharsets.UTF_8));
+            // 商品规格纠偏（2026-09-15 验收快修）：香辣鸡腿堡 p101 历史被误配「大杯」规格，
+            // 需为「直接加购」口径；幂等，放在 stage3 规格种子之后执行。
+            ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-product-spec-fix.sql"), StandardCharsets.UTF_8));
         }
     }
 }
