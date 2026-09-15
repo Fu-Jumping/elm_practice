@@ -185,6 +185,28 @@ const router = createRouter({
           component: () => import('@/views/user/MemberView.vue'),
           meta: { title: '会员权益', auth: true, priority: 'P1' },
         },
+        {
+          // 常见问题页（PRD 7.16.1「常见问题页」两行，设置与 FAQ P2）：整页静态帮助内容，不请求业务接口；
+          // 未登录可浏览（PRD 异常列），故不设 auth
+          path: 'faq',
+          name: 'faq',
+          component: () => import('@/views/user/FaqView.vue'),
+          meta: { title: '常见问题', priority: 'P2' },
+        },
+        {
+          // 系统设置页（PRD 7.16.1「系统设置页」两行，设置与 FAQ P2）：未登录在页面内跳登录并保留目标地址
+          path: 'settings',
+          name: 'settings',
+          component: () => import('@/views/user/SettingsView.vue'),
+          meta: { title: '系统设置', auth: true, priority: 'P2' },
+        },
+        {
+          // 个人资料页（PRD 7.10 设置：个人资料展示与编辑）：编辑写接口未进契约 → 当前为只读展示
+          path: 'settings/profile',
+          name: 'profile',
+          component: () => import('@/views/user/ProfileView.vue'),
+          meta: { title: '个人资料', auth: true, priority: 'P2' },
+        },
       ],
     },
     {

@@ -56,6 +56,16 @@ function placeholder(): void {
   toast('暂未开放')
 }
 
+/** 常见问题（FAQ，设置与 FAQ P2）：静态帮助页，未登录可浏览 */
+function goFaq(): void {
+  void router.push({ name: 'faq' })
+}
+
+/** 系统设置（设置与 FAQ P2）：个人资料展示、退出登录 */
+function goSettings(): void {
+  void router.push({ name: 'settings' })
+}
+
 /** 退出登录：清除会话并回登录页（PRD：退出后不能返回受保护页面） */
 async function onLogout(): Promise<void> {
   await sessionStore.logout()
@@ -131,6 +141,21 @@ async function onLogout(): Promise<void> {
             </svg>
             AI 点餐助手
           </span>
+          <span class="mn-arrow" aria-hidden="true">›</span>
+        </button>
+        <!-- 设计稿「常用功能」分组另含联系客服 / 常见问题 (FAQ) / 系统设置三条
+             （10-个人中心/01-个人中心/index.jsx:76-98）；联系客服属平台客服，已明确移出项目范围，
+             按占位处理（点击提示暂未开放），FAQ 与系统设置本期实现 -->
+        <button class="mn-item" type="button" data-testid="entry-support" @click="placeholder">
+          <span>联系客服</span>
+          <span class="mn-arrow" aria-hidden="true">›</span>
+        </button>
+        <button class="mn-item" type="button" data-testid="entry-faq" @click="goFaq">
+          <span>常见问题 (FAQ)</span>
+          <span class="mn-arrow" aria-hidden="true">›</span>
+        </button>
+        <button class="mn-item" type="button" data-testid="entry-settings" @click="goSettings">
+          <span>系统设置</span>
           <span class="mn-arrow" aria-hidden="true">›</span>
         </button>
       </section>
