@@ -8,6 +8,7 @@ import { useCatalogStore } from '@/stores/catalogStore'
 import { useSessionStore } from '@/stores/sessionStore'
 import { ADDRESS_SEED, addressMockState } from '@/mocks/address'
 import { mockDispatch } from '@/mocks'
+import { COURSE_CATEGORIES, courseCategoryIdOf } from '@/utils/courseCategories'
 
 // 原始 mock 分发器保留引用：T67/T68 在其响应上剥离 image 字段，模拟 real 模式（后端不填图）形状
 const actualMocks = await vi.importActual<typeof import('@/mocks')>('@/mocks')
@@ -361,6 +362,113 @@ describe('HomeView（首页 P0）', () => {
     await flushPromises()
     expect(messages).toContain('暂未开放')
     expect(routerInstance.currentRoute.value.name).toBe('coupons')
+  })
+})
+
+/**
+ * 首页分类宫格接线用例 CG-1～CG-3（2026-09-15，TODO-USER-107 ② 收口）
+ * 口径：PRD 7.16.1「首页-分类宫格」行——「分类项由课程 10 类点餐分类数据渲染（课程固定分类数据或分类接口返回）」、
+ *       「点击分类携带分类编号进入分类商家列表（6.3）；占位栏目点击提示"暂未开放"」。
+ * CG-1 课程分类项（非占位、非红包入口）点击 → 进入分类商家列表并携带课程分类编号与分类名
+ * CG-2 超范围占位栏目（超市便利等 5 格）点击 → 仍提示「暂未开放」且不跳转（口径不得放宽）
+ * CG-3 课程分类固定数据自洽：编号唯一、名称可解析回编号（避免两处硬编码漂移）
+ * 本组在 feat: 实现前必须红（宫格分类项与课程分类固定数据由 feat: 加入）。
+ */
+describe('HomeView（分类宫格接线，TODO-USER-107 ②）', () => {
+  const messages: string[] = []
+  let offToast: (() => void) | undefined
+
+  function gridRouter() {
+    routerInstance = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', name: 'home', component: HomeView },
+        {
+          path: '/category/:categoryId',
+          name: 'category-store-list',
+          component: { template: '<div />' },
+        },
+        { path: '/coupons', name: 'coupons', component: { template: '<div />' } },
+      ],
+    })
+    return routerInstance
+  }
+
+  beforeEach(() => {
+    messages.length = 0
+    offToast = onToast((message) => messages.push(message))
+  })
+
+  afterEach(() => offToast?.())
+
+  it('CG-1 课程分类项点击进入分类商家列表，携带分类编号与分类名（PRD 826 行）', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const router = gridRouter()
+    await router.push('/')
+    await router.isReady()
+    const wrapper = mount(HomeView, { global: { plugins: [pinia, router] } })
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="cat-grid"]').exists()).toBe(true),
+      { timeout: 2000 },
+    )
+    await flushPromises()
+
+    const cells = wrapper.findAll('[data-testid="cat-grid"] .cat-cell')
+    const burger = cells.find((cell) => cell.text().includes('汉堡西餐'))!
+    await burger.trigger('click')
+    await flushPromises()
+    expect(routerInstance.currentRoute.value.name).toBe('category-store-list')
+    expect(routerInstance.currentRoute.value.params.categoryId).toBe('pc07')
+    expect(routerInstance.currentRoute.value.query.name).toBe('汉堡西餐')
+    // 分类项不是占位：不得再提示「暂未开放」
+    expect(messages).not.toContain('暂未开放')
+
+    // 「全部」也走同一入口
+    await router.push('/')
+    await flushPromises()
+    const allCell = wrapper
+      .findAll('[data-testid="cat-grid"] .cat-cell')
+      .find((cell) => cell.text().includes('全部'))!
+    await allCell.trigger('click')
+    await flushPromises()
+    expect(routerInstance.currentRoute.value.params.categoryId).toBe('pc09')
+  })
+
+  it('CG-2 超范围占位栏目点击仍提示「暂未开放」且不跳转（口径不得放宽）', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const router = gridRouter()
+    await router.push('/')
+    await router.isReady()
+    const wrapper = mount(HomeView, { global: { plugins: [pinia, router] } })
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="cat-grid"]').exists()).toBe(true),
+      { timeout: 2000 },
+    )
+    await flushPromises()
+
+    const cells = wrapper.findAll('[data-testid="cat-grid"] .cat-cell')
+    for (const label of ['超市便利', '水果鲜花', '买菜', '买药', '跑腿']) {
+      const cell = cells.find((item) => item.text().includes(label))!
+      expect(cell.attributes('data-placeholder')).toBeDefined()
+      await cell.trigger('click')
+      await flushPromises()
+      expect(routerInstance.currentRoute.value.name).toBe('home')
+    }
+    expect(new Set(messages)).toEqual(new Set(['暂未开放']))
+  })
+
+  it('CG-3 课程分类固定数据：编号唯一且名称可解析回同一编号', () => {
+    expect(COURSE_CATEGORIES.length).toBe(9)
+    const ids = COURSE_CATEGORIES.map((category) => category.categoryId)
+    expect(new Set(ids).size).toBe(ids.length)
+    for (const category of COURSE_CATEGORIES) {
+      expect(courseCategoryIdOf(category.name)).toBe(category.categoryId)
+    }
+    // 未登记的文案（占位栏目 / 红包入口）不得解析出编号
+    expect(courseCategoryIdOf('超市便利')).toBeUndefined()
+    expect(courseCategoryIdOf('天天爆红包')).toBeUndefined()
   })
 })
 
