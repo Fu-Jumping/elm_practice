@@ -15,15 +15,15 @@
  * 本期按测试锁定口径完整号码 + 内联备注输入，支付方式区 P0 不渲染，视觉细化任务再对齐
  * 2026-09-08 缺陷修复：无地址引导块补点击（此前无点击事件，地址删光后只能退出页面新增）
  */
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { addressApi, couponApi, orderApi } from '@/services/api'
-import { PACKAGING_FEE, buildAmountLines, formatMoney, payableAmountText } from '@/services/normalizers'
+import { PACKAGING_FEE, buildAmountLines, buildDiscounts, formatMoney, payableAmountText } from '@/services/normalizers'
 import { useCartStore } from '@/stores/cartStore'
 import { useCatalogStore } from '@/stores/catalogStore'
 import { useSessionStore } from '@/stores/sessionStore'
 import { toast } from '@/utils/toast'
-import type { Address, CouponRecord } from '@/services/api/types'
+import type { Address, CouponRecord, OrderAmountSnapshot } from '@/services/api/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -60,37 +60,73 @@ const storeName = computed(() => catalogStore.storeDetail?.name ?? '')
 const deliveryFee = computed(() => catalogStore.storeDetail?.deliveryFee ?? 0)
 
 /**
- * 实付金额预览：商品小计 + 打包费 + 配送费（无优惠退化口径；后端计价为准，TC-ORD-011）
- * 优惠项（满减/红包/新客立减/会员折扣/配送费优惠）待批次① 计价与红包选择接入后按实际发生传入
+ * 后端计价预览（契约 §3.5 `POST /orders/preview`，CHG-006）：SRS §5.6 要求「确认订单时由后端按固定顺序
+ * 计算商品小计、店铺满减、新客立减、配送费优惠、会员折扣和红包，页面只展示结果」。
+ * 此前用户端没有优惠数据源，页面只能本地退化估算，导致商家已开启的满减与免配送费在下单前不可见（SHOW-QA-008）。
+ * 预览失败（店铺不存在/购物车为空/网络异常）不阻塞下单：退回本地估算并在金额区保留「预估」标注。
  */
-/** 实付预览：基础金额 − 已选红包面额（红包为七步第 ⑥ 步的减项） */
-const payableAmount = computed(
-  () =>
+const preview = ref<OrderAmountSnapshot | null>(null)
+
+/** 下单成功后金额区冻结在订单快照上（购物车此时已清空，再取预览只会得到空车 400） */
+const orderPlaced = ref(false)
+
+async function loadPreview(): Promise<void> {
+  if (orderPlaced.value) return
+  if (!storeId || cartStore.lines.length === 0) {
+    preview.value = null
+    return
+  }
+  try {
+    preview.value = await orderApi.previewOrder({ storeId })
+  } catch {
+    preview.value = null
+  }
+}
+
+/**
+ * 实付金额：取后端计价结果 − 已选红包面额（红包为七步第 ⑥ 步的减项，由本页按已选券传入下单请求）；
+ * 预览不可用时退回本地退化口径：商品小计 + 打包费 + 配送费 − 红包（后端计价为准，TC-ORD-011）
+ */
+const payableAmount = computed(() => {
+  const snapshot = preview.value
+  if (snapshot) return Number((snapshot.total - couponAmount.value).toFixed(2))
+  return (
     Number(
       payableAmountText({
         itemsTotal: cartStore.totalAmount,
         packagingFee: PACKAGING_FEE,
         deliveryFee: deliveryFee.value,
       }),
-    ) - couponAmount.value,
-)
+    ) - couponAmount.value
+  )
+})
 
 /**
- * 金额明细（CHG-004 定稿口径，批次① TODO-USER-001）：基础四行 + 优惠项按实际发生展示，
- * 与订单详情页、支付页共用 `normalizers.buildAmountLines` 唯一出口（本页暂无优惠数据源，
- * 未发生则整行不显示）；顺序固定 商品小计 → 打包费 → 配送费 → 优惠项 → 实付金额
+ * 金额明细（CHG-004 定稿口径 + CHG-006 预览接入）：基础四行 + 优惠项按实际发生展示，
+ * 与订单详情页、支付页共用 `normalizers.buildAmountLines`/`buildDiscounts` 唯一出口；
+ * 顺序固定 商品小计 → 打包费 → 配送费 → 优惠项 → 实付金额
  */
-const amountLines = computed(() =>
-  buildAmountLines({
-    itemsTotal: cartStore.totalAmount,
-    packagingFee: PACKAGING_FEE,
-    deliveryFee: deliveryFee.value,
-    // 红包优惠：选中券时各占一行（未发生不显示，CHG-004 优惠项按实际发生展示）
-    discounts: selectedCoupon.value
-      ? [{ key: 'coupon', label: '红包优惠', amount: couponAmount.value }]
-      : [],
+const amountLines = computed(() => {
+  const snapshot = preview.value
+  const discounts = snapshot ? buildDiscounts(snapshot) : []
+  // 红包由本页按已选券面额展示（预览接口不接收 couponId，其 couponAmount 恒 0）
+  if (selectedCoupon.value && !discounts.some((item) => item.key === 'coupon')) {
+    discounts.push({ key: 'coupon', label: '红包优惠', amount: couponAmount.value })
+  }
+  return buildAmountLines({
+    itemsTotal: snapshot ? snapshot.itemSubtotal : cartStore.totalAmount,
+    packagingFee: snapshot ? snapshot.packagingFee : PACKAGING_FEE,
+    deliveryFee: snapshot ? (snapshot.deliveryFee ?? 0) : deliveryFee.value,
+    discounts,
     payableAmount: payableAmount.value,
-  }),
+  })
+})
+
+/** 金额来源提示：预览可用即后端计价结果，不可用才是本地估算 */
+const amountSourceTip = computed(() =>
+  preview.value
+    ? '金额由系统按优惠规则实时计算，最终以下单时结果为准'
+    : '预估金额，最终以下单时计价为准',
 )
 
 /**
@@ -199,7 +235,17 @@ onMounted(async () => {
   loaded.value = true
   // 可用券依赖商品小计：购物车就绪后读取（失败不阻塞下单）
   void loadAvailableCoupons()
+  // 后端计价预览依赖购物车：就绪后取一次；数量调整由下方 watch 触发重取
+  void loadPreview()
 })
+
+/** 购物车金额变化（调整数量/删除商品）→ 重取计价预览，避免金额明细停留在旧小计 */
+watch(
+  () => cartStore.totalAmount,
+  () => {
+    void loadPreview()
+  },
+)
 
 /** 提交创建订单：只发一次请求；成功前不清购物车，成功后经购物车接口刷新清空（PRD 结算栏行） */
 async function submitOrder(): Promise<void> {
@@ -215,6 +261,19 @@ async function submitOrder(): Promise<void> {
     })
     // 成功后由明确前端流程清空该店购物车：经购物车接口重查（mock 后端已清空，TC-ORD-003）
     await cartStore.fetchCart(storeId)
+    // 金额区冻结在下单快照：此后购物车为空，重取预览只会失败并让金额区回落到本地估算
+    orderPlaced.value = true
+    preview.value = {
+      itemSubtotal: created.itemSubtotal,
+      packagingFee: created.packagingFee,
+      total: created.total,
+      deliveryFee: created.deliveryFee,
+      fullReductionAmount: created.fullReductionAmount,
+      newCustomerAmount: created.newCustomerAmount,
+      memberDiscountAmount: created.memberDiscountAmount,
+      couponAmount: created.couponAmount,
+      deliveryFeeDiscount: created.deliveryFeeDiscount,
+    }
     toast('下单成功')
     // PRD 7.5：创建订单成功后进入支付页（待支付收银台；批次⑩ 105 起取代原先跳订单列表）
     await router.push({ name: 'order-pay', params: { orderId: created.orderId } })
@@ -348,9 +407,10 @@ function goBack(): void {
         <p v-if="blockReason" class="co-block-tip" data-testid="submit-block-tip">
           {{ blockReason }}
         </p>
-        <!-- 预估提示（PRD 7.4：金额以后端计价为准，前端合计不得作为最终金额）：
-             用户端没有满减/新客立减/免配送费的查询接口，下单前无法预知这些优惠，故此处标注为预估 -->
-        <p class="co-estimate-tip" data-testid="amount-estimate-tip">预估金额，最终以下单时计价为准</p>
+        <!-- 金额来源提示（PRD 7.4：金额以后端计价为准，前端合计不得作为最终金额）：
+             CHG-006 起页面取后端计价预览（SRS §5.6「由后端计算、页面只展示结果」），预览可用即后端结果，
+             仅当预览不可用（店铺缺失/网络异常）退回本地估算时才标注为「预估」 -->
+        <p class="co-estimate-tip" data-testid="amount-estimate-tip">{{ amountSourceTip }}</p>
         <div class="co-payable-row">
           <div class="co-amount-detail" data-testid="amount-detail">
             <p

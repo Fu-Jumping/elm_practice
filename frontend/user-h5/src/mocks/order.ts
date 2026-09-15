@@ -231,6 +231,31 @@ function isNewCustomerAt(storeId: string): boolean {
 }
 
 export const orderMocks: Record<string, MockHandler> = {
+  /**
+   * 计价预览（契约 §3.5 `POST /orders/preview`，CHG-006）：确认订单页在下单前取后端七步计价结果。
+   * 只读：不落订单、不清购物车、不扣库存；复用 `priceOrder`（与 `POST /orders` 同一口径，避免两套算法）；
+   * 空购物车按后端口径返回 400。
+   */
+  'POST /orders/preview': ({ data }) => {
+    const { storeId } = (data ?? {}) as { storeId?: string }
+    if (!storeId) return fail(400, 40000, '缺少店铺')
+    const lines = getMockCartSnapshot(storeId)
+    if (lines.length === 0) return fail(400, 40000, '购物车为空')
+    const itemsTotal = Number(
+      lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0).toFixed(2),
+    )
+    const deliveryFee = findMockStore(storeId)?.deliveryFee ?? 0
+    return ok(
+      priceOrder({
+        itemSubtotal: itemsTotal,
+        deliveryFee,
+        storeId,
+        isNewCustomer: isNewCustomerAt(storeId),
+        couponAmount: 0,
+      }),
+    )
+  },
+
   'POST /orders': ({ data }) => {
     const { storeId, addressId, remark, expectedTotal, couponId } = (data ?? {}) as {
       storeId?: string

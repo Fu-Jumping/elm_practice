@@ -149,6 +149,31 @@ export interface CreateOrderPayload {
   couponId?: string
 }
 
+/**
+ * 计价预览请求（契约 §3.5 `POST /orders/preview`，CHG-006）：只传店铺，购物车由服务端读取，
+ * 不信任客户端金额；用于确认订单页在下单前展示后端按七步计价算出的优惠（SRS §5.6）。
+ */
+export interface OrderPreviewPayload {
+  storeId: string
+}
+
+/**
+ * 金额快照（契约 §3.5/§10.4 定稿命名）：订单详情与计价预览共用同一组字段，
+ * 供 `normalizers.buildDiscounts` 等唯一出口按「优惠项金额非 0 才出行」渲染。
+ */
+export type OrderAmountSnapshot = Pick<
+  OrderRecord,
+  | 'itemSubtotal'
+  | 'packagingFee'
+  | 'total'
+  | 'deliveryFee'
+  | 'fullReductionAmount'
+  | 'newCustomerAmount'
+  | 'memberDiscountAmount'
+  | 'couponAmount'
+  | 'deliveryFeeDiscount'
+>
+
 /** 创建订单响应（P0 最小集）：订单号 + 后端计价实付金额（商品小计 + 打包费 2.00） */
 export interface OrderCreated {
   orderId: string

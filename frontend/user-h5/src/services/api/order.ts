@@ -1,10 +1,19 @@
 /**
  * 订单域接口（契约 §3.5：创建/列表/详情；明细含在详情，P0）
  * 2026-09-07 联调对齐：返回后端真实形状 OrderRecord（扁平金额字段），由 normalizers 归一为视图模型
+ * 2026-09-15 新增计价预览（CHG-006）：确认订单页下单前展示后端七步计价结果（SRS §5.6）
  */
 import { request } from '@/services/http'
-import type { CreateOrderPayload, OrderRecord } from './types'
+import type { CreateOrderPayload, OrderAmountSnapshot, OrderPreviewPayload, OrderRecord } from './types'
 import { endpoints } from './endpoints'
+
+/**
+ * 计价预览（契约 §3.5 `POST /orders/preview`）：只读——不落订单、不清购物车、不扣库存；
+ * 购物车由服务端按登录态读取，请求只传 storeId，空购物车返回 400。
+ */
+export function previewOrder(body: OrderPreviewPayload): Promise<OrderAmountSnapshot> {
+  return request<OrderAmountSnapshot>({ method: 'POST', url: endpoints.order.preview, data: body })
+}
 
 export function createOrder(body: CreateOrderPayload): Promise<OrderRecord> {
   return request<OrderRecord>({ method: 'POST', url: endpoints.order.create, data: body })
