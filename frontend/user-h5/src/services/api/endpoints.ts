@@ -48,6 +48,8 @@ export const endpoints = {
     payment: (orderId: string) => `/orders/${encodeURIComponent(orderId)}/payment`,
     // 用户取消订单（契约 §3.5：reason 必填 1–50 字；COOKING 及之后 409；重复取消幂等）
     cancel: (orderId: string) => `/orders/${encodeURIComponent(orderId)}/cancel`,
+    // 计价预览（契约 §3.5，CHG-006）：确认订单页下单前取后端七步计价结果，只读
+    preview: '/orders/preview',
   },
   // 消息（契约 §6.1）：会话列表/详情/发消息/标记已读（列表支持 orderId 过滤，供订单详情「联系商家」直取会话）
   conversation: {

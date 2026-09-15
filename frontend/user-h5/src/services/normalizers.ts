@@ -3,7 +3,7 @@
  * 单测必测对象（TDD 规划 §4.2）；缺字段给确定默认值，禁止多键名试探式解包
  * 本文件 9/4 起按 TDD 实现（测试场景由人设计，AI 只辅助脚手架）
  */
-import type { CouponBlastRecord, CouponBlastResult, OrderAmountLine, OrderDetail, OrderDiscountItem, OrderRecord, OrderStatus, OrderSummary, StoreStatus } from '@/services/api/types'
+import type { CouponBlastRecord, CouponBlastResult, OrderAmountLine, OrderAmountSnapshot, OrderDetail, OrderDiscountItem, OrderRecord, OrderStatus, OrderSummary, StoreStatus } from '@/services/api/types'
 
 /** 金额：后端返回数字元，展示保留两位小数（契约：金额后端保留两位小数） */
 export function formatMoney(amount: number): string {
@@ -192,7 +192,7 @@ export function normalizeOrderDetail(raw: OrderRecord): OrderDetail {
 const DISCOUNT_DEFINITIONS: Array<{
   key: OrderDiscountItem['key']
   label: string
-  field: keyof OrderRecord
+  field: keyof OrderAmountSnapshot
 }> = [
   { key: 'full-reduction', label: '满减优惠', field: 'fullReductionAmount' },
   { key: 'coupon', label: '红包优惠', field: 'couponAmount' },
@@ -204,8 +204,10 @@ const DISCOUNT_DEFINITIONS: Array<{
 /**
  * 优惠项提取（CHG-004）：金额非 0 才生成行，未发生不显示；顺序按 DISCOUNT_DEFINITIONS 固定
  * 边界：快照可能为负数口径差异 → 取绝对值展示，页面统一按「品牌橙负号」呈现
+ * 入参收窄为金额快照（CHG-006）：订单详情（OrderRecord）与确认订单页计价预览（OrderAmountSnapshot）
+ * 共用同一出口，保证两处口径逐字段一致
  */
-export function buildDiscounts(raw: OrderRecord): OrderDiscountItem[] {
+export function buildDiscounts(raw: OrderAmountSnapshot): OrderDiscountItem[] {
   const discounts: OrderDiscountItem[] = []
   for (const { key, label, field } of DISCOUNT_DEFINITIONS) {
     const amount = toFiniteNumber(raw[field])
