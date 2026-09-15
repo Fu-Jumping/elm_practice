@@ -24,6 +24,18 @@ public interface ProductMapper {
                                      @Param("categoryId") String categoryId,
                                      @Param("onSaleOnly") boolean onSaleOnly);
 
+    // ---- 搜索增强（2026-09-15，TODO-BE-025）：多关键词全量召回（重映射后 Java 打分） ----
+    String MULTI_WHERE = " FROM products p JOIN stores s ON s.store_id = p.store_id"
+            + " WHERE s.status != 'CLOSED' AND p.on_sale = TRUE"
+            + " AND (<foreach collection='ks' item='k' separator=' OR '>"
+            + "p.name LIKE CONCAT('%', #{k}, '%')</foreach>)";
+
+    @Select("<script>SELECT p.product_id AS id, p.store_id AS storeId, p.category_id AS categoryId, p.name,"
+            + " p.description, p.image, p.price, p.member_price AS memberPrice, p.tags AS tagsJson,"
+            + " p.spec_options AS specOptionsJson, p.stock, p.on_sale AS onSale, p.sales"
+            + MULTI_WHERE + " ORDER BY p.sales DESC, p.product_id</script>")
+    List<Domain.Product> searchProductsByKeywords(@Param("ks") java.util.List<String> ks);
+
     @Insert("INSERT INTO products(product_id,store_id,category_id,name,description,image,price,member_price,tags,spec_options,stock,on_sale,sales) "
             + "VALUES(#{id},#{storeId},#{categoryId},#{name},#{description},#{image},#{price},#{memberPrice},"
             + "#{tagsJson},#{specOptionsJson},#{stock},#{onSale},#{sales})")

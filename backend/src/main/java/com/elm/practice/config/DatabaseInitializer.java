@@ -47,6 +47,8 @@ public class DatabaseInitializer implements ApplicationRunner {
             // 批次⑨：搜索距离字段 + 商家收藏 + 通知 + 会员标识 + 平台级课程分类（含数据种子），
             // 幂等可重复执行；必须晚于 seed.sql，否则首次建库时没有行可更新。
             ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-stage3.sql"), StandardCharsets.UTF_8));
+            // 搜索词条字典（2026-09-15 搜索增强，TODO-BE-025）：别名联想 + 检索重映射，幂等。
+            ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-search-terms.sql"), StandardCharsets.UTF_8));
         }
     }
 }
