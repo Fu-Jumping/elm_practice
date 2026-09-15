@@ -106,6 +106,8 @@ describe('HomeView（首页 P0）', () => {
     expect(bar.exists()).toBe(true)
     // PRD：定位文字无地址时使用课程演示地址（北洋园口径 2026-09-05 修正）
     expect(bar.text()).toContain('天津大学北洋园校区')
+    // 未登录访客：回退课程演示地址并标记为演示数据（PRD 检查列）
+    expect(bar.find('.location').attributes('title')).toContain('演示')
     expect(bar.text()).toContain('常点')
     expect(bar.text()).toContain('推荐')
     await bar.find('[data-placeholder="常点"]').trigger('click')
@@ -293,8 +295,9 @@ describe('HomeView（首页 P0）', () => {
     expect(wrapper.find('[data-testid="merchant-skeleton"]').exists()).toBe(false)
   })
 
-  // T60-T62 首页定位地址（2026-09-07 第三批，PRD 806 行：定位文字来自当前用户默认地址，
-  // 无地址/失败回退演示地址并标记；点击定位进入地址列表）
+  // T60-T62 首页定位地址（2026-09-07 第三批，PRD 806 行；2026-09-15 口径变更·方案 C）：
+  // 已登录有地址 → 默认地址 region；已登录无地址 → 占位「选择收货地址」；
+  // 未登录/读取失败 → 演示地址并标记；点击定位进入地址列表
   it('T60 已登录显示默认地址 region（来自地址接口，非写死）', async () => {
     const pinia = createPinia()
     setActivePinia(pinia)
@@ -309,7 +312,7 @@ describe('HomeView（首页 P0）', () => {
     )
   })
 
-  it('T61 已登录但无地址 → 回退演示地址并标记（PRD：保留默认演示地址）', async () => {
+  it('T61 已登录但无地址 → 占位「选择收货地址」，不再回退演示地址（2026-09-15 口径变更·方案 C）', async () => {
     const pinia = createPinia()
     setActivePinia(pinia)
     const session = useSessionStore()
@@ -317,12 +320,11 @@ describe('HomeView（首页 P0）', () => {
     addressMockState.splice(0, addressMockState.length)
     const wrapper = mount(HomeView, { global: { plugins: [pinia, routerPlugin()] } })
     await vi.waitFor(
-      () => expect(wrapper.find('[data-testid="location-bar"]').exists()).toBe(true),
+      () => expect(wrapper.find('.location-text').text()).toContain('选择收货地址'),
       { timeout: 2000 },
     )
-    expect(wrapper.find('.location-text').text()).toContain('天津大学北洋园校区')
-    // 演示数据标记（PRD：标记为演示数据）
-    expect(wrapper.find('.location').attributes('title')).toContain('演示')
+    // 占位态不是演示数据：不得标记「演示地址」（PRD 检查列的标记只针对演示数据）
+    expect(wrapper.find('.location').attributes('title')).toBeUndefined()
   })
 
   it('T62 点击定位文字 → 进入地址列表（PRD：点击定位文字进入地址列表）', async () => {

@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import { createPinia } from 'pinia'
+import { createPinia, setActivePinia } from 'pinia'
 import SearchResultView from '../SearchResultView.vue'
 import { onToast } from '@/utils/toast'
 import { mockDispatch } from '@/mocks'
+import { useSessionStore } from '@/stores/sessionStore'
+import { ADDRESS_SEED, addressMockState } from '@/mocks/address'
 
 const actualMocks = await vi.importActual<typeof import('@/mocks')>('@/mocks')
 vi.mock('@/mocks', async (importOriginal) => {
@@ -430,5 +432,23 @@ describe('SearchResultView（搜索结果页，批次⑤）', () => {
     await vi.waitFor(() =>
       expect(wrapper.findAll('[data-testid="search-merchant-card"]')).toHaveLength(3),
     )
+  })
+
+  it('SR-14 已登录但无地址 → 定位占位「选择收货地址」（2026-09-15 口径变更·方案 C）', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const session = useSessionStore()
+    session.user = { account: '13800000001', nickname: '张同学' }
+    addressMockState.splice(0, addressMockState.length)
+    const r = makeRouter('/search?keyword=肯德基')
+    await r.isReady()
+    const wrapper = mount(SearchResultView, { global: { plugins: [pinia, r] } })
+    await vi.waitFor(() =>
+      expect(wrapper.find('.sr-location').text()).toContain('选择收货地址'),
+    )
+    // 占位态不是演示数据：不得标记「演示地址」
+    expect(wrapper.find('.sr-location').attributes('title')).toBeUndefined()
+    // 还原地址种子（模块级内存态），避免影响后续用例
+    addressMockState.splice(0, addressMockState.length, ...ADDRESS_SEED.map((item) => ({ ...item })))
   })
 })

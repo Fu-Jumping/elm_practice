@@ -21,7 +21,7 @@
         搜索
       </button>
     </header>
-    <!-- 定位：与首页同口径（PRD 806/814）——未登录/无地址/读取失败回退课程演示地址 -->
+    <!-- 定位：与首页同口径（PRD 7.16.1「搜索结果页-搜索头部」）——已登录无地址占位「选择收货地址」，未登录/读取失败回退课程演示地址 -->
     <p class="sr-location" :title="isDemoLocation ? '演示地址' : undefined">
       <span class="sr-location-icon" aria-hidden="true">◎</span>{{ locationText }}
     </p>
@@ -151,15 +151,17 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { searchApi } from '@/services/api'
+import { addressApi, searchApi } from '@/services/api'
+import { useSessionStore } from '@/stores/sessionStore'
 import type { SearchSort, StoreSummary, Product } from '@/services/api/types'
 import { SEARCH_SORT_OPTIONS } from '@/services/api/types'
 import { formatMoney } from '@/services/normalizers'
-import { DEMO_LOCATION } from '@/utils/location'
+import { DEMO_LOCATION, LOCATION_LOAD_FAILED, resolveLocationState } from '@/utils/location'
 import { productImageSrc } from '@/utils/demoImages'
 
 const route = useRoute()
 const router = useRouter()
+const sessionStore = useSessionStore()
 
 const SORT_OPTIONS = SEARCH_SORT_OPTIONS
 
@@ -196,9 +198,26 @@ const hasMore = computed(
   () => merchants.value.length < merchantTotal.value || products.value.length < productTotal.value,
 )
 
-/** 定位文案（PRD：来自当前默认地址、默认同首页；本批不做地址读取的重复实现，统一回退演示地址） */
+/**
+ * 定位文案：与首页同口径（PRD 7.16.1 搜索结果页-搜索头部「定位来自当前默认地址，默认同首页」；
+ * 2026-09-15 口径变更·方案 C，唯一出口 utils/location）：已登录有地址取默认地址 region；
+ * 已登录无地址占位「选择收货地址」；未登录/读取失败回退演示地址并标记。
+ */
 const locationText = ref(DEMO_LOCATION)
 const isDemoLocation = ref(true)
+
+async function loadLocation(): Promise<void> {
+  let state = LOCATION_LOAD_FAILED
+  try {
+    if (!sessionStore.isLoggedIn) await sessionStore.checkLogin()
+    const addresses = sessionStore.isLoggedIn ? await addressApi.getAddresses() : null
+    state = resolveLocationState({ isLoggedIn: sessionStore.isLoggedIn, addresses })
+  } catch {
+    // PRD 检查列：读取地址失败保留默认演示地址并标记为演示数据
+  }
+  locationText.value = state.text
+  isDemoLocation.value = state.isDemoLocation
+}
 
 /**
  * 请求序号：只接受最后一次请求的结果（PRD「排序筛选栏」检查列：
@@ -208,6 +227,7 @@ let requestSeq = 0
 
 /** 首次进入：带关键词则直接搜索；空关键词只提示不请求 */
 onMounted(() => {
+  void loadLocation()
   if (keyword.value) void runSearch()
 })
 
