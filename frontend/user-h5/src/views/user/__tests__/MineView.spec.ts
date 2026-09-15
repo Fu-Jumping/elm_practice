@@ -124,6 +124,71 @@ describe('MineView（我的页 P0）', () => {
 })
 
 /**
+ * 我的页「设置与 FAQ」入口用例 MINE-SET-1（PRD 883 行：会员/收藏/红包/FAQ 入口本期均可进入对应页面；
+ * 系统设置页与常见问题页属 6.11 设置与 FAQ（P2）；设计稿「常用功能」分组含 联系客服 / 常见问题 (FAQ) / 系统设置）
+ * 本组在 feat: 实现前必须红（三个条目与两条路由由 feat: 加入）。
+ */
+describe('MineView（设置与 FAQ 入口，PRD 883 行 / 6.11）', () => {
+  const messages: string[] = []
+  let offToast: (() => void) | undefined
+
+  beforeEach(() => {
+    messages.length = 0
+    offToast = onToast((message) => messages.push(message))
+  })
+
+  afterEach(() => {
+    offToast?.()
+  })
+
+  async function mountWithEntries() {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/', name: 'home', component: { template: '<div />' } },
+        { path: '/mine', name: 'mine', component: MineView },
+        { path: '/faq', name: 'faq', component: { template: '<div />' } },
+        { path: '/settings', name: 'settings', component: { template: '<div />' } },
+      ],
+    })
+    await router.push('/mine')
+    await router.isReady()
+    useSessionStore().user = { account: '13800000001', nickname: '张同学' }
+    const wrapper = mount(MineView, { global: { plugins: [pinia, router] } })
+    await flushPromises()
+    return { wrapper, router }
+  }
+
+  it('MINE-SET-1 「常见问题 (FAQ)」与「系统设置」进入对应页面；「联系客服」按占位提示暂未开放', async () => {
+    const { wrapper, router } = await mountWithEntries()
+
+    const faqEntry = wrapper.find('[data-testid="entry-faq"]')
+    expect(faqEntry.exists()).toBe(true)
+    expect(faqEntry.text()).toContain('常见问题')
+    await faqEntry.trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('faq')
+
+    await router.push('/mine')
+    await flushPromises()
+    const settingsEntry = wrapper.find('[data-testid="entry-settings"]')
+    expect(settingsEntry.exists()).toBe(true)
+    await settingsEntry.trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('settings')
+
+    // 联系客服属平台客服，已明确移出项目范围 → 占位提示，不进入业务
+    await router.push('/mine')
+    await flushPromises()
+    await wrapper.find('[data-testid="entry-support"]').trigger('click')
+    await flushPromises()
+    expect(messages).toContain('暂未开放')
+  })
+})
+
+/**
  * 我的页 AI 点餐助手入口用例 MINE-AI-1（AI点餐助手前端PRD §2.3，2026-09-14）
  * PRD §2.3：「我的」页面功能列表新增「AI 点餐助手」条目（带对话图标），点击进入 AI 对话页。
  * 本组在 feat: 实现前必须红（条目由 feat: 加入 MineView.vue）。
