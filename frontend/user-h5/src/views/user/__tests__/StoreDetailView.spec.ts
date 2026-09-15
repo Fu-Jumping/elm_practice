@@ -262,6 +262,39 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     expect(wrapper.text()).not.toMatch(/[A-Z]+_[A-Z_]+/)
   })
 
+  it('SKU-5 有规格商品选完规格加购后，商品行必须给出已加购数量反馈', async () => {
+    // 缺陷现场（2026-09-15 负责人走查）：规格商品的行内步进器被 `!hasSpecs(product)` 挡掉后，
+    // 行内**没有任何"已在购物车"的反馈**——选完规格加购成功，商品行看起来仍像没加过，
+    // 而购物车弹层里其实已经有了（同一商品不同规格是不同行，故数量需跨行求和）。
+    const { wrapper } = await mountDetail('/stores/m002')
+    const session = useSessionStore()
+    session.user = { account: '13800000001', nickname: '张同学' }
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="product-item-p107"]').exists()).toBe(true),
+      { timeout: 10000 },
+    )
+    // 加购前：不得显示已加购反馈
+    expect(wrapper.find('[data-testid="product-added-p107"]').exists()).toBe(false)
+
+    // 点加号 → 打开规格弹层 → 选定规格（必选）→ 加入购物车
+    await wrapper.find('[data-testid="add-btn-p107"]').trigger('click')
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="spec-popup"]').exists()).toBe(true), {
+      timeout: 5000,
+    })
+    await wrapper.find('[data-testid="spec-option-标准份"]').trigger('click')
+    await wrapper.find('[data-testid="spec-submit"]').trigger('click')
+
+    // 加购后：商品行同步显示已加购数量（与购物车弹层内容一致）
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="product-added-p107"]').exists()).toBe(true),
+      { timeout: 10000 },
+    )
+    expect(wrapper.find('[data-testid="product-added-p107"]').text()).toContain('1')
+    const cart = useCartStore()
+    expect(cart.lines).toHaveLength(1)
+    expect(cart.lines[0]!.quantity).toBe(1)
+  })
+
   it('TV-10 评价 Tab 展示真实评价（含商家回复与脱敏昵称）与空态（批次⑩ 003 真实化）', async () => {
     const { wrapper } = await mountDetail('/stores/m002')
     await vi.waitFor(
