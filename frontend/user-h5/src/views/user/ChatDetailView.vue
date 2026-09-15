@@ -42,10 +42,17 @@ const storeName = computed(() => {
 })
 const canSend = computed(() => content.value.trim().length > 0 && !sending.value)
 
+/**
+ * 置底（2026-09-15 负责人走查：发送后必须手动下滑才看得到新消息）。
+ * 根因：页面滚动容器是 MainLayout 的 `.app-main`，`.chat-timeline` 自身 `overflow: visible`
+ * **不是滚动容器**，原实现对它设 `scrollTop` 不产生任何效果。
+ * 改为滚动真正的滚动容器；`.chat-page` 预留了底部输入区的 132px 内边距，
+ * 置底后最后一条消息不会被固定输入区盖住。
+ */
 function scrollToBottom(): void {
   void nextTick(() => {
-    const el = timelineRef.value
-    if (el) el.scrollTop = el.scrollHeight
+    const scroller = document.querySelector('.app-main')
+    if (scroller instanceof HTMLElement) scroller.scrollTop = scroller.scrollHeight
   })
 }
 
@@ -126,16 +133,18 @@ function messageTime(message: ChatMessageRecord): string {
 
     <template v-else-if="conversation">
       <div data-testid="chat-detail">
-        <header class="chat-appbar">
-          <button class="chat-back" type="button" aria-label="返回" data-testid="back-btn" @click="goBack">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M15 4.5L7.5 12L15 19.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            </svg>
-          </button>
-          <p class="chat-title">{{ storeName }}</p>
-        </header>
+        <!-- 吸顶区（2026-09-15 负责人走查：顶部栏与订单状态卡在消息滑动时都不能被带走）：
+             两者同处一个 sticky 容器，滚动时整块留在顶部；容器底色不透明，消息从其下方穿行。 -->
+        <div class="chat-top">
+          <header class="chat-appbar">
+            <button class="chat-back" type="button" aria-label="返回" data-testid="back-btn" @click="goBack">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15 4.5L7.5 12L15 19.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </button>
+            <p class="chat-title">{{ storeName }}</p>
+          </header>
 
-        <main class="chat-main">
           <!-- 订单状态卡：状态 / 订单编号 / 商家名（来自订单接口）+ 查看订单 -->
           <section v-if="order" class="chat-order-card" data-testid="chat-order-card">
             <div class="chat-order-info">
@@ -149,7 +158,9 @@ function messageTime(message: ChatMessageRecord): string {
               查看订单
             </button>
           </section>
+        </div>
 
+        <main class="chat-main">
           <!-- 消息时间线（商家侧左、用户侧右；按服务端时间排序） -->
           <section ref="timelineRef" class="chat-timeline">
             <p v-if="conversation.messages.length === 0" class="chat-empty">暂无消息，打个招呼吧</p>
@@ -230,13 +241,18 @@ function messageTime(message: ChatMessageRecord): string {
   background: #f9f9f9;
 }
 
-/* 顶部栏吸顶（2026-09-15 负责人走查：原为 position: relative，消息滑动时整条顶栏被带走）。
-   与站内其余 11 处顶栏同一约定（sticky + top:0 + z-index:10，见 MessageCenterView/FaqView 等）；
-   `.chat-back` 为绝对定位子元素，sticky 同样是定位元素，锚点不变。 */
-.chat-appbar {
+/* 吸顶区（2026-09-15 负责人走查）：顶部栏与订单状态卡同处一个 sticky 容器，
+   滚动消息时整块留在顶部、订单块不随之上移。原先顶栏是 position: relative（会被带走），
+   把 sticky 上提到本容器后，`.chat-back` 的绝对定位锚点仍在本容器内的 `.chat-appbar` 上，不受影响。
+   底色与页面一致且不透明：消息从其下方穿行时不会透出。 */
+.chat-top {
   position: sticky;
   top: 0;
   z-index: 10;
+  background: #f9f9f9;
+}
+
+.chat-appbar {
   display: flex;
   align-items: center;
   justify-content: center;
