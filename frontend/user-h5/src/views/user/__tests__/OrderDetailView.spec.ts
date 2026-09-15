@@ -323,6 +323,40 @@ describe('OrderDetailView 批次⑩（CHG-003 订单详情含跟踪时间线）'
     expect(text).toContain('共 2 件商品')
   })
 
+  it('OD-12 商品行渲染缩略图：接口 image 优先于演示映射（设计真源 w-14 h-14 rounded-xl object-cover）', async () => {
+    orderMockState.push(
+      odOrder({
+        orderId: 'od12',
+        items: [
+          {
+            productId: 'p101',
+            name: '香辣鸡腿堡',
+            // 刻意取一个「不是 p101 演示映射」的真实素材：命中即证明接口值优先
+            image: '/demo-images/product-m004-02.jpg',
+            unitPrice: 19.5,
+            quantity: 1,
+            subtotal: 19.5,
+          },
+        ],
+      }),
+    )
+    const { wrapper } = await mountOd('od12')
+    const thumbs = wrapper.findAll('[data-testid="od-dish-thumb"]')
+    expect(thumbs).toHaveLength(1)
+    expect(thumbs[0]?.attributes('src')).toBe('/demo-images/product-m004-02.jpg')
+    expect(thumbs[0]?.attributes('alt')).toBe('香辣鸡腿堡')
+  })
+
+  it('OD-13 接口未返回 image 时走演示映射兜底，商品行不得出现空 src（三级兜底链）', async () => {
+    const { wrapper } = await mountOd('od03')
+    const srcs = wrapper
+      .findAll('[data-testid="od-dish-thumb"]')
+      .map((thumb) => thumb.attributes('src') ?? '')
+    // od03 的两行商品为 p101 / p102，接口部分均不含 image → 命中演示映射（p101→product-m002-01、p102→product-m002-02）
+    expect(srcs).toEqual(['/demo-images/product-m002-01.jpg', '/demo-images/product-m002-02.jpg'])
+    expect(srcs.every((src) => src !== '')).toBe(true)
+  })
+
   it('TP-10 可用态点「取消订单」打开弹层，提交成功后详情刷新为已取消并展示原因（TODO-USER-002）', async () => {
     const { wrapper } = await mountOd('od01')
     const cancel = wrapper.find('[data-testid="cancel-order-btn"]')

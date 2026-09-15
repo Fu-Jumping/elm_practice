@@ -153,6 +153,27 @@ describe('normalizeOrderDetail 订单详情归一（含明细与地址快照）'
     })
   })
 
+  it('N4 明细 image 口径：接口有值原样保留，空串与缺失一律收敛为 undefined（2026-09-15）', () => {
+    const view = normalizeOrderDetail({
+      ...REAL_ORDER_RECORD,
+      items: [
+        {
+          productId: 'p101',
+          name: '有图',
+          image: '/demo-images/product-m002-01.jpg',
+          unitPrice: 10,
+          quantity: 1,
+          subtotal: 10,
+        },
+        { productId: 'p102', name: '空串', image: '', unitPrice: 10, quantity: 1, subtotal: 10 },
+        { productId: 'p103', name: '缺字段', unitPrice: 10, quantity: 1, subtotal: 10 },
+      ],
+    })
+    expect(view.items[0]?.image).toBe('/demo-images/product-m002-01.jpg')
+    expect(view.items[1]?.image).toBeUndefined()
+    expect(view.items[2]?.image).toBeUndefined()
+  })
+
   it('N3b 无 address/items 字段 → 空数组与空快照，不产生 undefined', () => {
     const view = normalizeOrderDetail({
       orderId: 'o0000',
