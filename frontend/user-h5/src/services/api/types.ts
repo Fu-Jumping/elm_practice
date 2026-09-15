@@ -341,6 +341,8 @@ export interface ChatMessageRecord {
 
 /** 会话详情（契约 §6.1 GET /conversations/{conversationId}：详情 + 消息时间线） */
 export interface ConversationDetailRecord extends ConversationRecord {
+  /** 后端会话视图直出的店铺名（BUG-20260914-005 修复后提供）；缺省时页面回退店铺列表映射 */
+  storeName?: string
   messages: ChatMessageRecord[]
 }
 
