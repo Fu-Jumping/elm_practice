@@ -383,8 +383,23 @@ function isSoldOut(product: Product): boolean {
   return !product.onSale || product.stock <= 0
 }
 
+/** 是否「有规格」商品（契约 §3.2/§4.2：`specOptions` 非空即需先选规格再加购） */
+function hasSpecs(product: Product): boolean {
+  return (product.specOptions ?? []).length > 0
+}
+
+/** 会员价（契约 §3.2：非会员仍返回该字段，计价仍按 price）；缺失返回 null → 整块隐藏 */
+function memberPriceOf(product: Product): number | null {
+  return typeof product.memberPrice === 'number' ? product.memberPrice : null
+}
+
 async function onAdd(product: Product, event?: MouseEvent): Promise<void> {
   if (isClosed.value || isSoldOut(product)) return
+  // 有规格商品：点加号先打开规格弹层，选定规格后才加购（PRD 850 行）
+  if (hasSpecs(product)) {
+    openSpecPopup(product)
+    return
+  }
   // 加购需登录（后端 401 口径）：未登录引导登录并回跳商家详情，不静默失败
   // （PRD 校验顺序"登录先行"；9/7 联调修正，用例 T45）
   if (!sessionStore.isLoggedIn) {
@@ -403,6 +418,117 @@ async function onAdd(product: Product, event?: MouseEvent): Promise<void> {
   const line = lineOf(product.productId)
   if (line) await cartStore.incrementLine(line.cartLineId)
   else await cartStore.addItem(storeId, product.productId)
+}
+
+/**
+ * 规格弹层（PRD 850「商品规格弹层-规格弹层」行，契约 §3.4/§4.2）
+ * - 规格默认值由商品配置返回；契约 `specOptions` 未定义默认项 → 视为「没有默认值，必须先选择」
+ *   （后端 `validatedSelection` 对未选也返回 400「请选择商品规格」，两边口径一致）
+ * - 数量默认 1；价格 = 基础价 + 已选规格价差（× 数量），前端只做展示，以后端计价为准
+ * - 打开时记录当前商品与库存快照；提交前重新校验上下架/库存，避免用过期快照下单
+ * - 遮罩或关闭按钮放弃本次输入
+ */
+const specPopupOpen = ref(false)
+const specProduct = ref<Product | null>(null)
+const selectedSpecName = ref('')
+const specQuantity = ref(1)
+const specSubmitting = ref(false)
+
+function openSpecPopup(product: Product): void {
+  specProduct.value = product
+  selectedSpecName.value = ''
+  specQuantity.value = 1
+  specPopupOpen.value = true
+}
+
+/** 关闭弹层：放弃本次输入（PRD 交互列） */
+function closeSpecPopup(): void {
+  specPopupOpen.value = false
+  specProduct.value = null
+  selectedSpecName.value = ''
+  specQuantity.value = 1
+}
+
+function selectSpec(name: string): void {
+  selectedSpecName.value = name
+}
+
+const selectedSpecOption = computed(
+  () => specProduct.value?.specOptions?.find((option) => option.name === selectedSpecName.value) ?? null,
+)
+
+/** 预览单价 = 基础价 + 已选规格价差（未选规格时即基础价） */
+const specUnitPrice = computed(
+  () => (specProduct.value?.price ?? 0) + (selectedSpecOption.value?.priceDelta ?? 0),
+)
+
+/** 预览合计 = 预览单价 × 数量（PRD：选择规格/数量后只更新预览价） */
+const specPreviewTotal = computed(() => specUnitPrice.value * specQuantity.value)
+
+/** 可买上限 = 弹层打开时的库存快照（不足 1 时按 1 兜底，避免数量控件失效） */
+const specMaxQuantity = computed(() => Math.max(1, specProduct.value?.stock ?? 1))
+
+function changeSpecQuantity(delta: number): void {
+  const next = specQuantity.value + delta
+  if (next < 1) {
+    toast('数量至少为 1')
+    return
+  }
+  if (next > specMaxQuantity.value) {
+    toast(`数量不能超过库存（${specMaxQuantity.value}）`)
+    return
+  }
+  specQuantity.value = next
+}
+
+/** 确认加入购物车：校验 → 提交带规格的加购请求 → 成功关闭弹层并刷新购物车栏 */
+async function confirmSpecAdd(): Promise<void> {
+  const product = specProduct.value
+  if (!product || specSubmitting.value) return
+  if (isClosed.value) {
+    toast('店铺休息中，暂不可下单')
+    return
+  }
+  // 必选规格未选：禁止提交（PRD 异常列；后端同样返回 400 兜底）
+  if (!selectedSpecName.value) {
+    toast('请选择规格')
+    return
+  }
+  // 商品已删除/下架/库存变化：禁止提交并提示刷新（PRD 异常列）
+  if (isSoldOut(product)) {
+    toast('商品已售罄或已下架，请刷新后重试')
+    return
+  }
+  if (specQuantity.value > product.stock) {
+    toast(`库存不足，最多可买 ${product.stock} 件`)
+    return
+  }
+  if (!sessionStore.isLoggedIn) {
+    await sessionStore.checkLogin()
+  }
+  if (!sessionStore.isLoggedIn) {
+    toast('请先登录')
+    void router.push({ name: 'login', query: { redirect: route.fullPath } })
+    return
+  }
+  specSubmitting.value = true
+  try {
+    const added = await cartStore.addItem(storeId, product.productId, specQuantity.value, [
+      { name: selectedSpecName.value, priceDelta: selectedSpecOption.value?.priceDelta ?? 0 },
+    ])
+    // 失败原因（售罄/超库存/未登录等）由 http 层统一 toast，弹层保留选择允许重试
+    if (added) {
+      toast('已加入购物车')
+      closeSpecPopup()
+    }
+  } finally {
+    specSubmitting.value = false
+  }
+}
+
+/** 购物车行规格文案（购物车弹层展示，契约 §3.4：同一商品不同规格是不同行） */
+function specTextOf(line: CartLine): string {
+  return (line.specOptions ?? []).map((option) => option.name).join(' / ')
 }
 
 /**
@@ -695,8 +821,10 @@ async function onCheckout(): Promise<void> {
                     <span class="price-symbol">¥</span>
                     <span class="price-int">{{ formatMoney(product.price) }}</span>
                   </span>
-                  <!-- 行内步进器（T47-T49）：已加购显示 "- 数量 +"，未加购仅 + 按钮 -->
-                  <span v-if="qtyOf(product.productId) > 0" class="product-stepper">
+                  <!-- 行内步进器（T47-T49）：已加购显示 "- 数量 +"，未加购仅 + 按钮。
+                       有规格商品不在此处步进——同一商品的不同规格在购物车中是不同行（contract §3.4），
+                       数量增减统一在规格弹层与购物车弹层内完成（PRD 850 行：点加号打开规格弹层） -->
+                  <span v-if="!hasSpecs(product) && qtyOf(product.productId) > 0" class="product-stepper">
                     <button
                       class="stepper-btn"
                       type="button"
@@ -738,6 +866,23 @@ async function onCheckout(): Promise<void> {
                       <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
                     </svg>
                   </button>
+                </p>
+                <!-- 会员价（PRD 7.10「会员价展示（价格行高亮）」、契约 §3.2）：
+                     接口返回 memberPrice 才展示；缺失整块隐藏，不显示 undefined。
+                     非会员同样可见（契约明确非会员仍返回该字段），实际计价以后端为准 -->
+                <p
+                  v-if="memberPriceOf(product) !== null"
+                  class="product-member-price"
+                  :data-testid="`member-price-${product.productId}`"
+                >
+                  <span class="member-price-tag">会员价</span>
+                  <span class="member-price-amount">
+                    <span class="price-symbol">¥</span>{{ formatMoney(memberPriceOf(product) as number) }}
+                  </span>
+                </p>
+                <!-- 规格入口提示（PRD 850：有规格的商品卡显示规格入口） -->
+                <p v-if="hasSpecs(product)" class="product-spec-hint" :data-testid="`spec-hint-${product.productId}`">
+                  可选规格 {{ (product.specOptions ?? []).length }} 项
                 </p>
                 <p v-if="isSoldOut(product)" class="product-soldout-text">售罄</p>
               </div>
@@ -813,7 +958,12 @@ async function onCheckout(): Promise<void> {
               class="cart-popup-item"
               data-testid="cart-popup-item"
             >
-              <span class="cart-popup-name">{{ line.name }}</span>
+              <span class="cart-popup-name">
+                {{ line.name }}
+                <span v-if="specTextOf(line)" class="cart-popup-spec" :data-testid="`popup-spec-${line.cartLineId}`">
+                  {{ specTextOf(line) }}
+                </span>
+              </span>
               <span class="cart-popup-price">¥{{ formatMoney(line.unitPrice) }}</span>
               <span class="product-stepper">
                 <button
@@ -847,6 +997,87 @@ async function onCheckout(): Promise<void> {
           <p class="cart-popup-total" data-testid="cart-popup-total">
             合计：¥{{ formatMoney(cartStore.totalAmount) }}
           </p>
+        </section>
+      </template>
+
+      <!-- 规格弹层（PRD 850 行 / 契约 §3.4·§4.2）：单选规格 + 数量 + 预览价 + 加入购物车 -->
+      <template v-if="specPopupOpen && specProduct">
+        <div class="spec-mask" data-testid="spec-popup-mask" @click="closeSpecPopup" />
+        <section class="spec-popup" data-testid="spec-popup" role="dialog" aria-label="选择规格">
+          <header class="spec-head">
+            <span class="spec-title" data-testid="spec-popup-name">{{ specProduct.name }}</span>
+            <button
+              class="spec-close"
+              type="button"
+              data-testid="spec-popup-close"
+              aria-label="关闭规格弹层"
+              @click="closeSpecPopup"
+            >
+              ×
+            </button>
+          </header>
+
+          <p class="spec-section-label">规格（必选）</p>
+          <div class="spec-options" data-testid="spec-options">
+            <button
+              v-for="option in specProduct.specOptions ?? []"
+              :key="option.name"
+              class="spec-option"
+              :class="{ 'is-selected': selectedSpecName === option.name }"
+              :data-testid="`spec-option-${option.name}`"
+              type="button"
+              :aria-pressed="selectedSpecName === option.name ? 'true' : 'false'"
+              @click="selectSpec(option.name)"
+            >
+              {{ option.name }}
+              <span v-if="option.priceDelta > 0" class="spec-option-delta">
+                +¥{{ formatMoney(option.priceDelta) }}
+              </span>
+            </button>
+          </div>
+
+          <div class="spec-quantity-row">
+            <span class="spec-section-label">数量</span>
+            <span class="product-stepper">
+              <button
+                class="stepper-btn"
+                type="button"
+                data-testid="spec-minus"
+                aria-label="减少数量"
+                @click="changeSpecQuantity(-1)"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+                </svg>
+              </button>
+              <span class="stepper-qty" data-testid="spec-quantity">{{ specQuantity }}</span>
+              <button
+                class="stepper-btn stepper-btn--add"
+                type="button"
+                data-testid="spec-plus"
+                aria-label="增加数量"
+                @click="changeSpecQuantity(1)"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+                </svg>
+              </button>
+            </span>
+          </div>
+
+          <p class="spec-preview" data-testid="spec-preview-total">
+            合计：¥{{ formatMoney(specPreviewTotal) }}
+          </p>
+
+          <button
+            class="spec-submit"
+            type="button"
+            data-testid="spec-submit"
+            :disabled="specSubmitting || !selectedSpecName || isClosed || isSoldOut(specProduct)"
+            @click="confirmSpecAdd"
+          >
+            加入购物车
+          </button>
         </section>
       </template>
     </template>
@@ -1614,5 +1845,154 @@ async function onCheckout(): Promise<void> {
   background: var(--color-surface-container);
   color: var(--color-text-tertiary);
   cursor: not-allowed;
+}
+
+/* ---- 会员价（PRD 7.10：价格行高亮） ---- */
+.product-member-price {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 0;
+}
+
+.member-price-tag {
+  padding: 1px 6px;
+  border-radius: 2px;
+  background: var(--color-primary);
+  font-size: 10px;
+  line-height: 16px;
+  color: var(--color-surface-white);
+}
+
+.member-price-amount {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* ---- 规格入口提示 ---- */
+.product-spec-hint {
+  margin: 4px 0 0;
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--color-text-tertiary);
+}
+
+/* ---- 规格弹层（PRD 850 行） ---- */
+.spec-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.spec-popup {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  border-radius: 12px 12px 0 0;
+  background: var(--color-surface-white);
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.spec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.spec-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.spec-close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+}
+
+.spec-section-label {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.spec-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* 规格选项：未选为描边胶囊，选中为品牌橙描边 + 浅品牌底（设计系统选中态口径） */
+.spec-option {
+  padding: 8px 14px;
+  border: 1px solid var(--color-border-light);
+  border-radius: 4px;
+  background: none;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.spec-option.is-selected {
+  border-color: var(--color-primary);
+  background: #ffdbd0;
+  color: var(--color-primary);
+}
+
+.spec-option-delta {
+  margin-left: 4px;
+  font-size: 12px;
+}
+
+.spec-quantity-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.spec-preview {
+  margin: 0;
+  text-align: right;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.spec-submit {
+  height: 44px;
+  border: none;
+  border-radius: 4px;
+  background: var(--color-primary);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-surface-white);
+  cursor: pointer;
+}
+
+.spec-submit:disabled {
+  background: var(--color-surface-container);
+  color: var(--color-text-tertiary);
+  cursor: not-allowed;
+}
+
+/* 购物车弹层内的规格文案（同一商品不同规格是不同行） */
+.cart-popup-spec {
+  margin-left: 6px;
+  font-size: 11px;
+  color: var(--color-text-tertiary);
 }
 </style>
