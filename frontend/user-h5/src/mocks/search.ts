@@ -96,3 +96,63 @@ export const searchMocks: Record<string, MockHandler> = {
     })
   },
 }
+
+/* ============ 搜索增强（2026-09-15，契约 §3.6）：联想 + 热门词 ============ */
+
+/** 词条字典镜像（与后端 search_terms 种子同源；含别名，用于联想匹配）。 */
+const TERM_DICT: Array<{ term: string; aliases: string[]; hot?: boolean }> = [
+  { term: '辣', aliases: ['麻辣', '香辣', '麻辣烫'], hot: true },
+  { term: '炸鸡', aliases: ['鸡腿', '鸡块', '鸡翅'], hot: true },
+  { term: '汉堡', aliases: ['burger', '堡'], hot: true },
+  { term: '烧烤', aliases: ['撸串', '夜宵', '烤串'], hot: true },
+  { term: '火锅', aliases: ['涮锅', '涮肉'], hot: true },
+  { term: '果汁', aliases: ['饮品', '饮料', '奶茶', '喝的'], hot: true },
+  { term: '肯德基', aliases: ['kfc', '开封菜'], hot: true },
+  { term: '便宜', aliases: ['实惠', '低价', '平价'], hot: true },
+  { term: '甜', aliases: ['甜品', '甜点'] },
+  { term: '清淡', aliases: ['沙拉', '轻食'] },
+  { term: '家常菜', aliases: ['小炒', '下饭', '麻辣烫'] },
+  { term: '主食', aliases: ['米饭', '面条', '饺子', '寿司'] },
+  { term: '麦当劳', aliases: ['金拱门', 'm记'] },
+  { term: '老王小店', aliases: ['老王'] },
+  { term: '老胖烧烤', aliases: ['老胖'] },
+  { term: '元盛居', aliases: ['元盛'] },
+]
+
+function suggestMatch(query: string, word: string): boolean {
+  const q = query.toLowerCase()
+  const w = word.toLowerCase()
+  // 对齐后端：词条/别名包含输入（含单字前缀联想） ∨ 输入包含多字别名 ∨ 全等
+  return q === w || (w.length >= 2 && q.includes(w)) || w.includes(q)
+}
+
+export const suggestMocks: Record<string, MockHandler> = {
+  'GET /search/suggest': ({ params }) => {
+    const q = String(params?.keyword ?? '').trim().toLowerCase()
+    const limit = Math.min(Math.max(Number(params?.limit ?? 8) || 8, 1), 20)
+    if (!q) return ok({ suggestions: [] as Array<{ text: string; source: string }> })
+    const seen = new Set<string>()
+    const out: Array<{ text: string; source: string }> = []
+    for (const entry of TERM_DICT) {
+      if ((suggestMatch(q, entry.term) || entry.aliases.some((a) => suggestMatch(q, a))) && seen.add(entry.term)) {
+        out.push({ text: entry.term, source: 'term' })
+      }
+    }
+    for (const store of STORES) {
+      if (store.name.toLowerCase().includes(q) && seen.add(store.name)) out.push({ text: store.name, source: 'store' })
+    }
+    for (const p of ALL_PRODUCTS) {
+      if (p.name.toLowerCase().includes(q) && seen.add(p.name)) out.push({ text: p.name, source: 'product' })
+    }
+    return ok({ suggestions: out.slice(0, limit) })
+  },
+
+  'GET /search/hot': ({ params }) => {
+    const limit = Math.min(Math.max(Number(params?.limit ?? 8) || 8, 1), 20)
+    const words = TERM_DICT.filter((e) => e.hot)
+      .slice(0, limit)
+      .map((e, i) => ({ word: e.term, hot: i < 3 }))
+    return ok(words)
+  },
+}
+

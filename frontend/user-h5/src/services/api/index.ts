@@ -19,3 +19,5 @@ export * as aiApi from './ai'
 // AI 域错误类型与结果类型（页面按 PRD §6.3 异常表分流时需要区分）
 export { AI_TIMEOUT_MS, AiTimeoutError, AiUnavailableError } from './ai'
 export type { AiChatMessage, AiChatPayload, AiChatResult } from './types'
+// 搜索增强（契约 §3.6）：联想候选类型（SearchEntryView 下拉用）
+export type { SearchSuggestion } from './search'
