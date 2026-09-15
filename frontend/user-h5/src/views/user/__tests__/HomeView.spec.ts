@@ -492,15 +492,12 @@ describe('HomeView（AI 点餐助手入口，AI点餐助手前端PRD §2）', ()
     expect(routerInstance.currentRoute.value.name).toBe('ai-chat')
   })
 
-  it('HOME-AI-2 搜索框「AI 推荐」按钮带预填提示词进对话页，且不触发搜索跳转（§2.2）', async () => {
+  it('HOME-AI-2 搜索框不再渲染「AI 推荐」按钮（2026-09-15 负责人指示：AI 入口收敛为浮窗+我的页）', async () => {
     const pinia = createPinia()
     setActivePinia(pinia)
     const wrapper = mount(HomeView, { global: { plugins: [pinia, routerPlugin()] } })
-    const aiButton = wrapper.find('[data-testid="search-ai-btn"]')
-    expect(aiButton.exists()).toBe(true)
-    await aiButton.trigger('click')
-    await flushPromises()
-    expect(routerInstance.currentRoute.value.name).toBe('ai-chat')
-    expect(routerInstance.currentRoute.value.query.prompt).toBe('帮我推荐今天吃什么')
+    expect(wrapper.find('[data-testid="search-ai-btn"]').exists()).toBe(false)
+    // 浮窗入口仍在
+    expect(wrapper.find('[data-testid="ai-float-btn"]').exists()).toBe(true)
   })
 })

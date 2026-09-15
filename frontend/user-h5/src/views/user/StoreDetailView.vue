@@ -39,14 +39,24 @@ const activeTab = ref<'order' | 'review'>('order')
 /** 店铺评价（批次⑩ TODO-USER-003：接契约 §6.2 店铺评价接口，含商家回复与脱敏昵称） */
 const reviews = ref<ReviewRecord[]>([])
 const reviewLoading = ref(false)
+/** 评价加载失败：保留旧结果 + 重试入口（2026-09-15 P1-6） */
+const reviewFailed = ref(false)
+
+/** 评价图片加载失败 → 占位图（PRD 859 异常分支） */
+function onReviewImageError(event: Event): void {
+  const target = event.target as HTMLImageElement
+  target.src = '/design-assets/首页-精细/product-thumb-1.png'
+  target.style.opacity = '0.5'
+}
 
 async function loadReviews(): Promise<void> {
+  reviewFailed.value = false
   reviewLoading.value = true
   try {
     reviews.value = await reviewApi.getStoreReviews(storeId)
   } catch {
-    // 评价加载失败不阻塞点餐主链路：展示空态
-    reviews.value = []
+    // 评价加载失败：保留已显示结果并提供重试（SRS R682-C9，2026-09-15 P1-6）
+    reviewFailed.value = true
   } finally {
     reviewLoading.value = false
   }
@@ -746,6 +756,10 @@ async function onCheckout(): Promise<void> {
       <!-- 店铺评价列表（批次⑩ 003 真实化：GET /stores/{storeId}/reviews） -->
       <div v-if="activeTab === 'review'" class="review-area" data-testid="review-list">
         <p v-if="reviewLoading" class="review-empty">评价加载中…</p>
+        <div v-else-if="reviewFailed" class="review-failed" data-testid="review-failed">
+          <span>{{ reviews.length > 0 ? '评价刷新失败，已保留原结果' : '评价加载失败' }}</span>
+          <button type="button" data-testid="review-retry-btn" @click="loadReviews">重试</button>
+        </div>
         <p v-else-if="reviews.length === 0" class="review-empty" data-testid="review-empty">暂无评价</p>
         <ul v-else class="review-list">
           <li v-for="review in reviews" :key="review.reviewId" class="review-item" data-testid="review-item">
@@ -754,6 +768,19 @@ async function onCheckout(): Promise<void> {
               <span class="review-stars" :aria-label="`${review.rating} 星`">
                 {{ '★'.repeat(review.rating) }}{{ '☆'.repeat(5 - review.rating) }}
               </span>
+            </div>
+            <!-- 评价图片（PRD 859：评价列表展示图片；≤3 张、失败占位，2026-09-15） -->
+            <div v-if="review.images && review.images.length > 0" class="review-images" data-testid="review-images">
+              <img
+                v-for="(img, imgIndex) in review.images.slice(0, 3)"
+                :key="imgIndex"
+                :src="img"
+                alt="评价图片"
+                loading="lazy"
+                @error="onReviewImageError($event)"
+              />
+            </div>
+            <div v-else class="review-head">
             </div>
             <p class="review-content">{{ review.content }}</p>
             <div v-if="review.tags.length > 0" class="review-tags">
@@ -1196,7 +1223,7 @@ async function onCheckout(): Promise<void> {
   width: 62px;
   height: 64px;
   border: 1px solid #eeeeee;
-  border-radius: 8px;
+  border-radius: 0 8px 8px 0;
   background: var(--color-surface-white);
   overflow: hidden;
 }
@@ -1329,7 +1356,35 @@ async function onCheckout(): Promise<void> {
 
 .review-area {
   padding: 12px;
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
   background: #ffffff;
+}
+.review-failed {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 12px;
+  font-size: 13px;
+  color: var(--color-text-secondary, #666);
+}
+.review-failed button {
+  border: 1px solid var(--color-primary, #ff5a1f);
+  background: none;
+  color: var(--color-primary, #ff5a1f);
+  border-radius: 6px;
+  padding: 3px 14px;
+  font-size: 12px;
+}
+.review-images {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+.review-images img {
+  width: 72px;
+  height: 72px;
+  border-radius: 6px;
+  object-fit: cover;
 }
 
 .review-empty {
@@ -1475,7 +1530,7 @@ async function onCheckout(): Promise<void> {
 
 .cat-rail-item--active {
   /* TODO-USER-015：选中项加外圆角（负责人 9/10 走查，设计系统 8px 圆角阶梯） */
-  border-radius: 8px;
+  border-radius: 0 8px 8px 0;
   background: var(--color-surface-white);
   font-weight: 500;
   color: var(--color-text-primary);
