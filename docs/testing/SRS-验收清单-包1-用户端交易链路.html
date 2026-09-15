@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SRS 验收清单 · 包① 用户端交易链路</title>
+<style>
+  :root {
+    --orange: #ff5a1f; --orange-weak: #fff0e9;
+    --ink: #23232b; --sub: #6b6b76; --line: #e6e6ec; --bg: #f6f6f8; --card: #ffffff;
+    --ok: #0c9d61; --ok-bg: #e7f7ef; --part: #b07700; --part-bg: #fdf3dc;
+    --fail: #d0342c; --fail-bg: #fdeaea; --na: #8a8a94; --na-bg: #f0f0f4;
+    --warn: #b5430d; --warn-bg: #fff2e8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif; font-size: 14px; line-height: 1.6; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 16px 16px 80px; }
+
+  header.hero { background: linear-gradient(135deg, #ff7a3d, #ff5a1f); color: #fff;
+    border-radius: 12px; padding: 20px 18px; margin-bottom: 14px; }
+  header.hero h1 { margin: 0 0 6px; font-size: 20px; }
+  header.hero .sub { opacity: .95; font-size: 13px; }
+
+  .meta { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 14px 16px; margin-bottom: 12px; font-size: 13px; }
+  .meta h2 { font-size: 14px; margin: 0 0 8px; }
+  .meta ul { margin: 4px 0 0; padding-left: 18px; }
+  .meta li { margin: 3px 0; }
+  .meta .exclude { color: var(--warn); }
+  .meta code { background: #f2f2f5; border-radius: 4px; padding: 0 4px; font-size: 12px; }
+
+  .sticky { position: sticky; top: 0; z-index: 20; background: var(--bg);
+    padding: 8px 0; margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
+  .stats { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .stats .chip { border: 1px solid var(--line); background: #fff; border-radius: 999px;
+    padding: 3px 10px; font-size: 12px; cursor: pointer; user-select: none; }
+  .stats .chip.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .stats .chip .n { font-weight: 700; }
+  .bar { height: 6px; background: #e9e9ee; border-radius: 3px; margin-top: 6px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--orange); width: 0; transition: width .2s; }
+  .toolrow { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .toolrow button { border: 1px solid var(--line); background: #fff; border-radius: 8px;
+    padding: 5px 12px; font-size: 12px; cursor: pointer; }
+  .toolrow button.primary { background: var(--orange); border-color: var(--orange); color: #fff; }
+
+  section.sec { margin-top: 16px; }
+  .sec-h { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; cursor: pointer;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px 12px 0 0;
+    padding: 10px 14px; }
+  .sec-h h2 { font-size: 15px; margin: 0; }
+  .sec-h .ln { color: var(--sub); font-size: 12px; }
+  .sec-h .cnt { margin-left: auto; font-size: 12px; color: var(--sub); }
+  .sec-note { background: #fffdf9; border: 1px solid #efe4d6; border-top: none; color: #7a5b33;
+    font-size: 12.5px; padding: 8px 14px; }
+
+  .item { background: var(--card); border: 1px solid var(--line); border-top: none;
+    padding: 12px 14px; }
+  .item:last-of-type { border-radius: 0 0 12px 12px; }
+  .item .head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .tag { background: #f2f2f5; color: #4a4a55; font-size: 11.5px; font-weight: 700;
+    border-radius: 6px; padding: 1px 7px; white-space: nowrap; }
+  .src { color: var(--sub); font-size: 11.5px; }
+  .title { font-weight: 600; }
+  .badge { margin-left: auto; font-size: 12px; font-weight: 700; border-radius: 999px;
+    padding: 2px 10px; border: 1px solid var(--line); background: #fff; color: var(--na); }
+  .badge.c-通过 { background: var(--ok-bg); color: var(--ok); border-color: #bfe8d3; }
+  .badge.c-部分通过 { background: var(--part-bg); color: var(--part); border-color: #ead9a8; }
+  .badge.c-不通过 { background: var(--fail-bg); color: var(--fail); border-color: #f2c2bf; }
+  .badge.c-未实现（已标注） { background: var(--na-bg); color: #5c5c66; border-color: #d8d8de; }
+  .badge.c-无法验证 { background: var(--warn-bg); color: var(--warn); border-color: #f0c9b2; }
+
+  .blk { margin-top: 8px; }
+  .blk b.lbl { display: block; font-size: 12px; color: var(--sub); margin-bottom: 2px; }
+  .blk .txt { font-size: 13px; }
+  .blk textarea, .blk input[type=text] { width: 100%; border: 1px solid var(--line);
+    border-radius: 8px; padding: 7px 9px; font-size: 13px; font-family: inherit; background: #fbfbfd; }
+  .blk textarea { min-height: 52px; resize: vertical; }
+  .pre { margin-top: 8px; background: var(--warn-bg); border: 1px solid #f3d3bd;
+    border-radius: 8px; padding: 6px 10px; font-size: 12.5px; color: var(--warn); }
+  .pre.ok { background: var(--ok-bg); border-color: #bfe8d3; color: var(--ok); }
+
+  .rec { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 10px;
+    align-items: end; }
+  .rec .col { display: flex; flex-direction: column; gap: 4px; }
+  .rec label { font-size: 12px; color: var(--sub); }
+  .rec select { border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px;
+    font-size: 13px; background: #fff; }
+
+  .appendix img { max-width: 100%; border: 1px solid var(--line); border-radius: 10px; margin: 6px 0; }
+  .appendix { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .appendix table { border-collapse: collapse; width: 100%; font-size: 12.5px; margin: 8px 0; }
+  .appendix th, .appendix td { border: 1px solid var(--line); padding: 5px 8px; text-align: left; }
+  .appendix code { font-size: 11.5px; background: #f2f2f5; padding: 0 3px; border-radius: 3px; }
+  .foot { margin-top: 18px; color: var(--sub); font-size: 12px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <h1>SRS 用户端交易链路验收清单 · 包①</h1>
+    <div class="sub">基线：docs/SRS.md 905 行版（2026-09-15）｜依据：《组内模拟交叉验收分工（四人方案）》分工总表 ①｜<b>2026-09-15 修订：商家端验收条目已全部划出本清单</b>（删 1 条、改 5 处，详见「二、不在本清单」）</div>
+  </header>
+
+  <div class="meta">
+    <h2>一、本清单验收范围（包①：端到端主链路 + 用户端交易链路）</h2>
+    <ul>
+      <li><b>§8.1 P0 主链路验收</b>（SRS 857–877）：<b>7 步用户端步骤</b> + 异常链路 4 条（SRS 原 8 步中的第 8 步「商家登录桌面后台查询本店订单」为商家端步骤，已删出本清单，不计入本页条数）</li>
+      <li><b>§8.2 通过门槛</b>（SRS 878–885）：5 条</li>
+      <li><b>§5.3 店铺与商品浏览</b>（283–297）：FR-STO-01、FR-SKU-01 正常 + 异常场景逐条</li>
+      <li><b>§5.4 购物车</b>（298–306）：FR-CART-01</li>
+      <li><b>§5.5 收货地址</b>（307–315）：FR-ADR-01</li>
+      <li><b>§5.6 确认订单与支付</b>（316–338）：FR-ORD-01、FR-PAY-01、FR-PRM-01</li>
+      <li><b>§5.7 订单</b>（339–351）：FR-ORD-02、FR-OST-01</li>
+      <li><b>§6.2.1 用户端原型说明 · 交易链路行</b>（28 行）：商家详情页(678-680)、商品规格弹层(683)、订单列表页(684-686)、订单详情页(687-690)、确认订单页与订单备注弹层(704-707)、支付页(708-709)、支付成功页(710-713)、支付失败页(714-715)、地址列表页与新增地址页(732-736)</li>
+      <li><b>§8.3 本期扩展模块的验收要求 · 取 3 条</b>：模拟支付与库存一致性(FR-PAY-01)、优惠与统一计价(FR-PRM-01/FR-MPRM-01)、商品规格与分类绑定商品(FR-SKU-01/FR-MSKU-01/FR-MCAT-02)</li>
+    </ul>
+    <h2 style="margin-top:12px">二、不在本清单（已排除）</h2>
+    <ul class="exclude">
+      <li><b>组长（付赞平）名下包②，不用你验收</b>：§5.2 首页与搜索（FR-SEA-01/02/03）、§5.11 评价·消息·用户资产（FR-REV-01/FR-MSG-01/FR-FAV-01/FR-MBR-01/FR-RED-01/FR-RED-02/FR-SET-01）、§5.12 取消订单（FR-CXL-01）、§6.1 页面清单用户端行、§6.2.1 非交易链路行（首页/搜索/评价/消息/我的/收藏/会员/红包等行）、§8.3 其余 5 条 + 双端 3 条</li>
+      <li><b>商家端（2026-09-15 口径：本人不验收商家端）</b>：本清单不含任何需登录或操作商家端后台的验收任务。本次已处理——① <b>整条删除</b>原 §8.1 第 8 步「商家登录桌面后台查询本店订单」；② §8.2-5「访问形态」只保留用户端手机访问半句；③ FR-ORD-02-2 订单留档、FR-OST-01-1 订单状态机、§6.2.1·L688 时间线三处的操作步骤改为<b>后端接口/数据库取证</b>，不再要求操作商家端页面；④ §8.3-③ 去掉「商家端配置侧互通证据」。商家端相关验收由包④（戴宇涵）承担，本页不再重复。</li>
+      <li>其余包：③ 账号权限·非功能（王馨琪）、④ 商家端全量 + AI（戴宇涵）</li>
+    </ul>
+    <h2 style="margin-top:12px">三、共同约定（四人方案第四条）</h2>
+    <ul>
+      <li>每条记录固定 6 字段：<b>条目编号｜操作与输入｜预期（抄 SRS 原句）｜实际（页面+接口+数据库）｜结论｜缺陷编号与等级</b>（本页的「预期」已按 SRS 原句预填）</li>
+      <li>结论只有 5 种：通过 / 不通过 / 部分通过 / 未实现（已标注）/ 无法验证；<b>未实现项不判「不通过」</b>，但仓库里写成「已完成」判标注不实</li>
+      <li>实现比 SRS 更细更多不判偏差；验收过程中不改代码（9/15 已冻结）；正式缺陷按项目规则 §1.1 落 <code>docs/testing/</code></li>
+    </ul>
+    <h2 style="margin-top:12px">四、环境与固定数据</h2>
+    <ul>
+      <li>线上：<code>http://82.157.137.114:4001/user/</code>，发布版本 <b>20260914-a2f15b1（9/14）</b>；9/15 的变更（规格弹层/会员价/订单筛选/订单详情商品图等前端与后端四组接口、平台分类与规格种子）<b>尚未重新发布</b>——涉及条目按「无法验证（未部署）」或本地 mock/real 补验，见各条目 🚩预检备注</li>
+      <li>固定数据：用户 <code>13800000001 / 123456</code>；演示店铺 <code>m002</code> 肯德基宅急送（<code>merchant-a / 123456</code> 仅在后端接口级取证取 token 时使用，本清单不登录商家端后台）；演示商品自 <code>p101</code> 起；地址为天津大学北洋园校区 12 号楼 304 室；浏览器手测视口 390×844</li>
+      <li>本页勾选状态保存在浏览器 localStorage，换设备不丢失同一浏览器；「导出 Markdown」按 6 字段表格生成</li>
+    </ul>
+  </div>
+
+  <div class="sticky">
+    <div class="stats" id="chips"></div>
+    <div class="bar"><i id="bar"></i></div>
+    <div class="toolrow">
+      <button class="primary" id="btnExport">导出 Markdown（已测条目）</button>
+      <button id="btnCopy">复制摘要</button>
+      <button id="btnReset">清空本机记录</button>
+    </div>
+  </div>
+
+  <main id="app"></main>
+
+  <div class="appendix" style="margin-top:24px">
+    <h2 style="margin:0 0 6px">附：版本差异预检证据（2026-09-15 实测）</h2>
+    <p style="font-size:12.5px;color:var(--sub)">回答「本地和服务器为什么不一样」：服务器跑的是 9/14 发布的 <code>20260914-a2f15b1</code>，今天合并进 main 的变更（前端新页面与交互、后端四组接口、平台分类与规格/会员价种子）都还没重新发布。下面两张图是线上旧构建实拍：① 线上首页；② 线上宫格点「美食外卖」仍提示「暂未开放」（9/15 的宫格接线未上线）。线上构建产物也缺失 <code>SettingsView / FaqView / ProfileView</code> 三个 9/15 新增页面的分包（已抓线上入口 JS 核对）。</p>
+    <img src="srs-shots/2026-09-15/t01-home.png" alt="线上首页（旧构建）">
+    <img src="srs-shots/2026-09-15/t02-grid-toast.png" alt="线上宫格点击提示暂未开放">
+    <table>
+      <tr><th>核对项</th><th>线上（4001）</th><th>本地 main（frontend/user-h5/src）</th></tr>
+      <tr><td>设置页 SettingsView / FAQ 页 FaqView / 个人资料页 ProfileView</td><td>无对应分包（旧构建）</td><td>已存在（9/15 合并）</td></tr>
+      <tr><td>订单列表六项状态筛选</td><td>仅「全部」</td><td>已实现（TODO-USER-118）</td></tr>
+      <tr><td>商品规格弹层与会员价高亮</td><td>无弹层、无会员价行</td><td>已实现（TODO-USER-119）</td></tr>
+      <tr><td>搜索结果商品组与分页</td><td>仅商家组</td><td>已实现（TODO-USER-120）</td></tr>
+      <tr><td>首页宫格课程分类入口</td><td>点击提示「暂未开放」</td><td>已接线（TODO-USER-121）</td></tr>
+      <tr><td>订单详情商品行缩略图</td><td>空占位（无图）</td><td>已修（TODO-USER-124，BUG-20260915-003）</td></tr>
+      <tr><td>后端 /me/favorites、/me/member、/me/notifications、/search</td><td>404（旧 jar）</td><td>main 已实现、待发布（批次④⑤⑥）</td></tr>
+    </table>
+  </div>
+
+  <div class="foot">本清单由 AI 依据 docs/SRS.md 905 行版与《四人方案》分工总表生成，供包①验收逐项勾选；行号以 SRS 原文为准。<br>2026-09-15 修订：按委托人口径删除商家端验收条目（删 1 条、改 5 处），商家端由包④验收。</div>
+</div>
+
+<script>
+"use strict";
+const CONC = ["未测","通过","部分通过","不通过","未实现（已标注）","无法验证"];
+const LSKEY = "srs-p1-checklist-v1";
+
+/* ---------------- 清单数据 ---------------- */
+const S = [];
+S.push({
+ id:"s81", title:"§8.1 P0 主链路验收", lines:"SRS 857–877",
+ note:"以下链路必须在真实系统数据（非演示假数据）下重复完成。前置固定演示数据：用户账号 13800000001/123456；演示店铺 m002 肯德基宅急送；演示商品自 p101 起；演示地址为用户默认地址。<b>原第 8 步「商家登录桌面后台查询本店订单」为商家端步骤，已按 2026-09-15 口径删除，由包④验收。</b>",
+ items:[
+  {id:"811",no:"8.1-1",title:"用户使用固定账号登录",expect:"用户使用固定账号登录。",op:"打开 http://82.157.137.114:4001/user/ → 我的 → 去登录 → 输入固定账号登录。"},
+  {id:"812",no:"8.1-2",title:"首页能看到主演示商家",expect:"首页商家列表中能看到主演示商家“肯德基宅急送（m002）”。",op:"登录后回首页，检查推荐商家列表是否出现肯德基宅急送（4.8 分 / 月售 3500+）。",pre:{t:"ok",x:"预检：线上可见（t01 截图）。"}},
+  {id:"813",no:"8.1-3",title:"进入该店查看店铺信息和商品",expect:"进入该店查看店铺信息和商品。",op:"点肯德基宅急送卡进 /user/stores/m002，检查商家信息横幅（名/评分/月售/配送时长/起送/配送费/营业状态）与点餐区商品列表。"},
+  {id:"814",no:"8.1-4",title:"加购、修改数量、删除并重新查看购物车",expect:"加购、修改数量、删除并重新查看购物车。",op:"点商品加号加购 → 展开购物车弹层增减数量 → 减到 0 删除 → 关闭后重开确认。"},
+  {id:"815",no:"8.1-5",title:"选择本人收货地址进入确认订单页",expect:"选择本人收货地址进入确认订单页。",op:"点去结算 → 确认订单页检查地址卡为默认地址（可点开地址列表验证）。"},
+  {id:"816",no:"8.1-6",title:"提交订单核对状态、金额构成与留档",expect:"提交订单，核对订单状态为「待支付」（PENDING_PAYMENT；完成模拟支付后进入「待接单」PENDING）、金额构成（基础四行：商品合计、打包费、配送费、实付金额；优惠项在金额非 0 时各占一行，2026-09-11 定稿，CHG-004）和下单留档信息。",op:"确认订单页填备注 → 提交 → 支付页核对订单号/商品清单/金额明细四行 → 立即支付 → 核对状态变化。",pre:{t:"ok",x:"预检：金额快照与状态机已于 9/13–9/14 发布，线上可验。"}},
+  {id:"817",no:"8.1-7",title:"在订单列表和订单详情中查询该订单",expect:"在订单列表和订单详情中查询该订单。",op:"订单 tab 列表找到该单 → 进详情核对商品明细/金额/收货信息/订单号/下单时间。"},
+  {id:"819",no:"8.1-异常1",title:"越权访问按「内容不存在」处理",expect:"越权访问他人地址/购物车/订单/其他店铺订单，按「内容不存在」（404）处理；",op:"以其他账号 token 访问不属于自己的订单/地址接口，观察响应码与页面表现。"},
+  {id:"81a",no:"8.1-异常2",title:"库存不足/店铺关闭/未达起送价被拒",expect:"库存不足、店铺已关闭、未达起送价时下单被拒绝并给出原因，且不产生半笔订单；",op:"构造起送价以下金额提交、或对售罄/关闭店结算，观察提示且订单列表无新单。"},
+  {id:"81b",no:"8.1-异常3",title:"重复提交同一订单只生效一次",expect:"重复提交同一订单只生效一次（幂等）；",op:"提交按钮连点/快速双击，核对只产生一个订单。"},
+  {id:"81c",no:"8.1-异常4",title:"密码错误与会话过期",expect:"登录密码错误、会话过期后按提示重新登录并可回到原操作。",op:"输错密码登录观察提示；会话过期后操作被引导重新登录并回到原操作。"},
+ ]
+});
+S.push({
+ id:"s82", title:"§8.2 通过门槛", lines:"SRS 878–885", note:"",
+ items:[
+  {id:"821",no:"8.2-1",title:"真实系统数据",expect:"演示全程使用真实系统数据，不用预置假数据冒充运行结果。",op:"核对页面数据与后端接口返回一致。"},
+  {id:"822",no:"8.2-2",title:"库记录与页面一致",expect:"系统保存的记录中能找到与页面一致的用户、店铺、商品、地址、购物车和订单数据。",op:"对关键操作（下单/改地址/加购）取接口或库证据比对页面展示。"},
+  {id:"823",no:"8.2-3",title:"异常场景有操作记录",expect:"正常场景和主要异常场景（登录错误、库存不足、店铺关闭、越权访问等）都有操作记录，不能只提供页面截图。",op:"异常条目记录接口响应码/错误文案作为操作记录。"},
+  {id:"824",no:"8.2-4",title:"无半笔订单、越权不可见",expect:"下单失败时不留下“半笔订单”；越权请求看不到其他用户或其他店铺的数据。",op:"被拒下单后核对订单列表与库中无残留单；越权请求核对 404 且无数据泄露。"},
+  {id:"825",no:"8.2-5",title:"访问形态（用户端）",expect:"手机通过局域网可访问用户端。〔原 SRS 句后半「商家端在宽度不低于 1280px 的桌面浏览器上可完整操作」属商家端，已按 2026-09-15 口径划出本清单，由包④验收〕",op:"手机浏览器访问 4001/user/，核对页面可正常打开，且登录、浏览、加购、下单链路在该形态下可用。"},
+ ]
+});
+S.push({
+ id:"s53", title:"§5.3 用户端——店铺与商品浏览", lines:"SRS 283–297", note:"",
+ items:[
+  {id:"531",no:"FR-STO-01-1",title:"店铺详情页顶部与点餐区结构",expect:"店铺详情页顶部展示商家信息（名称、评分、月售、地址、公告、促销标签）与营业状态，下方为评价入口和点餐区；点餐区左侧为分类栏，右侧为对应商品列表，点击分类切换。",op:"进 m002 核对顶部信息区字段、点餐/评价 Tab、左侧分类栏与右侧商品列表，点击分类切换。"},
+  {id:"532",no:"FR-STO-01-2",title:"商品项字段与规格/会员价标注",expect:"商品项展示名称、说明、价格、库存和上下架状态；会员价与促销标签为（待开发项）。商品详情可展示规格选项（如“中杯/大杯”）和数量，规格价差与加料为（待开发项），具体字段由接口契约确定。",op:"核对商品行字段；售罄商品灰化（如热辣香骨鸡）。",pre:{t:"warn",x:"预检：会员价高亮/规格弹层为 9/15 实现，线上未发布；线上仅基础价。"}},
+  {id:"533",no:"FR-STO-01-3",title:"异常：店铺不存在/休息/下架售罄",expect:"店铺不存在时提示并返回；店铺休息或未营业时，加购与结算入口禁用并提示；商品下架或库存为 0 时显示售罄、灰化且不可加购。",op:"访问不存在店铺 /stores/m999；对休息/关闭店加购；核对售罄商品加购按钮禁用。"},
+  {id:"534",no:"FR-SKU-01-1",title:"规格入口与弹层",expect:"有规格的商品在点餐区显示规格入口，点击加号打开规格弹层；无规格商品按基础价直接加入购物车。",op:"对 p101（已配规格「大杯 +3.00」，今日组内实测）点加号，观察是否弹层；对无规格商品点加号直接加购。",pre:{t:"warn",x:"预检：线上旧构建无规格弹层 + 线上规格接口异常（组内实测 GET /merchant/products/{id}/specifications 500）+ 种子未发布 → 线上判「无法验证（未部署）」，可本地 mock 补验。"}},
+  {id:"535",no:"FR-SKU-01-2",title:"弹层交互与价格计算",expect:"规格弹层可选规格选项与加料，数量默认 1；价格由系统按商品单价加规格价差计算，页面只展示。",op:"弹层内单选规格、调数量，核对预览价 = 单价+价差×数量，页面不自行计算。"},
+  {id:"536",no:"FR-SKU-01-3",title:"按规格分行与留档",expect:"购物车与订单按“商品 + 规格组合”区分，同一商品不同规格分行；订单明细保存规格留档。",op:"同商品两个规格分别加购，购物车应分行；下单后订单明细保留规格。"},
+  {id:"537",no:"FR-SKU-01-4",title:"异常：必选/数量/库存/下架",expect:"必选规格未选、数量小于 1 或超过可买库存时提示；商品已下架或库存变化时禁止提交并提示刷新；重复点击只产生一次加购请求。",op:"弹层内不选规格提交、数量置 0、超库存；连点加入购物车只一次请求。"},
+ ]
+});
+S.push({
+ id:"s54", title:"§5.4 用户端——购物车", lines:"SRS 298–306", note:"",
+ items:[
+  {id:"541",no:"FR-CART-01-1",title:"重复加购累加与底栏常驻",expect:"商品加入购物车后，同一商品重复加购只累加数量；页面底部购物车栏常驻展示商品数、合计金额和结算按钮。",op:"同商品连点两次加号，底栏数量/金额累加。"},
+  {id:"542",no:"FR-CART-01-2",title:"展开购物车增减删",expect:"展开购物车可增减数量，数量减到 0 时移除该行。",op:"展开购物车弹层，加/减数量，减到 0 行移除。"},
+  {id:"543",no:"FR-CART-01-3",title:"按商家隔离与规格分行",expect:"购物车按商家隔离，进入其他商家结算时得到明确提示；基础 P0 按商品行合并数量，同一商品不同规格分行（FR-SKU-01）。",op:"A 店加购后去 B 店结算，观察隔离提示。"},
+  {id:"544",no:"FR-CART-01-4",title:"异常：未登录/下架/库存/休息",expect:"未登录不能加购（引导登录）；商品已下架、库存不足或店铺休息时不能加购或结算，并提示原因。",op:"未登录点加号观察引导；售罄/休息店加购与结算被禁并提示。"},
+ ]
+});
+S.push({
+ id:"s55", title:"§5.5 用户端——收货地址", lines:"SRS 307–315", note:"",
+ items:[
+  {id:"551",no:"FR-ADR-01-1",title:"地址字段",expect:"地址包含：联系人、性别（男/女）、电话、地址、门牌号、默认标识。",op:"地址列表/新增页核对字段齐全。"},
+  {id:"552",no:"FR-ADR-01-2",title:"默认地址置顶与增删改",expect:"列表中默认地址置顶并带标识，可将其余地址设为默认；支持新增、编辑和删除。",op:"设默认、编辑、删除各做一次。"},
+  {id:"553",no:"FR-ADR-01-3",title:"删除默认后自动补默认",expect:"删除默认地址后，系统自动把剩余地址中最近一条设为默认；没有剩余地址时默认地址为空。",op:"删默认地址后核对剩余最近一条自动变默认。"},
+  {id:"554",no:"FR-ADR-01-4",title:"异常：校验/保存中/越权",expect:"联系人、地址缺失或电话不是 11 位时逐项提示修正；保存中显示“保存中”防止重复提交；用户只能查看和修改自己的地址。",op:"空联系人/11 位电话校验；保存连点防重复；越权访问他人地址 404。"},
+ ]
+});
+S.push({
+ id:"s56", title:"§5.6 用户端——确认订单与支付", lines:"SRS 316–338", note:"",
+ items:[
+  {id:"561",no:"FR-ORD-01-1",title:"确认订单页结构",expect:"确认订单页自上而下为：收货信息、商品清单（可调整数量）、备注、金额明细、提交按钮。",op:"进确认订单页核对五个区块顺序与可调数量。"},
+  {id:"562",no:"FR-ORD-01-2",title:"金额明细口径（CHG-004）",expect:"金额规则：基础 P0 实付金额 = 商品小计 + 打包费（每单固定 2.00 元），由系统统一计算，页面只做展示与输入检查；确认订单页金额明细按 2026-09-11 定稿口径「基础四行 + 优惠项按实际发生展示」（CHG-004）：基础四行为商品小计 / 打包费 / 配送费 / 实付金额；满减优惠、红包优惠等优惠项在金额非 0 时各占一行、未发生不显示；页面显示与系统结果不一致时以系统为准。",op:"构造满 20 元订单核对满减行出现；不足门槛时优惠行不出现；金额与后端快照一致。"},
+  {id:"563",no:"FR-ORD-01-3",title:"下单成功进入进行中并清空购物车",expect:"下单成功后订单进入“进行中”状态并可立即查询；该商家购物车同时清空。",op:"提交后回商家页核对购物车已清空，订单立即可查。"},
+  {id:"564",no:"FR-ORD-01-4",title:"异常：收货缺失/下架/库存/关闭/起送价",expect:"收货信息缺失时提交按钮禁用并提示补充；商品已下架、库存不足、店铺已关闭或不满足起送价时提示修正，库存不足时提示具体商品及其可用数量；下单要么完整成功要么完整失败，不会出现只生成一半的订单；重复点击提交只创建一个订单。",op:"清空地址提交被禁；对售罄/关闭店/低于起送价下单观察提示；连点提交只一单。"},
+  {id:"565",no:"FR-PAY-01-1",title:"支付页与倒计时",expect:"创建订单成功后进入支付页，展示订单号、金额、模拟支付方式和 15 分钟待支付倒计时；倒计时归零后禁止支付。",op:"下单后核对支付页要素与倒计时走秒（线上已有 14:58→14:53 复验证据）。"},
+  {id:"566",no:"FR-PAY-01-2",title:"支付成功页/失败页",expect:"点击“确认支付”模拟成功，进入支付成功页（展示订单号、预计送达、查看订单/返回首页）；模拟失败进入支付失败页（提供重试支付与返回订单列表）。",op:"分别走成功与失败两条路径，核对两页内容与按钮。"},
+  {id:"567",no:"FR-PAY-01-3",title:"支付成功状态更新",expect:"支付成功后订单支付状态更新，订单进入商家处理流程；不接第三方支付，不产生真实扣款。",op:"支付后订单列表该单变「待接单」。"},
+  {id:"568",no:"FR-PAY-01-4",title:"异常：不重复生效/不扣库存/超时不回补",expect:"同一订单的支付状态不能重复生效；支付失败不扣库存，库存只在创建订单时处理一次；支付超时不自动回补库存，属于课程简化规则。",op:"重复支付观察只一次生效；失败路径核对库存不变。"},
+  {id:"569",no:"FR-PRM-01-1",title:"计价顺序（七步）",expect:"纳入本期后，订单金额按固定顺序计算：商品小计（单价含规格价差；会员购买时配置了会员价的商品按会员价计价，未配置会员价的商品沿用基础价）→ 店铺满减取满足门槛的最大一档 → 新客立减只对本店首单生效 → 配送费优惠只作用于配送费 → 会员折扣作用于商品小计且与会员价不叠加 → 红包一单只能用一张（需满足门槛和适用范围），最终加上配送费（默认 3.00 元，演示口径，可由店铺配置，未配置按 0）与打包费（2.00 元）并减去各项优惠，且不小于 0。",op:"构造 20 元/40 元档订单、首单、会员、红包场景，核对后端金额快照与页面展示一致。",pre:{t:"ok",x:"预检：计价七步后端已于 9/13 发布（批次①，PR #48），线上可验。"}},
+  {id:"56a",no:"FR-PRM-01-2",title:"演示数值口径",expect:"演示数值口径（写入种子数据与测试基线）：满 20 减 2、满 40 减 5、新客立减 3 元、免配送费门槛 30 元、会员 95 折；红包门槛与适用范围由种子数据定义，一单一红包。",op:"按上述数值逐档构造订单核对优惠额。"},
+  {id:"56b",no:"FR-PRM-01-3",title:"不小于 0 与系统为准",expect:"最终金额不为负数；所有优惠金额由系统统一计算，页面只展示。",op:"核对页面不自行计算金额；构造优惠叠加核对非负。"},
+  {id:"56c",no:"FR-PRM-01-4",title:"异常：红包不可选/非法折扣",expect:"不满足门槛、超出适用范围或已过期的红包不可选并提示原因；非法折扣或超额优惠被系统拒绝或限制到合法范围；金额与系统结果不一致时以系统为准。",op:"选过期/不达门槛红包观察禁用与原因提示。"},
+ ]
+});
+S.push({
+ id:"s57", title:"§5.7 用户端——订单", lines:"SRS 339–351", note:"",
+ items:[
+  {id:"571",no:"FR-ORD-02-1",title:"订单列表与详情要素",expect:"订单列表与订单详情展示订单状态、商品明细、金额构成（基础四行：商品合计、打包费、配送费、实付金额；优惠项在金额非 0 时各占一行，2026-09-11 定稿，CHG-004）、收货信息、订单号和下单时间。",op:"订单列表找单进详情，逐项核对。",pre:{t:"warn",x:"预检：订单详情商品行缩略图修复（TODO-USER-124/BUG-20260915-003）未发布——线上商品行仍是空占位无图。"}},
+  {id:"572",no:"FR-ORD-02-2",title:"订单留档",expect:"订单按下单当时的商品、地址和金额留档展示，商家事后改价或改商品不影响历史订单。",op:"用后端接口/数据库把在售商品改价改文案（不登录商家端后台），回看旧订单明细与金额不变。"},
+  {id:"573",no:"FR-ORD-02-3",title:"再来一单",expect:"再来一单（P1（本期））：已完成订单可把仍可购买的商品重新加入购物车，不直接创建订单。",op:"已完成订单点再来一单，核对商品进购物车而非直接成单。"},
+  {id:"574",no:"FR-ORD-02-4",title:"异常：空态与下架商品",expect:"没有订单时展示空态并引导去首页；再来一单时商品已下架或店铺已关闭，跳过该商品并提示原因；",op:"新账号看空态；含下架商品的完成单再来一单观察跳过提示。"},
+  {id:"575",no:"FR-OST-01-1",title:"订单状态机全链路",expect:"完整正常与异常场景见 §5.10（本节不重复；订单状态机全链路为「待支付 PENDING_PAYMENT →（支付成功）待接单 PENDING → 制作中 COOKING → 配送中 DELIVERING → 已完成 COMPLETED，取消进入 CANCELLED」，与契约 §3.5 一致）。",op:"用商家账号 merchant-a 取 token 直接调用后端状态推进接口（接单→出餐→完成，不登录商家端后台页面），用户端每次重新读取核对中文状态与时间线节点；跳级推进被拒。"},
+ ]
+});
+
+/* ---- §6.2.1 交易链路 28 行 ---- */
+function prot(id,no,lines,title,fields,click,err,pre,op){return {id,no,lines,title,fields,click,err,pre,op};}
+S.push({
+ id:"s621", title:"§6.2.1 用户端原型说明 · 交易链路行（28 行）", lines:"SRS 678–680 / 683–690 / 704–715 / 732–736",
+ note:"口径提示：本表为基础口径，实现为其超集；更细更多不判偏差。每条含「字段与数据来源 / 点击与状态变化 / 空态·加载·错误·检查」三列，均抄自 SRS 原表。",
+ items:[
+  prot("b780","6.2.1·L678","678","商家详情页-顶部栏",
+   "商家编号来自页面参数；商家名来自商家详情接口；返回、分享/更多为页面控件。",
+   "页面进入先校验 storeId 再请求详情；点击返回回上一页；分享/更多未入选时只显示“暂未开放”，不生成分享记录；详情请求成功后标题更新。",
+   "缺少或无效编号直接返回商家列表；首次请求显示顶部占位；网络失败提供重试；商家不存在显示“商家不存在”并返回列表；字段缺失不显示空白占位词。"),
+  prot("b790","6.2.1·L679","679","商家详情页-商家信息横幅",
+   "商家名、评分、月售、配送时长、起送价、配送费、营业状态和促销标签来自详情接口；点餐/评价为页面临时选项，默认点餐；本期不提供店铺券领取能力，页面不展示「可领取金额」。",
+   "点击点餐显示商品区；点击评价进入该商家评价页；点击“领券”提示“暂未开放”——本期不提供店铺券领取能力（契约 §3.8 只有会员与红包接口），不调用领取接口、不产生优惠状态变化；详情刷新后以接口最新营业状态为准。",
+   "加载时显示头部占位；商家关闭时显示关闭原因并禁用加购、结算；商家不存在/下架显示错误并返回列表；字段缺失只隐藏对应字段，不能用旧演示值补齐。"),
+  prot("b800","6.2.1·L680","680","商家详情页-点餐内容区",
+   "分类和商品来自店铺分类与商品接口：左侧分类栏（默认选中第一个有商品的分类）、右侧商品列表（商品名、描述、月售、好评率、价格）、底部购物车栏（商品数与合计金额来自购物车接口，去结算按钮固定）。金额保留两位小数。",
+   "点击分类切换右侧商品并高亮当前分类；点击商品加号按基础价加购（规格扩展选定后才弹出规格弹层）；点击去结算先校验登录、购物车非空、店铺营业和起送金额，再进入确认订单（起送金额不满足时提示差额并停留本页）；点击购物车栏展开购物车弹层；加购成功后购物车栏数量与金额立即刷新。",
+   "商品接口为空显示“暂无商品”空态；首次加载显示分类和商品占位；接口失败提供重试且不把空态误当失败；售罄商品灰化并禁用加购；店铺休息时结算按钮禁用并提示原因；去结算重复点击只产生一次跳转；从确认订单返回后重新读取购物车；字段缺失隐藏对应字段而不显示 undefined。",
+   {t:"ok",x:"预检：线上基本可用（分类切换/售罄灰化已实测）。"}),
+  prot("b830","6.2.1·L683","683","商品规格弹层-规格弹层",
+   "规格弹层属于本期实现的规格扩展：有规格的商品卡显示规格入口，点击加号打开本弹层；无规格商品按基础价直接加入购物车。商品详情来自当前商品接口；规格默认值由商品配置返回，没有默认值时必须先选择；数量默认 1；价格由后端商品单价和规格价差计算，页面只展示。",
+   "打开弹层时记录当前商品和库存快照；选择规格/加料/数量后只更新预览价；点击加入购物车先检查登录、营业状态、上下架和库存，再请求加购；成功关闭弹层并刷新购物车；点击遮罩或关闭按钮放弃本次输入。",
+   "商品已删除、下架、库存变化时禁止提交并提示刷新；必选规格未选、数量小于 1 或超过可买库存时提示；加购请求中按钮禁用；网络失败保留选择并允许重试；后端返回金额时以后端结果为准；重复点击只产生一次加购请求；返回本页后重新读取购物车。",
+   {t:"warn",x:"预检：线上旧构建无本弹层（9/15 实现未发布），且线上规格接口 500、种子未迁移 → 线上判「无法验证（未部署）」，建议本地 mock 模式补验。"}),
+  prot("b840","6.2.1·L684","684","订单列表页-顶部栏",
+   "标题为固定文案；消息图标的未读数来自消息接口或默认为 0，消息本期实现，未读数来自消息接口。",
+   "点击消息图标先检查消息模块是否开放；开放时进入消息页，否则给出提示；进入订单页时读取当前筛选下的订单。",
+   "未读数加载失败按 0 显示并记录提示；图标资源失败仍保留可访问名称；未登录点击进入受保护页面时转登录。"),
+  prot("b850","6.2.1·L685","685","订单列表页-状态筛选与订单列表",
+   "筛选默认全部；P0 仅提供“全部”筛选，待支付/待评价筛选在对应 P1 扩展实施后出现；订单卡片由订单列表接口返回，金额、状态、时间使用接口值。",
+   "切换筛选重置列表并请求；点击卡片进入详情；待支付点击去支付，待评价点击评价，已完成点击再来一单时只复制可购买商品到购物车，不直接创建订单；回到列表重新请求。",
+   "首次/切换筛选显示占位；空结果显示对应空态；接口失败保留筛选并重试；订单状态变化时操作按钮按最新状态更新；待支付倒计时结束后显示已失效并禁止支付；金额字段缺失显示暂无金额。",
+   {t:"warn",x:"预检：六项状态筛选为 9/15 实现（TODO-USER-118），线上仍只有「全部」。"}),
+  prot("b860","6.2.1·L686","686","订单列表页-底部导航",
+   "导航固定为首页/消息/订单/我的，订单项由路由高亮。",
+   "点击切换页面；从详情返回列表时保留筛选值；重新进入订单页重新请求，不沿用过期列表。",
+   "登录失效时跳转登录并保留目标路由；未知路由回首页；导航自身不显示加载空态。"),
+  prot("b870","6.2.1·L687","687","订单详情页-顶部栏",
+   "订单编号来自路由参数，标题为固定文案（顶部为返回箭头 + 应用标题，无关闭按钮）；设计真源 docs/design/exports/用户端/12-订单与支付/01-订单详情-含订单跟踪/。",
+   "进入页面校验订单编号并请求详情；点击返回回订单列表；订单状态变化后刷新详情而不是只修改本地文字。",
+   "编号缺失或订单不存在返回列表并提示；加载显示详情骨架；未登录/无权限按统一规则处理；网络失败显示重试，不能显示上一笔订单。"),
+  prot("b880","6.2.1·L688","688","订单详情页-状态头与时间线（CHG-003 新增；原订单跟踪页已并入本页）",
+   "状态头大字为当前状态文案（如「商家已接单」）+ 预计送达时间；五节点时间线：已下单 / 已支付 / 商家接单 / 配送中 / 已完成，当前节点品牌橙实心 + 光环、未达节点灰；文案与状态值映射见 7.6；数据来自订单详情接口。",
+   "商家端推进后用户端刷新即更新当前节点；已完成订单全部节点点亮；已取消订单显示「已取消」且时间线置灰。",
+   "接口失败保留上次结果并提供刷新；状态缺失显示「状态获取失败」；不出现骑手位置、配送地图与实时定位。",
+   undefined,
+   "用商家账号 merchant-a 取 token 直接调后端状态推进接口（不登录商家端后台），推进后回用户端刷新核对当前节点更新；已完成订单全部节点点亮；已取消订单显示「已取消」且时间线置灰。"),
+  prot("b890","6.2.1·L689","689","订单详情页-订单详情内容（CHG-003 更新）",
+   "商家名与「外卖自取/送达」纯展示标签；商品明细按「商品 + 规格组合」展示；金额明细「基础四行 + 优惠项按实际发生展示」（基础四行：商品小计 / 打包费 ¥2.00 / 配送费 ¥3.00 / 实付金额；满减优惠、红包优惠等优惠项金额非 0 时各占一行）；「配送信息」卡（配送地址 + 收货人 + 配送服务方占位）；「订单信息」卡（订单号 + 复制、下单时间、支付方式）；配送服务方为课程演示占位文案。",
+   "点商家名进商家详情；点「复制」复制订单号；配送进度由本页时间线表达，不再有独立配送页。",
+   "首次加载显示占位；接口失败保留已展示结果并提供刷新；金额字段缺失显示「暂无金额」；替换为课程口径：不出现「蜂鸟专送」「微信支付」等第三方字样（配送服务方显示为课程占位文案、支付方式显示为模拟支付）。",
+   {t:"warn",x:"预检：商品行缩略图修复（BUG-20260915-003）未发布 → 线上商品行空占位无图；其余内容线上可验。"}),
+  prot("b8a0","6.2.1·L690","690","订单详情页-底部操作区（CHG-003 更新）",
+   "操作按钮由后端订单状态决定：待支付→去支付、待评价→去评价、已完成→再来一单、已支付可进入联系商家；「取消订单」按钮仅在 PENDING_PAYMENT（待支付）与 PENDING（待接单）可用；商家接单（COOKING）及之后保留但置灰，点击提示「商家已接单，无法取消」；不提供「查看配送进度」按钮（配送进度由本页时间线与配送信息卡表达）。",
+   "点击前再次校验订单状态；状态不允许时刷新详情；取消入口见 7.6（本页底部按钮与支付页卡内入口两处）。",
+   "无可用操作时隐藏操作栏；状态变化时按钮按最新状态更新；置灰按钮点击给出原因提示；不出现退款、售后与资金文案。"),
+  prot("b040","6.2.1·L704","704","确认订单页-顶部栏",
+   "标题固定；返回目标为当前商家详情，页面参数携带商家编号。",
+   "点击返回不创建订单；有修改未保存备注时提示是否放弃；重新进入页面重新读取购物车、地址和商家状态。",
+   "参数缺失或商家不存在返回列表；页面加载显示骨架；登录失效跳登录并保留目标；返回后购物车内容不被误清空。"),
+  prot("b050","6.2.1·L705","705","确认订单页-订单内容区",
+   "商家、购物车商品、数量、单价和库存来自接口；地址来自当前用户地址接口，默认选择默认地址；送达时间默认为“尽快送达”，实际时间为演示计算值；优惠入口只有选定优惠扩展后显示。",
+   "进入页面重新读取购物车、商家状态和地址；点击地址卡进入选择；点击送达时间修改临时选项；点击商品步进器修改购物车并重新请求金额；所有修改成功后更新结算栏。",
+   "购物车为空、商家关闭、商品下架、库存变化、最低起送金额不满足时禁止提交并说明原因；首次加载显示分区占位；任一区域失败提供重试；地址不存在时引导新增；不能用旧购物车金额提交。"),
+  prot("b060","6.2.1·L706","706","确认订单页-底部结算栏",
+   "合计金额来自后端试算或创建订单响应，默认显示加载占位；去支付按钮只在地址、商品和金额检查通过时可用。",
+   "点击去支付只发起一次创建订单请求；请求中按钮显示“提交中”；成功保存订单编号并进入订单结果/模拟支付页；失败停留当前页并保留表单；返回后重新读取购物车。",
+   "未登录转登录；金额不一致、库存不足、店铺关闭、重复提交和服务端错误分别提示；成功前不得清空购物车，成功后由后端或明确的前端流程清空；订单创建失败不得显示支付成功。"),
+  prot("b070","6.2.1·L707","707","订单备注弹层-备注弹层",
+   "快捷标签为固定选项；自定义备注为用户临时输入，默认空，最多 50 字；确定前不请求接口。",
+   "点击标签可多选并写入输入框；确定后把备注回填确认订单页；遮罩/关闭取消本次修改；订单提交时一次性提交最终备注。",
+   "超过 50 字立即提示或截断；只有空备注时确定也可关闭；弹层打开期间禁止底层重复操作；保存订单失败时备注仍保留。"),
+  prot("b080","6.2.1·L708","708","支付页-顶部栏（CHG-003 更新）",
+   "顶部为返回箭头 + 应用标题（无关闭按钮，原稿的关闭按钮已随支付页改版去掉）；标题固定；本页只在支付扩展启用后出现；设计真源 docs/design/exports/用户端/12-订单与支付/02-支付页/（原 07-支付/01-收银台 已被取代）。",
+   "点返回不改变支付状态，回到上一页；已支付订单再次进入时直接显示已支付结果，不能重复扣款。",
+   "订单编号缺失返回订单列表；加载显示支付占位；订单不存在、会话失效与网络失败提供明确处理。"),
+  prot("b090","6.2.1·L709","709","支付页-支付内容区（CHG-003 更新；已按负责人补充版重做）",
+   "倒计时卡：仅「支付剩余时间」（payDeadline 倒计时，默认 15 分钟，橙色大字）；订单详情卡：标题行右侧为取消订单入口（文字入口，不与底部按钮并排），卡内自上而下为商品清单（商品名 + 数量 ×1 + 单价）→ 金额明细（商品小计 / 打包费 / 配送费 / 满减优惠 / 红包优惠 / 实付金额（橙色加粗），优惠项按实际发生展示，CHG-004）→ 商家 / 订单编号（含复制钮）/ 下单时间 / 收货地址；底部固定「立即支付 ¥实付金额」主按钮。",
+   "点「立即支付」走模拟支付 → 支付成功页/失败页；点「取消订单」打开取消确认弹层（原因必填 1–50 字）；倒计时结束显示「已失效」并禁止支付。",
+   "加载：进入时读取订单状态与支付截止时间，未返回前「立即支付」禁用；错误：接口失败保留已展示结果并可重试，真实模式不得回退 Mock；检查：商品与金额一律按后端返回展示、前端不自行计算；倒计时结束禁止支付；不出现真实支付方式、退款与资金文案。",
+   {t:"ok",x:"预检：线上已发布（9/14），倒计时走秒与金额口径有复验证据（o1257）。"}),
+  prot("b100","6.2.1·L710","710","支付成功页-成功横幅",
+   "成功状态、支付金额和订单编号来自模拟支付接口/订单查询，不使用写死金额；本页仅在支付扩展选定后出现。",
+   "页面进入后只展示结果；订单状态以接口返回为准，不因为进入成功页再次发起支付；刷新页面应可重新查询同一结果。",
+   "支付结果加载中显示占位；接口失败提供查看订单/重试查询；状态未知时显示待确认，不显示成功；金额缺失显示暂无金额。"),
+  prot("b110","6.2.1·L711","711","支付成功页-订单摘要卡",
+   "订单编号、模拟支付方式、支付时间来自订单详情；支付方式默认“模拟支付”，不展示真实第三方渠道。",
+   "点击订单编号或查看订单进入订单详情；不允许在摘要卡上修改订单。",
+   "订单详情查询失败保留成功结果但提示刷新；编号缺失不生成假编号；时间格式异常按暂无时间显示。"),
+  prot("b120","6.2.1·L712","712","支付成功页-会员提示",
+   "提示文案（会员红包已同步、下次下单可使用）为固定课程文案；红包与会员本期实现，按接口返回数据展示；无数据时不显示空提示。",
+   "提示区纯展示不触发请求；点击查看订单进入订单详情，重复点击只发生一次跳转。",
+   "文案资源缺失时隐藏该区域；本页不请求会员或红包接口；本期不建设积分体系，不展示积分余额或兑换入口。"),
+  prot("b130","6.2.1·L713","713","支付成功页-底部操作",
+   "查看订单和回到首页是固定操作，订单编号来自当前支付订单。",
+   "点击查看订单进入详情；点击回到首页；重复点击只发生一次路由跳转，不改变订单状态。",
+   "订单编号缺失时查看订单改为返回订单列表；路由失败回订单列表；本页不提供真实支付、退款或配送操作。"),
+  prot("b140","6.2.1·L714","714","支付失败页-顶部栏",
+   "返回按钮和标题固定，当前订单编号来自路由参数。",
+   "点击返回订单详情或确认页；离开页面不删除待支付订单。",
+   "编号缺失返回订单列表；订单已支付时不再显示失败页；路由失败回订单列表。"),
+  prot("b150","6.2.1·L715","715","支付失败页-失败内容区",
+   "失败原因、待支付金额和订单号来自支付结果或订单查询；失败原因缺失时显示通用提示。",
+   "点击重新支付先查询订单当前支付状态，仍待支付才回支付页；状态已成功则进入成功结果；查询失败提供重试。",
+   "支付按钮防重复点击；订单过期、已支付、订单不存在和网络失败分别提示；本期不提供联系客服入口。"),
+  prot("b320","6.2.1·L732","732","地址列表页-顶部栏",
+   "标题固定；地址来自当前用户地址接口；新增入口为路由操作。",
+   "进入页面请求当前用户地址；点击新增进入空白地址表单；返回确认订单时把选择结果回填，不直接创建订单。",
+   "首次加载显示占位；未登录转登录；接口失败提供重试；用户无地址显示空态和新增入口；不能读取其他用户地址。"),
+  prot("b330","6.2.1·L733","733","地址列表页-地址列表",
+   "联系人、性别、电话、地区、详细地址、标签和默认标识来自地址接口；默认地址默认选中/置顶。",
+   "点击地址卡在确认订单场景中选中并返回，在管理场景中进入编辑；删除需要二次确认并调用删除接口；设为默认调用更新接口，成功后其他地址取消默认。",
+   "空列表显示新增入口；加载显示地址骨架；删除/设默认失败恢复原状态并提示；删除默认地址后由后端自动把剩余地址中最近更新的一条设为默认，无剩余地址时默认地址为空；字段缺失不允许作为下单地址。"),
+  prot("b340","6.2.1·L734","734","新增地址页-顶部栏",
+   "标题根据新增/编辑模式显示；编辑模式的地址编号来自路由。",
+   "点击返回：无修改直接返回；有修改先确认放弃；编辑地址不存在时返回列表并提示。",
+   "首次进入加载编辑数据；参数无效或无权限返回；网络失败提供重试；不能把编辑页的旧数据提交到另一个地址。"),
+  prot("b350","6.2.1·L735","735","新增地址页-地址表单",
+   "联系人、性别、手机号、地区、详细地址、标签和默认开关为用户输入；新增时默认空且默认开关按当前是否存在默认地址决定。",
+   "输入只更新表单；保存按钮统一提交新增/修改接口；设默认由本次提交带出；成功返回地址列表并刷新确认订单选择。",
+   "姓名、手机号、地区/详细地址必填；手机号按约定格式检查；长度超限、非法字符、重复提交、服务端校验失败分别提示；失败保留输入。"),
+  prot("b360","6.2.1·L736","736","新增地址页-保存按钮",
+   "按钮默认可见，表单不合法时不可提交或点击后定位首个错误。",
+   "点击后先前端校验，再只发一次请求；保存中禁用；成功使用后端返回地址更新列表；失败不返回、不清空输入。",
+   "会话失效、地址重复、网络错误和服务端错误分别提示；返回列表前必须确认保存成功；保存成功后默认状态和排序立即刷新。"),
+ ]
+});
+S.push({
+ id:"s83", title:"§8.3 本期扩展模块的验收要求 · 取 3 条", lines:"SRS 886–905", note:"判据来源：已实现并回写证据的模块以后端接口契约对应章节与测试证据为准；未收口模块按实际状态标注「本期实现（待开发）」或证据「待补」，不得写成已完成。",
+ items:[
+  {id:"831",no:"8.3-①",title:"模拟支付与库存一致性（FR-PAY-01）",expect:"支付成功/失败反馈、重复支付不重复生效、支付超时不回补库存、库存只在创建订单事务内扣减一次。",op:"走成功/失败两条路径；重复支付只一次生效；核对库存扣减时点与超时不回补。",pre:{t:"ok",x:"预检：状态机与支付链路线上已发布，可验。"}},
+  {id:"832",no:"8.3-②",title:"优惠与统一计价（FR-PRM-01、FR-MPRM-01）",expect:"满 20 减 2、满 40 减 5、新客立减 3 元、免配送费门槛 30 元、会员 95 折、红包一单一张，页面金额与系统结果一致。",op:"按演示数值逐档构造订单，核对页面金额 = 后端快照（基础四行 + 优惠项按实际发生）。",pre:{t:"ok",x:"预检：计价七步已发布（9/13），可验；注意店铺优惠配置以线上种子为准。"}},
+  {id:"833",no:"8.3-③",title:"商品规格（用户端侧：FR-SKU-01）",expect:"用户端侧：规格选项与价差、规格行购物车与订单留档。〔SRS 该条另含商家端「批量绑定商品到分类」（FR-MSKU-01/FR-MCAT-02），属商家端，已按 2026-09-15 口径划出本清单，由包④验收〕",op:"用已发布的规格种子数据：有规格商品弹层加购、规格分行、订单明细留档（不操作商家端配置页）。",pre:{t:"warn",x:"预检：线上旧构建无弹层 + 规格接口 500 + 种子未迁移 → 线上判「无法验证（未部署）」；本地 mock 或等重新发布后补验。"}},
+ ]
+});
+
+/* ---------------- 状态与渲染 ---------------- */
+function load(){ try { return JSON.parse(localStorage.getItem(LSKEY)) || {}; } catch(e){ return {}; } }
+let state = load();
+function save(){ try { localStorage.setItem(LSKEY, JSON.stringify(state)); } catch(e){} }
+function getC(id){ return (state[id]||{}).c || "未测"; }
+
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function itemHtml(si, it){
+  const st = state[it.id] || {};
+  const c = st.c || "未测";
+  const pre = it.pre ? `<div class="pre ${it.pre.t==='ok'?'ok':''}">🚩预检备注：${esc(it.pre.x)}</div>` : "";
+  const proto = it.fields ? `
+    <div class="blk"><b class="lbl">字段与数据来源（SRS 原表）</b><div class="txt">${esc(it.fields)}</div></div>
+    <div class="blk"><b class="lbl">点击与状态变化（SRS 原表）</b><div class="txt">${esc(it.click)}</div></div>
+    <div class="blk"><b class="lbl">空态·加载·错误·检查（SRS 原表）</b><div class="txt">${esc(it.err)}</div></div>` : "";
+  const op = (it.op || it.click) ? `
+    <div class="blk"><b class="lbl">操作与输入（可改）</b><textarea data-f="op">${esc(st.op!==undefined?st.op:(it.op||""))}</textarea></div>` : "";
+  return `
+  <div class="item" id="it-${it.id}" data-c="${c}">
+    <div class="head">
+      <span class="tag">${esc(it.no)}</span>
+      <span class="src">SRS L${esc(it.lines)}</span>
+      <span class="title">${esc(it.title)}</span>
+      <span class="badge c-${c}">${esc(c)}</span>
+    </div>
+    <div class="blk"><b class="lbl">预期（抄 SRS 原句）</b><div class="txt">${esc(it.expect)}</div></div>
+    ${op}
+    ${proto}
+    ${pre}
+    <div class="rec">
+      <div class="col" style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="col"><label>实际（页面 + 接口 + 数据库）</label><textarea data-f="actual">${esc(st.actual||"")}</textarea></div>
+        <div class="col"><label>缺陷编号与等级</label><input type="text" data-f="defect" value="${esc(st.defect||"")}" placeholder="如 BUG-20260915-004 / P2"></div>
+      </div>
+      <div class="col"><label>结论</label><select data-f="c">${CONC.map(x=>`<option ${x===c?"selected":""}>${x}</option>`).join("")}</select></div>
+    </div>
+  </div>`;
+}
+
+function render(filter){
+  const app = document.getElementById("app");
+  app.innerHTML = S.map(si=>{
+    const items = si.items.map(it=>itemHtml(si.id, it)).join("");
+    return `<section class="sec"><div class="sec-h"><h2>${esc(si.title)}</h2><span class="ln">${esc(si.lines)}</span><span class="cnt">${si.items.length} 条</span></div>${si.note?`<div class="sec-note">${esc(si.note)}</div>`:""}<div class="list">${items}</div></section>`;
+  }).join("");
+  bind();
+  updateStats();
+  if(filter && filter!=="全部") applyFilter(filter);
+}
+function bind(){
+  document.querySelectorAll(".item").forEach(el=>{
+    const id = el.id.slice(3);
+    el.querySelectorAll("select[data-f=c]").forEach(s=>s.addEventListener("change",()=>{
+      state[id]=state[id]||{}; state[id].c=s.value; save();
+      el.dataset.c = s.value;
+      const b = el.querySelector(".badge");
+      b.textContent = s.value;
+      b.className = "badge c-" + s.value;
+      updateStats();
+    }));
+    el.querySelectorAll("textarea[data-f=actual],textarea[data-f=op],input[data-f=defect]").forEach(inp=>inp.addEventListener("change",()=>{ state[id]=state[id]||{}; state[id][inp.dataset.f]=inp.value; save(); }));
+  });
+}
+function counts(){
+  const m = {}; CONC.forEach(c=>m[c]=0); let total=0;
+  S.forEach(si=>si.items.forEach(it=>{ total++; m[getC(it.id)]++; }));
+  return {total, m};
+}
+function updateStats(){
+  const {total, m} = counts();
+  const done = total - m["未测"];
+  document.getElementById("bar").style.width = (total? Math.round(done/total*100) : 0) + "%";
+  const chips = document.getElementById("chips");
+  const cur = chips.dataset.filter || "全部";
+  const mk = (label, n, cls) => `<span class="chip ${cls==="active"?"active":""}" data-f="${label}">${label} <span class="n">${n}</span></span>`;
+  chips.innerHTML = mk("全部", total, cur==="全部"?"active":"") + CONC.map(c=>mk(c, m[c], cur===c?"active":"")).join("");
+  chips.querySelectorAll(".chip").forEach(ch=>ch.addEventListener("click",()=>{
+    chips.dataset.filter = ch.dataset.f;
+    const f = ch.dataset.f;
+    document.querySelectorAll(".item").forEach(el=>{
+      const c = el.dataset.c;
+      el.style.display = (f==="全部"||c===f) ? "" : "none";
+    });
+    updateStats();
+  }));
+}
+function applyFilter(f){
+  document.getElementById("chips").dataset.filter = f;
+  document.querySelectorAll(".item").forEach(el=>{ el.style.display = el.dataset.c===f ? "" : "none"; });
+  updateStats();
+}
+function exportMd(){
+  const rows = [];
+  S.forEach(si=>{
+    let first = true;
+    si.items.forEach(it=>{
+      const st = state[it.id]||{};
+      const c = st.c||"未测";
+      if(c==="未测") return;
+      if(first){ rows.push(`\n## ${si.title}\n`); first=false; }
+      rows.push(`- **${it.no}｜${it.title}**`);
+      rows.push(`  - 操作与输入：${st.op||it.op||"（未填）"}`);
+      rows.push(`  - 预期（SRS 原句）：${it.expect}`);
+      rows.push(`  - 实际：${st.actual||"（未填）"}`);
+      rows.push(`  - 结论：${c}｜缺陷：${st.defect||"—"}`);
+    });
+  });
+  const {total, m} = counts();
+  const head = `# SRS 包① 用户端交易链路验收记录（导出）\n\n基线：docs/SRS.md 905 行版（2026-09-15）｜环境：线上 20260914-a2f15b1\n\n合计 ${total} 条：` + CONC.map(c=>`${c} ${m[c]}`).join(" / ") + "\n";
+  return head + rows.join("\n");
+}
+document.getElementById("btnExport").addEventListener("click",()=>{
+  const md = exportMd();
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([md], {type:"text/markdown;charset=utf-8"}));
+  a.download = "SRS包1-用户端交易链路验收记录.md";
+  a.click();
+});
+document.getElementById("btnCopy").addEventListener("click",()=>{
+  const {total, m} = counts();
+  const t = `SRS 包① 验收进度：${total-m["未测"]}/${total} 已测；通过 ${m["通过"]}、部分通过 ${m["部分通过"]}、不通过 ${m["不通过"]}、未实现（已标注） ${m["未实现（已标注）"]}、无法验证 ${m["无法验证"]}。`;
+  navigator.clipboard.writeText(t).then(()=>alert("已复制："+t));
+});
+document.getElementById("btnReset").addEventListener("click",()=>{
+  if(confirm("确定清空本机全部勾选与记录？")){ state={}; save(); render(); }
+});
+render();
+</script>
+</body>
+</html>
