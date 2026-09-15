@@ -3,9 +3,14 @@
  * 订单列表页（视觉真源：docs/design/exports/用户端/06-订单/01-订单列表，390 宽）
  * 2026-09-07 TDD 落地（T40-T42）：
  * - 订单卡由订单列表接口返回，金额、状态、时间使用接口值（PRD 7.16 订单列表行）
- * - P0 仅"全部"筛选（待支付/待评价筛选在对应 P1 扩展后出现）；订单按创建时间倒序（TC-ORD-013）
+ * - 订单按创建时间倒序（TC-ORD-013）
  * - 空结果显示空态；点击卡片进入订单详情；回到列表重新请求，不沿用过期列表
  * - 待支付订单提供「去支付」入口 → 支付页（批次⑩ 105，PRD 订单列表页行：待支付点击去支付）
+ * 2026-09-15 补状态筛选（PRD 7.6 六个筛选取值 + 7.16.1 列表页行）：
+ * - 筛选取值 全部/待支付/进行中/已完成/待评价/已取消，默认「全部」；切换筛选重置列表并重新请求
+ * - 跨状态取值（进行中、待评价）契约 §3.5 的单值 `status` 参数无法表达 → 前端按同一口径收窄，
+ *   映射与判定集中在 `utils/orderFilters.ts`（下传参数 + 收窄规则都写在那里）
+ * - 接口失败保留当前筛选并提供重试（PRD 异常列）
  */
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -19,6 +24,8 @@ import {
   remainingSeconds,
 } from '@/services/normalizers'
 import { reorderToCart } from '@/utils/reorder'
+import { ORDER_FILTERS, emptyTextOf, matchesOrderFilter, statusParamOf } from '@/utils/orderFilters'
+import type { OrderFilter } from '@/utils/orderFilters'
 import { toast } from '@/utils/toast'
 import { useCatalogStore } from '@/stores/catalogStore'
 import { useSessionStore } from '@/stores/sessionStore'
@@ -30,6 +37,13 @@ const sessionStore = useSessionStore()
 
 const orders = ref<OrderSummary[]>([])
 const loading = ref(false)
+/** 当前筛选（默认「全部」，PRD 列表页行：筛选默认全部） */
+const activeFilter = ref<OrderFilter>('全部')
+/** 接口失败标记：保留当前筛选并提供重试（PRD 异常列） */
+const failed = ref(false)
+
+/** 请求序号：只接受最后一次请求的结果，防止快速切换筛选时旧响应覆盖新结果（PRD 检查列） */
+let requestSeq = 0
 
 /** 每秒刷新的「当前时间」（待支付倒计时展示用） */
 const now = ref(Date.now())
@@ -87,6 +101,9 @@ async function onReorder(order: OrderSummary): Promise<void> {
 /** 店名映射（后端订单记录无 storeName：按 storeId 从店铺列表映射，缺口见联调问题清单） */
 const storeNameMap = computed(() => new Map(catalogStore.stores.map((s) => [s.storeId, s.name])))
 
+/** 分筛选空态文案（PRD 异常列：空结果显示对应空态） */
+const emptyText = computed(() => emptyTextOf(activeFilter.value))
+
 function displayName(order: OrderSummary): string {
   return storeNameMap.value.get(order.storeId) ?? order.storeId
 }
@@ -109,14 +126,33 @@ onUnmounted(() => {
 
 async function refresh(): Promise<void> {
   loading.value = true
+  failed.value = false
+  const seq = ++requestSeq
   try {
-    const records = await orderApi.listOrders()
-    orders.value = records.map(normalizeOrderSummary)
+    const records = await orderApi.listOrders(statusParamOf(activeFilter.value))
+    if (seq !== requestSeq) return // 过期响应丢弃，不覆盖后发筛选的结果
+    orders.value = records
+      .map(normalizeOrderSummary)
+      .filter((order) => matchesOrderFilter(order, activeFilter.value))
   } catch {
+    if (seq !== requestSeq) return
+    // 失败保留当前筛选，给出重试入口（PRD 异常列），不清空为「无订单」以免误判空态
+    failed.value = true
     orders.value = []
   } finally {
-    loading.value = false
+    if (seq === requestSeq) loading.value = false
   }
+}
+
+/**
+ * 切换筛选：同项不重复请求；否则重置列表并重新请求（PRD 交互列「切换筛选重置列表并请求」）
+ * 请求序号防连点：切得快时旧响应不覆盖新筛选的结果
+ */
+function changeFilter(filter: OrderFilter): void {
+  if (activeFilter.value === filter) return
+  activeFilter.value = filter
+  orders.value = []
+  void refresh()
 }
 
 function goDetail(order: OrderSummary): void {
@@ -128,11 +164,32 @@ function goDetail(order: OrderSummary): void {
   <div class="order-list-page">
     <header class="ol-header">
       <span class="ol-title">我的订单</span>
-      <span class="ol-filter">全部</span>
     </header>
+
+    <!-- 状态筛选栏（PRD 7.6 六个筛选取值，默认「全部」；设计稿 .list：白底通栏、24px 间距、可横向滚动，
+         选中项品牌橙文字 + 2px 下边线） -->
+    <nav class="ol-filters" data-testid="order-filters">
+      <button
+        v-for="filter in ORDER_FILTERS"
+        :key="filter"
+        class="ol-filter"
+        :class="{ 'is-active': activeFilter === filter }"
+        :data-testid="`order-filter-${filter}`"
+        type="button"
+        :aria-pressed="activeFilter === filter ? 'true' : 'false'"
+        @click="changeFilter(filter)"
+      >
+        {{ filter }}
+      </button>
+    </nav>
 
     <main class="ol-main">
       <template v-if="!loading">
+        <div v-if="failed" class="ol-error" data-testid="order-error">
+          <p>订单加载失败</p>
+          <button class="ol-retry" type="button" data-testid="order-retry" @click="refresh">重试</button>
+        </div>
+
         <section
           v-for="order in orders"
           :key="order.orderId"
@@ -194,8 +251,8 @@ function goDetail(order: OrderSummary): void {
           </div>
         </section>
 
-        <div v-if="orders.length === 0" class="ol-empty" data-testid="order-empty">
-          <p>暂无订单</p>
+        <div v-if="orders.length === 0 && !failed" class="ol-empty" data-testid="order-empty">
+          <p>{{ emptyText }}</p>
           <button class="ol-gohome" type="button" @click="router.push({ name: 'home' })">
             去逛逛
           </button>
@@ -233,10 +290,44 @@ function goDetail(order: OrderSummary): void {
   color: #1a1c1c;
 }
 
+/* 状态筛选栏（设计稿 .list：白底通栏、24px 列间距、左右 12px、可横向滚动；吸附在标题栏下方） */
+.ol-filters {
+  position: sticky;
+  top: 52px;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 12px;
+  background: #fff;
+  border-bottom: 1px solid #e5e5e5;
+  overflow-x: auto;
+  /* 隐藏横向滚动条（设计稿为可滚动但不显示滚动条） */
+  scrollbar-width: none;
+}
+
+.ol-filters::-webkit-scrollbar {
+  display: none;
+}
+
 .ol-filter {
-  font-size: 13px;
+  flex: none;
+  padding: 14px 4px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: #5f5e5e;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* 选中项：品牌橙文字 + 2px 品牌橙下边线（设计稿 .item） */
+.ol-filter.is-active {
+  border-bottom-color: #ff5a1f;
   color: #ff5a1f;
-  font-weight: 600;
 }
 
 /* 通栏分段：设计稿 .orderList（padding-top: 8px、row-gap: 8px 灰缝），左右不加外边距 */
@@ -355,5 +446,27 @@ function goDetail(order: OrderSummary): void {
   text-align: center;
   font-size: 14px;
   color: #999;
+}
+
+/* 接口失败：保留当前筛选，提供重试（PRD 异常列） */
+.ol-error {
+  background: #fff;
+  padding: 40px 12px;
+  text-align: center;
+}
+
+.ol-error p {
+  font-size: 14px;
+  color: #999;
+}
+
+.ol-retry {
+  margin-top: 16px;
+  padding: 8px 24px;
+  border: 1px solid #ff5a1f;
+  border-radius: 17px;
+  background: none;
+  color: #ff5a1f;
+  font-size: 14px;
 }
 </style>
