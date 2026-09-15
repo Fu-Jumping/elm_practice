@@ -39,6 +39,8 @@ public final class Requests {
     public static class CartAdd { public String storeId, productId; public Integer quantity; public List<Domain.SpecOption> specOptions; }
     public static class CartPatch { public Integer quantity; }
     public static class OrderCreate { public String storeId, addressId, remark, idempotencyKey, couponId; public BigDecimal expectedTotal; }
+    /** 确认订单页计价预览（契约 §3.5）：只传店铺；购物车由服务端读取，不信任客户端金额。 */
+    public static class OrderPreview { public String storeId; }
     public static class CancelOrder { public String reason; }
     public static class Payment { public Boolean success; }
     public static class StatusPatch { public String status; }

@@ -14,6 +14,8 @@ public class OrderController {
     private final AuthService auth; private final OrderService orders;
     public OrderController(AuthService auth,OrderService orders){this.auth=auth;this.orders=orders;}
     @PostMapping public ApiResponse<?> create(@RequestBody Requests.OrderCreate r,HttpSession s){return ApiResponse.success(ViewMapper.order(orders.create(auth.requireUser(s),r),true));}
+    /** 确认订单页计价预览（契约 §3.5）：只读，返回七步计价结果，页面只展示结果（SRS §5.6）。 */
+    @PostMapping("/preview") public ApiResponse<?> preview(@RequestBody Requests.OrderPreview r,HttpSession s){return ApiResponse.success(orders.preview(auth.requireUser(s),r));}
     @GetMapping public ApiResponse<?> list(@RequestParam(required=false) String status,HttpSession s){return ApiResponse.success(orders.list(auth.requireUser(s),status));}
     @GetMapping("/{orderId}") public ApiResponse<?> get(@PathVariable String orderId,HttpSession s){return ApiResponse.success(ViewMapper.order(orders.get(auth.requireUser(s),orderId),true));}
     @GetMapping("/{orderId}/items") public ApiResponse<?> items(@PathVariable String orderId,HttpSession s){return ApiResponse.success(orders.get(auth.requireUser(s),orderId).items.stream().map(i->{var m=new java.util.LinkedHashMap<String,Object>();m.put("productId",i.productId);m.put("name",i.name);m.put("image",i.image);m.put("categoryId",i.categoryId);m.put("unitPrice",i.unitPrice);m.put("quantity",i.quantity);m.put("subtotal",i.subtotal);return m;}).toList());}

@@ -132,6 +132,51 @@ public class OrderService {
         return order;
     }
 
+    /**
+     * 确认订单页计价预览（契约 §3.5 `POST /orders/preview`）。
+     * SRS §5.6 要求「确认订单时由后端按固定顺序计算商品小计、店铺满减、新客立减、配送费优惠、会员折扣和红包，
+     * 页面只展示结果」，本方法即该结果的只读出口：与 {@link #create} 共用同一套入参组装（购物车行 + 会员价规则
+     * + 七步计价），区别是不加行锁、不落订单、不清购物车、不扣库存、不校验库存数量。
+     * 用户红包由页面按已选券面额展示（下单时以后端核销结果为准），故此处 `couponAmount` 恒 0。
+     */
+    public Map<String,Object> preview(Domain.User u, Requests.OrderPreview r) {
+        if (r == null) throw ApiException.badRequest("请求体不能为空");
+        String sid = RequestUtil.required(r.storeId, "storeId");
+        Domain.Store store = stores.get(sid);
+        List<Domain.CartLine> lines = cartLines.findByUserAndStore(u.id, sid);
+        if (lines.isEmpty()) throw ApiException.badRequest("购物车为空");
+        boolean isMember = u.memberOpened;
+        BigDecimal subtotal = BigDecimal.ZERO;
+        BigDecimal memberDiscountBase = BigDecimal.ZERO;
+        for (Domain.CartLine line : lines) {
+            Domain.Product p = products.findById(line.productId);
+            if (p == null || !p.onSale) throw ApiException.conflict("商品已下架");
+            var selectedSpecs = CartService.validatedSelection(p, JsonLists.specs(line.specOptionsJson));
+            boolean memberPriced = isMember && p.memberPrice != null;
+            BigDecimal unit = CartService.unitPriceFrom(memberPriced ? p.memberPrice : p.price, selectedSpecs);
+            BigDecimal lineTotal = unit.multiply(BigDecimal.valueOf(line.quantity));
+            subtotal = subtotal.add(lineTotal);
+            if (!memberPriced) memberDiscountBase = memberDiscountBase.add(lineTotal);
+        }
+        var promo = promotions.findConfig(sid);
+        if (promo == null) promo = new Domain.PromoConfig();
+        promo.tiers.addAll(promotions.findTiers(sid));
+        boolean isNewCustomer = orders.countByUserAndStore(u.id, sid) == 0;
+        var pr = pricing.price(subtotal.setScale(2), memberDiscountBase.setScale(2), store.deliveryFee,
+                promo, isNewCustomer, isMember, BigDecimal.ZERO);
+        var v = new java.util.LinkedHashMap<String,Object>();
+        v.put("itemSubtotal", pr.itemSubtotal);
+        v.put("packagingFee", pr.packagingFee);
+        v.put("deliveryFee", pr.deliveryFee);
+        v.put("fullReductionAmount", pr.fullReductionAmount);
+        v.put("newCustomerAmount", pr.newCustomerAmount);
+        v.put("memberDiscountAmount", pr.memberDiscountAmount);
+        v.put("couponAmount", pr.couponAmount);
+        v.put("deliveryFeeDiscount", pr.deliveryFeeDiscount);
+        v.put("total", pr.total);
+        return v;
+    }
+
     public List<Map<String,Object>> list(Domain.User u, String status) {
         return orders.listByUser(u.id, status).stream().map(o -> ViewMapper.order(o, false)).toList();
     }
