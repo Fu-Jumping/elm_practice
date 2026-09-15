@@ -41,56 +41,110 @@
       </button>
     </nav>
 
-    <!-- 状态与结果列表（PRD「商家结果列表」：加载占位 / 空态 + 回首页 / 失败重试 / 字段缺失只隐藏） -->
+    <!-- 状态与结果列表（PRD「搜索结果页-商家结果列表」：加载占位 / 空态 + 回首页 / 失败重试 / 字段缺失只隐藏） -->
     <p v-if="hint" class="sr-hint" data-testid="search-hint">请输入关键词</p>
-    <div v-else-if="loading && !merchants.length" class="sr-skeleton" data-testid="search-skeleton">
+    <div v-else-if="loading && !hasResults" class="sr-skeleton" data-testid="search-skeleton">
       <div v-for="n in 3" :key="n" class="sr-skeleton-card"></div>
     </div>
     <div v-else-if="errorMessage" class="sr-error" data-testid="search-error">
       <p class="sr-error-text">{{ errorMessage }}</p>
       <button class="sr-retry" type="button" data-testid="search-retry" @click="runSearch">重试</button>
     </div>
-    <div v-else-if="!merchants.length" class="sr-empty" data-testid="search-empty">
+    <div v-else-if="!hasResults" class="sr-empty" data-testid="search-empty">
       <p class="sr-empty-text">没有找到「{{ keyword }}」相关的商家</p>
       <button class="sr-empty-home" type="button" data-testid="search-empty-home" @click="goHome">
         回到首页
       </button>
     </div>
-    <ul v-else class="sr-list" data-testid="search-merchant-list">
-      <li
-        v-for="store in merchants"
-        :key="store.storeId"
-        class="sr-card"
-        data-testid="search-merchant-card"
-        @click="goStore(store.storeId)"
+    <template v-else>
+      <!-- 商家结果组（PRD「搜索结果页-商家结果列表」行） -->
+      <ul
+        v-if="merchants.length > 0"
+        class="sr-list"
+        data-testid="search-merchant-list"
       >
-        <div class="sr-card-head">
-          <span class="sr-name">{{ store.name }}</span>
-          <span class="sr-rating">{{ store.rating }}</span>
-        </div>
-        <p class="sr-meta">
-          <span>月售{{ store.monthlySales }}</span>
-          <span>{{ store.deliveryMinutes }}分钟</span>
-          <!-- 距离来自接口，缺失整段隐藏（不显示 undefined） -->
-          <span v-if="store.distanceText">{{ store.distanceText }}</span>
-        </p>
-        <p class="sr-fee">
-          <span>起送 ¥{{ formatMoney(store.startPrice) }}</span>
-          <span>配送 ¥{{ formatMoney(store.deliveryFee) }}</span>
-        </p>
-        <!-- 促销标签只有接口明确返回时展示（PRD 字段列） -->
-        <p v-if="store.couponTags?.length" class="sr-tags">
-          <span
-            v-for="tag in store.couponTags"
-            :key="tag"
-            class="sr-tag"
-            data-testid="search-merchant-tag"
-          >
-            {{ tag }}
-          </span>
-        </p>
-      </li>
-    </ul>
+        <li
+          v-for="store in merchants"
+          :key="store.storeId"
+          class="sr-card"
+          data-testid="search-merchant-card"
+          @click="goStore(store.storeId)"
+        >
+          <div class="sr-card-head">
+            <span class="sr-name">{{ store.name }}</span>
+            <span class="sr-rating">{{ store.rating }}</span>
+          </div>
+          <p class="sr-meta">
+            <span>月售{{ store.monthlySales }}</span>
+            <span>{{ store.deliveryMinutes }}分钟</span>
+            <!-- 距离来自接口，缺失整段隐藏（不显示 undefined） -->
+            <span v-if="store.distanceText">{{ store.distanceText }}</span>
+          </p>
+          <p class="sr-fee">
+            <span>起送 ¥{{ formatMoney(store.startPrice) }}</span>
+            <span>配送 ¥{{ formatMoney(store.deliveryFee) }}</span>
+          </p>
+          <!-- 促销标签只有接口明确返回时展示（PRD 字段列） -->
+          <p v-if="store.couponTags?.length" class="sr-tags">
+            <span
+              v-for="tag in store.couponTags"
+              :key="tag"
+              class="sr-tag"
+              data-testid="search-merchant-tag"
+            >
+              {{ tag }}
+            </span>
+          </p>
+        </li>
+      </ul>
+
+      <!-- 商品结果组（PRD 831 行交互列：请求完成后更新商家结果**和商品结果**；契约 §3.6）：商品名命中按该组返回，
+           点击进入所属商家详情（本期无独立商品详情页） -->
+      <ul v-if="products.length > 0" class="sr-product-list" data-testid="search-product-list">
+        <li
+          v-for="product in products"
+          :key="product.productId"
+          class="sr-product"
+          data-testid="search-product-card"
+          @click="goStore(product.storeId)"
+        >
+          <img
+            class="sr-product-img"
+            :src="productImageSrc(product.productId, product.image)"
+            :alt="product.name"
+          />
+          <div class="sr-product-body">
+            <p class="sr-product-name">{{ product.name }}</p>
+            <p v-if="product.description" class="sr-product-desc">{{ product.description }}</p>
+            <p class="sr-product-price">
+              <span class="sr-product-amount">¥{{ formatMoney(product.price) }}</span>
+              <!-- 会员价只有接口返回时展示（PRD 7.10；缺失整段隐藏） -->
+              <span
+                v-if="typeof product.memberPrice === 'number'"
+                class="sr-product-member"
+                data-testid="search-product-member-price"
+              >
+                会员价 ¥{{ formatMoney(product.memberPrice) }}
+              </span>
+            </p>
+          </div>
+        </li>
+      </ul>
+
+      <!-- 分页：契约 §3.6 分页对象为 list/page/size/total，客户端下拉/点击加载下一页（PRD 592 行：分页参数由契约统一） -->
+      <div v-if="hasMore" class="sr-more-wrap">
+        <button
+          class="sr-more"
+          type="button"
+          data-testid="search-load-more"
+          :disabled="loading"
+          @click="loadMore"
+        >
+          {{ loading ? '加载中…' : '加载更多' }}
+        </button>
+      </div>
+      <p v-else-if="searched" class="sr-end" data-testid="search-list-end">没有更多了</p>
+    </template>
   </div>
 </template>
 
@@ -98,15 +152,19 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { searchApi } from '@/services/api'
-import type { SearchSort, StoreSummary } from '@/services/api/types'
+import type { SearchSort, StoreSummary, Product } from '@/services/api/types'
 import { SEARCH_SORT_OPTIONS } from '@/services/api/types'
 import { formatMoney } from '@/services/normalizers'
 import { DEMO_LOCATION } from '@/utils/location'
+import { productImageSrc } from '@/utils/demoImages'
 
 const route = useRoute()
 const router = useRouter()
 
 const SORT_OPTIONS = SEARCH_SORT_OPTIONS
+
+/** 每页条数（契约 §3.6 默认 size=10；页面不自行过滤真实数据） */
+const PAGE_SIZE = 10
 
 /** 关键词：来自页面参数并在输入框中保留（PRD「搜索头部」） */
 const keywordInput = ref(String(route.query.keyword ?? ''))
@@ -118,12 +176,25 @@ const sort = ref<SearchSort>(
 )
 
 const merchants = ref<StoreSummary[]>([])
+const products = ref<Product[]>([])
+/** 分页游标与总数（来自接口分页对象；页面不写死总数） */
+const page = ref(1)
+const merchantTotal = ref(0)
+const productTotal = ref(0)
 const loading = ref(false)
 const submitting = ref(false)
 const errorMessage = ref('')
 const searched = ref(false)
 /** 空关键词提示（PRD：空关键词不请求并提示输入关键词） */
 const hint = computed(() => keyword.value === '' && !errorMessage.value)
+
+/** 是否有任何结果（商家组或商品组任一非空即不算空态） */
+const hasResults = computed(() => merchants.value.length > 0 || products.value.length > 0)
+
+/** 是否还有下一页（两组任一未取完即需要继续加载） */
+const hasMore = computed(
+  () => merchants.value.length < merchantTotal.value || products.value.length < productTotal.value,
+)
 
 /** 定位文案（PRD：来自当前默认地址、默认同首页；本批不做地址读取的重复实现，统一回退演示地址） */
 const locationText = ref(DEMO_LOCATION)
@@ -140,16 +211,38 @@ onMounted(() => {
   if (keyword.value) void runSearch()
 })
 
+/** 首页/排序/关键词变化后的首次检索：重置到第 1 页并替换列表 */
 async function runSearch(): Promise<void> {
   if (!keyword.value) return
+  await fetchPage(1, true)
+}
+
+/** 加载下一页：追加到现有列表（PRD：下拉加载下一页） */
+async function loadMore(): Promise<void> {
+  if (!keyword.value || loading.value || !hasMore.value) return
+  await fetchPage(page.value + 1, false)
+}
+
+async function fetchPage(target: number, replace: boolean): Promise<void> {
   const seq = ++requestSeq
   loading.value = true
   submitting.value = true
   errorMessage.value = ''
   try {
-    const result = await searchApi.search({ keyword: keyword.value, sort: sort.value })
+    const result = await searchApi.search({
+      keyword: keyword.value,
+      sort: sort.value,
+      page: target,
+      size: PAGE_SIZE,
+    })
     if (seq !== requestSeq) return // 过期响应直接丢弃，不覆盖后发结果
-    merchants.value = result.merchants.list
+    merchantTotal.value = result.merchants.total
+    productTotal.value = result.products.total
+    merchants.value = replace
+      ? result.merchants.list
+      : [...merchants.value, ...result.merchants.list]
+    products.value = replace ? result.products.list : [...products.value, ...result.products.list]
+    page.value = target
     searched.value = true
   } catch (error) {
     if (seq !== requestSeq) return
@@ -352,5 +445,99 @@ function onBack(): void {
   border-radius: 4px;
   font-size: 11px;
   color: var(--color-primary);
+}
+
+/* ---- 商品结果组（契约 §3.6 的 products 汇总；设计稿无该区，按商家卡同族规范实现） ---- */
+.sr-product-list {
+  margin: 12px 0 0;
+  padding: 0 12px 12px;
+  list-style: none;
+}
+
+.sr-product {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--color-surface-white);
+  cursor: pointer;
+}
+
+.sr-product-img {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--color-surface-container);
+}
+
+.sr-product-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sr-product-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.sr-product-desc {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.sr-product-price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+}
+
+.sr-product-amount {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* 会员价高亮（PRD 7.10：价格行高亮） */
+.sr-product-member {
+  font-size: 12px;
+  color: var(--color-primary);
+}
+
+/* ---- 分页（契约 §3.6 分页对象；点击加载下一页） ---- */
+.sr-more-wrap {
+  padding: 0 12px 24px;
+}
+
+.sr-more {
+  display: block;
+  width: 100%;
+  padding: 10px 0;
+  border: 1px solid var(--color-primary);
+  border-radius: 17px;
+  background: none;
+  color: var(--color-primary);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.sr-more:disabled {
+  opacity: 0.6;
+}
+
+.sr-end {
+  margin: 0;
+  padding: 0 12px 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-text-tertiary);
 }
 </style>
