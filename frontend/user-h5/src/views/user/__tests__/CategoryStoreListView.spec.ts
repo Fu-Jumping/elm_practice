@@ -1,9 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import { createPinia } from 'pinia'
+import { createPinia, setActivePinia } from 'pinia'
 import CategoryStoreListView from '../CategoryStoreListView.vue'
 import { mockDispatch } from '@/mocks'
+import { useSessionStore } from '@/stores/sessionStore'
+import { ADDRESS_SEED, addressMockState } from '@/mocks/address'
 
 const actualMocks = await vi.importActual<typeof import('@/mocks')>('@/mocks')
 vi.mock('@/mocks', async (importOriginal) => {
@@ -323,5 +325,24 @@ describe('CategoryStoreListView（分类商家列表页，TODO-USER-107 ②）',
     await backWrapper.find('[data-testid="category-back"]').trigger('click')
     await flushPromises()
     expect(router.currentRoute.value.name).toBe('home')
+  })
+
+  it('CL-14 已登录但无地址 → 定位占位「选择收货地址」（2026-09-15 口径变更·方案 C）', async () => {
+    mockStores(() => storesPayload(STORES_SEED))
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const session = useSessionStore()
+    session.user = { account: '13800000001', nickname: '张同学' }
+    addressMockState.splice(0, addressMockState.length)
+    const r = makeRouter('/category/c101?name=%E4%B8%BB%E9%A3%9F')
+    await r.isReady()
+    const wrapper = mount(CategoryStoreListView, { global: { plugins: [pinia, r] } })
+    await vi.waitFor(() =>
+      expect(wrapper.find('[data-testid="category-location"]').text()).toContain('选择收货地址'),
+    )
+    // 占位态不是演示数据：不得标记「演示地址」
+    expect(wrapper.find('[data-testid="category-location"]').attributes('title')).toBeUndefined()
+    // 还原地址种子（模块级内存态）
+    addressMockState.splice(0, addressMockState.length, ...ADDRESS_SEED.map((item) => ({ ...item })))
   })
 })
