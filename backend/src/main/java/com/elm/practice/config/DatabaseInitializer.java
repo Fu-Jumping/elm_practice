@@ -16,7 +16,9 @@ import java.sql.Connection;
  * 启动自举：先幂等执行 db/schema.sql（CREATE IF NOT EXISTS + INSERT IGNORE）与
  * db/upgrade-*.sql（存量库扩列/建表类迁移，脚本自身幂等），
  * 再仅当 users 表为空时执行 db/seed.sql——不能改用 spring.sql.init.mode=always，
- * 否则种子里的 ON DUPLICATE KEY 会在每次重启时重置运行期库存/销量。
+ * 否则种子里的 ON DUPLICATE KEY 会在每次重启时重置运行期库存/销量；
+ * 最后执行 db/upgrade-stage3.sql：它包含**数据种子**（演示会员、课程分类、距离、收藏、通知），
+ * 必须晚于 seed.sql 才能在首次建库时命中刚插入的行，因此不能并到上面的结构性迁移里。
  */
 @Component
 public class DatabaseInitializer implements ApplicationRunner {
@@ -42,6 +44,9 @@ public class DatabaseInitializer implements ApplicationRunner {
             if (users.count() == 0) {
                 ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/seed.sql"), StandardCharsets.UTF_8));
             }
+            // 批次⑨：搜索距离字段 + 商家收藏 + 通知 + 会员标识 + 平台级课程分类（含数据种子），
+            // 幂等可重复执行；必须晚于 seed.sql，否则首次建库时没有行可更新。
+            ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-stage3.sql"), StandardCharsets.UTF_8));
         }
     }
 }

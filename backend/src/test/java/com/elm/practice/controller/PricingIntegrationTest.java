@@ -74,25 +74,28 @@ class PricingIntegrationTest {
                 .content(body)).andExpect(status().is(expectedStatus)).andReturn().getResponse().getContentAsString();
     }
 
-    /** TC-PRV-001：小计 23 元命中满 20 减 2；配送费 5 计入实付；u001 非新客。实付 = 23 − 2 + 5 + 2 = 28.00。 */
+    /** TC-PRV-001：小计 23 元命中满 20 减 2；配送费 5 计入实付；u001 非新客但**是会员**（批次⑨ 会员折扣真正生效）。
+     *  实付 = 23 − 2(满减) − 1.15(会员 95 折) + 5(配送费) + 2(打包费) = 26.85。 */
     @Test void tcPrv001_fullReductionAndDeliveryFeeSnapshot() throws Exception {
         var s = userLogin();
         addCart(s, "p104", 2);
-        String body = createOrder(s, "da001", "prv001-" + System.nanoTime(), "28.00");
-        org.junit.jupiter.api.Assertions.assertEquals(28.0, ((Number) JsonPath.read(body, "$.data.total")).doubleValue(), 0.0001);
+        String body = createOrder(s, "da001", "prv001-" + System.nanoTime(), "26.85");
+        org.junit.jupiter.api.Assertions.assertEquals(26.85, ((Number) JsonPath.read(body, "$.data.total")).doubleValue(), 0.0001);
+        org.junit.jupiter.api.Assertions.assertEquals(1.15, ((Number) JsonPath.read(body, "$.data.memberDiscountAmount")).doubleValue(), 0.0001);
         org.junit.jupiter.api.Assertions.assertEquals(2.0, ((Number) JsonPath.read(body, "$.data.fullReductionAmount")).doubleValue(), 0.0001);
         org.junit.jupiter.api.Assertions.assertEquals(5.0, ((Number) JsonPath.read(body, "$.data.deliveryFee")).doubleValue(), 0.0001);
         org.junit.jupiter.api.Assertions.assertEquals(0.0, ((Number) JsonPath.read(body, "$.data.newCustomerAmount")).doubleValue(), 0.0001);
         org.junit.jupiter.api.Assertions.assertEquals(0.0, ((Number) JsonPath.read(body, "$.data.deliveryFeeDiscount")).doubleValue(), 0.0001);
     }
 
-    /** TC-PRV-002 + 005：小计 48 同时命中满 40 减 5（只取最大档，不叠加）与免配送费门槛 30；实付 = 48 − 5 + 0 + 2 = 45.00。 */
+    /** TC-PRV-002 + 005：小计 48 同时命中满 40 减 5（只取最大档，不叠加）与免配送费门槛 30；
+     *  实付 = 48 − 5(满减) − 2.40(会员 95 折) + 0(免配送费) + 2(打包费) = 42.60。 */
     @Test void tcPrv002_maxTierOnlyAndFreeDelivery() throws Exception {
         var s = userLogin();
         addCart(s, "p101", 2);
         addCart(s, "p105", 1);
-        String body = createOrder(s, "da001", "prv002-" + System.nanoTime(), "45.00");
-        org.junit.jupiter.api.Assertions.assertEquals(45.0, ((Number) JsonPath.read(body, "$.data.total")).doubleValue(), 0.0001);
+        String body = createOrder(s, "da001", "prv002-" + System.nanoTime(), "42.60");
+        org.junit.jupiter.api.Assertions.assertEquals(42.6, ((Number) JsonPath.read(body, "$.data.total")).doubleValue(), 0.0001);
         org.junit.jupiter.api.Assertions.assertEquals(5.0, ((Number) JsonPath.read(body, "$.data.fullReductionAmount")).doubleValue(), 0.0001);
         org.junit.jupiter.api.Assertions.assertEquals(5.0, ((Number) JsonPath.read(body, "$.data.deliveryFeeDiscount")).doubleValue(), 0.0001);
         org.junit.jupiter.api.Assertions.assertEquals(5.0, ((Number) JsonPath.read(body, "$.data.deliveryFee")).doubleValue(), 0.0001);
@@ -117,12 +120,12 @@ class PricingIntegrationTest {
         org.junit.jupiter.api.Assertions.assertEquals(33.5, ((Number) JsonPath.read(second, "$.data.total")).doubleValue(), 0.0001);
     }
 
-    /** TC-PRV-009：前端篡改 expectedTotal 无效，以后端计算结果为准（场景同 TC-PRV-001，实付 28.00）。 */
+    /** TC-PRV-009：前端篡改 expectedTotal 无效，以后端计算结果为准（场景同 TC-PRV-001，实付 26.85）。 */
     @Test void tcPrv009_tamperedExpectedTotalIgnored() throws Exception {
         var s = userLogin();
         addCart(s, "p104", 2);
         String body = createOrder(s, "da001", "prv009-" + System.nanoTime(), "0.01");
-        org.junit.jupiter.api.Assertions.assertEquals(28.0, ((Number) JsonPath.read(body, "$.data.total")).doubleValue(), 0.0001);
+        org.junit.jupiter.api.Assertions.assertEquals(26.85, ((Number) JsonPath.read(body, "$.data.total")).doubleValue(), 0.0001);
     }
 
     /** TC-PRV-008：保存校验——负门槛、折扣率越界、阶梯重复均 400 且不落库。 */

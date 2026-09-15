@@ -13,6 +13,10 @@ TRUNCATE TABLE promotions;
 TRUNCATE TABLE promotion_tiers;
 TRUNCATE TABLE coupon_packs;
 TRUNCATE TABLE coupons;
+TRUNCATE TABLE favorites;
+TRUNCATE TABLE notifications;
+TRUNCATE TABLE platform_category_stores;
+TRUNCATE TABLE platform_categories;
 TRUNCATE TABLE stores;
 TRUNCATE TABLE merchants;
 TRUNCATE TABLE users;
@@ -22,23 +26,23 @@ INSERT INTO id_sequence(name,next_val) VALUES ('global',1004);
 -- MySQL 8+ demo seed. Password for both accounts is 123456 (SHA-256 digest only).
 -- 目录真源：图片清单.md。商品编号、图片文件、店铺归属、分类必须保持一一对应。
 -- 应用启动时仅当 users 为空才执行；已有环境使用 catalog-alignment.sql 做一次性对齐。
-INSERT INTO users(user_id,account,password_hash,nickname,created_at) VALUES
-('u001','13800000001','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','演示用户',NOW())
-ON DUPLICATE KEY UPDATE nickname=VALUES(nickname);
+INSERT INTO users(user_id,account,password_hash,nickname,created_at,member_opened,member_activated_at) VALUES
+('u001','13800000001','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','演示用户',NOW(),TRUE,DATE_SUB(NOW(),INTERVAL 30 DAY))
+ON DUPLICATE KEY UPDATE nickname=VALUES(nickname),member_opened=VALUES(member_opened),member_activated_at=VALUES(member_activated_at);
 INSERT INTO merchants(merchant_id,account,password_hash,store_id,phone,created_at) VALUES
 ('ma001','merchant-a','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','m002','13800000002',NOW())
 ON DUPLICATE KEY UPDATE store_id=VALUES(store_id);
 
-INSERT INTO stores(store_id,merchant_id,name,description,rating,monthly_sales,delivery_minutes,start_price,delivery_fee,image,status) VALUES
-('m001',NULL,'老王小店','家常小炒 · 经济实惠',4.60,1200,30,15.00,3.00,'/demo-images/store-m001.jpg','OPEN'),
-('m002','ma001','肯德基宅急送','炸鸡汉堡 · 外卖到家',4.80,3500,25,20.00,5.00,'/demo-images/store-m002.jpg','OPEN'),
-('m003',NULL,'麦当劳','经典快餐 · 随时开吃',4.70,2800,25,20.00,5.00,'/demo-images/store-m003.jpg','OPEN'),
-('m004',NULL,'老胖烧烤','深夜食堂 · 现烤现送',4.50,800,40,30.00,4.00,'/demo-images/store-m004.jpg','TEMPORARILY_CLOSED'),
-('m005',NULL,'元盛居火锅','铜锅涮肉 · 宅家开涮',4.90,950,45,50.00,6.00,'/demo-images/store-m005.jpg','OPEN')
+INSERT INTO stores(store_id,merchant_id,name,description,rating,monthly_sales,delivery_minutes,start_price,delivery_fee,image,status,distance_km) VALUES
+('m001',NULL,'老王小店','家常小炒 · 经济实惠',4.60,1200,30,15.00,3.00,'/demo-images/store-m001.jpg','OPEN',1.80),
+('m002','ma001','肯德基宅急送','炸鸡汉堡 · 外卖到家',4.80,3500,25,20.00,5.00,'/demo-images/store-m002.jpg','OPEN',2.40),
+('m003',NULL,'麦当劳','经典快餐 · 随时开吃',4.70,2800,25,20.00,5.00,'/demo-images/store-m003.jpg','OPEN',2.90),
+('m004',NULL,'老胖烧烤','深夜食堂 · 现烤现送',4.50,800,40,30.00,4.00,'/demo-images/store-m004.jpg','TEMPORARILY_CLOSED',3.60),
+('m005',NULL,'元盛居火锅','铜锅涮肉 · 宅家开涮',4.90,950,45,50.00,6.00,'/demo-images/store-m005.jpg','OPEN',4.20)
 ON DUPLICATE KEY UPDATE
   name=VALUES(name),description=VALUES(description),rating=VALUES(rating),monthly_sales=VALUES(monthly_sales),
   delivery_minutes=VALUES(delivery_minutes),start_price=VALUES(start_price),delivery_fee=VALUES(delivery_fee),
-  image=VALUES(image),status=VALUES(status);
+  image=VALUES(image),status=VALUES(status),distance_km=VALUES(distance_km);
 
 -- 批次① 计价基线（与 seed.sql 演示促销一致）：m002 满 20 减 2、满 40 减 5、新客立减 3、
 -- 满 30 免配送费、会员 95 折。PricingIntegrationTest 的期望金额依赖此配置，勿删。
@@ -79,6 +83,17 @@ ON DUPLICATE KEY UPDATE
   store_id=VALUES(store_id),category_id=VALUES(category_id),name=VALUES(name),description=VALUES(description),
   image=VALUES(image),price=VALUES(price),stock=VALUES(stock),on_sale=VALUES(on_sale),sales=VALUES(sales);
 
+-- 批次⑨（D2）：会员价与规格种子。会员价用于 PRD 7.4 第⑤步（配置了会员价的商品按会员价计价，不再叠加会员折扣）；
+-- 规格仅挂在未被既有计价/购物车用例直接加购的商品上（p103、p106），避免改变既有用例的加购前置。
+UPDATE products SET member_price = CASE product_id
+    WHEN 'p102' THEN 17.50 WHEN 'p103' THEN 15.00 WHEN 'p106' THEN 12.50
+    WHEN 'p205' THEN 9.90 WHEN 'p208' THEN 35.00 END
+ WHERE product_id IN ('p102','p103','p106','p205','p208');
+UPDATE products SET spec_options = JSON_ARRAY(JSON_OBJECT('name','标准','priceDelta',0), JSON_OBJECT('name','大份','priceDelta',3))
+ WHERE product_id = 'p103';
+UPDATE products SET spec_options = JSON_ARRAY(JSON_OBJECT('name','5块','priceDelta',0), JSON_OBJECT('name','10块','priceDelta',6))
+ WHERE product_id = 'p106';
+
 INSERT INTO addresses(address_id,user_id,contact_name,contact_sex,contact_phone,region,detail,label,is_default,updated_at) VALUES
 ('da001','u001','张同学','先生','13800000001','天津大学北洋园校区','12号楼 304室','学校',TRUE,NOW())
 ON DUPLICATE KEY UPDATE region=VALUES(region),detail=VALUES(detail),is_default=VALUES(is_default);
@@ -106,3 +121,30 @@ INSERT INTO coupons(coupon_id,user_id,name,amount,threshold,scope,store_id,valid
 ('cp004','u001','满10减3红包',3.00,10.00,'ALL',NULL,DATE_SUB(NOW(),INTERVAL 40 DAY),DATE_SUB(NOW(),INTERVAL 1 DAY),FALSE,NULL,'SEED',FALSE,NULL)
 ON DUPLICATE KEY UPDATE name=VALUES(name),amount=VALUES(amount),threshold=VALUES(threshold),scope=VALUES(scope),store_id=VALUES(store_id),
   valid_from=VALUES(valid_from),valid_to=VALUES(valid_to),used=VALUES(used),used_order_id=VALUES(used_order_id),source=VALUES(source),can_blast=VALUES(can_blast);
+
+-- 批次⑨ 商家收藏种子（契约 §3.7）：u001 收藏 m002（较新）与 m001（较早），供「按收藏时间倒序」用例。
+INSERT INTO favorites(favorite_id,user_id,store_id,created_at) VALUES
+('fv001','u001','m002',STR_TO_DATE('2026-09-10 12:00:00','%Y-%m-%d %H:%i:%s')),
+('fv002','u001','m001',STR_TO_DATE('2026-09-09 12:00:00','%Y-%m-%d %H:%i:%s'))
+ON DUPLICATE KEY UPDATE store_id=VALUES(store_id),created_at=VALUES(created_at);
+
+-- 批次⑨ 通知种子（契约 §3.9）：一条未读 MEMBER 权益提醒 + 一条已读 ORDER 通知，供倒序与未读数用例。
+INSERT INTO notifications(notification_id,user_id,type,title,content,related_id,is_read,created_at) VALUES
+('nt001','u001','MEMBER','会员权益提醒','您已开通会员，全店商品享 95 折（与商品会员价不叠加）',NULL,FALSE,DATE_SUB(NOW(),INTERVAL 2 HOUR)),
+('nt002','u001','ORDER','订单状态更新','订单 o1002 已完成，感谢惠顾','o1002',TRUE,DATE_SUB(NOW(),INTERVAL 3 HOUR))
+ON DUPLICATE KEY UPDATE type=VALUES(type),title=VALUES(title),content=VALUES(content),related_id=VALUES(related_id),is_read=VALUES(is_read),created_at=VALUES(created_at);
+
+-- 批次⑨ 平台级课程分类种子（PRD 7.16.1 首页分类宫格；编号 pc01~pc09 与用户端 COURSE_CATEGORIES 一致）。
+INSERT INTO platform_categories(category_id,name,sort_order) VALUES
+('pc01','美食外卖',1),('pc02','甜品饮品',2),('pc03','0元领水果',3),('pc04','会吃',4),
+('pc05','放心点榜',5),('pc06','趋势情报局',6),('pc07','汉堡西餐',7),('pc08','奶茶果汁',8),('pc09','全部',9)
+ON DUPLICATE KEY UPDATE name=VALUES(name),sort_order=VALUES(sort_order);
+INSERT IGNORE INTO platform_category_stores(category_id,store_id) VALUES
+('pc01','m001'),('pc01','m002'),('pc01','m003'),('pc01','m004'),('pc01','m005'),
+('pc02','m002'),('pc02','m003'),
+('pc04','m005'),
+('pc05','m001'),('pc05','m002'),('pc05','m005'),
+('pc06','m004'),
+('pc07','m002'),('pc07','m003'),
+('pc08','m002'),
+('pc09','m001'),('pc09','m002'),('pc09','m003'),('pc09','m004'),('pc09','m005');

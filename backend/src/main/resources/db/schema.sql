@@ -4,7 +4,9 @@ CREATE TABLE IF NOT EXISTS users (
   user_id VARCHAR(32) PRIMARY KEY, account VARCHAR(64) NOT NULL UNIQUE,
   password_hash VARCHAR(128) NOT NULL, nickname VARCHAR(80) NOT NULL, created_at TIMESTAMP NOT NULL,
   -- 批次⑥（CHG-001）：当天免费爆占用日期（东八区 yyyy-MM-dd），NULL=从未使用，0 点按日期自然重置。
-  free_blast_date DATE NULL
+  free_blast_date DATE NULL,
+  -- 批次⑨（契约 §3.8）：会员标识。由种子数据或后台标记，本契约不提供开通与续费接口。
+  member_opened BOOLEAN NOT NULL DEFAULT FALSE, member_activated_at TIMESTAMP NULL
 );
 CREATE TABLE IF NOT EXISTS merchants (
   merchant_id VARCHAR(32) PRIMARY KEY, account VARCHAR(64) NOT NULL UNIQUE,
@@ -15,7 +17,9 @@ CREATE TABLE IF NOT EXISTS stores (
   description VARCHAR(500), image VARCHAR(500), rating DECIMAL(3,2) NOT NULL DEFAULT 0,
   monthly_sales INT NOT NULL DEFAULT 0, delivery_minutes INT NOT NULL DEFAULT 30,
   start_price DECIMAL(10,2) NOT NULL DEFAULT 0, delivery_fee DECIMAL(10,2) NOT NULL DEFAULT 0,
-  status VARCHAR(32) NOT NULL
+  status VARCHAR(32) NOT NULL,
+  -- 批次⑨（契约 §3.6）：种子距离（km）。「距离」排序与 distanceText 展示的唯一数据源，不引入地图与定位服务。
+  distance_km DECIMAL(5,2) NULL
 );
 CREATE TABLE IF NOT EXISTS categories (
   category_id VARCHAR(32) PRIMARY KEY, store_id VARCHAR(32) NOT NULL, name VARCHAR(80) NOT NULL,
@@ -113,3 +117,28 @@ CREATE TABLE IF NOT EXISTS coupon_packs (
   INDEX idx_packs_user (user_id)
 );
 INSERT IGNORE INTO id_sequence(name,next_val) VALUES ('global',1004);
+
+-- 批次⑨ 商家收藏（契约 §3.7）：(user_id, store_id) 唯一，重复收藏幂等返回当前收藏，不产生重复记录。
+CREATE TABLE IF NOT EXISTS favorites (
+  favorite_id VARCHAR(32) PRIMARY KEY, user_id VARCHAR(32) NOT NULL, store_id VARCHAR(32) NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  UNIQUE KEY uk_favorite_user_store (user_id, store_id),
+  INDEX idx_favorites_user (user_id)
+);
+-- 批次⑨ 通知（契约 §3.9）：ORDER 订单状态更新 / COUPON 红包到账 / MEMBER 会员权益提醒。
+CREATE TABLE IF NOT EXISTS notifications (
+  notification_id VARCHAR(32) PRIMARY KEY, user_id VARCHAR(32) NOT NULL,
+  type VARCHAR(16) NOT NULL, title VARCHAR(120) NOT NULL, content VARCHAR(500) NOT NULL,
+  related_id VARCHAR(32), is_read BOOLEAN NOT NULL DEFAULT FALSE, created_at TIMESTAMP NOT NULL,
+  INDEX idx_notifications_user (user_id, created_at),
+  CONSTRAINT chk_notification_type CHECK(type IN ('ORDER','COUPON','MEMBER'))
+);
+-- 批次⑨ 平台级课程分类（PRD 7.16.1 首页分类宫格；编号 pc01~pc09 与用户端 COURSE_CATEGORIES 一致）。
+-- 独立成表而不复用 categories，避免课程分类污染商家详情的商品分类页签。
+CREATE TABLE IF NOT EXISTS platform_categories (
+  category_id VARCHAR(32) PRIMARY KEY, name VARCHAR(80) NOT NULL, sort_order INT NOT NULL DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS platform_category_stores (
+  category_id VARCHAR(32) NOT NULL, store_id VARCHAR(32) NOT NULL,
+  PRIMARY KEY (category_id, store_id)
+);

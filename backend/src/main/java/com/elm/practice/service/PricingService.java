@@ -24,8 +24,19 @@ public class PricingService {
                 newCustomerAmount, memberDiscountAmount, couponAmount, deliveryFeeDiscount, total;
     }
 
+    /** 兼容入口（无会员价商品时等价）：会员折扣基数 = 商品小计。 */
     public Result price(BigDecimal itemSubtotal, BigDecimal deliveryFee, Domain.PromoConfig promo,
                         boolean isNewCustomer, boolean isMember, BigDecimal couponAmount) {
+        return price(itemSubtotal, itemSubtotal, deliveryFee, promo, isNewCustomer, isMember, couponAmount);
+    }
+
+    /**
+     * 计价主入口（PRD 7.4 七步）。{@code memberDiscountBase} = **未配置会员价**的商品小计：
+     * 配置了会员价的商品已在第①步按会员价计价，第⑤步不再对它们打折（契约 §3.2/§3.5「与会员折扣不叠加」）。
+     */
+    public Result price(BigDecimal itemSubtotal, BigDecimal memberDiscountBase, BigDecimal deliveryFee,
+                        Domain.PromoConfig promo, boolean isNewCustomer, boolean isMember, BigDecimal couponAmount) {
+        BigDecimal discountBase = memberDiscountBase == null ? ZERO : memberDiscountBase.setScale(2);
         var r = new Result();
         r.itemSubtotal = (itemSubtotal == null ? ZERO : itemSubtotal).setScale(2);
         r.packagingFee = PACKAGING_FEE.setScale(2);
@@ -54,7 +65,7 @@ public class PricingService {
         BigDecimal member = ZERO;
         if (isMember && cfg.memberDiscountRate.signum() > 0
                 && cfg.memberDiscountRate.compareTo(BigDecimal.ONE) < 0) {
-            member = r.itemSubtotal.multiply(BigDecimal.ONE.subtract(cfg.memberDiscountRate));
+            member = discountBase.multiply(BigDecimal.ONE.subtract(cfg.memberDiscountRate));
         }
         r.memberDiscountAmount = member.setScale(2);
         // ⑥ 用户红包：批次⑥ coupons 表接入，当前恒 0。

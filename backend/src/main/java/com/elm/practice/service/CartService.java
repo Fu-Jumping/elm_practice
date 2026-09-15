@@ -97,7 +97,15 @@ public class CartService {
     }
 
     public static BigDecimal unitPrice(Domain.Product product,List<Domain.SpecOption> specs){
-        BigDecimal result=product.price;
+        return unitPriceFrom(product.price, specs);
+    }
+
+    /**
+     * 指定基准单价的计价（批次⑨）：会员下单时基准价取商品会员价（契约 §3.2/§3.5），
+     * 规格价差口径与 {@link #unitPrice} 完全一致。
+     */
+    public static BigDecimal unitPriceFrom(BigDecimal basePrice,List<Domain.SpecOption> specs){
+        BigDecimal result = basePrice == null ? BigDecimal.ZERO : basePrice;
         for(Domain.SpecOption option:specs)result=result.add(option.priceDelta);
         return result.setScale(2);
     }

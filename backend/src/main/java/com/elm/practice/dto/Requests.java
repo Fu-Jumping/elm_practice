@@ -34,6 +34,8 @@ public final class Requests {
     public static class SpecificationsPatch { public List<Domain.SpecOption> specOptions; }
     public static class AvailabilityPatch { public Boolean onSale; public Integer stock; }
     public static class AddressRequest { public String contactName, contactSex, contactPhone, region, detail, label; public Boolean isDefault; }
+    /** 收藏商家（契约 §3.7）：请求体只带 storeId，用户身份一律取自 Session。 */
+    public static class FavoriteCreate { public String storeId; }
     public static class CartAdd { public String storeId, productId; public Integer quantity; public List<Domain.SpecOption> specOptions; }
     public static class CartPatch { public Integer quantity; }
     public static class OrderCreate { public String storeId, addressId, remark, idempotencyKey, couponId; public BigDecimal expectedTotal; }

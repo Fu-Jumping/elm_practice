@@ -19,8 +19,52 @@ public final class ViewMapper {
         var m = new LinkedHashMap<String,Object>(); m.put("storeId",s.id); m.put("name",s.name);
         m.put("description",s.description); m.put("image",s.image); m.put("rating",s.rating);
         m.put("monthlySales",s.monthlySales); m.put("deliveryMinutes",s.deliveryMinutes);
-        m.put("startPrice",s.startPrice); m.put("deliveryFee",s.deliveryFee); m.put("status",s.status.name()); return m;
+        m.put("startPrice",s.startPrice); m.put("deliveryFee",s.deliveryFee); m.put("status",s.status.name());
+        // 批次⑨（契约 §3.6）：距离由后端按种子 distanceKm 计算文案，前端不自行换算。
+        m.put("distanceKm", s.distanceKm);
+        m.put("distanceText", distanceText(s.distanceKm));
+        return m;
     }
+    /** 距离文案（如 2.4km）；无种子距离时返回 null，前端按「返回才展示」整块隐藏。 */
+    public static String distanceText(java.math.BigDecimal km) {
+        return km == null ? null : String.format(java.util.Locale.ROOT, "%.1fkm", km);
+    }
+    /** 带促销标签的店铺视图（契约 §3.7 couponTags：无优惠返回空数组，不得由前端补演示值）。 */
+    public static Map<String,Object> storeWithTags(Domain.Store s, java.util.List<String> couponTags) {
+        var m = store(s); m.put("couponTags", couponTags == null ? java.util.List.of() : couponTags); return m;
+    }
+    /** 商家收藏视图（契约 §3.7）：展示字段由 stores / promotions 实时补齐，商家关闭后回显最新 storeStatus。 */
+    public static Map<String,Object> favorite(Domain.Favorite f, Domain.Store s, java.util.List<String> couponTags) {
+        var m = new LinkedHashMap<String,Object>();
+        m.put("favoriteId", f.id); m.put("storeId", f.storeId); m.put("createdAt", f.createdAt);
+        m.put("storeName", s == null ? null : s.name);
+        m.put("image", s == null ? null : s.image);
+        m.put("rating", s == null ? null : s.rating);
+        m.put("monthlySales", s == null ? 0 : s.monthlySales);
+        m.put("deliveryFee", s == null ? null : s.deliveryFee);
+        m.put("storeStatus", s == null ? null : s.status.name());
+        m.put("deliveryMinutes", s == null ? null : s.deliveryMinutes);
+        m.put("distanceText", s == null ? null : distanceText(s.distanceKm));
+        m.put("couponTags", couponTags == null ? java.util.List.of() : couponTags);
+        return m;
+    }
+    /** 通知视图（契约 §3.9）：read 为已读标记，relatedId 为订单号或红包编号。 */
+    public static Map<String,Object> notification(Domain.Notification n) {
+        var m = new LinkedHashMap<String,Object>();
+        m.put("notificationId", n.id); m.put("type", n.type); m.put("title", n.title);
+        m.put("content", n.content); m.put("relatedId", n.relatedId); m.put("read", n.read);
+        m.put("createdAt", n.createdAt); return m;
+    }
+    /** 会员信息视图（契约 §3.8）：discountRate 为演示折扣率，开通与续费接口本期不提供。 */
+    public static Map<String,Object> member(Domain.User u) {
+        var m = new LinkedHashMap<String,Object>();
+        m.put("memberOpened", u.memberOpened);
+        m.put("discountRate", new java.math.BigDecimal("0.95"));
+        m.put("discountDesc", "会员全店商品 95 折（与商品会员价不叠加）");
+        m.put("activatedAt", u.memberActivatedAt);
+        return m;
+    }
+
     /** 商家端店铺设置视图：额外回显联系电话（BUG-20260908-012，取自 merchants.phone；不对用户端暴露）。 */
     public static Map<String,Object> merchantStore(Domain.Store s, String contactPhone) {
         var m = store(s); m.put("contactPhone", contactPhone); return m;
