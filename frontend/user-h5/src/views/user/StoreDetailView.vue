@@ -589,6 +589,17 @@ function qtyOf(productId: string): number {
   return lineOf(productId)?.quantity ?? 0
 }
 
+/**
+ * 该商品已加购的总数量（跨规格行求和）。
+ * 契约 §3.4：同一商品的**不同规格**在购物车中是不同行，`lineOf` 只取首条 → 有规格商品必须跨行求和，
+ * 否则「同一商品选了两种规格」时行内数量只显示其中一行。
+ */
+function totalQtyOf(productId: string): number {
+  return cartStore.lines
+    .filter((line) => line.productId === productId)
+    .reduce((sum, line) => sum + line.quantity, 0)
+}
+
 /** 购物车弹层（T50，PRD：点击购物车栏展开弹层） */
 const cartPopupOpen = ref(false)
 
@@ -879,6 +890,18 @@ async function onCheckout(): Promise<void> {
                   <span class="product-price">
                     <span class="price-symbol">¥</span>
                     <span class="price-int">{{ formatMoney(product.price) }}</span>
+                  </span>
+                  <!-- 有规格商品的已加购反馈（2026-09-15 负责人走查）：规格商品的行内步进器被
+                       `!hasSpecs(product)` 挡掉后行内再无任何反馈，选完规格加购成功却看起来像没加过。
+                       这里只给**数量反馈**不给增减控件——同一商品不同规格是不同行（契约 §3.4），
+                       增减仍统一在规格弹层与购物车弹层内完成（PRD 850 行）。
+                       注意：本元素必须放在步进器的 `v-if` 之前，否则会截断下面 `+` 按钮的 `v-else` 链。 -->
+                  <span
+                    v-if="hasSpecs(product) && totalQtyOf(product.productId) > 0"
+                    class="product-added"
+                    :data-testid="`product-added-${product.productId}`"
+                  >
+                    已加购 {{ totalQtyOf(product.productId) }}
                   </span>
                   <!-- 行内步进器（T47-T49）：已加购显示 "- 数量 +"，未加购仅 + 按钮。
                        有规格商品不在此处步进——同一商品的不同规格在购物车中是不同行（contract §3.4），
@@ -1689,6 +1712,19 @@ async function onCheckout(): Promise<void> {
 }
 
 /* 行内步进器（T47-T49）：- 数量 + */
+/* 有规格商品的已加购反馈（2026-09-15）：紧跟价格右侧、`+` 按钮左侧；
+   `.product-stepper` 用 margin-left:auto 把增减控件推到行尾，本徽标则贴住价格，避免挤压 + 按钮 */
+.product-added {
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #fff1eb;
+  color: var(--color-primary);
+  font-size: 10px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
 .product-stepper {
   display: flex;
   align-items: center;
