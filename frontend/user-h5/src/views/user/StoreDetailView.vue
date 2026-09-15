@@ -14,7 +14,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useCatalogStore } from '@/stores/catalogStore'
 import { useCartStore } from '@/stores/cartStore'
 import { useSessionStore } from '@/stores/sessionStore'
-import { formatMoney, formatTime, statusText } from '@/services/normalizers'
+import { formatMoney, formatTime, storeStatusText } from '@/services/normalizers'
 import { reviewApi, favoriteApi } from '@/services/api'
 import type { CartLine, Product, ReviewRecord, StoreCategory } from '@/services/api/types'
 import { toast } from '@/utils/toast'
@@ -693,7 +693,7 @@ async function onCheckout(): Promise<void> {
           <p class="store-meta-row store-fee-row">
             <span class="store-meta">起送 ¥{{ formatMoney(store.startPrice) }}</span>
             <span class="store-meta">配送 ¥{{ formatMoney(store.deliveryFee) }}</span>
-            <span v-if="isClosed" class="store-status-closed">{{ statusText(store.status) }}</span>
+            <span v-if="isClosed" class="store-status-closed">{{ storeStatusText(store.status) }}</span>
           </p>
           <p class="store-tags-row">
             <span
