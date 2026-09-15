@@ -110,6 +110,7 @@ const PRODUCTS_M002: Product[] = [
     price: 19.5,
     stock: 100,
     onSale: true,
+    memberPrice: 17.5,
   },
   {
     productId: 'p102',
@@ -162,6 +163,38 @@ const PRODUCTS_M002: Product[] = [
     price: 13.9,
     stock: 0,
     onSale: true,
+  },
+  {
+    // 有规格商品演示行（契约 §3.2/§4.2：`specOptions` 元素含 `priceDelta`）：
+    // 用户端点加号先打开规格弹层，选定**一个**规格后才能加购（后端 `validatedSelection` 强制单选）；
+    // 同一商品不同规格在购物车中是不同行（`cartLineId` 按规格组合区分）
+    productId: 'p107',
+      image: '/demo-images/product-m002-04.jpg',
+    storeId: 'm002',
+    categoryId: 'c101',
+    name: '双人分享套餐',
+    description: '两人份，可选规格',
+    price: 49,
+    stock: 50,
+    onSale: true,
+    memberPrice: 45,
+    specOptions: [
+      { name: '标准份', priceDelta: 0 },
+      { name: '加量份', priceDelta: 4 },
+    ],
+  },
+  {
+    productId: 'p108',
+      image: '/demo-images/product-m002-05.jpg',
+    storeId: 'm002',
+    categoryId: 'c103',
+    name: '冰可乐',
+    description: '随餐解腻',
+    price: 8,
+    stock: 200,
+    onSale: true,
+    memberPrice: 7.2,
+    tags: ['会员价'],
   },
 ]
 

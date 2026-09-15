@@ -2,7 +2,7 @@
  * 购物车域接口（契约 §3.4：指定店铺查询/加购；数量步进与删除属购物车弹层任务）
  */
 import { request } from '@/services/http'
-import type { CartLine } from './types'
+import type { CartLine, ProductSpecOption } from './types'
 import { endpoints } from './endpoints'
 
 export function getCart(storeId: string): Promise<CartLine[]> {
@@ -13,6 +13,11 @@ export function addCartItem(body: {
   storeId: string
   productId: string
   quantity: number
+  /**
+   * 已选规格（契约 §3.4/§4.2）：有规格商品必须传且只能传一个（后端 `validatedSelection` 校验，
+   * 未选「请选择商品规格」、多选「每个商品请选择一个规格」、无规格商品传了「该商品没有可选规格」均 400）
+   */
+  specOptions?: ProductSpecOption[]
 }): Promise<CartLine> {
   return request<CartLine>({ method: 'POST', url: endpoints.cart.add, data: body })
 }

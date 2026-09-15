@@ -58,6 +58,13 @@ export interface StoreCategory {
   name: string
 }
 
+/** 商品规格选项（契约 §3.2/§4.2 定稿命名：`specOptions` 元素含 `priceDelta` 价差） */
+export interface ProductSpecOption {
+  name: string
+  /** 相对基础价的价差，≥ 0；后端 `CartService.unitPrice` 用「基础价 + 价差」计价 */
+  priceDelta: number
+}
+
 /** 商品（列表/详情最小集） */
 export interface Product {
   productId: string
@@ -76,6 +83,18 @@ export interface Product {
    */
   monthlySalesText?: string
   goodRateText?: string
+  /**
+   * 会员价（契约 §3.2：非会员仍返回该字段，但计价仍按 `price`）。
+   * 前端按「接口返回才展示」渲染为会员价高亮行；缺失整块隐藏，不显示 undefined（PRD 检查列）
+   */
+  memberPrice?: number | null
+  /** 商品标签（契约 §3.2；接口返回才展示） */
+  tags?: string[]
+  /**
+   * 规格选项（契约 §3.2/§4.2）：非空表示该商品「有规格」——点加号先打开规格弹层，
+   * 由用户选定**一个**规格后加购（后端 `validatedSelection` 强制单选，未选/多选均 400）
+   */
+  specOptions?: ProductSpecOption[]
 }
 
 /**
@@ -88,9 +107,14 @@ export interface CartLine {
   productId: string
   name: string
   image?: string
-  /** 后端重读的商品单价（客户端提交单价仅作一致性提示，不作计价依据） */
+  /** 后端重读的商品单价（客户端提交单价仅作一致性提示，不作计价依据；含已选规格价差） */
   unitPrice: number
   quantity: number
+  /**
+   * 该行已选规格（契约 §3.4：购物车行唯一范围为「用户 + 店铺 + 商品 + 规格组合」，
+   * 同一商品不同规格是不同行 → 由 `cartLineId` 区分，不得错误合并）
+   */
+  specOptions?: ProductSpecOption[]
 }
 
 /** 店铺列表查询参数（GET /stores） */

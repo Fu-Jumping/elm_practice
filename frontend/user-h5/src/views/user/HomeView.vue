@@ -2,8 +2,9 @@
 /**
  * 首页 exact 复刻（视觉真源：docs/design/exports/用户端/02-首页/02-首页-精细/首页-精细-项目化.svg，393×852）
  * 2026-09-06 静态视觉层转写 + 商家卡接 catalogStore（mock GET /stores）数据驱动；px 由 postcss px-to-viewport(390) 转 vw
- * 占位口径（PRD 7.16.1 + 精细版 README §2.3）：占位内容点击一律提示"暂未开放"，不进入功能范围
- * TODO(口径待确认)：课程 10 类分类固定数据未在文档枚举，宫格文案暂用设计稿原文，待分类接口定稿替换
+ * 占位口径（PRD 7.16.1 + 精细版 README §2.3）：超范围占位栏目点击一律提示"暂未开放"，不进入功能范围
+ * 2026-09-15 宫格接线补全（TODO-USER-107 ② 收口）：课程分类项点击携带分类编号进入分类商家列表（PRD 826 行），
+ * 分类编号取自 `utils/courseCategories.ts` 的课程固定分类数据（PRD 该行允许「课程固定分类数据」承载）。
  */
 import { computed, onActivated, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -15,6 +16,7 @@ import { addressApi } from '@/services/api'
 import { storeApi } from '@/services/api'
 import { formatMoney } from '@/services/normalizers'
 import { productImageSrc, storeImageSrc } from '@/utils/demoImages'
+import { courseCategoryIdOf } from '@/utils/courseCategories'
 import type { StorePreviewProduct, StoreSummary } from '@/services/api/types'
 import type { CSSProperties } from 'vue'
 
@@ -29,8 +31,13 @@ interface GridCell {
   icon: string
   /** 超范围占位栏目（点击提示暂未开放，不进入课程分类范围） */
   placeholder?: boolean
-  /** 已接通的真实入口（CHG-001：宫格「天天爆红包」→ 红包页；其余栏目仍未接通） */
+  /** 已接通的真实入口（CHG-001：宫格「天天爆红包」→ 红包页） */
   entry?: 'coupons'
+  /**
+   * 课程分类项标记：该格是「课程 10 类点餐分类」之一，点击进入分类商家列表（PRD 826 行）。
+   * 分类编号由 `courseCategoryIdOf(label)` 解析，不在宫格表里重复硬编码。
+   */
+  category?: boolean
 }
 
 // 优惠标签样式按序循环（真源三款：金/橙/灰）；数据驱动后样式与文案解耦
@@ -140,28 +147,29 @@ function retryStores(): void {
 }
 
 // 分类宫格 3 行 × 5 列；行 1 大图标 56px，行 2/3 小图标 36px；占位清单见精细版 README §2.3
+// `category: true` = 课程 10 类点餐分类项，点击进入分类商家列表（PRD 826 行）；占位栏目与红包入口不标该项
 const gridRows: GridCell[][] = [
   [
-    { key: 'takeout', label: '美食外卖', icon: `${ASSETS}/cat-grid-01.png` },
+    { key: 'takeout', label: '美食外卖', icon: `${ASSETS}/cat-grid-01.png`, category: true },
     { key: 'market', label: '超市便利', icon: `${ASSETS}/cat-grid-02.png`, placeholder: true },
     { key: 'fruit', label: '水果鲜花', icon: `${ASSETS}/cat-grid-03.png`, placeholder: true },
     { key: 'vegetable', label: '买菜', icon: `${ASSETS}/cat-grid-04.png`, placeholder: true },
     { key: 'pharmacy', label: '买药', icon: `${ASSETS}/cat-grid-05.png`, placeholder: true },
   ],
   [
-    { key: 'dessert', label: '甜品饮品', icon: `${ASSETS}/cat-grid-06.png` },
+    { key: 'dessert', label: '甜品饮品', icon: `${ASSETS}/cat-grid-06.png`, category: true },
     // CHG-001（PRD 7.16.1 首页「天天爆红包」入口行）：由占位装饰改为红包页真实入口
     { key: 'redpacket', label: '天天爆红包', icon: `${ASSETS}/cat-grid-07.png`, entry: 'coupons' },
-    { key: 'freefruit', label: '0元领水果', icon: `${ASSETS}/cat-grid-08.png` },
+    { key: 'freefruit', label: '0元领水果', icon: `${ASSETS}/cat-grid-08.png`, category: true },
     { key: 'errand', label: '跑腿', icon: `${ASSETS}/cat-grid-09.png`, placeholder: true },
-    { key: 'huichi', label: '会吃', icon: `${ASSETS}/cat-grid-10.png` },
+    { key: 'huichi', label: '会吃', icon: `${ASSETS}/cat-grid-10.png`, category: true },
   ],
   [
-    { key: 'ranking', label: '放心点榜', icon: `${ASSETS}/cat-grid-11.png` },
-    { key: 'trend', label: '趋势情报局', icon: `${ASSETS}/cat-grid-12.png` },
-    { key: 'burger', label: '汉堡西餐', icon: `${ASSETS}/cat-grid-13.png` },
-    { key: 'milktea', label: '奶茶果汁', icon: `${ASSETS}/cat-grid-14.png` },
-    { key: 'all', label: '全部', icon: `${ASSETS}/cat-grid-15.png` },
+    { key: 'ranking', label: '放心点榜', icon: `${ASSETS}/cat-grid-11.png`, category: true },
+    { key: 'trend', label: '趋势情报局', icon: `${ASSETS}/cat-grid-12.png`, category: true },
+    { key: 'burger', label: '汉堡西餐', icon: `${ASSETS}/cat-grid-13.png`, category: true },
+    { key: 'milktea', label: '奶茶果汁', icon: `${ASSETS}/cat-grid-14.png`, category: true },
+    { key: 'all', label: '全部', icon: `${ASSETS}/cat-grid-15.png`, category: true },
   ],
 ]
 
@@ -203,13 +211,26 @@ function onOpenStore(storeId: string): void {
 
 /**
  * 分类宫格点击：
- * - 已接通入口（CHG-001：天天爆红包）→ 跳红包页；未登录由红包页自身与路由守卫引导登录（PRD 877 行检查列）
- * - P0 分类商家列表与其余栏目未实现：点击均提示「暂未开放」（PRD 搜索框行同口径，PRD 877 行「其余占位保持不可点」）
+ * - 红包入口（CHG-001：天天爆红包）→ 跳红包页；未登录由红包页自身与路由守卫引导登录（PRD 877 行检查列）
+ * - 课程分类项（`category: true`）→ 携带课程分类编号进入分类商家列表（PRD 826 行交互列），
+ *   分类编号解析自课程固定分类数据（`utils/courseCategories.ts`）
+ * - 超范围占位栏目与其它未接通栏目 → 提示「暂未开放」（PRD 877 行「其余占位保持不可点」）
  */
 function onCellClick(cell: GridCell): void {
   if (cell.entry === 'coupons') {
     void router.push({ name: 'coupons' })
     return
+  }
+  if (cell.category) {
+    const categoryId = courseCategoryIdOf(cell.label)
+    if (categoryId) {
+      void router.push({
+        name: 'category-store-list',
+        params: { categoryId },
+        query: { name: cell.label },
+      })
+      return
+    }
   }
   toast('暂未开放')
 }

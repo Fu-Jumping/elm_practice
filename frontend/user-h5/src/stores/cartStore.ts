@@ -6,7 +6,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { cartApi } from '@/services/api'
-import type { CartLine } from '@/services/api/types'
+import type { CartLine, ProductSpecOption } from '@/services/api/types'
 
 export const useCartStore = defineStore('cart', () => {
   const lines = ref<CartLine[]>([])
@@ -71,12 +71,14 @@ export const useCartStore = defineStore('cart', () => {
     storeId: string,
     productId: string,
     quantity = 1,
+    /** 已选规格（契约 §3.4/§4.2）：有规格商品必须且只能传一个，由后端校验 */
+    specOptions?: ProductSpecOption[],
   ): Promise<boolean> {
     // XA-05 防重复提交：同商品加购进行中直接忽略后续点击
     if (addingProductIds.value.has(productId)) return false
     addingProductIds.value.add(productId)
     try {
-      const line = await cartApi.addCartItem({ storeId, productId, quantity })
+      const line = await cartApi.addCartItem({ storeId, productId, quantity, specOptions })
       // 成功后本地 upsert 响应行（mock/后端均返回合并后的行），不再逐次 GET 重查
       const index = lines.value.findIndex((existing) => existing.cartLineId === line.cartLineId)
       if (index >= 0) lines.value.splice(index, 1, line)
