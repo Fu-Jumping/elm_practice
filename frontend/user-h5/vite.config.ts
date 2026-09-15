@@ -3,6 +3,7 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import pxToViewport from 'postcss-px-to-viewport-8-plugin'
+import { vwScaleCapPlugin } from './src/utils/vwScaleCap'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -68,6 +69,11 @@ export default defineConfig(({ mode }) => {
             // 全库 px `max-width` 仅此 5 处且取值一致（430px），排除后行为唯一。
             propList: ['*', '!max-width'],
           }),
+          // 缩放上限（TODO-USER-112）：vw 只跟视口走，`.app-shell` 的 max-width 锁得住宽度、锁不住缩放
+          // ——视口 1163px 时整页被放大 3 倍（购物车栏 317px 盖住半屏）。紧接换算收口为
+          // `min(Nvw, N×4.3px)`：视口 ≤430px 时恒取 vw 原值（移动端逐像素不变），>430px 时
+          // 冻结在 430px 口径。详见 src/utils/vwScaleCap.ts。
+          vwScaleCapPlugin,
         ],
       },
     },
