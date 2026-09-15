@@ -59,7 +59,7 @@ class NotificationIntegrationTest {
         var s = userLogin();
         String body = list(s);
         Assertions.assertEquals(2, ((Number) JsonPath.read(body, "$.data.length()")).intValue());
-        Assertions.assertEquals("n001", JsonPath.read(body, "$.data[0].notificationId"));
+        Assertions.assertEquals("nt001", JsonPath.read(body, "$.data[0].notificationId"));
         Assertions.assertEquals("MEMBER", JsonPath.read(body, "$.data[0].type"));
         Assertions.assertFalse((Boolean) JsonPath.read(body, "$.data[0].read"));
         Assertions.assertNotNull(JsonPath.read(body, "$.data[0].title"));
@@ -82,9 +82,9 @@ class NotificationIntegrationTest {
     @Test void tcNtf002_unreadCountAndMarkReadIdempotent() throws Exception {
         var s = userLogin();
         Assertions.assertEquals(1, unread(s));
-        mvc.perform(patch("/api/v1/me/notifications/n001/read").session(s))
+        mvc.perform(patch("/api/v1/me/notifications/nt001/read").session(s))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data").isEmpty());
-        mvc.perform(patch("/api/v1/me/notifications/n001/read").session(s)).andExpect(status().isOk());
+        mvc.perform(patch("/api/v1/me/notifications/nt001/read").session(s)).andExpect(status().isOk());
         Assertions.assertEquals(0, unread(s));
 
         mvc.perform(patch("/api/v1/me/notifications/read").session(s))
@@ -95,7 +95,7 @@ class NotificationIntegrationTest {
     /** TC-NTF-003：不存在的通知 404；未登录 401；商家会话 403。 */
     @Test void tcNtf003_notFoundAndPermissions() throws Exception {
         var s = userLogin();
-        mvc.perform(patch("/api/v1/me/notifications/n999/read").session(s)).andExpect(status().isNotFound());
+        mvc.perform(patch("/api/v1/me/notifications/nt999/read").session(s)).andExpect(status().isNotFound());
         mvc.perform(get("/api/v1/me/notifications")).andExpect(status().isUnauthorized());
         mvc.perform(patch("/api/v1/me/notifications/read")).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/v1/me/notifications/unread-count")).andExpect(status().isUnauthorized());
@@ -123,8 +123,8 @@ class NotificationIntegrationTest {
                     .content("{\"status\":\"" + next + "\"}")).andExpect(status().isOk());
         }
         String body = list(userLogin());
-        Assertions.assertEquals(3, ((Number) JsonPath.read(body, "$.data[?(@.type=='ORDER' && @.relatedId=='o1001')].length()")).intValue(),
-                "接单/配送/完成三次状态更新应各写一条 ORDER 通知：" + body);
+        long orderNotices = ((java.util.List<?>) JsonPath.read(body, "$.data[?(@.type=='ORDER' && @.relatedId=='o1001')]")).size();
+        Assertions.assertEquals(3, orderNotices, "接单/配送/完成三次状态更新应各写一条 ORDER 通知：" + body);
     }
 
     /** TC-NTF-006：用户取消写 ORDER 通知。 */
@@ -133,8 +133,8 @@ class NotificationIntegrationTest {
         mvc.perform(post("/api/v1/orders/o1001/cancel").session(s).contentType(MediaType.APPLICATION_JSON)
                 .content("{\"reason\":\"不想要了\"}")).andExpect(status().isOk());
         String body = list(s);
-        Assertions.assertEquals(1, ((Number) JsonPath.read(body, "$.data[?(@.type=='ORDER' && @.relatedId=='o1001')].length()")).intValue(),
-                "用户取消必须写 ORDER 通知：" + body);
+        long cancelNotices = ((java.util.List<?>) JsonPath.read(body, "$.data[?(@.type=='ORDER' && @.relatedId=='o1001')]")).size();
+        Assertions.assertEquals(1, cancelNotices, "用户取消必须写 ORDER 通知：" + body);
     }
 
     /** TC-NTF-007：红包到账写 COUPON 通知，relatedId 为红包编号。 */

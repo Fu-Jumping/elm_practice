@@ -47,9 +47,9 @@ class FavoriteIntegrationTest {
         var s = userLogin();
         String body = list(s);
         Assertions.assertEquals(2, ((Number) JsonPath.read(body, "$.data.length()")).intValue());
-        Assertions.assertEquals("f001", JsonPath.read(body, "$.data[0].favoriteId"));
+        Assertions.assertEquals("fv001", JsonPath.read(body, "$.data[0].favoriteId"));
         Assertions.assertEquals("m002", JsonPath.read(body, "$.data[0].storeId"));
-        Assertions.assertEquals("f002", JsonPath.read(body, "$.data[1].favoriteId"));
+        Assertions.assertEquals("fv002", JsonPath.read(body, "$.data[1].favoriteId"));
         Assertions.assertEquals("肯德基宅急送", JsonPath.read(body, "$.data[0].storeName"));
         Assertions.assertEquals("/demo-images/store-m002.jpg", JsonPath.read(body, "$.data[0].image"));
         Assertions.assertEquals(4.8, ((Number) JsonPath.read(body, "$.data[0].rating")).doubleValue(), 0.001);
@@ -94,7 +94,9 @@ class FavoriteIntegrationTest {
         mvc.perform(delete("/api/v1/me/favorites/m999").session(s)).andExpect(status().isNotFound());
 
         mvc.perform(delete("/api/v1/me/favorites/m002").session(s)).andExpect(status().isOk());
-        Assertions.assertEquals(0, ((Number) JsonPath.read(list(s), "$.data.length()")).intValue());
+        String remaining = list(s);
+        Assertions.assertEquals(1, ((Number) JsonPath.read(remaining, "$.data.length()")).intValue());
+        Assertions.assertEquals("m001", JsonPath.read(remaining, "$.data[0].storeId"));
     }
 
     /** TC-FAV-004：storeId 不存在 404、缺 storeId 400。 */
