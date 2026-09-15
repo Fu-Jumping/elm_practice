@@ -100,10 +100,22 @@ export const reviewMocks: Record<string, MockHandler> = {
     return ok({ ...review })
   },
 
+  /** 评价列表（契约 §6.2 Wave3）：summary 聚合不随筛选变化 + filter 收窄（全部/有图/最新/好评/差评） */
   'GET /stores/:storeId/reviews': ({ params }) => {
-    const list = reviewMockState
+    const all = reviewMockState
       .filter((item) => item.storeId === params?.storeId)
       .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
-    return ok(list.map((item) => ({ ...item })))
+    const totalCount = all.length
+    const averageRating = totalCount
+      ? Math.round((all.reduce((sum, item) => sum + item.rating, 0) / totalCount) * 10) / 10
+      : 0
+    const filter = String(params?.filter ?? '全部')
+    const list = all.filter((item) => {
+      if (filter === '有图') return item.images.length > 0
+      if (filter === '好评') return item.rating >= 4
+      if (filter === '差评') return item.rating <= 3
+      return true // 全部 / 最新（最新=默认时间倒序）
+    })
+    return ok({ summary: { averageRating, totalCount }, list: list.map((item) => ({ ...item })) })
   },
 }

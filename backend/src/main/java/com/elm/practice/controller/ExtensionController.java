@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class ExtensionController {
     private final AuthService auth; private final ExtensionService extension;
     public ExtensionController(AuthService auth,ExtensionService extension){this.auth=auth;this.extension=extension;}
-    @GetMapping("/stores/{storeId}/reviews") public ApiResponse<?> reviews(@PathVariable String storeId,@RequestParam(required=false) Integer rating){return ApiResponse.success(extension.storeReviews(storeId,rating));}
+    @GetMapping("/stores/{storeId}/reviews") public ApiResponse<?> reviews(@PathVariable String storeId,@RequestParam(required=false) Integer rating,@RequestParam(required=false) String filter){return ApiResponse.success(extension.storeReviews(storeId,rating,filter));}
     @PostMapping("/orders/{orderId}/review") public ApiResponse<?> review(@PathVariable String orderId,@RequestBody Requests.ReviewCreate r,HttpSession s){return ApiResponse.success(ViewMapper.review(extension.review(auth.requireUser(s),orderId,r)));}
     @GetMapping("/merchant/reviews") public ApiResponse<?> merchantReviews(HttpSession s){return ApiResponse.success(extension.merchantReviews(auth.requireMerchant(s)));}
     @PatchMapping("/merchant/reviews/{reviewId}/reply") public ApiResponse<?> reply(@PathVariable String reviewId,@RequestBody Requests.ReplyPatch r,HttpSession s){return ApiResponse.success(ViewMapper.review(extension.reply(auth.requireMerchant(s),reviewId,r)));}

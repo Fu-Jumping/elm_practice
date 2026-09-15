@@ -15,6 +15,7 @@ import { useCatalogStore } from '@/stores/catalogStore'
 import { useCartStore } from '@/stores/cartStore'
 import { useSessionStore } from '@/stores/sessionStore'
 import { formatMoney, formatTime, storeStatusText } from '@/services/normalizers'
+import type { ReviewFilter } from '@/services/api/types'
 import { reviewApi, favoriteApi } from '@/services/api'
 import type { CartLine, Product, ReviewRecord, StoreCategory } from '@/services/api/types'
 import { toast } from '@/utils/toast'
@@ -41,6 +42,18 @@ const reviews = ref<ReviewRecord[]>([])
 const reviewLoading = ref(false)
 /** 评价加载失败：保留旧结果 + 重试入口（2026-09-15 P1-6） */
 const reviewFailed = ref(false)
+/** 评价汇总与筛选（Wave3，契约 §6.2）：summary 不随筛选变化；切换筛选重新请求 */
+const reviewSummary = ref<{ averageRating: number; totalCount: number } | null>(null)
+const reviewFilter = ref<ReviewFilter>('全部')
+const REVIEW_FILTERS: ReviewFilter[] = ['全部', '有图', '最新', '好评', '差评']
+
+/** 切换评价筛选：更新选项并重新请求（SRS R682-C7） */
+function switchReviewFilter(f: ReviewFilter): void {
+  if (reviewFilter.value === f) return
+  reviewFilter.value = f
+  reviews.value = []
+  void loadReviews()
+}
 
 /** 评价图片加载失败 → 占位图（PRD 859 异常分支） */
 function onReviewImageError(event: Event): void {
@@ -50,10 +63,12 @@ function onReviewImageError(event: Event): void {
 }
 
 async function loadReviews(): Promise<void> {
-  reviewFailed.value = false
   reviewLoading.value = true
+  reviewFailed.value = false
   try {
-    reviews.value = await reviewApi.getStoreReviews(storeId)
+    const page = await reviewApi.getStoreReviews(storeId, reviewFilter.value)
+    reviewSummary.value = page.summary
+    reviews.value = page.list
   } catch {
     // 评价加载失败：保留已显示结果并提供重试（SRS R682-C9，2026-09-15 P1-6）
     reviewFailed.value = true
@@ -755,6 +770,23 @@ async function onCheckout(): Promise<void> {
 
       <!-- 店铺评价列表（批次⑩ 003 真实化：GET /stores/{storeId}/reviews） -->
       <div v-if="activeTab === 'review'" class="review-area" data-testid="review-list">
+        <!-- 评价汇总行（Wave3：平均分+总数，来自评价接口聚合，非 stores.rating 静态值） -->
+        <div v-if="reviewSummary" class="review-summary" data-testid="review-summary">
+          <span class="rs-score">{{ Number(reviewSummary.averageRating || 0).toFixed(1) }}</span>
+          <span class="rs-total">{{ reviewSummary.totalCount }} 条评价</span>
+        </div>
+        <!-- 筛选 chips（契约 §6.2：全部/有图/最新/好评/差评，切换重新请求） -->
+        <div class="review-filters" data-testid="review-filters">
+          <button
+            v-for="f in REVIEW_FILTERS"
+            :key="f"
+            type="button"
+            class="review-filter"
+            :class="{ 'is-active': reviewFilter === f }"
+            :data-testid="`review-filter-${f}`"
+            @click="switchReviewFilter(f)"
+          >{{ f }}</button>
+        </div>
         <p v-if="reviewLoading" class="review-empty">评价加载中…</p>
         <div v-else-if="reviewFailed" class="review-failed" data-testid="review-failed">
           <span>{{ reviews.length > 0 ? '评价刷新失败，已保留原结果' : '评价加载失败' }}</span>
@@ -2049,5 +2081,42 @@ async function onCheckout(): Promise<void> {
   margin-left: 6px;
   font-size: 11px;
   color: var(--color-text-tertiary);
+}
+</style>
+<style scoped>
+.review-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 12px 6px;
+}
+.review-summary .rs-score {
+  font-size: 26px;
+  font-weight: 800;
+  color: #ff5a1f;
+}
+.review-summary .rs-total {
+  font-size: 12px;
+  color: #666;
+}
+.review-filters {
+  display: flex;
+  gap: 8px;
+  padding: 0 12px 10px;
+  flex-wrap: wrap;
+}
+.review-filter {
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  color: #666;
+  border-radius: 14px;
+  padding: 3px 14px;
+  font-size: 12px;
+}
+.review-filter.is-active {
+  color: #ff5a1f;
+  border-color: #ff5a1f;
+  background: #fff5ef;
+  font-weight: 600;
 }
 </style>
