@@ -14,7 +14,7 @@ import { messageMocks } from './message'
 import { favoriteMocks } from './favorite'
 import { memberMocks } from './member'
 import { couponMocks } from './coupon'
-import { searchMocks } from './search'
+import { searchMocks, suggestMocks } from './search'
 import { fileMocks } from './file'
 import { aiMocks } from './ai'
 
@@ -46,6 +46,7 @@ const handlers = new Map<string, MockHandler>([
   ...Object.entries(memberMocks),
   ...Object.entries(couponMocks),
   ...Object.entries(searchMocks),
+  ...Object.entries(suggestMocks),
   ...Object.entries(fileMocks),
   ...Object.entries(aiMocks),
 ])

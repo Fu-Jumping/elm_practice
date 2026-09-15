@@ -25,6 +25,17 @@ import { COUPON_SEED, couponMockState } from '@/mocks/coupon'
  * CP-8 购买套餐：调接口 → 生成对应张数 → 提示；处理中按钮禁用防重复提交
  */
 describe('红包页（批次⑥/CHG-001 TODO-USER-028）', () => {
+  /**
+   * 东八区当天日期（yyyy-MM-dd）。**不要用 `new Date().toISOString()`**：那是 UTC，
+   * 在东八区 00:00–08:00 会退回前一天，使「当日免费次数已用」的模拟日期与实际当天不符、
+   * 也让「当天 23:59:59 到期」的断言在凌晨失败（契约 §3.10 免费爆 0 点重置按东八区）。
+   */
+  const todayLocal = (): string => {
+    const pad = (n: number): string => String(n).padStart(2, '0')
+    const d = new Date()
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  }
+
   const messages: string[] = []
   let offToast: (() => void) | undefined
 
@@ -114,7 +125,7 @@ describe('红包页（批次⑥/CHG-001 TODO-USER-028）', () => {
       ...COUPON_SEED[0]!,
       couponId: 'cp-today',
       name: '今日到期红包',
-      validTo: `${new Date().toISOString().slice(0, 10)} 23:59:59`,
+      validTo: `${todayLocal()} 23:59:59`,
     })
     const expired = { ...COUPON_SEED[0]!, couponId: 'cp-exp', name: '已过期红包', validTo: '2026-09-01 23:59:59' }
     couponMockState.push(expired)

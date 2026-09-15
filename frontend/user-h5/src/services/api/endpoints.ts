@@ -20,6 +20,8 @@ export const endpoints = {
   // 搜索（契约 §3.6）：关键词搜索同时返回商家与商品汇总；排序 综合/销量/距离；分页 page/size
   search: {
     query: '/search',
+    suggest: '/search/suggest',
+    hot: '/search/hot',
   },
   // 文件上传（契约 §10.1）：单张 multipart（字段 file，可选 scene=product/review）；
   // 读取经静态映射 /uploads/** 提供，业务侧只保存返回的 url

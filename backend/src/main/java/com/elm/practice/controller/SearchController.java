@@ -26,4 +26,17 @@ public class SearchController {
                                  @RequestParam(required = false) String size) {
         return ApiResponse.success(search.search(keyword, categoryId, sort, page, size));
     }
+
+    /** 输入联想（契约 §3.6 /search/suggest）：词条字典 + 店铺名 + 商品名三源合并去重。 */
+    @GetMapping("/search/suggest")
+    public ApiResponse<?> suggest(@RequestParam(required = false) String keyword,
+                                  @RequestParam(required = false) Integer limit) {
+        return ApiResponse.success(search.suggest(keyword, limit));
+    }
+
+    /** 热门词（契约 §3.6 /search/hot）：词条字典 hot 词条按权重，前 3 带 HOT 标记。 */
+    @GetMapping("/search/hot")
+    public ApiResponse<?> hot(@RequestParam(required = false) Integer limit) {
+        return ApiResponse.success(search.hot(limit));
+    }
 }
