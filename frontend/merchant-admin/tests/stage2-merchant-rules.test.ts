@@ -27,6 +27,14 @@ describe('第二阶段商家端规则（PRD v1.3 / 最新契约）', () => {
     expect(() => preparePromotionConfig({ ...promotion, memberDiscountRate: 0 })).toThrow('折扣率')
   })
 
+  it('关闭配送费优惠开关时把门槛归零，避免后端仍按门槛免配送费', () => {
+    expect(preparePromotionConfig({ ...promotion, freeDeliveryEnabled: false }).freeDeliveryThreshold).toBe(0)
+  })
+
+  it('启用配送费优惠但门槛为 0 时阻止保存（后端以门槛 0 表示不启用）', () => {
+    expect(() => preparePromotionConfig({ ...promotion, freeDeliveryThreshold: 0 })).toThrow('门槛须大于 0')
+  })
+
   it('商品图拒绝 0 字节、超 2MB 和非图片类型', () => {
     expect(validateProductImage(new File([], 'empty.png', { type: 'image/png' }))).toContain('不能为空')
     expect(validateProductImage(new File([new Uint8Array(2 * 1024 * 1024 + 1)], 'large.jpg', { type: 'image/jpeg' }))).toContain('不能超过 2MB')
