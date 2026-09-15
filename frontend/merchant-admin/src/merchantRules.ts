@@ -35,10 +35,15 @@ export function preparePromotionConfig(input: PromotionConfig): PromotionConfig 
     throw new Error('会员折扣率须大于 0 且不超过 1。')
   }
 
+  const freeDeliveryThreshold = finiteNonNegative(input.freeDeliveryThreshold, '免配送费门槛')
+  if (input.freeDeliveryEnabled && freeDeliveryThreshold <= 0) {
+    throw new Error('启用配送费优惠时，免配送费门槛须大于 0。')
+  }
+
   return {
     ...input,
     newCustomerAmount: finiteNonNegative(input.newCustomerAmount, '新客立减金额'),
-    freeDeliveryThreshold: finiteNonNegative(input.freeDeliveryThreshold, '免配送费门槛'),
+    freeDeliveryThreshold: input.freeDeliveryEnabled ? freeDeliveryThreshold : 0,
     memberDiscountRate,
     fullReductions: tiers
       .sort((left, right) => left.threshold - right.threshold)
