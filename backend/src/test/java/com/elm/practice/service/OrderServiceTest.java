@@ -13,6 +13,7 @@ import org.springframework.test.context.jdbc.SqlConfig;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -137,5 +138,64 @@ class OrderServiceTest {
         String payDeadline = String.valueOf(view.get("payDeadline"));
         assertNotEquals("null", payDeadline, "payDeadline 不能缺失");
         assertEquals(LocalDateTime.parse(createdAt, Times.TIME).plusMinutes(15).format(Times.TIME), payDeadline);
+    }
+
+    /**
+     * 契约 §3.5 新增 `POST /orders/preview`（确认订单页计价预览，SRS §5.6「由后端计算、页面只展示结果」）：
+     * 预览必须与真实下单**同一口径**，且**只读**——不改购物车、不扣库存、不落订单。
+     * reset.sql 促销基线（满 20 减 2、满 40 减 5、新客 3、免配送费门槛 30、会员 95 折），u001 在 m002 非新客但是会员：
+     * p101×2 小计 39.00 → 满减 2.00、免配送费 5.00、会员折扣 39×0.05=1.95，实付 = 39 − 2 − 1.95 + 5 − 5 + 2 = 37.05。
+     */
+    @Test void previewOrderMatchesCreateAmountsAndWritesNothing() {
+        seedCartLine("p101", 2);
+        int ordersBefore = orderMapper.listByUser("u001", null).size();
+        Requests.OrderPreview request = new Requests.OrderPreview(); request.storeId = "m002";
+        Map<String, Object> preview = orders.preview(user(), request);
+        assertEquals(new BigDecimal("39.00"), preview.get("itemSubtotal"));
+        assertEquals(new BigDecimal("2.00"), preview.get("packagingFee"));
+        assertEquals(new BigDecimal("5.00"), preview.get("deliveryFee"));
+        assertEquals(new BigDecimal("2.00"), preview.get("fullReductionAmount"));
+        assertEquals(new BigDecimal("0.00"), preview.get("newCustomerAmount"));
+        assertEquals(new BigDecimal("1.95"), preview.get("memberDiscountAmount"));
+        assertEquals(new BigDecimal("0.00"), preview.get("couponAmount"));
+        assertEquals(new BigDecimal("5.00"), preview.get("deliveryFeeDiscount"));
+        assertEquals(new BigDecimal("37.05"), preview.get("total"));
+        // 只读：不落订单、购物车未清、库存未扣。
+        assertEquals(ordersBefore, orderMapper.listByUser("u001", null).size());
+        assertEquals(1, cartLineMapper.findByUserAndStore("u001", "m002").size());
+        assertEquals(100, productMapper.findById("p101").stock);
+        // 与真实下单逐项一致（预览不是另一套算法）。
+        Requests.OrderCreate create = new Requests.OrderCreate(); create.storeId = "m002"; create.addressId = "da001";
+        Domain.Order order = orders.create(user(), create);
+        assertEquals(order.itemSubtotal, preview.get("itemSubtotal"));
+        assertEquals(order.packagingFee, preview.get("packagingFee"));
+        assertEquals(order.deliveryFee, preview.get("deliveryFee"));
+        assertEquals(order.fullReductionAmount, preview.get("fullReductionAmount"));
+        assertEquals(order.newCustomerAmount, preview.get("newCustomerAmount"));
+        assertEquals(order.memberDiscountAmount, preview.get("memberDiscountAmount"));
+        assertEquals(order.couponAmount, preview.get("couponAmount"));
+        assertEquals(order.deliveryFeeDiscount, preview.get("deliveryFeeDiscount"));
+        assertEquals(order.total, preview.get("total"));
+        assertEquals(ordersBefore + 1, orderMapper.listByUser("u001", null).size());
+    }
+
+    /** 满减取「满足门槛的最大档」：p104×4 = 46.00 ≥ 40 → 减 5.00（不是 20 档的 2.00）。 */
+    @Test void previewOrderAppliesLargestSatisfiedFullReductionTier() {
+        seedCartLine("p104", 4);
+        Requests.OrderPreview request = new Requests.OrderPreview(); request.storeId = "m002";
+        Map<String, Object> preview = orders.preview(user(), request);
+        assertEquals(new BigDecimal("46.00"), preview.get("itemSubtotal"));
+        assertEquals(new BigDecimal("5.00"), preview.get("fullReductionAmount"));
+        assertEquals(new BigDecimal("5.00"), preview.get("deliveryFeeDiscount"));
+        assertEquals(new BigDecimal("2.30"), preview.get("memberDiscountAmount"));
+        // 46 − 5 − 2.30 + 5 − 5 + 2 = 40.70
+        assertEquals(new BigDecimal("40.70"), preview.get("total"));
+    }
+
+    /** 空购物车与下单同口径：400 购物车为空，不返回一套「0 元但收配送费」的假金额。 */
+    @Test void previewOrderRejectsEmptyCartLikeCreate() {
+        Requests.OrderPreview request = new Requests.OrderPreview(); request.storeId = "m002";
+        ApiException ex = assertThrows(ApiException.class, () -> orders.preview(user(), request));
+        assertEquals(400, ex.getStatus().value());
     }
 }
