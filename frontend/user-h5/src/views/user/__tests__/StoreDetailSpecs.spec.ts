@@ -23,6 +23,10 @@ import { clearMockCart, getMockCartSnapshot } from '@/mocks/cart'
  * SPEC-5 同一商品不同规格在购物车中分行（不同规格不得合并），单价各含各自价差
  * SPEC-6 遮罩点击放弃本次输入；数量不得超过库存
  * SPEC-7 会员价：接口返回 memberPrice 才展示并高亮；缺失整块隐藏且不出现 undefined
+ * SPEC-8 有规格商品加购后，商品列表卡片显示该商品的已加**合计**数量（同一商品不同规格是不同行，
+ *        卡片数量为各行之和）；行内不出现减号（多规格行无法确定减哪一行，增减统一在规格弹层与
+ *        购物车弹层内完成）；加号仍打开规格弹层。对应缺陷：有规格商品此前被整体排除在步进器之外，
+ *        加购成功后卡片无任何数量反馈，只剩"未加购"外观（PRD 7.16.1：加购成功后购物车栏数量与金额立即刷新）
  * 本组在 feat: 实现前必须红（规格弹层、会员价行与替身规格数据由 feat: 加入）。
  */
 describe('StoreDetailView（规格弹层与会员价，2026-09-15）', () => {
@@ -225,5 +229,40 @@ describe('StoreDetailView（规格弹层与会员价，2026-09-15）', () => {
     // 未返回 memberPrice 的商品（p102）→ 整块隐藏，不显示 undefined
     expect(wrapper.find('[data-testid="member-price-p102"]').exists()).toBe(false)
     expect(wrapper.text()).not.toContain('undefined')
+  })
+
+  it('SPEC-8 有规格商品加购后卡片显示累计数量，行内无减号且加号仍开弹层（红端：卡片无数量反馈）', async () => {
+    const { wrapper } = await mountDetail()
+
+    // 初始未加购：卡片不显示数量
+    expect(wrapper.find('[data-testid="product-qty-p107"]').exists()).toBe(false)
+
+    // 选「标准份」加购 1 件 → 卡片立即显示 1
+    await wrapper.find('[data-testid="add-btn-p107"]').trigger('click')
+    await flushPromises()
+    await wrapper.find('[data-testid="spec-option-标准份"]').trigger('click')
+    await wrapper.find('[data-testid="spec-submit"]').trigger('click')
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="product-qty-p107"]').text()).toBe('1'),
+      { timeout: 10000 },
+    )
+
+    // 同一商品改选「加量份」再加 1 件（不同规格分行）→ 卡片数量为两行之和
+    await wrapper.find('[data-testid="add-btn-p107"]').trigger('click')
+    await flushPromises()
+    await wrapper.find('[data-testid="spec-option-加量份"]').trigger('click')
+    await wrapper.find('[data-testid="spec-submit"]').trigger('click')
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="product-qty-p107"]').text()).toBe('2'),
+      { timeout: 10000 },
+    )
+
+    // 有规格商品行内不做减号：多规格行无法确定减哪一行（增减在弹层内完成）
+    expect(wrapper.find('[data-testid="minus-btn-p107"]').exists()).toBe(false)
+
+    // 加号仍打开规格弹层（PRD 850：有规格商品卡点加号打开规格弹层）
+    await wrapper.find('[data-testid="add-btn-p107"]').trigger('click')
+    await flushPromises()
+    expect(wrapper.find('[data-testid="spec-popup"]').exists()).toBe(true)
   })
 })
