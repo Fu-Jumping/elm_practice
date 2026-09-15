@@ -4,37 +4,37 @@
       "id": 5124724748,
       "node_id": "PRR_kwDOULaxtM8AAAABMXUYDA",
       "user": {
-        "login": "Fu-Jumping",
+        "login": "匿名评审人",
         "id": 234341049,
         "node_id": "U_kgDODffCuQ",
         "avatar_url": "https://avatars.githubusercontent.com/u/234341049?u=b991452c8ee2ae30131649584f3cf97d689e3009&v=4",
         "gravatar_id": "",
-        "url": "https://api.github.com/users/Fu-Jumping",
-        "html_url": "https://github.com/Fu-Jumping",
-        "followers_url": "https://api.github.com/users/Fu-Jumping/followers",
-        "following_url": "https://api.github.com/users/Fu-Jumping/following{/other_user}",
-        "gists_url": "https://api.github.com/users/Fu-Jumping/gists{/gist_id}",
-        "starred_url": "https://api.github.com/users/Fu-Jumping/starred{/owner}{/repo}",
-        "subscriptions_url": "https://api.github.com/users/Fu-Jumping/subscriptions",
-        "organizations_url": "https://api.github.com/users/Fu-Jumping/orgs",
-        "repos_url": "https://api.github.com/users/Fu-Jumping/repos",
-        "events_url": "https://api.github.com/users/Fu-Jumping/events{/privacy}",
-        "received_events_url": "https://api.github.com/users/Fu-Jumping/received_events",
+        "url": "https://api.github.com/users/anonymous-reviewer",
+        "html_url": "https://github.com/anonymous-reviewer",
+        "followers_url": "https://api.github.com/users/anonymous-reviewer/followers",
+        "following_url": "https://api.github.com/users/anonymous-reviewer/following{/other_user}",
+        "gists_url": "https://api.github.com/users/anonymous-reviewer/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/anonymous-reviewer/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/anonymous-reviewer/subscriptions",
+        "organizations_url": "https://api.github.com/users/anonymous-reviewer/orgs",
+        "repos_url": "https://api.github.com/users/anonymous-reviewer/repos",
+        "events_url": "https://api.github.com/users/anonymous-reviewer/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/anonymous-reviewer/received_events",
         "type": "User",
         "user_view_type": "public",
         "site_admin": false
       },
       "body": "## 评审结论：打回（Request Changes）——代码可收，但 TDD 红绿在提交历史里不成立\n\n代码本身验收是过的：\n- 分支尖端全量 vitest 实测：**29/29 passed**（4 个测试文件）\n- 无 `docs/record/daily/**` 变更，raw 留痕齐全，提交信息中文+类型前缀规范\n- 素材提交（7dd0d81 / 5b13276 / 81fb433）实测**未随 #7 进入 main**（#7 只合并了注册功能部分），本 PR retarget 到 main 后会一并进入，符合 PR 描述预期\n\n打回的唯一原因——先红→转绿在提交历史中从未发生：\n\n1. `d63fe1a`（test: 先红）实际包含**全部实现**：TabBar.vue(+158)、MainLayout.vue(±76)、HomeView.vue(+861) 都在这个提交里。实测在该提交上跑 HomeView.spec：**4 passed，不是 4 failed**。\n2. `b6fb523`（feat: 转绿）实际只含 `docs/record/raw/2026-09-06/用户端-1221.md`（+35 行），无任何代码。\n3. 即「test 提交 = 实现+测试、feat 提交 = 一篇记录」。对照团队既有标准：#7 的 `f3058d4`（test 先红）实测 **14 failed / 6 passed**，是真红。\n\n### 修复方法（raw 片段里本就写了「待 test:/feat: 拆分提交」，按原计划拆即可）\n\n- 交互 rebase 拆分：`d63fe1a` 只保留 `HomeView.spec.ts` 变更——spec 仅 import HomeView 与 `@/utils/toast`，对 base `81fb433` 的 42 行 Hello 占位页可正常编译，T1-T4 会复现 **4 failed**；`TabBar.vue`、`MainLayout.vue`、`HomeView.vue` 移入 `b6fb523`（转绿后全量 29 passed）；`942aa38` 不动。\n- force-push 分支后我会复验红绿，随后把 base 改指 main 并合并（素材提交随 #9 一并进入 main）。",
       "state": "CHANGES_REQUESTED",
-      "html_url": "https://github.com/Fu-Jumping/elm_practice/pull/9#pullrequestreview-5124724748",
-      "pull_request_url": "https://api.github.com/repos/Fu-Jumping/elm_practice/pulls/9",
+      "html_url": "（仓库 PR 链接已匿名化）",
+      "pull_request_url": "https://api.github.com/repos/（已匿名）/pulls/9",
       "author_association": "OWNER",
       "_links": {
         "html": {
-          "href": "https://github.com/Fu-Jumping/elm_practice/pull/9#pullrequestreview-5124724748"
+          "href": "（仓库 PR 链接已匿名化）"
         },
         "pull_request": {
-          "href": "https://api.github.com/repos/Fu-Jumping/elm_practice/pulls/9"
+          "href": "https://api.github.com/repos/（已匿名）/pulls/9"
         }
       },
       "submitted_at": "2026-09-06T08:17:36Z",

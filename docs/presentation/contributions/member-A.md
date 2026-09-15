@@ -1,4 +1,4 @@
-# 林晨｜个人工作贡献总结
+# 成员A（后端B）｜个人工作贡献总结
 
 > 根据现有分工、Git/PR 与工作记录整理的讲稿草稿；由本人核对。本轮 AI 检查的修复不归入个人既往工作。
 
@@ -20,7 +20,7 @@
 - 5db7023（4 家追加店铺、21 商品种子数据）；docs/record/raw/2026-09-08/后端-1040.md。
 - docs/record/daily/2026-09-07.md；backend/src/main/resources/db/ 与部署文档。
 
-仓库：https://github.com/Fu-Jumping/elm_practice
+仓库：（仓库 PR 链接已匿名化）
 
 ## 答辩时应能解释
 
