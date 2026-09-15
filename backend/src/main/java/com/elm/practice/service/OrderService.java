@@ -86,7 +86,8 @@ public class OrderService {
             lockedCoupon = couponSvc.lockForOrder(u, r.couponId.trim(), sid, subtotal);
             couponAmount = lockedCoupon.amount.setScale(2);
         }
-        var pr = pricing.price(subtotal, store.deliveryFee, promo, isNewCustomer, false, couponAmount);
+        // 第⑤步会员折扣：会员标识来自 users.is_member（契约 §3.8），折扣率取店铺 promotions.member_discount。
+        var pr = pricing.price(subtotal, store.deliveryFee, promo, isNewCustomer, u.isMember, couponAmount);
         BigDecimal total = pr.total;
         String id = ids.nextId("o");
         // 支付扩展已选定：订单创建即待支付，15 分钟内支付成功后进入待接单（契约 3.5；状态机修正 BE-002）。

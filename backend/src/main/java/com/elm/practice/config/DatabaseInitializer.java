@@ -39,6 +39,10 @@ public class DatabaseInitializer implements ApplicationRunner {
             ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-reviews-stage2.sql"), StandardCharsets.UTF_8));
             // AI 点餐助手：会话与消息表（会话记忆复用 MySQL），幂等可重复执行。
             ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-ai-chat.sql"), StandardCharsets.UTF_8));
+            // 批次⑥：商家收藏表（契约 §3.7），幂等可重复执行。
+            ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-favorites.sql"), StandardCharsets.UTF_8));
+            // 批次⑥：会员标识扩列（契约 §3.8），幂等可重复执行。
+            ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-member.sql"), StandardCharsets.UTF_8));
             if (users.count() == 0) {
                 ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/seed.sql"), StandardCharsets.UTF_8));
             }

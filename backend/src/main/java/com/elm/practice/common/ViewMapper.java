@@ -25,6 +25,16 @@ public final class ViewMapper {
     public static Map<String,Object> merchantStore(Domain.Store s, String contactPhone) {
         var m = store(s); m.put("contactPhone", contactPhone); return m;
     }
+    /** 收藏商家卡片（契约 §3.7）：含店铺快照字段与促销标签；distanceText 当前无距离数据不返回，前端按缺失隐藏。 */
+    public static Map<String,Object> favorite(Domain.Favorite f, java.util.List<String> couponTags) {
+        var m = new LinkedHashMap<String,Object>();
+        m.put("favoriteId", f.id); m.put("storeId", f.storeId); m.put("storeName", f.storeName);
+        m.put("image", f.image); m.put("rating", f.rating); m.put("monthlySales", f.monthlySales);
+        m.put("deliveryFee", f.deliveryFee); m.put("storeStatus", f.storeStatus);
+        m.put("createdAt", f.createdAt); m.put("deliveryMinutes", f.deliveryMinutes);
+        m.put("couponTags", couponTags == null ? java.util.List.of() : couponTags);
+        return m;
+    }
     public static Map<String,Object> category(Domain.Category c) {
         var m = new LinkedHashMap<String,Object>(); m.put("categoryId",c.id); m.put("storeId",c.storeId);
         m.put("name",c.name); m.put("sortOrder",c.sortOrder); return m;

@@ -4,7 +4,9 @@ CREATE TABLE IF NOT EXISTS users (
   user_id VARCHAR(32) PRIMARY KEY, account VARCHAR(64) NOT NULL UNIQUE,
   password_hash VARCHAR(128) NOT NULL, nickname VARCHAR(80) NOT NULL, created_at TIMESTAMP NOT NULL,
   -- 批次⑥（CHG-001）：当天免费爆占用日期（东八区 yyyy-MM-dd），NULL=从未使用，0 点按日期自然重置。
-  free_blast_date DATE NULL
+  free_blast_date DATE NULL,
+  -- 批次⑥：会员标识（种子/后台标记，不提供开通接口，契约 §3.8）；member_activated_at 为开通时间。
+  is_member BOOLEAN NOT NULL DEFAULT FALSE, member_activated_at TIMESTAMP NULL
 );
 CREATE TABLE IF NOT EXISTS merchants (
   merchant_id VARCHAR(32) PRIMARY KEY, account VARCHAR(64) NOT NULL UNIQUE,
@@ -111,5 +113,13 @@ CREATE TABLE IF NOT EXISTS coupon_packs (
   pack_id VARCHAR(32) PRIMARY KEY, pack_key VARCHAR(16) NOT NULL, user_id VARCHAR(32) NOT NULL,
   price DECIMAL(10,2) NOT NULL, quantity INT NOT NULL, created_at TIMESTAMP NOT NULL,
   INDEX idx_packs_user (user_id)
+);
+
+-- 批次⑥ 商家收藏（契约 §3.7）：(user_id, store_id) 唯一，重复收藏幂等。
+CREATE TABLE IF NOT EXISTS favorites (
+  favorite_id VARCHAR(32) PRIMARY KEY, user_id VARCHAR(32) NOT NULL, store_id VARCHAR(32) NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  UNIQUE KEY uk_favorites_user_store (user_id, store_id),
+  INDEX idx_favorites_user_time (user_id, created_at)
 );
 INSERT IGNORE INTO id_sequence(name,next_val) VALUES ('global',1004);

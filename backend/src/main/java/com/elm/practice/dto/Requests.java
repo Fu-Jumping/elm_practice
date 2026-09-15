@@ -43,6 +43,7 @@ public final class Requests {
     public static class ReviewCreate { public Integer rating; public String content; public List<String> tags, images; }
     public static class ReplyPatch { public String reply; }
     public static class MessageCreate { public String content; }
+    public static class FavoriteCreate { public String storeId; }
     public static class PromotionTierItem { public BigDecimal threshold, amount; }
     public static class PromotionPatch {
         public Boolean enabled;
