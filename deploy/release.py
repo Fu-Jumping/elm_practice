@@ -30,7 +30,11 @@ if not any((BASE / 'backend' / 'target').glob('*.jar')):
 def run(*args): subprocess.run(args, check=True)
 old = json.loads((BACKUP/'pm2-before.json').read_text())
 backend = next(p for p in old if p['name']=='elm-backend')['pm2_env']
-env = {k:backend[k] for k in ('DB_HOST','DB_USER','DB_PASSWORD','DB_NAME')}
+# 2026-09-15：DEEPSEEK_API_KEY 必须在发布后保留（否则线上 AI 助手退回 503）。
+env_keys = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME']
+if backend.get('DEEPSEEK_API_KEY'):
+    env_keys.append('DEEPSEEK_API_KEY')
+env = {k: backend[k] for k in env_keys}
 config = {'apps':[{'name':'elm-backend', 'script':'/usr/bin/java', 'interpreter':'none', 'cwd':str(BASE/'backend'), 'args':['-jar','target/elm-practice-backend-0.1.0-SNAPSHOT.jar','--server.port=4000','--server.address=127.0.0.1'], 'env':env}]}
 private = BACKUP/'new-backend.json'
 private.write_text(json.dumps(config)); private.chmod(0o600)

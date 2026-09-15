@@ -1,5 +1,26 @@
 import type { Order, PromotionConfig, PromotionTier } from './services/merchantApi'
 
+/** 订单状态文案：覆盖后端 Domain.OrderStatus 全部枚举（新增状态须同步此处） */
+export const ORDER_STATUS_LABELS: Record<string, string> = {
+  PENDING_PAYMENT: '待支付',
+  PENDING: '待接单',
+  COOKING: '制作中',
+  DELIVERING: '配送中',
+  PROCESSING: '进行中',
+  COMPLETED: '已完成',
+  CANCELLED: '已取消',
+}
+
+/** 状态枚举 → 中文文案；未知状态保持原样 */
+export function orderStatusLabel(status: string): string {
+  return ORDER_STATUS_LABELS[status] ?? status
+}
+
+/** 统计/分布数据的状态名本地化（保留原数值与顺序，未知名称不丢数据） */
+export function localizeStatusDistribution<T extends { name: string }>(items: T[]): T[] {
+  return items.map((item) => ({ ...item, name: orderStatusLabel(item.name) }))
+}
+
 const PRODUCT_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const PRODUCT_IMAGE_MAX_BYTES = 2 * 1024 * 1024
 

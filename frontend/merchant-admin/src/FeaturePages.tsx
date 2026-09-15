@@ -12,7 +12,7 @@ import {
   type PromotionConfig,
   type Review,
 } from './services/merchantApi'
-import { preparePromotionConfig } from './merchantRules'
+import { localizeStatusDistribution, preparePromotionConfig } from './merchantRules'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -223,7 +223,7 @@ export function AnalyticsPage() {
     <Skeleton loading={loading} active>
       <Row gutter={[16, 16]}><Col span={8}><Card><Statistic title="营业额" value={data?.salesAmount ?? 0} prefix="¥" precision={2} /></Card></Col><Col span={8}><Card><Statistic title="有效订单" value={data?.orderCount ?? 0} /></Card></Col><Col span={8}><Card><Statistic title="客单价" value={data?.avgOrderAmount ?? 0} prefix="¥" precision={2} /></Card></Col></Row>
       <Card title="每日趋势" className="feature-card"><Table pagination={false} rowKey="date" dataSource={data?.trend ?? []} locale={{ emptyText: <Empty description="当前范围暂无趋势数据" image={Empty.PRESENTED_IMAGE_SIMPLE} /> }} columns={[{ title: '日期', dataIndex: 'date' }, { title: '订单数', dataIndex: 'orderCount', align: 'right' }, { title: '营业额', dataIndex: 'salesAmount', align: 'right', render: (value) => `¥${Number(value || 0).toFixed(2)}` }]} /></Card>
-      <Row gutter={[16, 16]}><Col span={12}><DistributionCard title="渠道占比" items={data?.channelDistribution ?? []} /></Col><Col span={12}><DistributionCard title="状态分布" items={data?.statusDistribution ?? []} /></Col></Row>
+      <Row gutter={[16, 16]}><Col span={12}><DistributionCard title="渠道占比" items={data?.channelDistribution ?? []} /></Col><Col span={12}><DistributionCard title="状态分布" items={localizeStatusDistribution(data?.statusDistribution ?? [])} /></Col></Row>
     </Skeleton>
   </section>
 }

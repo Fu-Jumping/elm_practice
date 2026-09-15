@@ -31,6 +31,9 @@ public class CouponController {
         return ApiResponse.success(coupons.purchasePack(auth.requireUser(s), r));
     }
 
+    @GetMapping("/me/coupons/blast-status")
+    public ApiResponse<?> blastStatus(HttpSession s){return ApiResponse.success(coupons.blastStatus(auth.requireUser(s)));}
+
     @PostMapping("/me/coupons/blast")
     public ApiResponse<?> blast(@RequestBody(required = false) Requests.BlastRequest r, HttpSession s) {
         return ApiResponse.success(coupons.blast(auth.requireUser(s), r));

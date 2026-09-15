@@ -752,6 +752,33 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     )
     expect(router.currentRoute.value.name).toBe('store-detail')
   })
+
+  it('T80 评价汇总与筛选：summary 行（平均分+总数）+ 五 chip 切换重新请求（契约 §6.2 Wave3）', async () => {
+    const { wrapper } = await mountDetail('/stores/m002')
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="tab-review"]').exists()).toBe(true),
+      { timeout: 10000 },
+    )
+    await wrapper.find('[data-testid="tab-review"]').trigger('click')
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="review-summary"]').exists()).toBe(true),
+      { timeout: 3000 },
+    )
+    const summary = wrapper.find('[data-testid="review-summary"]').text()
+    expect(summary).toMatch(/\d+\.\d/)
+    expect(summary).toContain('条评价')
+    // 五个筛选 chip 存在
+    for (const f of ['全部', '有图', '最新', '好评', '差评']) {
+      expect(wrapper.find(`[data-testid="review-filter-${f}"]`).exists()).toBe(true)
+    }
+    // 切换「有图」：mock 种子只有第一条带图 → 列表收窄为 1
+    await wrapper.find('[data-testid="review-filter-有图"]').trigger('click')
+    await vi.waitFor(
+      () => expect(wrapper.findAll('[data-testid="review-item"]').length).toBe(1),
+      { timeout: 3000 },
+    )
+    expect(wrapper.findAll('[data-testid="review-images"]').length).toBe(1)
+  })
 })
 
 /**

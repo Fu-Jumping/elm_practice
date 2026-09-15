@@ -374,3 +374,32 @@ export function normalizeConversation(raw: unknown): ConversationCard {
     unread: toFiniteNumber(source.unread ?? source.unreadCount),
   }
 }
+
+/**
+ * 会话详情归一化（2026-09-15 P1 消息簇）：真实后端 senderRole → 前端 sender；
+ * storeName/storeId 直出透传（storeId 缺省回退 merchantId）。
+ * POST /conversations/{id}/messages 返回**整个会话对象**，同样经本函数归一后整包替换。
+ */
+export function normalizeConversationDetail(
+  raw: unknown,
+): import('./api/types').ConversationDetailRecord {
+  const source = (raw ?? {}) as Record<string, unknown>
+  const text = (value: unknown): string => (typeof value === 'string' ? value : '')
+  const card = normalizeConversation(raw)
+  const messages = Array.isArray(source.messages) ? source.messages : []
+  return {
+    ...card,
+    storeName: text(source.storeName) || undefined,
+    messages: messages.map((item) => {
+      const m = (item ?? {}) as Record<string, unknown>
+      const sender = text(m.senderRole) || text(m.sender) || 'MERCHANT'
+      return {
+        messageId: text(m.messageId),
+        conversationId: card.conversationId,
+        sender: sender === 'USER' ? 'USER' : 'MERCHANT',
+        content: text(m.content),
+        createdAt: text(m.createdAt),
+      }
+    }),
+  }
+}

@@ -32,3 +32,27 @@ export function search(params: SearchParams): Promise<SearchResult> {
     },
   })
 }
+
+/** 联想候选（契约 §3.6 /search/suggest）：词条/店铺/商品三源，text 为补全文本 */
+export interface SearchSuggestion {
+  text: string
+  source: 'term' | 'store' | 'product'
+}
+
+/** 输入联想（防抖由调用方负责）：空关键词返回空列表 */
+export function suggest(keyword: string, limit = 8): Promise<{ suggestions: SearchSuggestion[] }> {
+  return request<{ suggestions: SearchSuggestion[] }>({
+    method: 'GET',
+    url: endpoints.search.suggest,
+    params: { keyword, limit },
+  })
+}
+
+/** 热门词（契约 §3.6 /search/hot）：来自后端词条字典，前 3 名带 HOT 标记 */
+export function hotWords(limit = 8): Promise<Array<{ word: string; hot: boolean }>> {
+  return request<Array<{ word: string; hot: boolean }>>({
+    method: 'GET',
+    url: endpoints.search.hot,
+    params: { limit },
+  })
+}

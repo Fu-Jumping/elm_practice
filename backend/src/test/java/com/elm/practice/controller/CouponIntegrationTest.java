@@ -229,7 +229,7 @@ class CouponIntegrationTest {
         var s = newUserSession();
         String body = buyPack(s, "pack49");
         org.junit.jupiter.api.Assertions.assertEquals(4, ((Number) JsonPath.read(body, "$.data.quantity")).intValue());
-        org.junit.jupiter.api.Assertions.assertEquals(49.0, ((Number) JsonPath.read(body, "$.data.price")).doubleValue(), 0.0001);
+        org.junit.jupiter.api.Assertions.assertEquals(4.90, ((Number) JsonPath.read(body, "$.data.price")).doubleValue(), 0.0001); // 2026-09-15 修正：契约 §10.5 为 ¥4.9（原 49.0 错 10 倍）;
         org.junit.jupiter.api.Assertions.assertEquals(4, ((Number) JsonPath.read(body, "$.data.coupons.length()")).intValue());
         // pack49 = 3×满30减5 + 1×无门槛减5（插入顺序）
         for (int i = 0; i < 3; i++) {
@@ -253,7 +253,7 @@ class CouponIntegrationTest {
         var s = newUserSession();
         String b1 = buyPack(s, "pack99");
         org.junit.jupiter.api.Assertions.assertEquals(8, ((Number) JsonPath.read(b1, "$.data.quantity")).intValue());
-        org.junit.jupiter.api.Assertions.assertEquals(99.0, ((Number) JsonPath.read(b1, "$.data.price")).doubleValue(), 0.0001);
+        org.junit.jupiter.api.Assertions.assertEquals(9.90, ((Number) JsonPath.read(b1, "$.data.price")).doubleValue(), 0.0001); // 2026-09-15 修正：契约 §10.5 为 ¥9.9（原 99.0 错 10 倍）
         // pack99 = 6×满30减5 + 1×满40减10（index 6） + 1×无门槛减5（index 7）
         for (int i = 0; i < 6; i++) {
             org.junit.jupiter.api.Assertions.assertEquals(30.0, ((Number) JsonPath.read(b1, "$.data.coupons[" + i + "].threshold")).doubleValue(), 0.0001);
@@ -334,5 +334,33 @@ class CouponIntegrationTest {
         String body = orderWithCoupon(s, "m002", addr, couponId);
         org.junit.jupiter.api.Assertions.assertEquals(5.0, ((Number) JsonPath.read(body, "$.data.couponAmount")).doubleValue(), 0.0001);
         org.junit.jupiter.api.Assertions.assertEquals(23.0, ((Number) JsonPath.read(body, "$.data.total")).doubleValue(), 0.0001);
+    }
+
+    // ================= 红包验收修复（2026-09-15） =================
+
+    /** 套餐价格按契约 §10.5 第 7 条为 ¥4.9/¥9.9（原实现 49.00/99.00 错 10 倍）。 */
+    @Test void packPriceMatchesContractFourPointNine() throws Exception {
+        // 先登录（沿用本类既有登录辅助）
+        var session=userLogin();
+        String body=mvc.perform(post("/api/v1/me/coupon-packs").session(session).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"packKey\":\"pack49\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        double price=com.jayway.jsonpath.JsonPath.read(body,"$.data.price");
+        org.junit.jupiter.api.Assertions.assertEquals(4.90, price, 0.001,
+                "pack49 价格应为 ¥4.90（契约 §10.5），实际=" + price);
+    }
+
+    /** 免费爆次数查询：新用户 true；爆一次后同日 false（契约 §3.10 回写）。 */
+    @Test void blastStatusReflectsFreeAvailability() throws Exception {
+        var session=userLogin();
+        mvc.perform(get("/api/v1/me/coupons/blast-status").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.freeBlastAvailable").value(true));
+        mvc.perform(post("/api/v1/me/coupons/blast").session(session).contentType(MediaType.APPLICATION_JSON).content("{}"))
+                .andExpect(status().isOk());
+        mvc.perform(get("/api/v1/me/coupons/blast-status").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.freeBlastAvailable").value(false));
     }
 }

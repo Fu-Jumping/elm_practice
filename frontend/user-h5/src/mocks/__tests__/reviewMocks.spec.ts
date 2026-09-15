@@ -38,7 +38,10 @@ describe('评价接口替身（契约 §6.2）', () => {
     expect(orderMockState.find((order) => order.orderId === 'or01')?.reviewed).toBe(true)
 
     const list = await mockDispatch({ method: 'GET', url: '/stores/m002/reviews' })
-    const reviews = list.payload.data as Array<Record<string, unknown>>
+    // 2026-09-15 Wave3：响应改为 { summary, list }（契约 §6.2）
+    const page = list.payload.data as { summary: { averageRating: number; totalCount: number }; list: Array<Record<string, unknown>> }
+    expect(page.summary.totalCount).toBeGreaterThan(0)
+    const reviews = page.list
     const mine = reviews.find((item) => item.orderId === 'or01')
     expect(mine).toBeDefined()
     expect(mine!.rating).toBe(5)
@@ -54,7 +57,7 @@ describe('评价接口替身（契约 §6.2）', () => {
     })
     expect(dup.status).toBe(409)
     const list = await mockDispatch({ method: 'GET', url: '/stores/m002/reviews' })
-    const mine = (list.payload.data as Array<Record<string, unknown>>).filter((item) => item.orderId === 'or01')
+    const mine = ((list.payload.data as { list: Array<Record<string, unknown>> }).list).filter((item) => item.orderId === 'or01')
     expect(mine).toHaveLength(1)
   })
 
@@ -75,7 +78,7 @@ describe('评价接口替身（契约 §6.2）', () => {
 
   it('TV-12d 店铺评价列表含商家回复与回复时间，按时间倒序（TC-REV-003）', async () => {
     const list = await mockDispatch({ method: 'GET', url: '/stores/m002/reviews' })
-    const reviews = list.payload.data as Array<Record<string, unknown>>
+    const reviews = (list.payload.data as { list: Array<Record<string, unknown>> }).list
     expect(reviews.length).toBeGreaterThan(0)
     const replied = reviews.find((item) => item.reply)
     expect(replied).toBeDefined()

@@ -1,10 +1,18 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createPinia } from 'pinia'
 import SearchEntryView from '../SearchEntryView.vue'
 import { onToast } from '@/utils/toast'
-import { SEARCH_HISTORY_KEY } from '@/utils/searchHistory'
+import { SEARCH_HISTORY_KEY, readSearchHistory } from '@/utils/searchHistory'
+import { mockDispatch } from '@/mocks'
+
+// mock 桩：默认走真实 mock handler（词条字典联想/热门词），个别用例按需覆盖
+const actualMocks = await vi.importActual<typeof import('@/mocks')>('@/mocks')
+vi.mock('@/mocks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/mocks')>()
+  return { ...actual, mockDispatch: vi.fn() }
+})
 
 /**
  * 搜索页（输入页）测试（TODO-USER-107）
@@ -18,6 +26,8 @@ import { SEARCH_HISTORY_KEY } from '@/utils/searchHistory'
  * SE-6 底部促销条为纯展示（点击不跳转、不产生业务行为）
  */
 const HOT_WORDS = ['麻辣烫', '奶茶', '烧烤', '炸鸡', '寿司', '饺子', '面条', '沙拉']
+/** 词条字典热门词（mock /search/hot 与后端 search_terms 种子同源，前 3 HOT） */
+const DICT_HOT_WORDS = ['辣', '炸鸡', '汉堡', '烧烤', '火锅', '果汁', '肯德基', '便宜']
 
 let router: ReturnType<typeof createRouter>
 async function mountEntry() {
@@ -44,6 +54,8 @@ describe('SearchEntryView（搜索页，TODO-USER-107）', () => {
     localStorage.clear()
     messages.length = 0
     offToast = onToast((m) => messages.push(m))
+    // 默认走真实 mock handler（热门词/联想来自词条字典）；个别用例（SE-9）自行覆盖后由这里复位
+    vi.mocked(mockDispatch).mockImplementation(actualMocks.mockDispatch)
   })
 
   it('SE-1 渲染搜索栏、热门搜索（含 HOT 标记）与底部促销条；无历史时不出现最近搜索区', async () => {
@@ -53,10 +65,14 @@ describe('SearchEntryView（搜索页，TODO-USER-107）', () => {
     expect(wrapper.find('[data-testid="search-entry-submit"]').exists()).toBe(true)
     // 无历史 → 最近搜索区隐藏
     expect(wrapper.find('[data-testid="search-entry-recent"]').exists()).toBe(false)
-    // 热门搜索：课程演示内置清单 + HOT 标记
-    const hot = wrapper.findAll('[data-testid="search-entry-hot-word"]')
-    expect(hot.map((node) => node.text().replace(/\s*HOT\s*/g, ''))).toEqual(HOT_WORDS)
-    expect(wrapper.findAll('[data-testid="search-entry-hot-badge"]').length).toBeGreaterThan(0)
+    // 热门搜索：来自词条字典接口（mock /search/hot 带 200–500ms 模拟延迟，用 waitFor 等待）
+    await vi.waitFor(() => {
+      const words = wrapper.findAll('[data-testid="search-entry-hot-word"]').map((node) =>
+        node.text().replace(/\s*HOT\s*/g, ''),
+      )
+      expect(words).toEqual(DICT_HOT_WORDS)
+    })
+    expect(wrapper.findAll('[data-testid="search-entry-hot-badge"]').length).toBe(3)
     // 底部促销条为纯展示
     expect(wrapper.get('[data-testid="search-entry-promo"]').text()).toContain('配送优惠')
   })
@@ -122,4 +138,62 @@ describe('SearchEntryView（搜索页，TODO-USER-107）', () => {
     expect(router.currentRoute.value.name).toBe('search-entry')
     expect(messages).toEqual([])
   })
-})
+
+  it('SE-7 输入联想：输入「炸」250ms 后出现联想下拉（词条优先），点击联想词直接进结果页并写历史', async () => {
+    vi.useFakeTimers()
+    try {
+      const wrapper = await mountEntry()
+      const input = wrapper.get('[data-testid="search-entry-input"]')
+      await input.setValue('炸')
+      // 防抖未到：不下拉
+      expect(wrapper.find('[data-testid="search-suggest-list"]').exists()).toBe(false)
+      // 推进防抖 250ms + mock 层 200–500ms 模拟延迟
+      await vi.advanceTimersByTimeAsync(1200)
+      await flushPromises()
+      const list = wrapper.find('[data-testid="search-suggest-list"]')
+      expect(list.exists()).toBe(true)
+      const first = wrapper.get('[data-testid="search-suggest-item-0"]')
+      expect(first.text()).toContain('炸鸡')
+      expect(first.text()).toContain('词条')
+      // 点击联想 → 进结果页并写历史
+      await first.trigger('mousedown')
+      await flushPromises()
+      expect(router.currentRoute.value.query.keyword).toBe('炸鸡')
+      expect(readSearchHistory()[0]).toBe('炸鸡')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('SE-8 清空输入收起联想；空词不发起联想请求', async () => {
+    vi.useFakeTimers()
+    try {
+      const wrapper = await mountEntry()
+      const input = wrapper.get('[data-testid="search-entry-input"]')
+      await input.setValue('  ')
+      await vi.advanceTimersByTimeAsync(300)
+      expect(wrapper.find('[data-testid="search-suggest-list"]').exists()).toBe(false)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('SE-9 热门词接口失败 → 回落设计稿内置清单（页面不空白）', async () => {
+    const { mockDispatch } = await import('@/mocks')
+    const actualMocks = await vi.importActual<typeof import('@/mocks')>('@/mocks')
+    const spy = vi.mocked(mockDispatch)
+    spy.mockImplementation(async (config) => {
+      if (config.url === '/search/hot') throw new Error('网络异常')
+      return actualMocks.mockDispatch(config)
+    })
+    try {
+      const wrapper = await mountEntry()
+      await flushPromises()
+      const hot = wrapper.findAll('[data-testid="search-entry-hot-word"]')
+      expect(hot.map((node) => node.text().replace(/\s*HOT\s*/g, ''))).toEqual(HOT_WORDS)
+    } finally {
+      spy.mockReset()
+    }
+  })
+}
+)

@@ -65,6 +65,25 @@ public interface StoreMapper {
             + "</script>")
     long countSearchStores(@Param("k") String k, @Param("categoryId") String categoryId);
 
+    // ---- 搜索增强（2026-09-15，TODO-BE-025）：联想名字查询 + 多关键词全量召回（重映射后 Java 打分） ----
+    @Select("SELECT name FROM stores WHERE status != 'CLOSED' AND LOWER(name) LIKE CONCAT('%', #{k}, '%') "
+            + "ORDER BY monthly_sales DESC LIMIT 5")
+    List<String> suggestStoreNames(@Param("k") String k);
+
+    @Select("SELECT DISTINCT p.name FROM products p JOIN stores s ON s.store_id = p.store_id "
+            + "WHERE s.status != 'CLOSED' AND p.on_sale = TRUE AND LOWER(p.name) LIKE CONCAT('%', #{k}, '%') "
+            + "ORDER BY p.name LIMIT 5")
+    List<String> suggestProductNames(@Param("k") String k);
+
+    String MULTI_WHERE = " FROM stores WHERE status != 'CLOSED'"
+            + " AND (<foreach collection='ks' item='k' separator=' OR '>"
+            + "name LIKE CONCAT('%', #{k}, '%') OR description LIKE CONCAT('%', #{k}, '%')"
+            + " OR EXISTS (SELECT 1 FROM products p2 WHERE p2.store_id = stores.store_id AND p2.on_sale = TRUE"
+            + " AND p2.name LIKE CONCAT('%', #{k}, '%'))</foreach>)";
+
+    @Select("<script>SELECT " + COLS + MULTI_WHERE + "</script>")
+    List<Domain.Store> searchStoresByKeywords(@Param("ks") java.util.List<String> ks);
+
     @Insert("INSERT INTO stores(store_id, merchant_id, name, description, image, rating, monthly_sales, "
             + "delivery_minutes, start_price, delivery_fee, status) "
             + "VALUES(#{id}, #{merchantId}, #{name}, #{description}, #{image}, #{rating}, #{monthlySales}, "

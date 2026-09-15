@@ -41,7 +41,7 @@ import {
   merchantApi,
 } from './services/merchantApi'
 import { AnalyticsPage, MessagesPage, OverviewPage, PromotionsPage, ReviewsPage } from './FeaturePages'
-import { buildOrderAmountRows, validateProductImage } from './merchantRules'
+import { buildOrderAmountRows, orderStatusLabel, validateProductImage } from './merchantRules'
 import './App.css'
 
 const { Header, Content, Sider } = Layout
@@ -71,24 +71,11 @@ function formatMoney(value: number) {
   return `¥${Number(value || 0).toFixed(2)}`
 }
 
-// 覆盖后端 Domain.OrderStatus 全部枚举；新增状态须同步此处（PR #36 评审缺口1）
-const orderStatusLabels: Record<string, string> = {
-  PENDING_PAYMENT: '待支付',
-  PENDING: '待接单',
-  COOKING: '制作中',
-  DELIVERING: '配送中',
-  PROCESSING: '进行中',
-  COMPLETED: '已完成',
-  CANCELLED: '已取消',
-}
-
 const nextOrderStatus: Record<string, string> = { PENDING: 'COOKING', COOKING: 'DELIVERING', DELIVERING: 'COMPLETED' }
 const nextOrderAction: Record<string, string> = { PENDING: '接单', COOKING: '出餐', DELIVERING: '完成' }
 
-// oxlint-disable-next-line react/only-export-components -- exported for the status-contract tests
-export function orderStatusLabel(status: string) {
-  return orderStatusLabels[status] ?? status
-}
+// oxlint-disable-next-line react/only-export-components -- re-exported for the status-contract tests
+export { orderStatusLabel }
 
 function StoreStatusTag({ status }: { status: StoreStatus }) {
   const meta = statusMeta[status] ?? { label: status, color: 'default' }
@@ -293,6 +280,15 @@ function OrdersPage({ onContactCustomer }: { onContactCustomer: (orderId: string
     } finally { setAdvancing(false) }
   }
 
+  // PRD 7.11：拒单仅给出课程演示提示、打印小票仅模拟反馈——两者都不调用真实接口、不改订单状态
+  function handleRejectOrderDemo() {
+    message.info('课程演示：拒单不调用真实接口，仅作演示提示')
+  }
+
+  function handlePrintReceiptDemo() {
+    message.info('打印小票（模拟）：已发送至前台打印机，仅作演示反馈')
+  }
+
   async function openDetail(order: Order) {
     setSelectedOrder(order)
     setDetailLoading(true)
@@ -369,6 +365,8 @@ function OrdersPage({ onContactCustomer }: { onContactCustomer: (orderId: string
             <Space>
               {nextOrderStatus[selectedOrder.status] && <Button type="primary" loading={advancing} onClick={() => void advance()}>{nextOrderAction[selectedOrder.status]}</Button>}
               <Button onClick={() => onContactCustomer(selectedOrder.orderId)}>联系顾客</Button>
+              <Button onClick={handleRejectOrderDemo}>拒单</Button>
+              <Button onClick={handlePrintReceiptDemo}>打印小票</Button>
             </Space>
             <Card size="small" title="金额汇总">
               {buildOrderAmountRows(selectedOrder).map((row) => <div key={row.key} className={`money-line${row.discount ? ' discount' : ''}${row.total ? ' total' : ''}`}><span>{row.label}</span><strong>{row.discount ? '-' : ''}{formatMoney(row.amount)}</strong></div>)}
@@ -418,6 +416,8 @@ function StorePage({ currentStore, onStoreChange }: { currentStore: Store; onSto
       const savedStore = await merchantApi.updateStore({
         name: values.name.trim(),
         description: values.description?.trim(),
+        // 空值不提交：后端把空串视为非法（契约 §4.1）
+        contactPhone: values.contactPhone?.trim() || undefined,
         startPrice: values.startPrice,
         deliveryFee: values.deliveryFee,
       })
@@ -452,6 +452,15 @@ function StorePage({ currentStore, onStoreChange }: { currentStore: Store; onSto
           </Form.Item>
           <Form.Item label="店铺简介" name="description">
             <Input.TextArea rows={4} maxLength={200} showCount />
+          </Form.Item>
+          {/* 契约 §4.1（L364）：contactPhone 为可选字段，传入时必须为 11 位手机号；
+              空串会被后端判 400，故提交时空值不发送（见 saveStore） */}
+          <Form.Item
+            label="联系电话"
+            name="contactPhone"
+            rules={[{ pattern: /^1\d{10}$/, message: '请输入 11 位手机号' }]}
+          >
+            <Input maxLength={11} placeholder="11 位手机号" allowClear />
           </Form.Item>
           <div className="form-grid">
             <Form.Item label="起送金额（元）" name="startPrice" rules={[{ type: 'number', min: 0, message: '起送金额不能小于 0' }]}><InputNumber min={0} precision={2} className="full-width" /></Form.Item>

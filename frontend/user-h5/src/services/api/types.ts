@@ -309,6 +309,20 @@ export interface ReviewRecord {
   repliedAt?: string | null
 }
 
+/** 评价汇总（契约 §6.2 Wave3：平均分+总数，不随筛选变化） */
+export interface ReviewSummary {
+  averageRating: number
+  totalCount: number
+}
+
+/** 评价列表响应（契约 §6.2 Wave3：summary + 按筛选收窄的 list） */
+export interface ReviewPage {
+  summary: ReviewSummary
+  list: ReviewRecord[]
+}
+
+export type ReviewFilter = '全部' | '有图' | '最新' | '好评' | '差评'
+
 /** 提交评价请求体（契约 §6.2：rating 1–5 必填；content/tags/images 为评价内容与可选字段） */
 export interface ReviewSubmitPayload {
   rating: number
@@ -341,6 +355,8 @@ export interface ChatMessageRecord {
 
 /** 会话详情（契约 §6.1 GET /conversations/{conversationId}：详情 + 消息时间线） */
 export interface ConversationDetailRecord extends ConversationRecord {
+  /** 后端会话视图直出的店铺名（BUG-20260914-005 修复后提供）；缺省时页面回退店铺列表映射 */
+  storeName?: string
   messages: ChatMessageRecord[]
 }
 

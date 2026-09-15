@@ -45,9 +45,17 @@ public class ExtensionService {
         this.orders = orders; this.stores = stores; this.ids = ids;
     }
 
-    public List<Map<String,Object>> storeReviews(String storeId, Integer rating) {
+    /** 评价聚合与筛选（Wave3，契约 §6.2）：summary 不随筛选变化；filter ∈ 全部/有图/最新/好评/差评，非法 400。 */
+    public Map<String,Object> storeReviews(String storeId, Integer rating, String filter) {
         stores.get(storeId);
-        return reviews.findByStore(storeId, rating).stream().map(ViewMapper::review).toList();
+        String f = (filter == null || filter.isBlank()) ? "全部" : filter.trim();
+        if (!Set.of("全部","有图","最新","好评","差评").contains(f))
+            throw ApiException.badRequest("filter 只支持 全部/有图/最新/好评/差评");
+        Map<String,Object> summary = reviews.summarizeByStore(storeId);
+        var out = new LinkedHashMap<String,Object>();
+        out.put("summary", summary == null ? Map.of("averageRating", 0.0, "totalCount", 0L) : summary);
+        out.put("list", reviews.findByStore(storeId, rating, f).stream().map(ViewMapper::review).toList());
+        return out;
     }
 
     @Transactional
@@ -67,7 +75,7 @@ public class ExtensionService {
     }
 
     public List<Map<String,Object>> merchantReviews(Domain.Merchant merchant) {
-        return reviews.findByStore(merchant.storeId, null).stream().map(ViewMapper::review).toList();
+        return reviews.findByStore(merchant.storeId, null, "全部").stream().map(ViewMapper::review).toList();
     }
 
     @Transactional
@@ -323,6 +331,8 @@ public class ExtensionService {
         var v = new LinkedHashMap<String,Object>();
         v.put("conversationId", c.id);
         v.put("orderId", c.orderId);
+        v.put("storeId", c.storeId);
+        v.put("storeName", c.storeName);
         v.put("userId", c.userId);
         v.put("userNickname", maskNickname(c.userNickname));
         v.put("merchantId", c.merchantId);

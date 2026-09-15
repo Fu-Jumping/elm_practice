@@ -52,7 +52,9 @@ class SearchIntegrationTest {
         Assertions.assertEquals(1, ((Number) JsonPath.read(body, "$.data.merchants.page")).intValue());
         Assertions.assertEquals(10, ((Number) JsonPath.read(body, "$.data.merchants.size")).intValue());
         Assertions.assertEquals("m002", JsonPath.read(body, "$.data.merchants.list[0].storeId"));
-        Assertions.assertEquals(0, ((Number) JsonPath.read(body, "$.data.products.total")).intValue());
+        // 2026-09-15 搜索增强（TODO-BE-025）：品牌词经词条重映射带出该店热销商品（肯德基→鸡腿堡），
+        // 商品组不再为空（原 P0 口径 products=0，随增强有意变更，见契约 §3.6 词条重映射段）
+        Assertions.assertEquals(2, ((Number) JsonPath.read(body, "$.data.products.total")).intValue());
         Assertions.assertEquals(1, ((Number) JsonPath.read(body, "$.data.products.page")).intValue());
         Assertions.assertEquals(10, ((Number) JsonPath.read(body, "$.data.products.size")).intValue());
     }
@@ -136,5 +138,74 @@ class SearchIntegrationTest {
         String body = search(query().param("keyword", "肯德基"));
         Assertions.assertEquals(0, ((Number) JsonPath.read(body, "$.data.merchants.total")).intValue());
         Assertions.assertEquals(0, ((Number) JsonPath.read(body, "$.data.products.total")).intValue());
+    }
+
+    // ================= 词条重映射与联想（2026-09-15 搜索增强，TODO-BE-025） =================
+
+    @Test void synonymExpansionRecallsProductsBeyondSubstring() throws Exception {
+        // "炸鸡"目录无完整子串（鸡腿堡/鸡块），经重映射（炸鸡→鸡）必须召回
+        String body = mvc.perform(get("/api/v1/search").param("keyword", "炸鸡"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.merchants.list[?(@.storeId == 'm002')]").isNotEmpty())
+                .andReturn().getResponse().getContentAsString();
+        var names = (java.util.List<?>) com.jayway.jsonpath.JsonPath.read(body, "$.data.products.list[*].name");
+        org.junit.jupiter.api.Assertions.assertTrue(names.toString().contains("鸡腿堡"),
+                "重映射（炸鸡→鸡）应召回鸡腿堡类商品: " + names);
+    }
+
+    @Test void brandAliasCaseInsensitiveMatchesStore() throws Exception {
+        for (String w : new String[]{"kfc", "KFC"}) {
+            mvc.perform(get("/api/v1/search").param("keyword", w))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.merchants.list[?(@.storeId == 'm002')]").isNotEmpty());
+        }
+    }
+
+    @Test void designHotWordsAllReturnNonEmptyResults() throws Exception {
+        // 演示保证：设计稿 8 热门词（含目录中不存在的麻辣烫/奶茶/寿司/饺子/沙拉）经重映射全部非空
+        for (String w : new String[]{"麻辣烫", "奶茶", "烧烤", "炸鸡", "寿司", "饺子", "面条", "沙拉"}) {
+            String body = mvc.perform(get("/api/v1/search").param("keyword", w))
+                    .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+            int m = com.jayway.jsonpath.JsonPath.read(body, "$.data.merchants.total");
+            int pr = com.jayway.jsonpath.JsonPath.read(body, "$.data.products.total");
+            org.junit.jupiter.api.Assertions.assertTrue(m + pr > 0,
+                    "演示热门词「" + w + "」必须召回非空（merchants=" + m + ", products=" + pr + "）");
+        }
+    }
+
+    @Test void priceIntentReturnsCheapestFirst() throws Exception {
+        String body = mvc.perform(get("/api/v1/search").param("keyword", "便宜"))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        var list = (java.util.List<?>) com.jayway.jsonpath.JsonPath.read(body, "$.data.products.list");
+        org.junit.jupiter.api.Assertions.assertFalse(list.isEmpty(), "便宜应返回低价商品");
+        String first = com.jayway.jsonpath.JsonPath.read(body, "$.data.products.list[0].name");
+        org.junit.jupiter.api.Assertions.assertTrue(first.contains("米饭"), "最低价（米饭）应居首，实际=" + first);
+    }
+
+    @Test void suggestReturnsTermsStoresAndProducts() throws Exception {
+        String body = mvc.perform(get("/api/v1/search/suggest").param("keyword", "肯"))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        java.util.List<String> texts = com.jayway.jsonpath.JsonPath.read(body, "$.data.suggestions[*].text");
+        org.junit.jupiter.api.Assertions.assertTrue(texts.stream().anyMatch(t -> t.contains("肯德基")), "联想应含肯德基: " + texts);
+    }
+
+    @Test void suggestBlankKeywordReturnsEmpty() throws Exception {
+        mvc.perform(get("/api/v1/search/suggest").param("keyword", " "))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.suggestions.length()").value(0));
+    }
+
+    @Test void hotWordsComeFromDictionaryAndAllSearchable() throws Exception {
+        String body = mvc.perform(get("/api/v1/search/hot"))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        java.util.List<String> words = com.jayway.jsonpath.JsonPath.read(body, "$.data[*].word");
+        org.junit.jupiter.api.Assertions.assertFalse(words.isEmpty(), "热门词接口应返回字典词条");
+        for (String w : words) {
+            String sb = mvc.perform(get("/api/v1/search").param("keyword", w))
+                    .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+            int m = com.jayway.jsonpath.JsonPath.read(sb, "$.data.merchants.total");
+            int pr = com.jayway.jsonpath.JsonPath.read(sb, "$.data.products.total");
+            org.junit.jupiter.api.Assertions.assertTrue(m + pr > 0, "热门词「" + w + "」搜索不得为空");
+        }
     }
 }

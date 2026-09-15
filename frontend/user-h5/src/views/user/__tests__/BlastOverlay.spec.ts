@@ -25,6 +25,17 @@ import { COUPON_SEED, blastRandomState, couponMockState, freeBlastState } from '
  * RB-7 动效可跳过；音频不可用时静默降级（不抛错、不影响结果）
  */
 describe('爆红包浮层（CHG-001 TODO-USER-029）', () => {
+  /**
+   * 东八区当天日期（yyyy-MM-dd）。**不要用 `new Date().toISOString()`**：那是 UTC，
+   * 在东八区 00:00–08:00 会退回前一天，使「当日免费次数已用」的模拟日期与实际当天不符、
+   * 也让「当天 23:59:59 到期」的断言在凌晨失败（契约 §3.10 免费爆 0 点重置按东八区）。
+   */
+  const todayLocal = (): string => {
+    const pad = (n: number): string => String(n).padStart(2, '0')
+    const d = new Date()
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  }
+
   const messages: string[] = []
   let offToast: (() => void) | undefined
 
@@ -161,7 +172,7 @@ describe('爆红包浮层（CHG-001 TODO-USER-029）', () => {
 
   it('RB-4 无可爆券且无免费次数 → 引导「去购买」（TC-RBP-009）', async () => {
     const { wrapper } = await mountCoupon()
-    freeBlastState.date = new Date().toISOString().slice(0, 10) // 模拟当日免费次数已用
+    freeBlastState.date = todayLocal() // 模拟当日免费次数已用
     await openOverlay(wrapper)
     await wrapper.find('[data-testid="blast-burst-btn"]').trigger('click')
     await vi.waitFor(
@@ -185,7 +196,7 @@ describe('爆红包浮层（CHG-001 TODO-USER-029）', () => {
     )
     const blasted = couponMockState.find((item) => item.source === 'BLAST_OUT')!
     expect(blasted.validTo.endsWith('23:59:59')).toBe(true)
-    expect(blasted.validTo.slice(0, 10)).toBe(new Date().toISOString().slice(0, 10))
+    expect(blasted.validTo.slice(0, 10)).toBe(todayLocal())
     expect(blasted.canBlast).toBe(false)
     // 结果卡上的到期文案与券数据一致（同为当天到期口径）
     expect(wrapper.find('[data-testid="blast-result"]').text()).toContain('限今天 23:59 前使用')
@@ -195,7 +206,7 @@ describe('爆红包浮层（CHG-001 TODO-USER-029）', () => {
     const { wrapper } = await mountCoupon()
     await openOverlay(wrapper)
     // 注入失败：把免费次数标记为已用且无可爆券 → 接口返回 409（真实失败路径）
-    freeBlastState.date = new Date().toISOString().slice(0, 10)
+    freeBlastState.date = todayLocal()
     await wrapper.find('[data-testid="blast-burst-btn"]').trigger('click')
     await vi.waitFor(
       () => expect(wrapper.find('[data-testid="blast-blocked"]').exists()).toBe(true),
@@ -248,7 +259,7 @@ describe('爆红包浮层（CHG-001 TODO-USER-029）', () => {
     )
 
     // 免费次数已用 → 爆被拒 409 → 进入阻塞态，提供「消耗一张红包再爆」
-    freeBlastState.date = new Date().toISOString().slice(0, 10)
+    freeBlastState.date = todayLocal()
     await openOverlay(wrapper)
     await wrapper.find('[data-testid="blast-burst-btn"]').trigger('click')
     await vi.waitFor(

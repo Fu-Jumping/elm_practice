@@ -30,6 +30,10 @@ async function mountCenter() {
         name: 'chat-detail',
         component: { template: '<div />' },
       },
+      // 2026-09-15 通知跳转：三类目标路由（ORDER/COUPON/MEMBER）
+      { path: '/orders/:orderId', name: 'order-detail', component: { template: '<div />' } },
+      { path: '/coupons', name: 'coupons', component: { template: '<div />' } },
+      { path: '/member', name: 'member', component: { template: '<div />' } },
     ],
   })
   await router.push('/messages')

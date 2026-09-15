@@ -27,6 +27,7 @@ import BlastOverlay from '@/components/BlastOverlay.vue'
 import { couponExpiryText, formatMoneyCompact } from '@/services/normalizers'
 import { useSessionStore } from '@/stores/sessionStore'
 import { toast } from '@/utils/toast'
+import { request } from '@/services/http'
 import type { CouponPackKey, CouponRecord } from '@/services/api/types'
 
 const route = useRoute()
@@ -68,12 +69,27 @@ const buying = ref(false)
 
 /** 今日免费爆次数已用尽且无可爆券时，主按钮改为引导购买（PRD 878 行空态口径） */
 const noBlastAvailable = ref(false)
+/** 展开使用规则的券 id（SRS/PRD：点击红包卡展开使用规则说明，2026-09-15） */
+const expandedCouponId = ref('')
 const hasBlastable = computed(() => coupons.value.some((item) => item.canBlast))
 
 const PACKS: Array<{ key: CouponPackKey; price: string; count: string; desc: string }> = [
   { key: 'pack49', price: '¥4.9', count: '4 张红包', desc: '3×满30减5 + 1×无门槛减5' },
   { key: 'pack99', price: '¥9.9', count: '8 张红包', desc: '6×满30减5 + 1×满40减10 + 1×无门槛减5' },
 ]
+
+/** 免费爆次数状态（契约 §3.10 /me/coupons/blast-status）：用完切「去购买」（2026-09-15） */
+async function loadBlastStatus(): Promise<void> {
+  try {
+    const res = await request<{ freeBlastAvailable: boolean }>({
+      method: 'GET',
+      url: '/me/coupons/blast-status',
+    })
+    noBlastAvailable.value = !res.freeBlastAvailable && !hasBlastable.value
+  } catch {
+    /* 查询失败保持默认口径（免费爆1次），爆时后端 409 兜底 */
+  }
+}
 
 async function loadCoupons(): Promise<void> {
   loading.value = true
@@ -112,6 +128,7 @@ onMounted(async () => {
     }
   }
   await loadCoupons()
+  void loadBlastStatus()
 })
 
 /** 券卡适用范围说明：ALL → 全平台可用；STORE → 限{店名}可用（店名未知时隐藏该行） */
@@ -150,6 +167,11 @@ async function confirmBuy(): Promise<void> {
 /** 占位券点击：纯展示、不可选用（TC-RBP-012） */
 function onPlaceholderClick(): void {
   toast('该红包为演示占位，本期不可用')
+}
+
+/** 真实券点击：展开/收起使用规则说明（SRS/PRD 902，2026-09-15） */
+function toggleCouponRules(coupon: { couponId: string }): void {
+  expandedCouponId.value = expandedCouponId.value === coupon.couponId ? '' : coupon.couponId
 }
 
 /** 爆红包浮层开关（TODO-USER-029） */
@@ -271,7 +293,7 @@ function goBack(): void {
           class="cp-card"
           data-testid="coupon-card"
           :data-expired="coupon.status === 'expired' ? 'true' : 'false'"
-          @click="onPlaceholderClick"
+          @click="toggleCouponRules(coupon)"
         >
           <div class="cp-card-left">
             <p class="cp-card-amount" data-testid="coupon-amount">
@@ -294,6 +316,18 @@ function goBack(): void {
             <p class="cp-card-expiry" data-testid="coupon-expiry" :data-used="coupon.used ? 'true' : 'false'">
               {{ coupon.status === 'expired' ? '已失效' : couponExpiryText(coupon.validTo) }}
             </p>
+          </div>
+          <!-- 点击展开使用规则（SRS/PRD 902：点击红包卡展开使用规则说明） -->
+          <div
+            v-if="expandedCouponId === coupon.couponId"
+            class="cp-card-rules"
+            data-testid="coupon-rules"
+          >
+            <p>有效期：{{ coupon.validFrom }} 至 {{ coupon.validTo }}</p>
+            <p>使用门槛：{{ coupon.threshold > 0 ? `满 ¥${coupon.threshold} 可用` : '无门槛' }}</p>
+            <p>适用范围：{{ coupon.scope === 'ALL' ? '全平台通用' : `仅限指定商家（${scopeNote(coupon) || '见券面'}）` }}</p>
+            <p>状态：{{ coupon.used ? '已使用' : coupon.status === 'expired' ? '已过期' : '可使用' }}</p>
+            <p>使用方式：确认订单页选择红包抵扣，一单限用一张。</p>
           </div>
         </section>
 
@@ -840,5 +874,17 @@ function goBack(): void {
 
 .cp-sheet-confirm:disabled {
   opacity: 0.5;
+}
+</style>
+<style scoped>
+.cp-card-rules {
+  flex-basis: 100%;
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: #fff7f2;
+  border-radius: 6px;
+  font-size: 11.5px;
+  line-height: 1.8;
+  color: var(--color-text-secondary, #666);
 }
 </style>
