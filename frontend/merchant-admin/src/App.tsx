@@ -280,6 +280,15 @@ function OrdersPage({ onContactCustomer }: { onContactCustomer: (orderId: string
     } finally { setAdvancing(false) }
   }
 
+  // PRD 7.11：拒单仅给出课程演示提示、打印小票仅模拟反馈——两者都不调用真实接口、不改订单状态
+  function handleRejectOrderDemo() {
+    message.info('课程演示：拒单不调用真实接口，仅作演示提示')
+  }
+
+  function handlePrintReceiptDemo() {
+    message.info('打印小票（模拟）：已发送至前台打印机，仅作演示反馈')
+  }
+
   async function openDetail(order: Order) {
     setSelectedOrder(order)
     setDetailLoading(true)
@@ -356,6 +365,8 @@ function OrdersPage({ onContactCustomer }: { onContactCustomer: (orderId: string
             <Space>
               {nextOrderStatus[selectedOrder.status] && <Button type="primary" loading={advancing} onClick={() => void advance()}>{nextOrderAction[selectedOrder.status]}</Button>}
               <Button onClick={() => onContactCustomer(selectedOrder.orderId)}>联系顾客</Button>
+              <Button onClick={handleRejectOrderDemo}>拒单</Button>
+              <Button onClick={handlePrintReceiptDemo}>打印小票</Button>
             </Space>
             <Card size="small" title="金额汇总">
               {buildOrderAmountRows(selectedOrder).map((row) => <div key={row.key} className={`money-line${row.discount ? ' discount' : ''}${row.total ? ' total' : ''}`}><span>{row.label}</span><strong>{row.discount ? '-' : ''}{formatMoney(row.amount)}</strong></div>)}
