@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SRS 三维视角演示</title>
-<!-- 派生视图注记（2026-09-06）：本页基于 2026-09-03 的 SRS 工程版 v0.1 制作；SRS 现拆分为交付版（docs/SRS.md，面向评阅）与工程版（docs/SRS-工程版.md，原 v0.1），需求真源为 docs/PRD.md。仅供讲解演示，不作口径真源。 -->
+<!-- 派生视图注记（2026-09-15 修订）：本页为 2026-09-04 静态快照，仅供讲解演示；需求真源 docs/PRD.md，评阅视图 docs/SRS.md，工程口径见 docs/backend/**。口径已过期，引用请以 SRS v1.2 为准。 -->
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
   :root { --brand: #ff5a1f; --bggray: #faf7f5; }
@@ -57,7 +57,7 @@
 
 <header>
   <h1>SRS 三维视角演示</h1>
-  <p>内容真源：docs/SRS.md（v0.1 初稿）· 接口 / 后端 / 测试口径以 docs/backend/ 为准 · 生成日期 2026-09-04 · 本页为派生视图，需求口径以原文档为准</p>
+  <p>本页为 2026-09-04 静态快照，仅供讲解演示 · 需求真源 docs/PRD.md，评阅视图 docs/SRS.md，工程口径见 docs/backend/** · 口径已过期，引用请以 SRS v1.2 为准</p>
 </header>
 
 <div class="tabbar">
@@ -113,7 +113,7 @@
     </div>
     <div class="layer-row" id="backend-layers"></div>
     <div class="note">
-      <b>待确认项（SRS §9）：</b>Spring Boot / ORM（MyBatis 或 JPA）/ MySQL 版本、架构设计模块划分、P0 是否扣库存——实现前需回写 SRS、契约与测试。
+      <b>待确认项（SRS §9）：</b>Spring Boot / ORM（MyBatis 或 JPA）/ MySQL 版本、架构设计模块划分、P0 是否扣库存——实现前需回写 SRS、契约与测试。（Spring Boot / ORM / MySQL 版本项已结案，见 docs/backend/架构设计.md §1：Spring Boot 3.5.5 + MyBatis 3.0.4 + MySQL 8）
     </div>
   </div>
 
