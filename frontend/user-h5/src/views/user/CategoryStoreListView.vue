@@ -9,7 +9,7 @@
       </button>
       <h1 class="cl-title" data-testid="category-title">{{ categoryTitle }}</h1>
     </header>
-    <!-- 定位：与首页/搜索结果页同口径（设计真源 03-搜索与商家列表/02 顶部栏第二行） -->
+    <!-- 定位：与首页/搜索结果页同口径（设计真源 03-搜索与商家列表/02 顶部栏第二行；PRD 7.16.1）——已登录无地址占位「选择收货地址」，未登录/读取失败回退课程演示地址 -->
     <p class="cl-location" data-testid="category-location" :title="isDemoLocation ? '演示地址' : undefined">
       <span class="cl-location-icon" aria-hidden="true">◎</span>{{ locationText }}
     </p>
@@ -120,14 +120,16 @@
  */
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { storeApi } from '@/services/api'
+import { addressApi, storeApi } from '@/services/api'
+import { useSessionStore } from '@/stores/sessionStore'
 import type { SearchSort, StoreSummary } from '@/services/api/types'
 import { SEARCH_SORT_OPTIONS } from '@/services/api/types'
 import { formatMoney } from '@/services/normalizers'
-import { DEMO_LOCATION } from '@/utils/location'
+import { DEMO_LOCATION, LOCATION_LOAD_FAILED, resolveLocationState } from '@/utils/location'
 
 const route = useRoute()
 const router = useRouter()
+const sessionStore = useSessionStore()
 
 const SORT_OPTIONS = SEARCH_SORT_OPTIONS
 
@@ -153,14 +155,32 @@ const loading = ref(false)
 const errorMessage = ref('')
 const missingCategory = computed(() => categoryId.value === '')
 
-/** 定位文案：与首页/搜索结果页同口径（本批不重复实现地址读取） */
+/**
+ * 定位文案：与首页/搜索结果页同口径（PRD 7.16.1 分类商家列表页-顶部栏；
+ * 2026-09-15 口径变更·方案 C，唯一出口 utils/location）：已登录有地址取默认地址 region；
+ * 已登录无地址占位「选择收货地址」；未登录/读取失败回退演示地址并标记。
+ */
 const locationText = ref(DEMO_LOCATION)
 const isDemoLocation = ref(true)
+
+async function loadLocation(): Promise<void> {
+  let state = LOCATION_LOAD_FAILED
+  try {
+    if (!sessionStore.isLoggedIn) await sessionStore.checkLogin()
+    const addresses = sessionStore.isLoggedIn ? await addressApi.getAddresses() : null
+    state = resolveLocationState({ isLoggedIn: sessionStore.isLoggedIn, addresses })
+  } catch {
+    // PRD 检查列：读取地址失败保留默认演示地址并标记为演示数据
+  }
+  locationText.value = state.text
+  isDemoLocation.value = state.isDemoLocation
+}
 
 /** 请求序号：只接受最后一次请求的结果（PRD：不以外端旧列表冒充新结果） */
 let requestSeq = 0
 
 onMounted(() => {
+  void loadLocation()
   if (categoryId.value) void load()
 })
 

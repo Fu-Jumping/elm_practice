@@ -17,6 +17,7 @@ import { storeApi } from '@/services/api'
 import { formatMoney } from '@/services/normalizers'
 import { productImageSrc, storeImageSrc } from '@/utils/demoImages'
 import { courseCategoryIdOf } from '@/utils/courseCategories'
+import { DEMO_LOCATION, LOCATION_LOAD_FAILED, resolveLocationState } from '@/utils/location'
 import type { StorePreviewProduct, StoreSummary } from '@/services/api/types'
 import type { CSSProperties } from 'vue'
 
@@ -61,26 +62,23 @@ const visibleCards = computed(() =>
   catalogStore.stores.filter((store) => !dismissedCardIds.value.includes(store.storeId)),
 )
 
-// 定位地址（T60-T62，PRD 806 行）：来自当前用户默认地址；无地址/未登录/失败回退课程演示地址
-const DEMO_LOCATION = '天津大学北洋园校区'
+// 定位地址（PRD 7.16.1 首页-定位与频道栏；2026-09-15 口径变更·方案 C，唯一出口 utils/location）：
+// 已登录有地址 → 默认地址 region（缺省 detail）；已登录无地址 → 占位「选择收货地址」；
+// 未登录或读取失败 → 回退课程演示地址并标记为演示数据
 const locationText = ref(DEMO_LOCATION)
 const isDemoLocation = ref(true)
 
 async function loadLocationAddress(): Promise<void> {
+  let state = LOCATION_LOAD_FAILED
   try {
     if (!sessionStore.isLoggedIn) await sessionStore.checkLogin()
-    if (!sessionStore.isLoggedIn) return
-    const list = await addressApi.getAddresses()
-    const def = list.find((item) => item.isDefault) ?? list[0]
-    // PRD：地址字段不允许由前端随意拼接——优先 region，缺省 detail
-    const text = def?.region || def?.detail
-    if (text) {
-      locationText.value = text
-      isDemoLocation.value = false
-    }
+    const addresses = sessionStore.isLoggedIn ? await addressApi.getAddresses() : null
+    state = resolveLocationState({ isLoggedIn: sessionStore.isLoggedIn, addresses })
   } catch {
-    // 读取失败保留默认演示地址并标记（PRD 806 验收列）
+    // PRD 检查列：读取地址失败保留默认演示地址并标记为演示数据
   }
+  locationText.value = state.text
+  isDemoLocation.value = state.isDemoLocation
 }
 
 // 商品预览聚合（T46，PRD 7.16.1：预览来自商家商品接口）：/stores 未返回 previewProducts
