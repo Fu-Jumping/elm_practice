@@ -4,6 +4,7 @@ import {
   formatMoney,
   formatTime,
   statusText,
+  storeStatusText,
   payableAmountText,
   normalizeOrderSummary,
   normalizeOrderDetail,
@@ -13,7 +14,7 @@ import {
   orderDisplayStatus,
   normalizeBlastResult,
 } from '../normalizers'
-import type { CouponBlastRecord, OrderRecord } from '../api/types'
+import type { CouponBlastRecord, OrderRecord, OrderStatus, StoreStatus } from '../api/types'
 // 把被测函数引进来。'../normalizers' 是相对路径：测试文件在 __tests__ 里，往上一层就是它
 describe('formatMoney 金额格式化', () => {
   // 这一组都在测金额格式化
@@ -41,8 +42,10 @@ describe('statusText 状态文案（契约：订单 P0 仅 PROCESSING）', () =>
   })
 
   it('B5 未知状态兜底：原样返回原始值（2026-09-04 拍板，避免页面出现空白）', () => {
-    // 不认识的状态原样返回，绝不让页面显示空白
-    expect(statusText('WHATEVER')).toBe('WHATEVER')
+    // 不认识的状态原样返回，绝不让页面显示空白。
+    // 参数已收敛为 OrderStatus（SHOW-QA-007 类型加固）：此处用 as 模拟**后端运行时**给出定义域外的值，
+    // 锁的是运行时兜底分支，不是「可以随便传字符串」——传店铺状态会在编译期报错。
+    expect(statusText('WHATEVER' as OrderStatus)).toBe('WHATEVER')
   })
 })
 
@@ -358,7 +361,7 @@ describe('批次⑩ 评价相关归一化 TV-11', () => {
  */
 describe('批次⑩ 打磨：订单状态文案全覆盖（TODO-USER-009）', () => {
   it('T09 全部状态值均有中文映射且不出现英文原文', () => {
-    const cases: Array<[string, string]> = [
+    const cases: Array<[OrderStatus, string]> = [
       ['PENDING_PAYMENT', '待支付'],
       ['PENDING', '待接单'],
       ['COOKING', '制作中'],
@@ -373,6 +376,40 @@ describe('批次⑩ 打磨：订单状态文案全覆盖（TODO-USER-009）', ()
     }
     expect(orderDisplayStatus({ status: 'COMPLETED', reviewed: false })).toBe('待评价')
     expect(orderDisplayStatus({ status: 'COMPLETED', reviewed: true })).toBe('已完成')
+  })
+})
+
+/**
+ * SHOW-QA-007（2026-09-15 缺陷登记，负责人走查截图）：店铺状态曾泄漏英文枚举
+ * 缺陷链路：商家详情页拿**订单状态**映射 `statusText()` 渲染 `store.status`——店铺枚举不在其
+ * 定义域内，兜底 `?? status` 原样返回英文（线上 m004「老胖烧烤」`status=TEMPORARILY_CLOSED`）。
+ * 口径（2026-09-15）：店铺状态有自己的中文出口；闭店文案对齐用户端既有先例「休息中」
+ * （收藏页/分类列表页/确认订单页提示三处一致），`CLOSED` 与 `TEMPORARILY_CLOSED` **用户端不作区分**
+ * ——PRD 427 只要求「店铺闭店时展示不可购买状态」，区分两种闭店只发生在商家端营业状态设置
+ * （营业中/已关店/临时闭店，PRD 1004 行 MS-17）。
+ */
+describe('storeStatusText 店铺营业状态文案（SHOW-QA-007）', () => {
+  it('SS-1 三种契约枚举均返回中文，不出现英文原文与下划线', () => {
+    const cases: Array<[StoreStatus, string]> = [
+      ['OPEN', '营业中'],
+      ['CLOSED', '休息中'],
+      ['TEMPORARILY_CLOSED', '休息中'],
+    ]
+    for (const [raw, text] of cases) {
+      expect(storeStatusText(raw)).toBe(text)
+      expect(storeStatusText(raw)).not.toContain('_')
+      expect(storeStatusText(raw)).not.toBe(raw)
+    }
+  })
+
+  it('SS-2 两种闭店在用户端同文案：CLOSED 与 TEMPORARILY_CLOSED 均为「休息中」', () => {
+    expect(storeStatusText('CLOSED')).toBe(storeStatusText('TEMPORARILY_CLOSED'))
+  })
+
+  it('SS-3 未知状态兜底不得回落英文枚举（与订单 statusText 的「原样返回」兜底相反）', () => {
+    const unknown = storeStatusText('WHATEVER' as StoreStatus)
+    expect(unknown).not.toContain('_')
+    expect(unknown).not.toBe('WHATEVER')
   })
 })
 

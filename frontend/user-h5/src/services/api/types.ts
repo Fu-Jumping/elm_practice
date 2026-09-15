@@ -191,7 +191,7 @@ export interface OrderRecord {
   storeId: string
   addressId?: string
   remark: string
-  status: string
+  status: OrderStatus
   createdAt: string
   itemSubtotal: number
   packagingFee: number
@@ -244,7 +244,8 @@ export interface AddressSnapshot {
 /** 订单摘要视图模型（normalizeOrderSummary 输出；店名由页面按 storeId 映射） */
 export interface OrderSummary {
   orderId: string
-  status: string
+  /** 订单状态（契约 §3.5）：视图模型保留联合类型，供 statusText/orderDisplayStatus 直取 */
+  status: OrderStatus
   storeId: string
   storeName: string
   amounts: OrderAmounts

@@ -230,8 +230,13 @@ function messageTime(message: ChatMessageRecord): string {
   background: #f9f9f9;
 }
 
+/* 顶部栏吸顶（2026-09-15 负责人走查：原为 position: relative，消息滑动时整条顶栏被带走）。
+   与站内其余 11 处顶栏同一约定（sticky + top:0 + z-index:10，见 MessageCenterView/FaqView 等）；
+   `.chat-back` 为绝对定位子元素，sticky 同样是定位元素，锚点不变。 */
 .chat-appbar {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -247,6 +247,21 @@ describe('StoreDetailView（商家详情页 P0）', () => {
     expect(wrapper.find('[data-testid="checkout-btn"]').attributes('disabled')).toBeDefined()
   })
 
+  it('SHOW-QA-007 休息态标签为中文，页面不得出现英文状态枚举', async () => {
+    // 缺陷链路（2026-09-15 负责人走查截图）：标签原用**订单状态**映射 statusText() 渲染
+    // store.status → 兜底 ?? status 原样返回英文；m004 线上 status=TEMPORARILY_CLOSED 即此现场。
+    // 本用例同时锁「标签文案」与「全页不得泄漏枚举原文」两条口径（后者为防复发断言）。
+    const { wrapper } = await mountDetail('/stores/m004')
+    await vi.waitFor(() => expect(wrapper.text()).toContain('老胖烧烤'), { timeout: 10000 })
+    const label = wrapper.find('.store-status-closed')
+    expect(label.exists()).toBe(true)
+    expect(label.text()).toBe('休息中')
+    expect(label.text()).not.toContain('_')
+    expect(wrapper.text()).not.toContain('TEMPORARILY_CLOSED')
+    // 含下划线的全大写契约枚举一律不得上屏（通用断言，防同类跨域误用复发）
+    expect(wrapper.text()).not.toMatch(/[A-Z]+_[A-Z_]+/)
+  })
+
   it('TV-10 评价 Tab 展示真实评价（含商家回复与脱敏昵称）与空态（批次⑩ 003 真实化）', async () => {
     const { wrapper } = await mountDetail('/stores/m002')
     await vi.waitFor(
