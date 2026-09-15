@@ -12,7 +12,7 @@ import {
   type PromotionConfig,
   type Review,
 } from './services/merchantApi'
-import { preparePromotionConfig } from './merchantRules'
+import { localizeStatusDistribution, preparePromotionConfig } from './merchantRules'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -97,7 +97,7 @@ export function PromotionsPage() {
       </>}</Form.List>
       <div className="settings-grid">
         <Card size="small" title="新客立减"><Form.Item name="newCustomerEnabled" valuePropName="checked"><Switch checkedChildren="启用" unCheckedChildren="停用" /></Form.Item><Form.Item name="newCustomerAmount" label="立减金额" rules={[nonNegative]}><InputNumber min={0} precision={2} addonAfter="元" /></Form.Item></Card>
-        <Card size="small" title="配送费优惠"><Form.Item name="freeDeliveryEnabled" valuePropName="checked"><Switch checkedChildren="启用" unCheckedChildren="停用" /></Form.Item><Form.Item name="freeDeliveryThreshold" label="免配送费门槛" rules={[nonNegative]}><InputNumber min={0} precision={2} addonAfter="元" /></Form.Item></Card>
+        <Card size="small" title="配送费优惠"><Form.Item name="freeDeliveryEnabled" valuePropName="checked"><Switch checkedChildren="启用" unCheckedChildren="停用" /></Form.Item><Form.Item name="freeDeliveryThreshold" label="免配送费门槛" dependencies={['freeDeliveryEnabled']} rules={[nonNegative, ({ getFieldValue }) => ({ validator(_, value) { return !getFieldValue('freeDeliveryEnabled') || Number(value) > 0 ? Promise.resolve() : Promise.reject(new Error('启用配送费优惠时，免配送费门槛须大于 0')) } })]}><InputNumber min={0} precision={2} addonAfter="元" /></Form.Item></Card>
         <Card size="small" title="会员折扣"><Form.Item name="memberDiscountEnabled" valuePropName="checked"><Switch checkedChildren="启用" unCheckedChildren="停用" /></Form.Item><Form.Item name="memberDiscountRate" label="折扣率" rules={[{ required: true }, { type: 'number', min: 0.01, max: 1, message: '折扣率须大于 0 且不超过 1' }]}><InputNumber min={0.01} max={1} step={0.01} precision={2} /></Form.Item></Card>
       </div>
       <Button type="primary" htmlType="submit" loading={saving}>保存优惠配置</Button>
@@ -223,7 +223,7 @@ export function AnalyticsPage() {
     <Skeleton loading={loading} active>
       <Row gutter={[16, 16]}><Col span={8}><Card><Statistic title="营业额" value={data?.salesAmount ?? 0} prefix="¥" precision={2} /></Card></Col><Col span={8}><Card><Statistic title="有效订单" value={data?.orderCount ?? 0} /></Card></Col><Col span={8}><Card><Statistic title="客单价" value={data?.avgOrderAmount ?? 0} prefix="¥" precision={2} /></Card></Col></Row>
       <Card title="每日趋势" className="feature-card"><Table pagination={false} rowKey="date" dataSource={data?.trend ?? []} locale={{ emptyText: <Empty description="当前范围暂无趋势数据" image={Empty.PRESENTED_IMAGE_SIMPLE} /> }} columns={[{ title: '日期', dataIndex: 'date' }, { title: '订单数', dataIndex: 'orderCount', align: 'right' }, { title: '营业额', dataIndex: 'salesAmount', align: 'right', render: (value) => `¥${Number(value || 0).toFixed(2)}` }]} /></Card>
-      <Row gutter={[16, 16]}><Col span={12}><DistributionCard title="渠道占比" items={data?.channelDistribution ?? []} /></Col><Col span={12}><DistributionCard title="状态分布" items={data?.statusDistribution ?? []} /></Col></Row>
+      <Row gutter={[16, 16]}><Col span={12}><DistributionCard title="渠道占比" items={data?.channelDistribution ?? []} /></Col><Col span={12}><DistributionCard title="状态分布" items={localizeStatusDistribution(data?.statusDistribution ?? [])} /></Col></Row>
     </Skeleton>
   </section>
 }

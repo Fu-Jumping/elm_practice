@@ -101,4 +101,22 @@ class ConversationStage2IntegrationTest {
         mvc.perform(get("/api/v1/conversations").param("orderId",orderId).session(other))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(0));
     }
+
+    // ================= 消息域 P1 簇（2026-09-15 验收修复） =================
+
+    /** BUG-20260914-005 根因侧：会话对象必须携带 storeId/storeName（契约 §6.1 回写），用户端聊天详情/列表依赖店铺名。 */
+    @Test void conversationReturnsStoreIdAndStoreName() throws Exception {
+        var user=user();
+        String orderId=createOrder(user);
+        String list=mvc.perform(get("/api/v1/conversations").param("orderId",orderId).session(user))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].storeId").value("m002"))
+                .andExpect(jsonPath("$.data[0].storeName").value("肯德基宅急送"))
+                .andReturn().getResponse().getContentAsString();
+        String conversationId=JsonPath.read(list,"$.data[0].conversationId");
+        mvc.perform(get("/api/v1/conversations/{id}",conversationId).session(user))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.storeId").value("m002"))
+                .andExpect(jsonPath("$.data.storeName").value("肯德基宅急送"));
+    }
 }

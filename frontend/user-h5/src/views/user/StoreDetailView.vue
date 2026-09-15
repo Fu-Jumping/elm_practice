@@ -14,7 +14,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useCatalogStore } from '@/stores/catalogStore'
 import { useCartStore } from '@/stores/cartStore'
 import { useSessionStore } from '@/stores/sessionStore'
-import { formatMoney, formatTime, statusText } from '@/services/normalizers'
+import { formatMoney, formatTime, storeStatusText } from '@/services/normalizers'
+import type { ReviewFilter } from '@/services/api/types'
 import { reviewApi, favoriteApi } from '@/services/api'
 import type { CartLine, Product, ReviewRecord, StoreCategory } from '@/services/api/types'
 import { toast } from '@/utils/toast'
@@ -39,14 +40,38 @@ const activeTab = ref<'order' | 'review'>('order')
 /** 店铺评价（批次⑩ TODO-USER-003：接契约 §6.2 店铺评价接口，含商家回复与脱敏昵称） */
 const reviews = ref<ReviewRecord[]>([])
 const reviewLoading = ref(false)
+/** 评价加载失败：保留旧结果 + 重试入口（2026-09-15 P1-6） */
+const reviewFailed = ref(false)
+/** 评价汇总与筛选（Wave3，契约 §6.2）：summary 不随筛选变化；切换筛选重新请求 */
+const reviewSummary = ref<{ averageRating: number; totalCount: number } | null>(null)
+const reviewFilter = ref<ReviewFilter>('全部')
+const REVIEW_FILTERS: ReviewFilter[] = ['全部', '有图', '最新', '好评', '差评']
+
+/** 切换评价筛选：更新选项并重新请求（SRS R682-C7） */
+function switchReviewFilter(f: ReviewFilter): void {
+  if (reviewFilter.value === f) return
+  reviewFilter.value = f
+  reviews.value = []
+  void loadReviews()
+}
+
+/** 评价图片加载失败 → 占位图（PRD 859 异常分支） */
+function onReviewImageError(event: Event): void {
+  const target = event.target as HTMLImageElement
+  target.src = '/design-assets/首页-精细/product-thumb-1.png'
+  target.style.opacity = '0.5'
+}
 
 async function loadReviews(): Promise<void> {
   reviewLoading.value = true
+  reviewFailed.value = false
   try {
-    reviews.value = await reviewApi.getStoreReviews(storeId)
+    const page = await reviewApi.getStoreReviews(storeId, reviewFilter.value)
+    reviewSummary.value = page.summary
+    reviews.value = page.list
   } catch {
-    // 评价加载失败不阻塞点餐主链路：展示空态
-    reviews.value = []
+    // 评价加载失败：保留已显示结果并提供重试（SRS R682-C9，2026-09-15 P1-6）
+    reviewFailed.value = true
   } finally {
     reviewLoading.value = false
   }
@@ -564,6 +589,17 @@ function qtyOf(productId: string): number {
   return lineOf(productId)?.quantity ?? 0
 }
 
+/**
+ * 该商品已加购的总数量（跨规格行求和）。
+ * 契约 §3.4：同一商品的**不同规格**在购物车中是不同行，`lineOf` 只取首条 → 有规格商品必须跨行求和，
+ * 否则「同一商品选了两种规格」时行内数量只显示其中一行。
+ */
+function totalQtyOf(productId: string): number {
+  return cartStore.lines
+    .filter((line) => line.productId === productId)
+    .reduce((sum, line) => sum + line.quantity, 0)
+}
+
 /** 购物车弹层（T50，PRD：点击购物车栏展开弹层） */
 const cartPopupOpen = ref(false)
 
@@ -693,7 +729,7 @@ async function onCheckout(): Promise<void> {
           <p class="store-meta-row store-fee-row">
             <span class="store-meta">起送 ¥{{ formatMoney(store.startPrice) }}</span>
             <span class="store-meta">配送 ¥{{ formatMoney(store.deliveryFee) }}</span>
-            <span v-if="isClosed" class="store-status-closed">{{ statusText(store.status) }}</span>
+            <span v-if="isClosed" class="store-status-closed">{{ storeStatusText(store.status) }}</span>
           </p>
           <p class="store-tags-row">
             <span
@@ -745,7 +781,28 @@ async function onCheckout(): Promise<void> {
 
       <!-- 店铺评价列表（批次⑩ 003 真实化：GET /stores/{storeId}/reviews） -->
       <div v-if="activeTab === 'review'" class="review-area" data-testid="review-list">
+        <!-- 评价汇总行（Wave3：平均分+总数，来自评价接口聚合，非 stores.rating 静态值） -->
+        <div v-if="reviewSummary" class="review-summary" data-testid="review-summary">
+          <span class="rs-score">{{ Number(reviewSummary.averageRating || 0).toFixed(1) }}</span>
+          <span class="rs-total">{{ reviewSummary.totalCount }} 条评价</span>
+        </div>
+        <!-- 筛选 chips（契约 §6.2：全部/有图/最新/好评/差评，切换重新请求） -->
+        <div class="review-filters" data-testid="review-filters">
+          <button
+            v-for="f in REVIEW_FILTERS"
+            :key="f"
+            type="button"
+            class="review-filter"
+            :class="{ 'is-active': reviewFilter === f }"
+            :data-testid="`review-filter-${f}`"
+            @click="switchReviewFilter(f)"
+          >{{ f }}</button>
+        </div>
         <p v-if="reviewLoading" class="review-empty">评价加载中…</p>
+        <div v-else-if="reviewFailed" class="review-failed" data-testid="review-failed">
+          <span>{{ reviews.length > 0 ? '评价刷新失败，已保留原结果' : '评价加载失败' }}</span>
+          <button type="button" data-testid="review-retry-btn" @click="loadReviews">重试</button>
+        </div>
         <p v-else-if="reviews.length === 0" class="review-empty" data-testid="review-empty">暂无评价</p>
         <ul v-else class="review-list">
           <li v-for="review in reviews" :key="review.reviewId" class="review-item" data-testid="review-item">
@@ -754,6 +811,19 @@ async function onCheckout(): Promise<void> {
               <span class="review-stars" :aria-label="`${review.rating} 星`">
                 {{ '★'.repeat(review.rating) }}{{ '☆'.repeat(5 - review.rating) }}
               </span>
+            </div>
+            <!-- 评价图片（PRD 859：评价列表展示图片；≤3 张、失败占位，2026-09-15） -->
+            <div v-if="review.images && review.images.length > 0" class="review-images" data-testid="review-images">
+              <img
+                v-for="(img, imgIndex) in review.images.slice(0, 3)"
+                :key="imgIndex"
+                :src="img"
+                alt="评价图片"
+                loading="lazy"
+                @error="onReviewImageError($event)"
+              />
+            </div>
+            <div v-else class="review-head">
             </div>
             <p class="review-content">{{ review.content }}</p>
             <div v-if="review.tags.length > 0" class="review-tags">
@@ -820,6 +890,18 @@ async function onCheckout(): Promise<void> {
                   <span class="product-price">
                     <span class="price-symbol">¥</span>
                     <span class="price-int">{{ formatMoney(product.price) }}</span>
+                  </span>
+                  <!-- 有规格商品的已加购反馈（2026-09-15 负责人走查）：规格商品的行内步进器被
+                       `!hasSpecs(product)` 挡掉后行内再无任何反馈，选完规格加购成功却看起来像没加过。
+                       这里只给**数量反馈**不给增减控件——同一商品不同规格是不同行（契约 §3.4），
+                       增减仍统一在规格弹层与购物车弹层内完成（PRD 850 行）。
+                       注意：本元素必须放在步进器的 `v-if` 之前，否则会截断下面 `+` 按钮的 `v-else` 链。 -->
+                  <span
+                    v-if="hasSpecs(product) && totalQtyOf(product.productId) > 0"
+                    class="product-added"
+                    :data-testid="`product-added-${product.productId}`"
+                  >
+                    已加购 {{ totalQtyOf(product.productId) }}
                   </span>
                   <!-- 行内步进器（T47-T49）：已加购显示 "- 数量 +"，未加购仅 + 按钮。
                        有规格商品不在此处步进——同一商品的不同规格在购物车中是不同行（contract §3.4），
@@ -1196,7 +1278,7 @@ async function onCheckout(): Promise<void> {
   width: 62px;
   height: 64px;
   border: 1px solid #eeeeee;
-  border-radius: 8px;
+  border-radius: 0 8px 8px 0;
   background: var(--color-surface-white);
   overflow: hidden;
 }
@@ -1329,7 +1411,35 @@ async function onCheckout(): Promise<void> {
 
 .review-area {
   padding: 12px;
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
   background: #ffffff;
+}
+.review-failed {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 12px;
+  font-size: 13px;
+  color: var(--color-text-secondary, #666);
+}
+.review-failed button {
+  border: 1px solid var(--color-primary, #ff5a1f);
+  background: none;
+  color: var(--color-primary, #ff5a1f);
+  border-radius: 6px;
+  padding: 3px 14px;
+  font-size: 12px;
+}
+.review-images {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+.review-images img {
+  width: 72px;
+  height: 72px;
+  border-radius: 6px;
+  object-fit: cover;
 }
 
 .review-empty {
@@ -1475,7 +1585,7 @@ async function onCheckout(): Promise<void> {
 
 .cat-rail-item--active {
   /* TODO-USER-015：选中项加外圆角（负责人 9/10 走查，设计系统 8px 圆角阶梯） */
-  border-radius: 8px;
+  border-radius: 0 8px 8px 0;
   background: var(--color-surface-white);
   font-weight: 500;
   color: var(--color-text-primary);
@@ -1602,6 +1712,19 @@ async function onCheckout(): Promise<void> {
 }
 
 /* 行内步进器（T47-T49）：- 数量 + */
+/* 有规格商品的已加购反馈（2026-09-15）：紧跟价格右侧、`+` 按钮左侧；
+   `.product-stepper` 用 margin-left:auto 把增减控件推到行尾，本徽标则贴住价格，避免挤压 + 按钮 */
+.product-added {
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #fff1eb;
+  color: var(--color-primary);
+  font-size: 10px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
 .product-stepper {
   display: flex;
   align-items: center;
@@ -1994,5 +2117,42 @@ async function onCheckout(): Promise<void> {
   margin-left: 6px;
   font-size: 11px;
   color: var(--color-text-tertiary);
+}
+</style>
+<style scoped>
+.review-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 12px 6px;
+}
+.review-summary .rs-score {
+  font-size: 26px;
+  font-weight: 800;
+  color: #ff5a1f;
+}
+.review-summary .rs-total {
+  font-size: 12px;
+  color: #666;
+}
+.review-filters {
+  display: flex;
+  gap: 8px;
+  padding: 0 12px 10px;
+  flex-wrap: wrap;
+}
+.review-filter {
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  color: #666;
+  border-radius: 14px;
+  padding: 3px 14px;
+  font-size: 12px;
+}
+.review-filter.is-active {
+  color: #ff5a1f;
+  border-color: #ff5a1f;
+  background: #fff5ef;
+  font-weight: 600;
 }
 </style>

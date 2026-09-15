@@ -15,7 +15,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import StoreCover from '@/components/StoreCover.vue'
 import { favoriteApi } from '@/services/api'
-import { formatMoney } from '@/services/normalizers'
+import { formatMoney, storeStatusText } from '@/services/normalizers'
 import { useSessionStore } from '@/stores/sessionStore'
 import { toast } from '@/utils/toast'
 import type { FavoriteItem } from '@/services/api/types'
@@ -130,8 +130,11 @@ function goBack(): void {
             <div class="fav-bottom-row">
               <div class="fav-tags">
                 <span v-for="tag in item.couponTags ?? []" :key="tag" class="fav-tag">{{ tag }}</span>
-                <span v-if="item.storeStatus === 'CLOSED' || item.storeStatus === 'TEMPORARILY_CLOSED'" class="fav-tag fav-tag--closed">
-                  休息中
+                <span
+                  v-if="item.storeStatus === 'CLOSED' || item.storeStatus === 'TEMPORARILY_CLOSED'"
+                  class="fav-tag fav-tag--closed"
+                >
+                  {{ storeStatusText(item.storeStatus) }}
                 </span>
               </div>
               <button

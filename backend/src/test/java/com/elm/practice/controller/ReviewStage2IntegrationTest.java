@@ -85,4 +85,33 @@ class ReviewStage2IntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON).content("{\"reply\":\"越权\"}"))
                 .andExpect(status().isNotFound());
     }
+
+    // ================= 评价聚合与筛选（2026-09-15 Wave3，契约 §6.2 回写） =================
+
+    /** GET /stores/{id}/reviews 返回 summary（平均分+总数）+ list（按筛选收窄）；非法 filter 400。 */
+    @Test void reviewFilterAndSummary() throws Exception {
+        // 本用例自造数据：o1002（COMPLETED）一条带图 5 星评价
+        mvc.perform(post("/api/v1/orders/o1002/review").session(user()).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"rating\":5,\"content\":\"带图好评\",\"images\":[\"/uploads/a.png\"]}"))
+                .andExpect(status().isOk());
+        // 默认（全部）
+        mvc.perform(get("/api/v1/stores/m002/reviews"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.summary.totalCount").value(1))
+                .andExpect(jsonPath("$.data.summary.averageRating").value(5.0))
+                .andExpect(jsonPath("$.data.list.length()").value(1));
+        // 有图
+        mvc.perform(get("/api/v1/stores/m002/reviews").param("filter", "有图"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.list.length()").value(1))
+                .andExpect(jsonPath("$.data.list[0].images.length()").value(1));
+        // 好评（≥4）1 条；差评（≤3）0 条；最新 = 默认时间倒序
+        mvc.perform(get("/api/v1/stores/m002/reviews").param("filter", "好评"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.list.length()").value(1));
+        mvc.perform(get("/api/v1/stores/m002/reviews").param("filter", "差评"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.list.length()").value(0));
+        // 非法 filter 400
+        mvc.perform(get("/api/v1/stores/m002/reviews").param("filter", "随便"))
+                .andExpect(status().isBadRequest());
+    }
 }

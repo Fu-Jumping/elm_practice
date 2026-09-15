@@ -286,15 +286,8 @@ function onCloseCard(storeId: string): void {
         <span class="search-placeholder">相关推荐商品的搜索…</span>
         <button class="search-btn" type="button">搜索</button>
         <!-- AI 点餐助手辅助入口（AI点餐助手前端PRD §2.2）：亮橙文字 + 图标，点击进对话页并预填提示词 -->
-        <button class="search-ai" type="button" data-testid="search-ai-btn" @click.stop="goAiChat('帮我推荐今天吃什么')">
-          <svg viewBox="0 0 20 20" aria-hidden="true">
-            <path
-              d="M10 2.5l1.6 4.4 4.4 1.6-4.4 1.6L10 14.5 8.4 10.1 4 8.5l4.4-1.6L10 2.5Z"
-              fill="currentColor"
-            />
-          </svg>
-          AI 推荐
-        </button>
+        <!-- 2026-09-15 负责人指示：AI 入口收敛为右下角浮窗（+我的页），搜索框按钮移除 -->
+
       </div>
     </section>
 

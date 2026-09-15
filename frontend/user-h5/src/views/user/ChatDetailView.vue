@@ -14,7 +14,13 @@
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { messageApi, orderApi } from '@/services/api'
-import { formatTime, normalizeOrderDetail, statusText } from '@/services/normalizers'
+import { BizError } from '@/services/http'
+import {
+  formatTime,
+  normalizeConversationDetail,
+  normalizeOrderDetail,
+  statusText,
+} from '@/services/normalizers'
 import { useCatalogStore } from '@/stores/catalogStore'
 import type { ChatMessageRecord, ConversationDetailRecord, OrderDetail } from '@/services/api/types'
 
@@ -26,6 +32,10 @@ const conversationId = typeof route.params.conversationId === 'string' ? route.p
 const conversation = ref<ConversationDetailRecord | null>(null)
 const order = ref<OrderDetail | null>(null)
 const missing = ref(false)
+/** 会话加载失败（网络/5xx）：提供重试，不静默跳回（2026-09-15 P1 消息簇 CD-3） */
+const loadFailed = ref(false)
+/** 订单卡加载失败：显示「无法查看」而非整卡消失（CD-4） */
+const orderFailed = ref(false)
 const content = ref('')
 const sending = ref(false)
 const sendError = ref('')
@@ -36,16 +46,25 @@ const QUICK_REPLIES = ['请问多久送达', '麻烦尽快', '不用餐具'] as 
 const MAX_MESSAGE_LENGTH = 200
 
 const storeName = computed(() => {
+  // 真实后端直出 storeName（BUG-20260914-005 修复）；缺省回退店铺列表映射（mock/旧形状）
+  if (conversation.value?.storeName) return conversation.value.storeName
   const storeId = conversation.value?.storeId
   if (!storeId) return ''
   return catalogStore.stores.find((store) => store.storeId === storeId)?.name ?? storeId
 })
 const canSend = computed(() => content.value.trim().length > 0 && !sending.value)
 
+/**
+ * 置底（2026-09-15 负责人走查：发送后必须手动下滑才看得到新消息）。
+ * 根因：页面滚动容器是 MainLayout 的 `.app-main`，`.chat-timeline` 自身 `overflow: visible`
+ * **不是滚动容器**，原实现对它设 `scrollTop` 不产生任何效果。
+ * 改为滚动真正的滚动容器；`.chat-page` 预留了底部输入区的 132px 内边距，
+ * 置底后最后一条消息不会被固定输入区盖住。
+ */
 function scrollToBottom(): void {
   void nextTick(() => {
-    const el = timelineRef.value
-    if (el) el.scrollTop = el.scrollHeight
+    const scroller = document.querySelector('.app-main')
+    if (scroller instanceof HTMLElement) scroller.scrollTop = scroller.scrollHeight
   })
 }
 
@@ -55,21 +74,35 @@ async function load(): Promise<void> {
     window.setTimeout(() => void router.replace({ name: 'messages' }), 400)
     return
   }
+  loadFailed.value = false
   try {
-    const detail = await messageApi.getConversation(conversationId)
-    conversation.value = detail
-    void catalogStore.fetchStores().catch(() => undefined)
-    try {
-      order.value = normalizeOrderDetail(await orderApi.getOrder(detail.orderId))
-    } catch {
-      order.value = null
-    }
+    conversation.value = normalizeConversationDetail(await messageApi.getConversation(conversationId))
+    if (!conversation.value.storeName) void catalogStore.fetchStores().catch(() => undefined)
+    await loadOrder()
     // 进入会话即标记已读（用户端未读清零）
     void messageApi.markConversationRead(conversationId).catch(() => undefined)
     scrollToBottom()
+  } catch (err) {
+    // 404（会话不存在/越权）→ 引导回列表；网络/5xx → 失败态 + 重试（CD-3）
+    if (err instanceof BizError && err.status === 404) {
+      missing.value = true
+      window.setTimeout(() => void router.replace({ name: 'messages' }), 400)
+    } else {
+      loadFailed.value = true
+    }
+  }
+}
+
+/** 订单状态卡：失败给「无法查看」降级块，不吞掉整卡（CD-4） */
+async function loadOrder(): Promise<void> {
+  orderFailed.value = false
+  const orderId = conversation.value?.orderId
+  if (!orderId) return
+  try {
+    order.value = normalizeOrderDetail(await orderApi.getOrder(orderId))
   } catch {
-    missing.value = true
-    window.setTimeout(() => void router.replace({ name: 'messages' }), 400)
+    order.value = null
+    orderFailed.value = true
   }
 }
 
@@ -85,11 +118,25 @@ async function onSend(): Promise<void> {
   sending.value = true
   sendError.value = ''
   try {
-    const message = await messageApi.sendMessage(conversationId, text)
-    conversation.value?.messages.push(message)
-    if (conversation.value) {
-      conversation.value.lastMessage = message.content
-      conversation.value.lastMessageAt = message.createdAt
+    // 真实后端返回**整个会话对象**（非单条消息）：归一后整包替换，回显最后一条（CD-2，修空气泡）；
+    // mock/替身仍返回单条消息 → 按单条追加（两种形状都不得产生空气泡）
+    const raw = (await messageApi.sendMessage(conversationId, text)) as unknown as Record<string, unknown>
+    if (Array.isArray(raw.messages)) {
+      const updated = normalizeConversationDetail(raw)
+      if (conversation.value) {
+        conversation.value = { ...updated, storeName: updated.storeName ?? conversation.value.storeName }
+      }
+    } else if (conversation.value) {
+      const m = raw as unknown as { messageId: string; sender: 'USER' | 'MERCHANT'; content: string; createdAt: string }
+      conversation.value.messages.push({
+        messageId: String(m.messageId ?? ''),
+        conversationId,
+        sender: m.sender === 'MERCHANT' ? 'MERCHANT' : 'USER',
+        content: String(m.content ?? text),
+        createdAt: String(m.createdAt ?? ''),
+      })
+      conversation.value.lastMessage = String(m.content ?? text)
+      conversation.value.lastMessageAt = String(m.createdAt ?? '')
     }
     content.value = ''
     scrollToBottom()
@@ -124,18 +171,25 @@ function messageTime(message: ChatMessageRecord): string {
   <div class="chat-page">
     <p v-if="missing" class="chat-missing" data-testid="chat-missing">会话不存在，即将返回消息列表…</p>
 
+    <div v-else-if="loadFailed" class="chat-load-error" data-testid="chat-load-error">
+      <p>会话加载失败，请检查网络</p>
+      <button type="button" data-testid="chat-retry-btn" @click="load">重试</button>
+    </div>
+
     <template v-else-if="conversation">
       <div data-testid="chat-detail">
-        <header class="chat-appbar">
-          <button class="chat-back" type="button" aria-label="返回" data-testid="back-btn" @click="goBack">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M15 4.5L7.5 12L15 19.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            </svg>
-          </button>
-          <p class="chat-title">{{ storeName }}</p>
-        </header>
+        <!-- 吸顶区（2026-09-15 负责人走查：顶部栏与订单状态卡在消息滑动时都不能被带走）：
+             两者同处一个 sticky 容器，滚动时整块留在顶部；容器底色不透明，消息从其下方穿行。 -->
+        <div class="chat-top">
+          <header class="chat-appbar">
+            <button class="chat-back" type="button" aria-label="返回" data-testid="back-btn" @click="goBack">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15 4.5L7.5 12L15 19.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </button>
+            <p class="chat-title">{{ storeName }}</p>
+          </header>
 
-        <main class="chat-main">
           <!-- 订单状态卡：状态 / 订单编号 / 商家名（来自订单接口）+ 查看订单 -->
           <section v-if="order" class="chat-order-card" data-testid="chat-order-card">
             <div class="chat-order-info">
@@ -149,7 +203,14 @@ function messageTime(message: ChatMessageRecord): string {
               查看订单
             </button>
           </section>
+          <!-- 订单接口失败：降级提示而非整卡消失（CD-4） -->
+          <section v-else-if="orderFailed" class="chat-order-card chat-order-card--unavailable" data-testid="chat-order-unavailable">
+            <span>订单状态暂时无法查看</span>
+            <button type="button" data-testid="chat-order-retry-btn" @click="loadOrder">刷新</button>
+          </section>
+        </div>
 
+        <main class="chat-main">
           <!-- 消息时间线（商家侧左、用户侧右；按服务端时间排序） -->
           <section ref="timelineRef" class="chat-timeline">
             <p v-if="conversation.messages.length === 0" class="chat-empty">暂无消息，打个招呼吧</p>
@@ -230,8 +291,18 @@ function messageTime(message: ChatMessageRecord): string {
   background: #f9f9f9;
 }
 
+/* 吸顶区（2026-09-15 负责人走查）：顶部栏与订单状态卡同处一个 sticky 容器，
+   滚动消息时整块留在顶部、订单块不随之上移。原先顶栏是 position: relative（会被带走），
+   把 sticky 上提到本容器后，`.chat-back` 的绝对定位锚点仍在本容器内的 `.chat-appbar` 上，不受影响。
+   底色与页面一致且不透明：消息从其下方穿行时不会透出。 */
+.chat-top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #f9f9f9;
+}
+
 .chat-appbar {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -507,5 +578,32 @@ function messageTime(message: ChatMessageRecord): string {
   text-align: center;
   font-size: 14px;
   color: #999999;
+}
+</style>
+<style scoped>
+.chat-load-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 16px;
+  font-size: 14px;
+  color: var(--color-text-secondary, #666);
+}
+.chat-load-error button,
+.chat-order-card--unavailable button {
+  border: 1px solid var(--color-primary, #ff5a1f);
+  background: none;
+  color: var(--color-primary, #ff5a1f);
+  border-radius: 6px;
+  padding: 4px 16px;
+  font-size: 13px;
+}
+.chat-order-card--unavailable {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--color-text-secondary, #666);
 }
 </style>

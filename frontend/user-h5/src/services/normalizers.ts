@@ -3,7 +3,7 @@
  * 单测必测对象（TDD 规划 §4.2）；缺字段给确定默认值，禁止多键名试探式解包
  * 本文件 9/4 起按 TDD 实现（测试场景由人设计，AI 只辅助脚手架）
  */
-import type { CouponBlastRecord, CouponBlastResult, OrderAmountLine, OrderAmountSnapshot, OrderDetail, OrderDiscountItem, OrderRecord, OrderSummary } from '@/services/api/types'
+import type { CouponBlastRecord, CouponBlastResult, OrderAmountLine, OrderAmountSnapshot, OrderDetail, OrderDiscountItem, OrderRecord, OrderStatus, OrderSummary, StoreStatus } from '@/services/api/types'
 
 /** 金额：后端返回数字元，展示保留两位小数（契约：金额后端保留两位小数） */
 export function formatMoney(amount: number): string {
@@ -26,8 +26,8 @@ export function formatTime(input: string | number | Date): string {
   )
 }
 
-/** 状态枚举 → 文案映射（如订单状态），值对齐契约枚举，禁止页面散落魔法数字 */
-const STATUS_TEXT_MAP: Record<string, string> = {
+/** 订单状态枚举 → 文案映射（契约 §3.5），值对齐契约枚举，禁止页面散落魔法数字 */
+const STATUS_TEXT_MAP: Record<OrderStatus, string> = {
   PROCESSING: '进行中',
   // 后端已实现支付扩展状态机（联调实测 2026-09-07）：创建订单即进入待支付
   PENDING_PAYMENT: '待支付',
@@ -40,11 +40,43 @@ const STATUS_TEXT_MAP: Record<string, string> = {
   CANCELLED: '已取消',
 }
 
-export function statusText(status: string): string {
-  // TODO(9/4 TDD)：按契约枚举实现映射与测试
+/**
+ * 订单状态文案（契约 §3.5）。
+ *
+ * 参数收敛为 `OrderStatus` 联合类型（SHOW-QA-007 类型加固，2026-09-15）：此前为宽泛 `string`，
+ * 店铺状态被喂进来时编译期毫无察觉——SHOW-QA-007 的根因正是「订单映射函数被拿去渲染店铺状态」。
+ * 收敛后同类跨域误用在编译期即报错；店铺状态请用 `storeStatusText`。
+ * 运行时后端仍可能返回定义域外的值 → 保留「未知名原样返回」兜底（normalizers.spec B5 锁定口径）。
+ */
+export function statusText(status: OrderStatus): string {
   // ?? 叫"空值合并"：左边取不到值（映射里没有这个键）时用右边的兜底
   // B4：PROCESSING 查表 → '进行中'；B5：WHATEVER 查不到 → 原样返回（你拍板的口径）
   return STATUS_TEXT_MAP[status] ?? status
+}
+
+/** 闭店态统一文案：用户端不区分「已关店」与「临时闭店」（PRD 427 只要求展示不可购买状态），
+ *  对齐收藏页/分类列表页/确认订单页既有口径「休息中」；区分两态只发生在商家端营业状态设置。 */
+const STORE_CLOSED_TEXT = '休息中'
+
+/** 店铺营业状态枚举 → 用户端文案（契约 §3.2：OPEN / CLOSED / TEMPORARILY_CLOSED） */
+const STORE_STATUS_TEXT_MAP: Record<StoreStatus, string> = {
+  OPEN: '营业中',
+  CLOSED: STORE_CLOSED_TEXT,
+  TEMPORARILY_CLOSED: STORE_CLOSED_TEXT,
+}
+
+/**
+ * 店铺营业状态文案（SHOW-QA-007，2026-09-15 缺陷修复）。
+ *
+ * 缺陷链路：商家详情页曾用**订单状态**映射 `statusText()` 渲染 `store.status`，店铺枚举不在其
+ * 定义域内，兜底 `?? status` 把 `TEMPORARILY_CLOSED` 原样漏到页面上（线上 m004 实测）。
+ * 本函数是店铺状态上屏的唯一出口，与订单状态分属两套枚举、不得互相借用。
+ *
+ * 兜底口径与 `statusText` **相反**：未知值一律回落「休息中」，绝不回落英文枚举本身——
+ * 调用点（`StoreDetailView` 的状态标签）只在 `status !== 'OPEN'` 时渲染，未知状态同样是不可下单态。
+ */
+export function storeStatusText(status: StoreStatus): string {
+  return STORE_STATUS_TEXT_MAP[status] ?? STORE_CLOSED_TEXT
 }
 
 /** 打包费固定 2.00 元（PRD 7.4 2026-09-01 评审决议演示口径，与后端计价规则一致） */
@@ -114,7 +146,7 @@ export function normalizeOrderSummary(raw: OrderRecord): OrderSummary {
  * 展示用状态文案（契约 §3.5 / PRD 7.6）：「已完成」且未评价时用户端展示为「待评价」，
  * 「待评价」不是独立存储状态，由状态与评价情况计算；其余状态回落 statusText。
  */
-export function orderDisplayStatus(input: { status: string; reviewed?: boolean }): string {
+export function orderDisplayStatus(input: { status: OrderStatus; reviewed?: boolean }): string {
   if (input.status === 'COMPLETED' && input.reviewed === false) return '待评价'
   return statusText(input.status)
 }
@@ -342,5 +374,34 @@ export function normalizeConversation(raw: unknown): ConversationCard {
     lastMessage: text(source.lastMessage),
     lastMessageAt: text(source.lastMessageAt) || text(source.updatedAt),
     unread: toFiniteNumber(source.unread ?? source.unreadCount),
+  }
+}
+
+/**
+ * 会话详情归一化（2026-09-15 P1 消息簇）：真实后端 senderRole → 前端 sender；
+ * storeName/storeId 直出透传（storeId 缺省回退 merchantId）。
+ * POST /conversations/{id}/messages 返回**整个会话对象**，同样经本函数归一后整包替换。
+ */
+export function normalizeConversationDetail(
+  raw: unknown,
+): import('./api/types').ConversationDetailRecord {
+  const source = (raw ?? {}) as Record<string, unknown>
+  const text = (value: unknown): string => (typeof value === 'string' ? value : '')
+  const card = normalizeConversation(raw)
+  const messages = Array.isArray(source.messages) ? source.messages : []
+  return {
+    ...card,
+    storeName: text(source.storeName) || undefined,
+    messages: messages.map((item) => {
+      const m = (item ?? {}) as Record<string, unknown>
+      const sender = text(m.senderRole) || text(m.sender) || 'MERCHANT'
+      return {
+        messageId: text(m.messageId),
+        conversationId: card.conversationId,
+        sender: sender === 'USER' ? 'USER' : 'MERCHANT',
+        content: text(m.content),
+        createdAt: text(m.createdAt),
+      }
+    }),
   }
 }

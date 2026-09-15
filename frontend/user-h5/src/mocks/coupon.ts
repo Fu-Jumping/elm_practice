@@ -148,6 +148,12 @@ export const couponMocks: Record<string, MockHandler> = {
     return ok(list)
   },
 
+
+  /** 免费爆次数查询（契约 §3.10，2026-09-15）：与爆一次共享 freeBlastState 口径 */
+  'GET /me/coupons/blast-status': () => {
+    const today = formatDateTime(new Date()).slice(0, 10)
+    return ok({ freeBlastAvailable: freeBlastState.date !== today })
+  },
   'POST /me/coupons/blast': ({ data }) => {
     const couponId = String((data as { couponId?: unknown } | undefined)?.couponId ?? '').trim()
     const today = formatDateTime(new Date()).slice(0, 10)

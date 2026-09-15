@@ -97,4 +97,19 @@ class OrderCancellationStage2IntegrationTest {
                 .content("{\"reason\":\"123456789012345678901234567890123456789012345678901\"}"))
                 .andExpect(status().isBadRequest());
     }
+
+    /** TODO-BE-013 / BUG-20260908-005：PENDING_PAYMENT 订单支付前对商家不可见，支付成功后出现（契约 §5/PRD 7.6）。 */
+    @Test void pendingPaymentOrderIsHiddenFromMerchantUntilPaid() throws Exception {
+        var merchant=merchant();
+        mvc.perform(get("/api/v1/merchant/orders").session(merchant))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[?(@.orderId == 'o1003')]").isEmpty());
+        mvc.perform(get("/api/v1/merchant/orders/o1003").session(merchant))
+                .andExpect(status().isNotFound());
+        mvc.perform(post("/api/v1/orders/o1003/payment").session(user()).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"success\":true}")).andExpect(status().isOk());
+        mvc.perform(get("/api/v1/merchant/orders/o1003").session(merchant))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("PENDING"));
+    }
 }

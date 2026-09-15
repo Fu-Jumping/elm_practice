@@ -134,6 +134,15 @@ CREATE TABLE IF NOT EXISTS ai_chat_messages (
   CHECK(role IN ('SYSTEM','USER','ASSISTANT','TOOL'))
 );
 
+CREATE TABLE IF NOT EXISTS search_terms (
+  term_id INT AUTO_INCREMENT PRIMARY KEY,
+  term VARCHAR(40) NOT NULL UNIQUE,
+  aliases JSON NOT NULL,
+  targets JSON NOT NULL,
+  kind VARCHAR(12) NOT NULL,
+  weight INT NOT NULL DEFAULT 1,
+  hot BOOLEAN NOT NULL DEFAULT FALSE
+);
 INSERT IGNORE INTO id_sequence(name,next_val) VALUES ('global',1004);
 
 -- 批次⑨ 商家收藏（契约 §3.7）：(user_id, store_id) 唯一，重复收藏幂等返回当前收藏，不产生重复记录。

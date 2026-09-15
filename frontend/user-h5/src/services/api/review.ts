@@ -4,13 +4,18 @@
  * 店铺评价：GET /stores/{storeId}/reviews（按时间倒序，含商家回复）
  */
 import { request } from '@/services/http'
-import type { ReviewRecord, ReviewSubmitPayload } from './types'
+import type { ReviewFilter, ReviewPage, ReviewRecord, ReviewSubmitPayload } from './types'
 import { endpoints } from './endpoints'
 
 export function submitReview(orderId: string, body: ReviewSubmitPayload): Promise<ReviewRecord> {
   return request<ReviewRecord>({ method: 'POST', url: endpoints.review.submit(orderId), data: body })
 }
 
-export function getStoreReviews(storeId: string): Promise<ReviewRecord[]> {
-  return request<ReviewRecord[]>({ method: 'GET', url: endpoints.review.byStore(storeId) })
+/** 店铺评价（契约 §6.2 Wave3）：返回 summary（平均分+总数）+ 按筛选收窄的 list */
+export function getStoreReviews(storeId: string, filter: ReviewFilter = '全部'): Promise<ReviewPage> {
+  return request<ReviewPage>({
+    method: 'GET',
+    url: endpoints.review.byStore(storeId),
+    params: filter === '全部' ? undefined : { filter },
+  })
 }

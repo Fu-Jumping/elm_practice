@@ -1,4 +1,4 @@
-# 王嘉悦｜个人工作贡献总结
+# 成员C（后端A）｜个人工作贡献总结
 
 > 根据现有分工、Git/PR 与工作记录整理的讲稿草稿；由本人核对。本轮 AI 检查的修复不归入个人既往工作。
 
@@ -20,7 +20,7 @@
 - PR 作者账号与角色记录存在交叉，归属依据分工与 daily；不要把 PR 提交账号简单等同姓名。
 - backend/src/main/java/com/elm/practice/ 下分层源码及 service/controller 测试。
 
-仓库：https://github.com/Fu-Jumping/elm_practice
+仓库：（仓库 PR 链接已匿名化）
 
 ## 答辩时应能解释
 

@@ -75,7 +75,7 @@
                 class="cl-closed"
                 data-testid="category-store-closed"
               >
-                休息中 · 暂不可下单
+                {{ storeStatusText(store.status) }} · 暂不可下单
               </span>
             </div>
             <p class="cl-meta">
@@ -124,7 +124,7 @@ import { addressApi, storeApi } from '@/services/api'
 import { useSessionStore } from '@/stores/sessionStore'
 import type { SearchSort, StoreSummary } from '@/services/api/types'
 import { SEARCH_SORT_OPTIONS } from '@/services/api/types'
-import { formatMoney } from '@/services/normalizers'
+import { formatMoney, storeStatusText } from '@/services/normalizers'
 import { DEMO_LOCATION, LOCATION_LOAD_FAILED, resolveLocationState } from '@/utils/location'
 
 const route = useRoute()
