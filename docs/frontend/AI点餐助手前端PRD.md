@@ -19,7 +19,7 @@
 | 项 | 说明 |
 | --- | --- |
 | 后端接口 | `POST /api/v1/ai/chat`（非流式）、`POST /api/v1/ai/stream-chat`（SSE 流式） |
-| 会话标识 | `sessionId`：不传时由后端基于 HttpSession 生成并返回，前端需保存用于多轮 |
+| 会话标识 | `sessionId`：**由前端生成并随每次请求携带**（契约 §10.6 允许传入；`/stream-chat` 只回文本分片、不回 `sessionId`）。若 `/chat` 回显了不同的 `sessionId`，前端切到后端 id 并在新 key 下保存当前消息 |
 | 数据来源 | 后端启动时从业务库加载全部在售商家与商品生成知识库，注入大模型上下文 |
 | 大模型 | DeepSeek，经后端代理调用，前端不接触 API key |
 
@@ -132,7 +132,7 @@ AI 回复中提到的商家名称渲染为可点击链接（前端通过商家�
 
 ### 5.1 会话标识
 
-- 首次进入对话页时，调用 `/chat` 不传 `sessionId`，后端返回新的 `sessionId`
+- 首次进入对话页时，**前端生成** `sessionId` 并随请求携带（2026-09-15 口径修订：原写「调用 `/chat` 不传 `sessionId`、后端返回新的 `sessionId`」与实测不符——契约 §10.6 的 `/stream-chat` 只回文本分片、不回 `sessionId`，按字面实现则首次回复无法走流式；契约 §10.6 明确「不传则后端基于 HttpSession 生成，传即采用」）
 - 前端将 `sessionId` 保存到 localStorage（key: `ai_session_id`）
 - 后续请求携带该 `sessionId`，实现多轮记忆
 - 用户主动清空对话时，清除 localStorage 中的 `sessionId`，下次进入生成新会话
