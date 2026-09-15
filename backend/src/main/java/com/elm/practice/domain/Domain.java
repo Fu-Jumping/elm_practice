@@ -23,8 +23,8 @@ public final class Domain {
         public String createdAt;
         /** 批次⑥：当天已用免费爆的日期（yyyy-MM-dd，东八区），null=从未使用。CHG-001 §3.10。 */
         public String freeBlastDate;
-        /** 批次⑥：会员标识（契约 §3.8，种子/后台标记）；memberActivatedAt 为开通时间（yyyy-MM-dd HH:mm:ss）。 */
-        public boolean isMember;
+        /** 批次⑨（契约 §3.8）：会员标识与开通时间。由种子数据或后台标记，无开通/续费接口。 */
+        public boolean memberOpened;
         public String memberActivatedAt;
         public User(String id, String account, String passwordHash, String nickname, String createdAt) {
             this.id = id; this.account = account; this.passwordHash = passwordHash;
@@ -51,6 +51,8 @@ public final class Domain {
         public int monthlySales, deliveryMinutes;
         public BigDecimal startPrice, deliveryFee;
         public StoreStatus status;
+        /** 批次⑨（契约 §3.6）：种子距离（km）。「距离」排序与 distanceText 展示的唯一数据源。 */
+        public BigDecimal distanceKm;
         public Store(String id, String name, String description, String image, BigDecimal rating,
                      int monthlySales, int deliveryMinutes, BigDecimal startPrice, BigDecimal deliveryFee,
                      StoreStatus status, String merchantId) {
@@ -216,12 +218,23 @@ public final class Domain {
         }
         public Message() {}
     }
-    /** 商家收藏（契约 §3.7）；storeName 等展示字段由 JOIN stores 扁平带出，storeStatus 保留字符串原样。 */
+    /** 商家收藏（批次⑨，契约 §3.7，favorites 表映射）。展示字段由 join stores / promotions 补齐。 */
     public static final class Favorite {
         public String id, userId, storeId, createdAt;
-        public String storeName, image, storeStatus;
-        public java.math.BigDecimal rating, deliveryFee;
-        public int monthlySales, deliveryMinutes;
         public Favorite() {}
+        public Favorite(String id, String userId, String storeId, String createdAt) {
+            this.id = id; this.userId = userId; this.storeId = storeId; this.createdAt = createdAt;
+        }
+    }
+    /** 站内通知（批次⑨，契约 §3.9，notifications 表映射）。type 取 ORDER / COUPON / MEMBER。 */
+    public static final class Notification {
+        public String id, userId, type, title, content, relatedId, createdAt;
+        public boolean read;
+        public Notification() {}
+        public Notification(String id, String userId, String type, String title, String content,
+                            String relatedId, boolean read, String createdAt) {
+            this.id = id; this.userId = userId; this.type = type; this.title = title;
+            this.content = content; this.relatedId = relatedId; this.read = read; this.createdAt = createdAt;
+        }
     }
 }

@@ -7,29 +7,28 @@ import com.elm.practice.service.FavoriteService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;
 
-/** 商家收藏（契约 §3.7）。 */
+/** 商家收藏（契约 §3.7，TODO-BE-008 收藏部分）。全部从 Session 取用户，只读写本人收藏。 */
 @RestController
-@RequestMapping("/api/v1/me/favorites")
+@RequestMapping("/api/v1")
 public class FavoriteController {
-    private final AuthService auth;
-    private final FavoriteService favorites;
+    private final AuthService auth; private final FavoriteService favorites;
 
     public FavoriteController(AuthService auth, FavoriteService favorites) {
         this.auth = auth; this.favorites = favorites;
     }
 
-    @GetMapping
+    @GetMapping("/me/favorites")
     public ApiResponse<?> list(HttpSession s) {
         return ApiResponse.success(favorites.list(auth.requireUser(s)));
     }
 
-    @PostMapping
-    public ApiResponse<?> add(@RequestBody Requests.FavoriteCreate req, HttpSession s) {
-        return ApiResponse.success(favorites.add(auth.requireUser(s), req));
+    @PostMapping("/me/favorites")
+    public ApiResponse<?> create(@RequestBody(required = false) Requests.FavoriteCreate r, HttpSession s) {
+        return ApiResponse.success(favorites.create(auth.requireUser(s), r == null ? null : r.storeId));
     }
 
-    @DeleteMapping("/{storeId}")
-    public ApiResponse<?> remove(@PathVariable String storeId, HttpSession s) {
-        return ApiResponse.success(favorites.remove(auth.requireUser(s), storeId));
+    @DeleteMapping("/me/favorites/{storeId}")
+    public ApiResponse<?> delete(@PathVariable String storeId, HttpSession s) {
+        return ApiResponse.success(favorites.delete(auth.requireUser(s), storeId));
     }
 }

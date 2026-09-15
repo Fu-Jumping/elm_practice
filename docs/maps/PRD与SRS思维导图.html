@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PRD 与 SRS 思维导图</title>
-<!-- 派生视图注记（2026-09-06）：SRS 已拆分为交付版（docs/SRS.md，面向评阅）与工程版（docs/SRS-工程版.md，原 v0.1），需求真源为 docs/PRD.md。本图仅供讲解演示，不作口径真源。 -->
+<!-- 派生视图注记（2026-09-15 修订）：本页为 2026-09-04 静态快照，仅供讲解演示；需求真源 docs/PRD.md，评阅视图 docs/SRS.md，工程口径见 docs/backend/**。口径已过期，引用请以 SRS v1.2 为准。 -->
 <script>
   window.markmap = {
     autoLoader: {
@@ -370,10 +370,10 @@ markmap:
 - 归属不匹配 404，不泄露资源存在
 - 不信任请求体 userId/merchantId/storeId
 ### 3.2 系统上下文
-- H5(Vue3)→Spring Boot:4000→MySQL:3306；后台(React18)
+- H5(Vue3):5173 → Spring Boot:4000 → MySQL:3306；后台(React18):4001
 - 单仓库三目录
 ### 3.3 运行环境
-- :5173 / :5174 / :4000 / :3306
+- 用户端 5173 / 商家端 4001 / 后端 4000 / MySQL 3306
 - 联调禁止 Mock 回退
 ### 3.4 全局业务约束（10 条）
 - 1 /api/v1 前缀；商家 /api/v1/merchant

@@ -9,8 +9,9 @@ public interface UserMapper {
             + "DATE_FORMAT(created_at,'%Y-%m-%d %H:%i:%s') AS createdAt, "
             // 批次⑥（CHG-001）：当天免费爆占用日期，NULL=从未使用。
             + "DATE_FORMAT(free_blast_date,'%Y-%m-%d') AS freeBlastDate, "
-            // 批次⑥：会员标识与开通时间（契约 §3.8）。
-            + "is_member AS isMember, DATE_FORMAT(member_activated_at,'%Y-%m-%d %H:%i:%s') AS memberActivatedAt";
+            // 批次⑨（契约 §3.8）：会员标识与开通时间。
+            + "member_opened AS memberOpened, "
+            + "DATE_FORMAT(member_activated_at,'%Y-%m-%d %H:%i:%s') AS memberActivatedAt";
 
     @Select("SELECT " + COLS + " FROM users WHERE user_id = #{id}")
     Domain.User findById(String id);

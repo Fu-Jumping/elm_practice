@@ -151,13 +151,13 @@ class CouponIntegrationTest {
 
     // ---------------------------------------------------------------- TC-CPN 下单选用
 
-    /** TC-CPN-003：下单选用全场红包——小计 23 命中满减 2 与红包 2，实付 = 23−2−2+5+2 = 26.00，券置已用。 */
+    /** TC-CPN-003：下单选用全场红包——小计 23 命中满减 2、会员 95 折 1.15 与红包 2，实付 = 23−2−1.15−2+5+2 = 24.85，券置已用。 */
     @Test void tcCpn003_orderWithCouponReducesTotalAndMarksUsed() throws Exception {
         var s = userLogin();
         addCart(s, "m002", "p104", 2);
         String body = orderWithCoupon(s, "m002", "da001", "cp001");
         org.junit.jupiter.api.Assertions.assertEquals(2.0, ((Number) JsonPath.read(body, "$.data.couponAmount")).doubleValue(), 0.0001);
-        org.junit.jupiter.api.Assertions.assertEquals(26.0, ((Number) JsonPath.read(body, "$.data.total")).doubleValue(), 0.0001);
+        org.junit.jupiter.api.Assertions.assertEquals(24.85, ((Number) JsonPath.read(body, "$.data.total")).doubleValue(), 0.0001);
         // 券已置为已用，可用查询不再返回
         String avail = mvc.perform(get("/api/v1/me/coupons/available?storeId=m002&amount=99").session(s))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();

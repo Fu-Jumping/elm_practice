@@ -236,6 +236,17 @@ describe('爆红包浮层（CHG-001 TODO-USER-029）', () => {
       timeout: 2000,
     })
 
+    // 必须先等「买套餐」触发的 loadCoupons() 重载落地，再去删共享 mock 里的可爆券：
+    // mock 接口带 200~500ms 随机延迟，若这次重载晚于删券返回，会把页面的 coupons 刷成「删后数据」；
+    // 而 blastableCouponId 是实时 computed，浮层里「消耗一张红包再爆」按钮随即被 v-if 摘掉，
+    // 断言/点击就会拿到空 DOMWrapper（Cannot call trigger on an empty DOMWrapper，RB-8 flaky 根因）。
+    // 页面渲染的张数 == mock 列表长度，即说明这次重载已经落地。
+    await vi.waitFor(
+      () =>
+        expect(wrapper.findAll('[data-testid="coupon-card"]').length).toBe(couponMockState.length),
+      { timeout: 3000 },
+    )
+
     // 免费次数已用 → 爆被拒 409 → 进入阻塞态，提供「消耗一张红包再爆」
     freeBlastState.date = new Date().toISOString().slice(0, 10)
     await openOverlay(wrapper)
@@ -251,6 +262,10 @@ describe('爆红包浮层（CHG-001 TODO-USER-029）', () => {
     for (let i = couponMockState.length - 1; i >= 0; i -= 1) {
       if (staleIds.has(couponMockState[i]!.couponId)) couponMockState.splice(i, 1)
     }
+
+    // 删券之后尚无新的重载回来：页面此刻持有的正是「后端已不存在」的过期券快照，
+    // 消耗入口必须仍然可见，这样下面点击才会真的带着失效 couponId 请求后端（404 路径）
+    expect(wrapper.find('[data-testid="blast-spend-btn"]').exists()).toBe(true)
 
     await wrapper.find('[data-testid="blast-spend-btn"]').trigger('click')
     await vi.waitFor(

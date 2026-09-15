@@ -53,11 +53,13 @@ class OrderServiceTest {
         assertEquals(new BigDecimal("39.00"), order.itemSubtotal);
         assertEquals(new BigDecimal("2.00"), order.packagingFee);
         // 批次① 计价口径（reset.sql 促销基线：满 20 减 2、满 30 免配送费）：
-        // 小计 39 ≥ 20 减 2，≥ 30 免配送费 5，u001 有演示订单非新客 → 实付 = 39 − 2 + 5 − 5 + 2 = 39.00。
+        // 批次① 计价口径（reset.sql 促销基线：满 20 减 2、满 30 免配送费）+ 批次⑨ 会员折扣真正生效：
         assertEquals(new BigDecimal("2.00"), order.fullReductionAmount);
         assertEquals(new BigDecimal("5.00"), order.deliveryFee);
         assertEquals(new BigDecimal("5.00"), order.deliveryFeeDiscount);
-        assertEquals(new BigDecimal("39.00"), order.total);
+        // 小计 39 ≥ 20 减 2，≥ 30 免配送费 5，u001 有演示订单非新客但**是会员** → 实付 = 39 − 2 − 1.95 + 5 − 5 + 2 = 37.05。
+        assertEquals(new BigDecimal("1.95"), order.memberDiscountAmount);
+        assertEquals(new BigDecimal("37.05"), order.total);
         assertEquals(Domain.OrderStatus.PENDING_PAYMENT, order.status);
         // 原 repo.cartLines.isEmpty()：购物车行已删除。
         assertTrue(cartLineMapper.findByUserAndStore("u001", "m002").isEmpty());

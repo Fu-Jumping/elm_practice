@@ -187,7 +187,9 @@ export const couponMocks: Record<string, MockHandler> = {
         canBlast: false,
       }
       couponMockState.push({ ...coupon })
-      return ok({ coupon, tierIndex, free: true })
+      // 契约 §3.10 的响应是**扁平对象**（2026-09-14 线上实测确认）：券字段直接铺在 data 上，
+      // 另加 tierIndex 与 freeBlast 两个控制字段；不再返回 { coupon, tierIndex, free } 嵌套壳
+      return ok({ ...coupon, tierIndex, freeBlast: true })
     }
 
     // 传 couponId → 消耗并**替换**该券（门槛与金额同时可能变化，不新增行；爆出后为终态）
@@ -202,7 +204,8 @@ export const couponMocks: Record<string, MockHandler> = {
     target.validTo = todayEnd
     target.source = 'BLAST_OUT'
     target.canBlast = false
-    return ok({ coupon: { ...target }, tierIndex, free: false })
+    // 同上：替换式爆也返回契约扁平形状，freeBlast=false 表示本次消耗了红包而非免费次数
+    return ok({ ...target, tierIndex, freeBlast: false })
   },
 
   'POST /me/coupon-packs': ({ data }) => {

@@ -289,20 +289,17 @@ export function formatMoneyCompact(amount: number): string {
 /**
  * 爆一次（`POST /me/coupons/blast`）响应归一化 —— 契约 §3.10。
  *
- * 真实后端按契约返回**扁平对象**：券字段（couponId/amount/threshold/…/canBlast）直接铺在 `data` 上，
- * 另加 `tierIndex`（命中档位序号）与 `freeBlast`（本次是否免费爆）；
- * 而组件与替身既有形态是 `{ coupon, tierIndex, free }`。此处做**唯一出口**适配，不把适配散进页面；
- * 已是嵌套形态的响应原样透传（替身与既有用例不受影响）。
+ * 输入**只有一种形状**：契约扁平对象——券字段（couponId/amount/threshold/…/canBlast）直接铺在 `data` 上，
+ * 另加 `tierIndex`（命中档位序号）与 `freeBlast`（本次是否免费爆）。真实后端（2026-09-14 线上实测）
+ * 与替身 `mocks/coupon.ts`（TODO-USER-110 已对齐同一形状）都返回该形状。
+ * 输出页面视图模型 `{ coupon, tierIndex, free }`：本函数是接口适配的唯一出口，不把适配散进页面；
+ * 缺 `tierIndex`/`freeBlast` 时给确定默认值（0 / false），禁止 undefined 上屏。
  *
- * 2026-09-14 线上实测：真实后端为扁平形态；未适配前结果卡拿不到金额（用户侧表现为「爆不出数额」）。
+ * 历史：曾兼容替身的嵌套旧形状 `{ coupon, tierIndex, free }`。替身按 TODO-USER-110 改为契约扁平形状后，
+ * 该分支已无生产者（真后端亦为扁平），2026-09-15 随本次对齐一并删除，避免两套形状并存。
  */
-export function normalizeBlastResult(
-  raw: CouponBlastRecord | CouponBlastResult,
-): CouponBlastResult {
-  if (raw && typeof raw === 'object' && 'coupon' in raw && raw.coupon) {
-    return raw as CouponBlastResult
-  }
-  const { tierIndex, freeBlast, ...coupon } = raw as CouponBlastRecord
+export function normalizeBlastResult(raw: CouponBlastRecord): CouponBlastResult {
+  const { tierIndex, freeBlast, ...coupon } = raw
   return {
     coupon: coupon as CouponBlastResult['coupon'],
     tierIndex: tierIndex ?? 0,

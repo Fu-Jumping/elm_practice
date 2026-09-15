@@ -31,15 +31,17 @@ public class OrderService {
     private final ConversationMapper conversations; private final PromotionMapper promotions;
     private final StoreService stores; private final AddressService addresses; private final IdGenerator ids;
     private final PricingService pricing; private final CouponService couponSvc;
+    private final NotificationService notifications;
 
     public OrderService(OrderMapper orders, OrderItemMapper orderItems, CartLineMapper cartLines,
                         ProductMapper products, ConversationMapper conversations, PromotionMapper promotions,
                         StoreService stores, AddressService addresses, IdGenerator ids, PricingService pricing,
-                        CouponService couponSvc) {
+                        CouponService couponSvc, NotificationService notifications) {
         this.orders = orders; this.orderItems = orderItems; this.cartLines = cartLines;
         this.products = products; this.conversations = conversations; this.promotions = promotions;
         this.stores = stores; this.addresses = addresses; this.ids = ids; this.pricing = pricing;
         this.couponSvc = couponSvc;
+        this.notifications = notifications;
     }
 
     /** @Transactional 即真实 DB 事务：任何一步抛错整体回滚（扣库存、清购物车、订单/明细/会话插入原子）。 */
@@ -58,6 +60,10 @@ public class OrderService {
         List<Domain.CartLine> lines = cartLines.findByUserAndStoreForUpdate(u.id, sid);
         if (lines.isEmpty()) throw ApiException.badRequest("购物车为空");
         BigDecimal subtotal = BigDecimal.ZERO;
+        // 批次⑨（PRD 7.4 第①/⑤步）：会员对「配置了会员价」的商品按会员价计价，该部分不计入会员折扣基数；
+        // 未配置会员价的商品才应用店铺会员折扣（契约 §3.2/§3.5「与会员折扣不叠加」）。
+        BigDecimal memberDiscountBase = BigDecimal.ZERO;
+        boolean isMember = u.memberOpened;
         var snapshots = new java.util.ArrayList<Domain.OrderItem>();
         for (Domain.CartLine line : lines) {
             Domain.Product p = products.findById(line.productId);
@@ -65,14 +71,18 @@ public class OrderService {
             if (line.quantity > p.stock) throw new ApiException(org.springframework.http.HttpStatus.CONFLICT, 40901,
                     "商品库存不足", Map.of("productId", p.id, "reason", "库存最多为 " + p.stock));
             var selectedSpecs = CartService.validatedSelection(p, JsonLists.specs(line.specOptionsJson));
-            BigDecimal unit = CartService.unitPrice(p, selectedSpecs);
-            subtotal = subtotal.add(unit.multiply(BigDecimal.valueOf(line.quantity)));
+            boolean memberPriced = isMember && p.memberPrice != null;
+            BigDecimal unit = CartService.unitPriceFrom(memberPriced ? p.memberPrice : p.price, selectedSpecs);
+            BigDecimal lineTotal = unit.multiply(BigDecimal.valueOf(line.quantity));
+            subtotal = subtotal.add(lineTotal);
+            if (!memberPriced) memberDiscountBase = memberDiscountBase.add(lineTotal);
             var snapshot = new Domain.OrderItem(p.id, p.name, p.image, p.categoryId, unit, line.quantity);
             snapshot.specKey = line.specKey;
             snapshot.specOptionsJson = JsonLists.toJson(selectedSpecs);
             snapshots.add(snapshot);
         }
         subtotal = subtotal.setScale(2);
+        memberDiscountBase = memberDiscountBase.setScale(2);
         if (subtotal.compareTo(store.startPrice) < 0) throw ApiException.conflict("未达到起送金额 " + store.startPrice);
         // 优惠计价七步（批次①，PRD 7.4）：满减/新客/免配送费随 promotions 配置；会员与红包批次⑥接入，当前非会员、红包 0。
         var promo = promotions.findConfig(sid);
@@ -86,8 +96,7 @@ public class OrderService {
             lockedCoupon = couponSvc.lockForOrder(u, r.couponId.trim(), sid, subtotal);
             couponAmount = lockedCoupon.amount.setScale(2);
         }
-        // 第⑤步会员折扣：会员标识来自 users.is_member（契约 §3.8），折扣率取店铺 promotions.member_discount。
-        var pr = pricing.price(subtotal, store.deliveryFee, promo, isNewCustomer, u.isMember, couponAmount);
+        var pr = pricing.price(subtotal, memberDiscountBase, store.deliveryFee, promo, isNewCustomer, isMember, couponAmount);
         BigDecimal total = pr.total;
         String id = ids.nextId("o");
         // 支付扩展已选定：订单创建即待支付，15 分钟内支付成功后进入待接单（契约 3.5；状态机修正 BE-002）。
@@ -153,7 +162,11 @@ public class OrderService {
             throw ApiException.conflict("支付已超时");
         if (success) {
             String paidAt = Times.now();
-            if (orders.markPaid(id, paidAt) > 0) { o.status = Domain.OrderStatus.PENDING; o.paidAt = paidAt; }
+            if (orders.markPaid(id, paidAt) > 0) {
+                o.status = Domain.OrderStatus.PENDING; o.paidAt = paidAt;
+                // 契约 §3.9：支付成功进入 PENDING 写 ORDER 通知。
+                notifications.orderStatus(o.userId, id, Domain.OrderStatus.PENDING, null);
+            }
         }
         return o;
     }
@@ -178,6 +191,8 @@ public class OrderService {
         order.cancelledBy = "USER";
         order.items.addAll(orderItems.findByOrder(id));
         for (Domain.OrderItem item : order.items) products.restoreStock(item.productId, item.quantity);
+        // 契约 §3.9：用户取消写 ORDER 通知。
+        notifications.orderStatus(order.userId, order.id, Domain.OrderStatus.CANCELLED, reason);
         return order;
     }
 
@@ -199,6 +214,8 @@ public class OrderService {
             return withItems(current);
         }
         o.status = target;
+        // 契约 §3.9：接单 / 出餐配送 / 完成各写一条 ORDER 通知。
+        notifications.orderStatus(o.userId, o.id, target, null);
         return o;
     }
 

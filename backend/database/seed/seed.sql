@@ -1,9 +1,8 @@
 -- MySQL 8+ demo seed. Password for both accounts is 123456 (SHA-256 digest only).
 -- 目录真源：图片清单.md。商品编号、图片文件、店铺归属、分类必须保持一一对应。
 -- 应用启动时仅当 users 为空才执行；已有环境使用 catalog-alignment.sql 做一次性对齐。
--- 演示账号 u001 为会员（契约 §3.8，与 upgrade-member.sql 的存量库标记一致）。
-INSERT INTO users(user_id,account,password_hash,nickname,created_at,is_member,member_activated_at) VALUES
-('u001','13800000001','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','演示用户',NOW(),TRUE,DATE_SUB(NOW(),INTERVAL 30 DAY))
+INSERT INTO users(user_id,account,password_hash,nickname,created_at) VALUES
+('u001','13800000001','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','演示用户',NOW())
 ON DUPLICATE KEY UPDATE nickname=VALUES(nickname);
 INSERT INTO merchants(merchant_id,account,password_hash,store_id,phone,created_at) VALUES
 ('ma001','merchant-a','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','m002','13800000002',NOW())
@@ -30,26 +29,25 @@ INSERT INTO categories(category_id,store_id,name,sort_order) VALUES
 ON DUPLICATE KEY UPDATE store_id=VALUES(store_id),name=VALUES(name),sort_order=VALUES(sort_order);
 
 -- 商品与图片清单逐项对应；p101–p106 是肯德基主菜单，p201–p209 是其余四店菜单。
--- member_price 仅 m002（会员店）给演示会员价，其余店铺 NULL（契约 §3.2/§3.8）。
-INSERT INTO products(product_id,store_id,category_id,name,description,image,price,member_price,stock,on_sale,sales) VALUES
-('p201','m001','c201','家常豆腐','下饭神器','/demo-images/product-m001-04.jpg',12.00,NULL,50,TRUE,300),
-('p202','m001','c201','鱼香肉丝','酸甜下饭','/demo-images/product-m001-05.jpg',15.00,NULL,40,TRUE,260),
-('p203','m001','c202','米饭','粒粒分明','/demo-images/product-m001-06.jpg',2.00,NULL,100,TRUE,180),
-('p101','m002','c101','香辣鸡腿堡','招牌汉堡，香辣多汁','/demo-images/product-m002-01.jpg',19.50,18.50,100,TRUE,1200),
-('p102','m002','c101','劲脆鸡腿堡','外酥里嫩，经典之选','/demo-images/product-m002-02.jpg',19.50,18.50,100,TRUE,960),
-('p103','m002','c101','老北京鸡肉卷','经典风味，饱腹满足','/demo-images/product-m002-03.jpg',17.00,16.10,80,TRUE,880),
-('p104','m002','c102','黄金鸡块（5块）','分享装，外酥里嫩','/demo-images/product-m002-04.jpg',11.50,10.90,120,TRUE,750),
-('p105','m002','c103','九珍果汁','冰爽解腻','/demo-images/product-m002-05.jpg',9.00,8.50,150,TRUE,640),
-('p106','m002','c101','热辣香骨鸡（5块）','销量冠军，售完即止','/demo-images/product-m002-06.jpg',13.90,13.20,0,TRUE,0),
-('p204','m003','c301','巨无霸','经典双层牛肉','/demo-images/product-m003-01.jpg',25.50,NULL,60,TRUE,1800),
-('p205','m003','c302','薯条（大）','金黄酥脆','/demo-images/product-m003-03.jpg',11.00,NULL,80,TRUE,900),
-('p206','m004','c401','羊肉串（10串）','现烤现送','/demo-images/product-m004-01.jpg',28.00,NULL,30,TRUE,500),
-('p207','m004','c402','烤茄子','蒜香浓郁','/demo-images/product-m004-02.jpg',10.00,NULL,20,TRUE,300),
-('p208','m005','c501','精品肥牛','纹理细腻，涮煮鲜嫩','/demo-images/product-m005-01.jpg',39.00,NULL,25,TRUE,400),
-('p209','m005','c502','手切鲜羊肉','现切鲜羊肉','/demo-images/product-m005-02.jpg',46.00,NULL,18,TRUE,350)
+INSERT INTO products(product_id,store_id,category_id,name,description,image,price,stock,on_sale,sales) VALUES
+('p201','m001','c201','家常豆腐','下饭神器','/demo-images/product-m001-04.jpg',12.00,50,TRUE,300),
+('p202','m001','c201','鱼香肉丝','酸甜下饭','/demo-images/product-m001-05.jpg',15.00,40,TRUE,260),
+('p203','m001','c202','米饭','粒粒分明','/demo-images/product-m001-06.jpg',2.00,100,TRUE,180),
+('p101','m002','c101','香辣鸡腿堡','招牌汉堡，香辣多汁','/demo-images/product-m002-01.jpg',19.50,100,TRUE,1200),
+('p102','m002','c101','劲脆鸡腿堡','外酥里嫩，经典之选','/demo-images/product-m002-02.jpg',19.50,100,TRUE,960),
+('p103','m002','c101','老北京鸡肉卷','经典风味，饱腹满足','/demo-images/product-m002-03.jpg',17.00,80,TRUE,880),
+('p104','m002','c102','黄金鸡块（5块）','分享装，外酥里嫩','/demo-images/product-m002-04.jpg',11.50,120,TRUE,750),
+('p105','m002','c103','九珍果汁','冰爽解腻','/demo-images/product-m002-05.jpg',9.00,150,TRUE,640),
+('p106','m002','c101','热辣香骨鸡（5块）','销量冠军，售完即止','/demo-images/product-m002-06.jpg',13.90,0,TRUE,0),
+('p204','m003','c301','巨无霸','经典双层牛肉','/demo-images/product-m003-01.jpg',25.50,60,TRUE,1800),
+('p205','m003','c302','薯条（大）','金黄酥脆','/demo-images/product-m003-03.jpg',11.00,80,TRUE,900),
+('p206','m004','c401','羊肉串（10串）','现烤现送','/demo-images/product-m004-01.jpg',28.00,30,TRUE,500),
+('p207','m004','c402','烤茄子','蒜香浓郁','/demo-images/product-m004-02.jpg',10.00,20,TRUE,300),
+('p208','m005','c501','精品肥牛','纹理细腻，涮煮鲜嫩','/demo-images/product-m005-01.jpg',39.00,25,TRUE,400),
+('p209','m005','c502','手切鲜羊肉','现切鲜羊肉','/demo-images/product-m005-02.jpg',46.00,18,TRUE,350)
 ON DUPLICATE KEY UPDATE
   store_id=VALUES(store_id),category_id=VALUES(category_id),name=VALUES(name),description=VALUES(description),
-  image=VALUES(image),price=VALUES(price),member_price=VALUES(member_price),stock=VALUES(stock),on_sale=VALUES(on_sale),sales=VALUES(sales);
+  image=VALUES(image),price=VALUES(price),stock=VALUES(stock),on_sale=VALUES(on_sale),sales=VALUES(sales);
 
 INSERT INTO addresses(address_id,user_id,contact_name,contact_sex,contact_phone,region,detail,label,is_default,updated_at) VALUES
 ('da001','u001','张同学','先生','13800000001','天津大学北洋园校区','12号楼 304室','学校',TRUE,NOW())

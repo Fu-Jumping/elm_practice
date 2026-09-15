@@ -391,12 +391,29 @@ describe('normalizeBlastResult 爆红包响应归一化（契约 §3.10）', () 
     expect(result.coupon.amount).toBe(5)
   })
 
-  it('BL-3 兼容替身既有的嵌套响应（原样透传，避免同批改动波及既有用例）', () => {
-    const nested = {
-      coupon: { couponId: 'cpb0001', name: '满30减5红包', amount: 5, threshold: 30, scope: 'ALL' as const, validFrom: '2026-09-14 15:00:00', validTo: '2026-09-14 23:59:59', status: 'available' as const, used: false, source: 'BLAST_OUT' as const, canBlast: false },
-      tierIndex: 2,
-      free: true,
+  it('BL-3 扁平响应缺 tierIndex/freeBlast 时给确定默认值（0 / false），输出恒为三键视图模型', () => {
+    const flat: CouponBlastRecord = {
+      couponId: 'cpb0002',
+      name: '满25减8红包',
+      amount: 8,
+      threshold: 25,
+      scope: 'ALL',
+      storeId: null,
+      validFrom: '2026-09-14 15:00:00',
+      validTo: '2026-09-14 23:59:59',
+      status: 'available',
+      used: false,
+      source: 'BLAST_OUT',
+      canBlast: false,
     }
-    expect(normalizeBlastResult(nested)).toEqual(nested)
+    const result = normalizeBlastResult(flat)
+    expect(result.coupon.couponId).toBe('cpb0002')
+    expect(result.coupon.amount).toBe(8)
+    expect(result.tierIndex).toBe(0)
+    expect(result.free).toBe(false)
+    // 唯一出口口径：恒为 { coupon, tierIndex, free } 三键，coupon 内不残留契约控制字段
+    expect(Object.keys(result).sort()).toEqual(['coupon', 'free', 'tierIndex'])
+    expect(result.coupon).not.toHaveProperty('tierIndex')
+    expect(result.coupon).not.toHaveProperty('freeBlast')
   })
 })

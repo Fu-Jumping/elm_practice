@@ -1,4 +1,5 @@
 {
+  "_note": "本清单为 2026-09-08 首次发布快照，baseline 为 508889e，其后未重新生成；不要据此判断当前线上版本。",
   "baseline": "508889ee2c0b09431d93fa40482fe47a9200b0b0",
   "branch": "fix/deploy-audit-20260908",
   "gitChanges": "working tree; no commit or push",
@@ -99,7 +100,6 @@
     "deploy/verify_persistence.py": "72bc9a8bc10e04be62d9bc6dd3531b77818718ddc025d78d21b30874b3077a24",
     "docs/PRD.md": "0c23a674ceb88bc56b295c0a3ad1540590a2d2580a4df552b0d01a2ec86e8b85",
     "docs/README.md": "4cc0bc0bfba6199e81952625f8ec81f02df6814feb06b647d0710b0b3e928983",
-    "docs/SRS-工程版.md": "ac5849983d90f4bb7bc2ea309a699825b666257caf1fb1149524744910e23b52",
     "docs/SRS.md": "61ac8428f6bf08911049527f66cfb358441dffcd9b78166fb6c528999b0bba0a",
     "docs/backend/README.md": "10a1d7d141f6dda984b07ca67e23d86b9b918fe4b15f3ad9308646d70cf3e91f",
     "docs/backend/diagrams/system-context.puml": "cb46b2a3e5d218fc47943bf2360c89fd86523c9c33128a2e9c0eb38cb33c862e",

@@ -51,4 +51,23 @@ public interface ProductMapper {
     long countByCategory(String categoryId);
     @Select("SELECT COUNT(*) FROM products WHERE store_id=#{storeId}")
     long countByStore(String storeId);
+
+    /**
+     * 契约 §3.6 搜索的商品组：商品名命中，且所属店铺对用户端可见（CLOSED 隐藏）；
+     * 分类条件接受商品自身 categoryId、店铺自身分类，或平台级课程分类（批次⑨ C1）。
+     */
+    String SEARCH_FROM = " FROM products WHERE on_sale = TRUE"
+            + " AND EXISTS (SELECT 1 FROM stores s WHERE s.store_id = products.store_id AND s.status != 'CLOSED')"
+            + " <if test=\"k != null and k != ''\"> AND LOWER(name) LIKE CONCAT('%', #{k}, '%') </if>"
+            + " <if test=\"categoryId != null and categoryId != ''\">"
+            + " AND (category_id = #{categoryId}"
+            + " OR EXISTS (SELECT 1 FROM categories c WHERE c.store_id = products.store_id AND c.category_id = #{categoryId})"
+            + " OR EXISTS (SELECT 1 FROM platform_category_stores pcs WHERE pcs.store_id = products.store_id AND pcs.category_id = #{categoryId}))</if>";
+
+    @Select("<script>SELECT " + COLS + SEARCH_FROM + " ORDER BY sales DESC, product_id LIMIT #{limit} OFFSET #{offset}</script>")
+    List<Domain.Product> searchByName(@Param("k") String k, @Param("categoryId") String categoryId,
+                                      @Param("limit") int limit, @Param("offset") int offset);
+
+    @Select("<script>SELECT COUNT(*)" + SEARCH_FROM + "</script>")
+    long countSearchByName(@Param("k") String k, @Param("categoryId") String categoryId);
 }

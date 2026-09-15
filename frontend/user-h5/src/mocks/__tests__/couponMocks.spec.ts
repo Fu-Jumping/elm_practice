@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { mockDispatch } from '../index'
 import { clearMockCart } from '../cart'
 import { BLAST_TIERS, COUPON_SEED, blastRandomState, couponMockState, formatDateTime, freeBlastState } from '../coupon'
+import { normalizeBlastResult } from '../../services/normalizers'
+import type { CouponBlastRecord } from '../../services/api/types'
 
 /**
  * 红包域 mock（契约 §3.8 + §3.10 后端替身行为，CHG-001）
@@ -86,6 +88,7 @@ describe('红包域 mock（契约 §3.8/§3.10 后端替身行为）', () => {
  * RBM-2 免费爆：新增一张（source=BLAST_OUT、canBlast=false、当天 23:59:59 到期），当日再爆 409（TC-RBP-003/004）
  * RBM-3 消耗券爆：替换式（同 couponId、门槛与金额同时更新、不新增行、canBlast 置终态）（TC-RBP-005）
  * RBM-4 爆出来的券再爆 409；未知 couponId 404；无免费次数且无可爆券 409（TC-RBP-006/009）
+ * RBM-5 响应形状 = 契约 §3.10 扁平对象（券字段 + tierIndex + freeBlast，2026-09-14 线上实测同形状），无嵌套壳且可被归一化唯一出口直接消费
  */
 describe('爆红包替身（契约 §3.10）', () => {
   beforeEach(() => {
@@ -101,15 +104,15 @@ describe('爆红包替身（契约 §3.10）', () => {
     const first = await mockDispatch({ method: 'POST', url: '/me/coupons/blast', data: {} })
     const firstData = first.payload.data as Record<string, unknown>
     expect(firstData.tierIndex).toBe(1)
-    expect((firstData.coupon as Record<string, unknown>).amount).toBe(5)
-    expect((firstData.coupon as Record<string, unknown>).threshold).toBe(30)
-    expect(firstData.free).toBe(true)
+    expect(firstData.amount).toBe(5)
+    expect(firstData.threshold).toBe(30)
+    expect(firstData.freeBlast).toBe(true)
     blastRandomState.fn = () => 0.999 // 命中第 10 档（满40减18.8）
     freeBlastState.date = '' // 再给一次免费机会用于断言末档
     const last = await mockDispatch({ method: 'POST', url: '/me/coupons/blast', data: {} })
     const lastData = last.payload.data as Record<string, unknown>
     expect(lastData.tierIndex).toBe(10)
-    expect((lastData.coupon as Record<string, unknown>).amount).toBe(18.8)
+    expect(lastData.amount).toBe(18.8)
   })
 
   it('RBM-2 免费爆新增一张且不消耗已购券；当日再爆 409（TC-RBP-003/004）', async () => {
@@ -138,6 +141,12 @@ describe('爆红包替身（契约 §3.10）', () => {
       data: { couponId: String(target.couponId) },
     })
     expect(res.status).toBe(200)
+    // 响应同为契约 §3.10 扁平对象（freeBlast=false 表示本次消耗红包而非免费次数）
+    const body = res.payload.data as Record<string, unknown>
+    expect(body.coupon).toBeUndefined()
+    expect(body.couponId).toBe(target.couponId)
+    expect(body.tierIndex).toBe(10)
+    expect(body.freeBlast).toBe(false)
     expect(couponMockState.length).toBe(countBefore) // 替换式不新增行
     const updated = couponMockState.find((item) => item.couponId === target.couponId)!
     expect(updated.threshold).toBe(40)
@@ -148,7 +157,7 @@ describe('爆红包替身（契约 §3.10）', () => {
 
   it('RBM-4 爆出的券再爆 409；未知 couponId 404；无免费次数且无可爆券 409（TC-RBP-006/009）', async () => {
     const free = await mockDispatch({ method: 'POST', url: '/me/coupons/blast', data: {} })
-    const blastedId = String((free.payload.data as { coupon: { couponId: string } }).coupon.couponId)
+    const blastedId = String((free.payload.data as { couponId: string }).couponId)
     // 爆出来的券 canBlast=false → 再爆 409
     const reBlast = await mockDispatch({ method: 'POST', url: '/me/coupons/blast', data: { couponId: blastedId } })
     expect(reBlast.status).toBe(409)
@@ -158,6 +167,43 @@ describe('爆红包替身（契约 §3.10）', () => {
     // 无免费次数（已用）且无可爆券 → 409
     const exhausted = await mockDispatch({ method: 'POST', url: '/me/coupons/blast', data: {} })
     expect(exhausted.status).toBe(409)
+  })
+
+  it('RBM-5 爆一次响应为契约 §3.10 扁平对象：券字段铺在 data 上 + tierIndex + freeBlast，无嵌套壳（2026-09-14 线上实测同形状）', async () => {
+    blastRandomState.fn = () => 0.999 // 命中第 10 档（满40减18.8）
+    const res = await mockDispatch({ method: 'POST', url: '/me/coupons/blast', data: {} })
+    expect(res.status).toBe(200)
+    const data = res.payload.data as Record<string, unknown>
+    // 键集 = 券字段（CouponRecord 的 12 个）+ tierIndex + freeBlast；不得出现嵌套壳 coupon 与旧字段 free
+    expect(Object.keys(data).sort()).toEqual([
+      'amount',
+      'canBlast',
+      'couponId',
+      'freeBlast',
+      'name',
+      'scope',
+      'source',
+      'status',
+      'storeId',
+      'threshold',
+      'tierIndex',
+      'used',
+      'validFrom',
+      'validTo',
+    ])
+    expect(data.coupon).toBeUndefined()
+    expect(data.free).toBeUndefined()
+    expect(data.amount).toBe(18.8)
+    expect(data.threshold).toBe(40)
+    expect(data.tierIndex).toBe(10)
+    expect(data.freeBlast).toBe(true)
+    // 与真后端同形状 → 归一化唯一出口可直接消费（页面拿到同一份视图模型）
+    const normalized = normalizeBlastResult(data as unknown as CouponBlastRecord)
+    expect(normalized.coupon.couponId).toBe(data.couponId)
+    expect(normalized.coupon.amount).toBe(18.8)
+    expect(normalized.coupon.threshold).toBe(40)
+    expect(normalized.tierIndex).toBe(10)
+    expect(normalized.free).toBe(true)
   })
 })
 

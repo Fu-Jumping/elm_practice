@@ -30,11 +30,13 @@ import java.util.Random;
 public class CouponService {
     private final CouponMapper coupons; private final CouponPackMapper packs; private final UserMapper users;
     private final IdGenerator ids;
+    private final NotificationService notifications;
     /** 档位随机源；注入 Random 便于测试固定种子（契约 §3.10）。 */
     private Random rng = new Random();
-
-    public CouponService(CouponMapper coupons, CouponPackMapper packs, UserMapper users, IdGenerator ids) {
+    public CouponService(CouponMapper coupons, CouponPackMapper packs, UserMapper users, IdGenerator ids,
+                         NotificationService notifications) {
         this.coupons = coupons; this.packs = packs; this.users = users; this.ids = ids;
+        this.notifications = notifications;
     }
 
     /** 套餐定义（§10.5 第 7 条，代码常量与契约表双写）：门槛+减免序列，价格为模拟付费价。 */
@@ -85,6 +87,8 @@ public class CouponService {
             c.source = "PACK"; c.canBlast = true; c.packId = packId;
             coupons.insert(c);
             views.add(ViewMapper.coupon(c));
+            // 契约 §3.9：红包到账写 COUPON 通知，relatedId 为红包编号。
+            notifications.couponArrived(u.id, c.id, c.name, c.threshold, c.amount);
         }
         var out = new LinkedHashMap<String,Object>();
         out.put("packId", packId); out.put("packKey", spec.key()); out.put("price", spec.price());
@@ -117,6 +121,8 @@ public class CouponService {
             c.threshold = tier.threshold(); c.amount = tier.amount(); c.validFrom = now; c.validTo = endOfToday;
             c.source = "BLAST_OUT"; c.canBlast = false;
         }
+        // 契约 §3.9：爆出来的红包到账同样写 COUPON 通知（替换式更新不新增行，relatedId 仍是该券编号）。
+        notifications.couponArrived(u.id, c.id, c.name, c.threshold, c.amount);
         var out = new LinkedHashMap<String,Object>(ViewMapper.coupon(c));
         out.put("tierIndex", tier.index()); out.put("freeBlast", free);
         return out;

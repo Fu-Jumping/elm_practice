@@ -6,6 +6,7 @@ import com.elm.practice.common.ViewMapper;
 import com.elm.practice.domain.Domain;
 import com.elm.practice.mapper.CategoryMapper;
 import com.elm.practice.mapper.MerchantMapper;
+import com.elm.practice.mapper.PlatformCategoryMapper;
 import com.elm.practice.mapper.ProductMapper;
 import com.elm.practice.mapper.StoreMapper;
 import org.springframework.stereotype.Service;
@@ -17,16 +18,26 @@ import java.util.Map;
 @Service
 public class StoreService {
     private final StoreMapper stores; private final CategoryMapper categories; private final ProductMapper products;
-    private final MerchantMapper merchants;
-    public StoreService(StoreMapper stores, CategoryMapper categories, ProductMapper products, MerchantMapper merchants) {
+    private final MerchantMapper merchants; private final PromotionTagService promotionTags;
+    private final PlatformCategoryMapper platformCategories;
+    public StoreService(StoreMapper stores, CategoryMapper categories, ProductMapper products, MerchantMapper merchants,
+                        PromotionTagService promotionTags, PlatformCategoryMapper platformCategories) {
         this.stores = stores; this.categories = categories; this.products = products; this.merchants = merchants;
+        this.promotionTags = promotionTags; this.platformCategories = platformCategories;
     }
 
+    /**
+     * 用户端店铺列表（契约 §3.2）：CLOSED 店铺隐藏、TEMPORARILY_CLOSED 可见但不可下单；
+     * 分类条件同时接受店铺自身 categories 与平台级课程分类（批次⑨ C1），两者都不认识时返回空列表。
+     * 促销标签耦合真实 promotions 配置（§3.7 couponTags / 商家卡标签）。
+     */
     public List<Map<String,Object>> list(String keyword, String categoryId, String sort) {
-        // CLOSED 店铺对用户端隐藏；TEMPORARILY_CLOSED 可见但不可下单（过滤/排序下推 SQL）。
         String k = keyword == null ? "" : keyword.trim().toLowerCase();
-        if (categoryId != null && !categoryId.isBlank() && categories.findById(categoryId) == null) return List.of();
-        return stores.listVisible(k, categoryId, sort).stream().map(ViewMapper::store).toList();
+        if (categoryId != null && !categoryId.isBlank()
+                && categories.findById(categoryId) == null
+                && platformCategories.countById(categoryId) == 0) return List.of();
+        return stores.listVisible(k, categoryId, sort).stream()
+                .map(s -> ViewMapper.storeWithTags(s, promotionTags.tags(s.id))).toList();
     }
 
     public Domain.Store get(String storeId) {

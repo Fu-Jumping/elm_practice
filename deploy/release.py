@@ -3,8 +3,9 @@
 2026-09-10 参数化（默认值与 2026-09-08 首次发布完全一致，不带参数运行行为不变）：
     python3 deploy/release.py
     python3 deploy/release.py --source /home/ubuntu/releases/elm-20260910-e41444c \
-        --tag 20260910-e41444c --release-sha e41444c
+        --tag 20260910-99a646d --release-sha 99a646d
 发布前会自动校验源目录、构建产物与 nginx 模板；任一步失败按原逻辑回滚到 --backup 指向的版本。
+注意：不带参数运行 = 按默认值发布 2026-09-08 首次发布版本（等价于把线上回滚到旧版），正式发布/回滚必须显式传全 --source/--tag/--release-sha/--backup。
 """
 import argparse, json, pathlib, subprocess, os, time, urllib.request, shutil
 
