@@ -323,6 +323,8 @@ public class ExtensionService {
         var v = new LinkedHashMap<String,Object>();
         v.put("conversationId", c.id);
         v.put("orderId", c.orderId);
+        v.put("storeId", c.storeId);
+        v.put("storeName", c.storeName);
         v.put("userId", c.userId);
         v.put("userNickname", maskNickname(c.userNickname));
         v.put("merchantId", c.merchantId);

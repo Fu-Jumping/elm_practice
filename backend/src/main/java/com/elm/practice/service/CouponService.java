@@ -44,12 +44,12 @@ public class CouponService {
         int quantity() { return items.length; }
     }
     private static final Map<String,PackSpec> PACKS = Map.of(
-            "pack49", new PackSpec("pack49", new BigDecimal("49.00"), new BigDecimal[][]{
+            "pack49", new PackSpec("pack49", new BigDecimal("4.90"), new BigDecimal[][]{
                     {new BigDecimal("30.00"), new BigDecimal("5.00")},
                     {new BigDecimal("30.00"), new BigDecimal("5.00")},
                     {new BigDecimal("30.00"), new BigDecimal("5.00")},
                     {BigDecimal.ZERO, new BigDecimal("5.00")}}),
-            "pack99", new PackSpec("pack99", new BigDecimal("99.00"), new BigDecimal[][]{
+            "pack99", new PackSpec("pack99", new BigDecimal("9.90"), new BigDecimal[][]{
                     {new BigDecimal("30.00"), new BigDecimal("5.00")},
                     {new BigDecimal("30.00"), new BigDecimal("5.00")},
                     {new BigDecimal("30.00"), new BigDecimal("5.00")},
@@ -59,6 +59,14 @@ public class CouponService {
                     {new BigDecimal("40.00"), new BigDecimal("10.00")},
                     {BigDecimal.ZERO, new BigDecimal("5.00")}})
     );
+
+    /** 免费爆次数查询（契约 §3.10，2026-09-15 回写）：free_blast_date 早于东八区今天（含 NULL）即可用。 */
+    public Map<String,Object> blastStatus(Domain.User u) {
+        Domain.User fresh = users.findById(u.id);
+        boolean available = fresh == null || fresh.freeBlastDate == null
+                || fresh.freeBlastDate.compareTo(Times.todayCn()) < 0;
+        return Map.of("freeBlastAvailable", available);
+    }
 
     public List<Map<String,Object>> list(Domain.User u, String status) {
         if (status != null && !status.equals("available") && !status.equals("expired"))

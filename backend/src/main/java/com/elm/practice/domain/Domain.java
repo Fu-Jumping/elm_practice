@@ -204,6 +204,7 @@ public final class Domain {
     }
     public static final class Conversation {
         public String id, orderId, userId, merchantId, userNickname;
+        public String storeId, storeName; // BUG-20260914-005：用户端需要店铺名（契约 §6.1 回写）
         public boolean userRead, merchantRead;
         public final List<Message> messages = new ArrayList<>();
         public Conversation(String id, String orderId, String userId, String merchantId) {
