@@ -422,7 +422,7 @@ const mockState: MockState = {
     storeId: 'm002',
     name: '肯德基宅急送',
     description: '提供校园配送服务',
-    contactPhone: '022-12345678',
+    contactPhone: '13800000002',
     startPrice: 20,
     deliveryFee: 3,
     status: 'OPEN',
