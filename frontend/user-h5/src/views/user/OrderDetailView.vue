@@ -11,6 +11,9 @@
  * - 不提供「查看配送进度」按钮（配送进度由本页时间线与配送信息卡表达，CHG-002/003）
  * - 课程口径替换：配送服务方为课程占位文案（不出现「蜂鸟专送」）、支付方式显示「模拟支付」（不出现「微信支付」）
  * - 预计送达：契约 §3.5 无 ETA 字段 → 按 createdAt + 40 分钟本地推算（2026-09-11 负责人确认的课程演示口径）
+ * - 商品行缩略图：设计真源每行商品带 56×56 圆角图（`w-14 h-14 rounded-xl object-cover`）；
+ *   图片地址走 `utils/demoImages.productImageSrc`（接口 image 快照优先 → 演示映射 → 占位图），
+ *   与首页/商家详情同一口径（2026-09-15 修：此前只渲染了空占位、从未显示商品图）
  * - 取消确认弹层与评价/消息/再来一单跳转分别属 TODO-USER-002/003/004/008，本批先渲染按钮并给出占位提示
  * - 收货人电话按数据原样展示（PRD 未要求本页脱敏；商家端脱敏口径用于评价昵称）
  */
@@ -28,6 +31,7 @@ import { useCatalogStore } from '@/stores/catalogStore'
 import type { OrderDetail } from '@/services/api/types'
 import CancelOrderSheet from '@/components/CancelOrderSheet.vue'
 import { reorderToCart } from '@/utils/reorder'
+import { productImageSrc } from '@/utils/demoImages'
 import { toast } from '@/utils/toast'
 
 const route = useRoute()
@@ -367,7 +371,12 @@ async function onReorder(): Promise<void> {
 
           <ul class="od-dishes">
             <li v-for="item in order.items" :key="item.productId" class="od-dish">
-              <span class="od-thumb" aria-hidden="true" />
+              <img
+                class="od-thumb"
+                :src="productImageSrc(item.productId, item.image)"
+                :alt="item.name"
+                data-testid="od-dish-thumb"
+              />
               <span class="od-dish-info">
                 <span class="od-dish-name">{{ item.name }}</span>
                 <span class="od-dish-qty">x{{ item.quantity }}</span>
@@ -827,8 +836,10 @@ async function onReorder(): Promise<void> {
   height: 56px;
   border: 1px solid #0000000d;
   border-radius: 12px;
-  /* 商品图占位：接口 image 缺失时保持设计稿缩略图尺寸，不用外部素材 */
+  /* 设计真源 w-14 h-14 rounded-xl object-cover：图片裁切填满缩略图；
+     background 留作图片加载失败时的底衬（图片地址走 utils/demoImages 三级兜底链） */
   background: #f6f7f9;
+  object-fit: cover;
 }
 
 .od-dish-info {

@@ -227,6 +227,8 @@ export interface OrderAmounts {
 export interface OrderItemSnapshot {
   productId: string
   name: string
+  /** 下单时商品图快照（`order_items.image`，契约 §3.5）；缺失时由 `utils/demoImages` 兜底 */
+  image?: string
   unitPrice: number
   quantity: number
 }
