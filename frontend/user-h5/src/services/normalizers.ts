@@ -127,6 +127,9 @@ export function normalizeOrderDetail(raw: OrderRecord): OrderDetail {
     items: (raw.items ?? []).map((item) => ({
       productId: item.productId,
       name: item.name,
+      // 后端无图时返回空串，页面视图模型里「无图」只保留一种表示（undefined）：
+      // 展示层 productImageSrc 据此走演示映射/占位图，不必再判空串
+      image: item.image || undefined,
       unitPrice: toFiniteNumber(item.unitPrice),
       quantity: item.quantity,
     })),
