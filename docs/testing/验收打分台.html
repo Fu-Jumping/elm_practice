@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>验收打分台 · elm 轻量外卖（逐条核验 + 手动测试 + 评分）</title>
+<style>
+:root{--navy:#063866;--deep:#042747;--blue:#006ab4;--ice:#e8f2f9;--gold:#c9a365;--ink:#17324a;--paper:#f5f8fb;--line:#d8e4ee;--ok:#1e7b3c;--warn:#b26a00;--bad:#b3261e;--na:#7d95ab}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--paper);color:var(--ink);font-size:14px;line-height:1.6}
+button{font-family:inherit;cursor:pointer}
+.top{position:sticky;top:0;z-index:200;background:linear-gradient(90deg,var(--deep),var(--navy));color:#fff;padding:8px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.top h1{font-size:15px;font-weight:700}
+.top .sub{font-size:11px;color:#bcd6ea}
+.top .spacer{flex:1}
+.tbtn{border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);color:#fff;border-radius:6px;padding:3px 12px;font-size:12px}
+.tbtn:hover{background:rgba(255,255,255,.25)}
+.prog{min-width:160px;height:6px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#e5d3ae);width:0}
+.prog-txt{font-size:11px;color:#bcd6ea;font-variant-numeric:tabular-nums}
+.layout{display:flex;min-height:calc(100vh - 46px)}
+.side{width:216px;flex:none;background:#fff;border-right:1px solid var(--line);padding:10px 0;overflow-y:auto;max-height:calc(100vh - 46px);position:sticky;top:46px}
+.side .grp{padding:6px 14px 2px;font-size:11px;color:var(--gold);font-weight:700;letter-spacing:1px}
+.side a{display:flex;justify-content:space-between;align-items:center;padding:5px 14px;font-size:12.5px;color:var(--ink);text-decoration:none;border-left:3px solid transparent}
+.side a:hover{background:var(--ice)}
+.side a.on{background:var(--ice);border-left-color:var(--navy);color:var(--navy);font-weight:600}
+.side a .st{font-size:10px;color:#999}
+.side a .st.done{color:var(--ok)}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.cp{padding:16px 20px 40px;max-width:860px}
+.cp-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.cp-head .no{font-size:11px;color:var(--gold);border:1px solid var(--gold);border-radius:4px;padding:0 6px;font-weight:700}
+.cp-head h2{font-size:18px;color:var(--navy)}
+.cp-head .refs{font-size:11px;color:#7d95ab}
+.test-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:12px 0}
+.test-bar .lbl{font-size:12px;color:#7d95ab}
+.tbtn2{border:1px solid var(--navy);background:var(--navy);color:#fff;border-radius:6px;padding:4px 14px;font-size:12.5px}
+.tbtn2:hover{background:#0a4a84}
+.tbtn2.ghost{background:#fff;color:var(--navy)}
+.test-bar code{font-size:11.5px;background:var(--ice);padding:2px 8px;border-radius:4px;color:var(--blue)}
+.frame-panel{display:none;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px;background:#fff}
+.frame-panel.open{display:block}
+.frame-panel .fp-head{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--ice);font-size:12px;color:var(--ink)}
+.frame-panel .fp-head .x{margin-left:auto;border:none;background:none;color:var(--bad);font-size:16px}
+.frame-wrap{position:relative;height:560px}
+.frame-wrap iframe{border:0}
+.frame-wrap .hint{position:absolute;inset:0;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;color:#7d95ab;background:repeating-linear-gradient(45deg,#fafcff,#fafcff 12px,#f1f6fb 12px,#f1f6fb 24px);font-size:13px}
+.crit{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.crit .c-head{display:flex;align-items:flex-start;gap:8px}
+.crit .c-idx{flex:none;width:22px;height:22px;border-radius:50%;background:var(--ice);color:var(--navy);font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;margin-top:1px}
+.crit .c-txt{flex:1;font-size:13.5px}
+.crit .c-ref{display:block;font-size:11px;color:#7d95ab;margin-top:1px}
+.opts{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.opt{border:1.5px solid var(--line);background:#fff;border-radius:18px;padding:3px 16px;font-size:12.5px;color:var(--ink)}
+.opt:hover{border-color:var(--navy)}
+.opt.sel-p{background:#f1faf3;border-color:var(--ok);color:var(--ok);font-weight:700}
+.opt.sel-w{background:#fdf7e9;border-color:var(--warn);color:var(--warn);font-weight:700}
+.opt.sel-f{background:#fdf2f1;border-color:var(--bad);color:var(--bad);font-weight:700}
+.opt.sel-n{background:#f0f3f6;border-color:var(--na);color:var(--na);font-weight:700}
+.note-box textarea{width:100%;min-height:44px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12.5px;resize:vertical;font-family:inherit;margin-top:4px}
+.nav-row{display:flex;justify-content:space-between;gap:10px;margin-top:18px}
+.nav-row button{border:1px solid var(--navy);background:#fff;color:var(--navy);border-radius:8px;padding:7px 22px;font-size:13px}
+.nav-row button:disabled{opacity:.4;cursor:not-allowed}
+.nav-row .next{background:var(--navy);color:#fff}
+dialog{border:none;border-radius:12px;padding:0;max-width:720px;width:92%;box-shadow:0 18px 60px rgba(4,39,71,.35);max-height:86vh}
+dialog::backdrop{background:rgba(4,39,71,.5)}
+.dlg{padding:18px 22px;overflow-y:auto;max-height:86vh}
+.dlg h3{color:var(--navy);margin-bottom:10px;font-size:16px}
+.sum-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.sum-tabs button{border:1px solid var(--line);background:#fff;border-radius:6px;padding:3px 12px;font-size:12px}
+.sum-tabs button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+table.sum{width:100%;border-collapse:collapse;font-size:12px}
+table.sum th{background:var(--ice);color:var(--navy);text-align:left;padding:6px 8px;position:sticky;top:0}
+table.sum td{padding:5px 8px;border-bottom:1px solid #eef3f8}
+.tag-p{color:var(--ok);font-weight:700}.tag-w{color:var(--warn);font-weight:700}.tag-f{color:var(--bad);font-weight:700}.tag-n{color:var(--na)}
+.md-out{width:100%;min-height:220px;font-family:ui-monospace,monospace;font-size:11.5px;border:1px solid var(--line);border-radius:8px;padding:10px}
+.dlg .actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.toc .jp{display:flex;justify-content:space-between;width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;font-size:13px;margin-bottom:5px}
+@media(max-width:900px){.layout{flex-direction:column}.side{width:100%;max-height:none;position:static;display:flex;flex-wrap:wrap;padding:6px}.side .grp{width:100%}.side a{border-left:none;border-radius:6px}}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>验收打分台</h1><span class="sub">elm 轻量外卖 · 逐条核验 + 手动测试 + 打分（localStorage 自动保存）</span>
+  <span class="spacer"></span>
+  <span class="prog-txt" id="prog-txt">0/0</span>
+  <span class="prog"><i id="prog-bar"></i></span>
+  <button class="tbtn" onclick="Acc.jumpIndex()">目录</button>
+  <button class="tbtn" onclick="Acc.openSummary()">汇总/导出</button>
+  <button class="tbtn" onclick="Acc.confirmReset()">清空</button>
+</div>
+<div class="layout">
+  <nav class="side" id="side"></nav>
+  <main class="main"><div class="cp" id="cp"></div></main>
+</div>
+<dialog id="toc"><div class="dlg toc"><h3>目录</h3><div id="toc-body"></div></div></dialog>
+<dialog id="summary"><div class="dlg">
+  <h3>汇总与导出</h3>
+  <div class="sum-tabs" id="sum-tabs">
+    <button class="on" data-t="fail">未通过项</button>
+    <button data-t="all">全部明细</button>
+    <button data-t="md">Markdown 导出</button>
+  </div>
+  <div id="sum-body"></div>
+  <div class="actions">
+    <button class="tbtn2" onclick="Acc.copyMd()">复制 Markdown</button>
+    <button class="tbtn2 ghost" onclick="Acc.downloadMd()">下载 .md</button>
+    <button class="tbtn2 ghost" style="margin-left:auto" onclick="document.getElementById('summary').close()">关闭</button>
+  </div>
+</div></dialog>
+<script>
+/* ============ 检查点数据（route 为被测页面路径；iframe:'phone' 用户端手机壳 / 'desk' 桌面全宽） ============ */
+const GROUPS = [
+{ name:'① 账号与登录', items:[
+ {id:'ACC-01',title:'用户注册',route:'/user/register',iframe:'phone',refs:'FR-ACC-01 / SRS §5.1',crits:[
+  ['手机号 + 密码（6-64 位）注册成功','FR-ACC-01'],
+  ['已注册账号重复注册被拒并提示','FR-ACC-01 异常'],
+  ['手机号格式 / 密码过短有逐项提示','FR-ACC-01 异常']]},
+ {id:'ACC-02',title:'用户登录与注销',route:'/user/login',iframe:'phone',refs:'FR-ACC-01 / §8.1',crits:[
+  ['固定账号 13800000001/123456 登录成功进首页','§8.1-1'],
+  ['错误密码提示且不跳转','§8.1 异常'],
+  ['登录失效后受保护页跳登录并带 redirect','SRS 669']]},
+]},
+{ name:'② 首页与搜索', items:[
+ {id:'SEA-01',title:'首页商家列表',route:'/user/',iframe:'phone',refs:'FR-SEA-01 / SRS 657-663',crits:[
+  ['列表来自真实接口（Network 可见 GET /stores）','R661'],
+  ['肯德基宅急送卡片字段齐全（评分/月售/距离/起送/配送费）','§8.1-2'],
+  ['点卡片携带 storeId 进入商家详情','R661'],
+  ['返回首页定位文字重读默认地址（KeepAlive 修复）','P1-5 修复']]},
+ {id:'SEA-02',title:'搜索入口与联想',route:'/user/search-entry',iframe:'phone',refs:'FR-SEA-02 / 契约 §3.6 增强',crits:[
+  ['热门词来自接口（辣/炸鸡/汉堡 前3带 HOT）','TODO-BE-026'],
+  ['输入「炸」出联想下拉（词条/店铺/商品标签）','§3.6 suggest'],
+  ['点联想词直接进结果页并写历史','SE-7'],
+  ['空词提交提示不跳转','SE-3']]},
+ {id:'SEA-03',title:'搜索结果页',route:'/user/search?keyword=%E7%82%B8%E9%B8%A1',iframe:'phone',refs:'FR-SEA-03 / TC-SRC',crits:[
+  ['「炸鸡」重映射返回商家+商品（鸡腿堡可见）','演示词保证'],
+  ['综合/销量/距离三档排序切换生效','TC-SRC-004'],
+  ['kfc / 麻辣烫 / 便宜 等演示词全部非空','14 词保证']]},
+]},
+{ name:'③ 商家详情与点餐', items:[
+ {id:'STO-01',title:'商家详情与商品',route:'/user/stores/m002',iframe:'phone',refs:'FR-STO-01 / SRS 678-683',crits:[
+  ['店铺信息完整；状态中文（休息中，非英文枚举）','SHOW-QA-007'],
+  ['左分类栏点击定位；选中块左缘无圆角右外圆角','走查修复'],
+  ['加购抛球动效 + 角标 + 底栏合计','TODO-USER-016']]},
+ {id:'STO-02',title:'评价 Tab',route:'/user/stores/m002',iframe:'phone',refs:'FR-REV-01 / R681-682',crits:[
+  ['评价列表：昵称脱敏/星级/正文/标签/回复','R682'],
+  ['带图评价渲染图片（≤3张）失败显占位','Wave1 修复'],
+  ['评价加载失败显失败态+重试（不误判空态）','P1-6 修复']]},
+]},
+{ name:'④ 购物车 / 地址', items:[
+ {id:'CAR-01',title:'购物车',route:'/user/stores/m002',iframe:'phone',refs:'FR-CART-01',crits:[
+  ['重复加购合并数量；弹层增减、减到0移除','FR-CART-01'],
+  ['售罄商品加购被拒并提示库存','§8.1 异常'],
+  ['未登录加购引导登录','FR-CART-01 异常']]},
+ {id:'ADR-01',title:'地址管理',route:'/user/addresses',iframe:'phone',refs:'FR-ADR-01 / SRS 732-736',crits:[
+  ['默认地址置顶带标识；增删改可用','FR-ADR-01'],
+  ['字段缺失逐项提示；电话 11 位校验','FR-ADR-01 异常'],
+  ['删默认地址自动改派；无剩余为空','SRS 733']]},
+]},
+{ name:'⑤ 确认订单与支付', items:[
+ {id:'ORD-01',title:'确认订单页',route:'/user/orders/confirm?storeId=m002',iframe:'phone',refs:'FR-ORD-01 / b060',crits:[
+  ['收货/清单/备注/金额/提交五区齐全','FR-ORD-01'],
+  ['基础四行金额；红包优惠行按实际发生','CHG-004'],
+  ['无地址提交禁用；提交中防重复','b060'],
+  ['未达起送被拒且无半笔订单','§8.1 异常']]},
+ {id:'ORD-02',title:'模拟支付',route:'/user/orders',iframe:'phone',refs:'FR-PAY-01',crits:[
+  ['支付页 15 分钟倒计时 + 订单号/金额','FR-PAY-01'],
+  ['成功页/失败页（可重试）正确','FR-PAY-01'],
+  ['重复支付不重复生效；商家端可见','TC-ORD']]},
+ {id:'ORD-03',title:'订单查询与取消',route:'/user/orders',iframe:'phone',refs:'FR-ORD-02 / FR-CXL-01',crits:[
+  ['列表筛选；详情金额=快照','FR-ORD-02'],
+  ['待支付/待接单可取消（原因必填/回补/幂等）','FR-CXL-01'],
+  ['制作中及之后不可取消（409）','FR-CXL-01 异常']]},
+]},
+{ name:'⑥ 红包与爆红包', items:[
+ {id:'RED-01',title:'红包页',route:'/user/coupons',iframe:'phone',refs:'FR-RED-01/02',crits:[
+  ['券列表真实（门槛/范围/有效期/used）','FR-RED-01'],
+  ['点真实券展开使用规则说明','Wave1 修复'],
+  ['买套餐价格 ¥4.9/¥9.9（非 49/99）','P1-12 修复']]},
+ {id:'RED-02',title:'爆红包',route:'/user/coupons',iframe:'phone',refs:'FR-RED-02 / CHG-001',crits:[
+  ['全屏动效完整可跳过；音效静默降级','PRD 879'],
+  ['每日1次免费；用完按钮切换（blast-status）','Wave1 修复'],
+  ['爆出券当天 23:59:59 到期；消耗为替换式','契约 §3.10']]},
+]},
+{ name:'⑦ 消息 / 通知 / 评价提交', items:[
+ {id:'MSG-01',title:'消息中心',route:'/user/messages',iframe:'phone',refs:'FR-MSG-01 / SRS 695-697',crits:[
+  ['会话行显示店铺名（非序号/ID）','P1 簇修复'],
+  ['聊天：店名正确、气泡方向正确（己右商左）','P1-2/3 修复'],
+  ['发送立即回显（无空气泡）；失败保留输入','P1-1 修复'],
+  ['点通知按类型跳转（订单/红包/会员）','P1-8 修复']]},
+ {id:'MSG-02',title:'聊天详情健壮性',route:'/user/messages',iframe:'phone',refs:'SRS 698-701',crits:[
+  ['订单卡正常；失败显「无法查看」+刷新','P1-11 修复'],
+  ['会话加载失败显重试（不静默跳回）','P1-9 修复'],
+  ['「全部已读」不换行；未读角标正确','走查修复']]},
+ {id:'REV-01',title:'评价提交',route:'/user/orders',iframe:'phone',refs:'FR-REV-01 / SRS 692-694',crits:[
+  ['已完成订单可评价：星级+标签+文字+图片','FR-REV-01'],
+  ['一单一评（重复 409）；未选星级禁提交','FR-REV-01 异常']]},
+]},
+{ name:'⑧ 我的 / 设置 / 会员收藏', items:[
+ {id:'SET-01',title:'我的与设置',route:'/user/mine',iframe:'phone',refs:'FR-SET-01 / SRS 716-719',crits:[
+  ['用户信息正确；各入口可达','R716'],
+  ['退出登录二次确认后清会话','R719'],
+  ['占位项提示暂未开放','R718']]},
+ {id:'MBR-01',title:'会员与收藏',route:'/user/member',iframe:'phone',refs:'FR-MBR-01 / FR-FAV-01',crits:[
+  ['会员页权益展示（真实接口）','FR-MBR-01'],
+  ['收藏/取消幂等；列表显示最新状态','FR-FAV-01']]},
+]},
+{ name:'⑨ 商家端（桌面 ≥1280px）', items:[
+ {id:'MER-01',title:'登录与店铺设置',route:'/',iframe:'desk',refs:'FR-MER-01/02',crits:[
+  ['merchant-a 登录进后台；九项导航齐全','§6.1'],
+  ['店铺设置含联系电话（11 位校验回显）','MER-010'],
+  ['营业状态切换落库（用户端同步）','FR-MER-02']]},
+ {id:'MER-02',title:'订单处理',route:'/#orders',iframe:'desk',refs:'FR-OST-01 / FR-MORD-01',crits:[
+  ['订单列表字段齐全状态中文；待支付不可见','FR-MORD-01'],
+  ['接单→出餐→完成顺序推进；跳级被拒','FR-OST-01'],
+  ['详情抽屉：金额自洽、拒单/打印小票入口','MER-013']]},
+ {id:'MER-03',title:'商品与分类',route:'/#products',iframe:'desk',refs:'FR-PRD-01 / FR-CAT-01',crits:[
+  ['商品表字段齐全；上下架/库存/会员价/规格','FR-PRD-01'],
+  ['分类绑定商品批量操作；排序值生效','FR-CAT-01'],
+  ['负价格/负库存/空名称 400 不落库','§8.2']]},
+ {id:'MER-04',title:'优惠配置与统计',route:'/#promotions',iframe:'desk',refs:'FR-PRM-01 / FR-STA-01',crits:[
+  ['满减阶梯编辑校验；保存影响用户端计价','FR-PRM-01'],
+  ['免配送费门槛语义（填0不启用）','配送费 doc 问题二'],
+  ['统计概览真实聚合；状态分布中文','SHOW-QA-006']]},
+ {id:'MER-05',title:'评价管理与消息',route:'/#reviews',iframe:'desk',refs:'FR-MREV-01 / FR-MMSG-01',crits:[
+  ['评价列表评分列有值；分布百分比一致','Wave2 待验'],
+  ['回复抽屉可见原文图片；回复用户端可见','FR-MREV-01'],
+  ['消息页回复框在首屏内','Wave2 布局']]},
+]},
+{ name:'⑩ AI 点餐助手', items:[
+ {id:'AI-01',title:'对话与推荐',route:'/user/ai-chat',iframe:'phone',refs:'FR-AI-01~04',crits:[
+  ['入口：右下角浮窗 + 我的页（搜索框已移除）','负责人指示'],
+  ['推荐基于真实数据；多轮记忆连续','FR-AI-01/03'],
+  ['查无如实说并给相近推荐','FR-AI-02'],
+  ['只推荐不下单；未配 key 返回 503','FR-AI-04']]},
+]},
+{ name:'⑪ 非功能与横切', items:[
+ {id:'NF-01',title:'权限与异常',route:'/user/',iframe:'phone',refs:'§3.1 / §8.2',crits:[
+  ['越权：他人订单 404；用户进商家接口 403','§8.2'],
+  ['统一 JSON 错误响应；401 跳登录','§8.2'],
+  ['下单失败不产生半笔订单','§8.2']]},
+ {id:'NF-02',title:'部署与兼容',route:'/demo/panorama.html',iframe:'desk',refs:'§8.2',crits:[
+  ['三入口 200（/ /user/ /demo/）；4002 双入口','部署'],
+  ['商家端 ≥1280px 完整；用户端 390px 正常','§8.2'],
+  ['AI 助手线上可用（非 503）','部署']]},
+]},
+];
+/* ============ 运行时 ============ */
+const Acc = (() => {
+const STORE_KEY = 'acc-score-v1';
+const $ = (id) => document.getElementById(id);
+const BASE = location.port === '4001' ? '' : 'http://82.157.137.114:4001';
+const flat = [];
+GROUPS.forEach(g => g.items.forEach(it => { it.group = g.name; flat.push(it); }));
+let cur = 0;
+let scores = {};
+try { scores = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch (e) { scores = {}; }
+const save = () => localStorage.setItem(STORE_KEY, JSON.stringify(scores));
+const scOf = (id) => scores[id] || (scores[id] = { crits: {}, note: '' });
+
+function totals() {
+  let done = 0, total = 0, p = 0, w = 0, f = 0, n = 0;
+  flat.forEach(it => it.crits.forEach((c, i) => {
+    total++;
+    const v = (scores[it.id] || {}).crits && scores[it.id].crits[i];
+    if (v) { done++; if (v === 'p') p++; else if (v === 'w') w++; else if (v === 'f') f++; else n++; }
+  }));
+  return { done, total, p, w, f, n };
+}
+function renderProgress() {
+  const t = totals();
+  $('prog-txt').textContent = t.done + '/' + t.total + '（✅' + t.p + ' ⚠️' + t.w + ' ❌' + t.f + ' ➖' + t.n + '）';
+  $('prog-bar').style.width = (t.total ? (t.done / t.total * 100) : 0) + '%';
+}
+function itemState(it) {
+  const s = (scores[it.id] || {}).crits || {};
+  const n = it.crits.filter((_, i) => s[i]).length;
+  return n === 0 ? '' : (n < it.crits.length ? n + '/' + it.crits.length : '✓');
+}
+function renderSide() {
+  let html = '';
+  GROUPS.forEach(g => {
+    html += '<div class="grp">' + g.name + '</div>';
+    g.items.forEach(it => {
+      const st = itemState(it);
+      html += '<a href="#" data-i="' + flat.indexOf(it) + '" class="' + (flat[cur] === it ? 'on' : '') + '">' + it.id + ' ' + it.title + '<span class="st ' + (st ? 'done' : '') + '">' + st + '</span></a>';
+    });
+  });
+  $('side').innerHTML = html;
+  $('side').querySelectorAll('a').forEach(a => a.addEventListener('click', (e) => { e.preventDefault(); go(+a.dataset.i); }));
+}
+const OPT_LABELS = { p: '✅ 通过', w: '⚠️ 部分通过', f: '❌ 不通过', n: '➖ 无法验证' };
+function render() {
+  const it = flat[cur];
+  const s = scOf(it.id);
+  const route = it.route;
+  let html = '<div class="cp-head"><span class="no">' + it.id + '</span><h2>' + it.title + '</h2><span class="refs">' + it.group + ' · ' + it.refs + '</span></div>'
+    + '<div class="test-bar"><span class="lbl">手动测试：</span>'
+    + '<button class="tbtn2" data-open="1">▶ 页面内嵌打开</button>'
+    + '<button class="tbtn2 ghost" data-open="2">新标签页打开 ↗</button>'
+    + '<code>' + route + '</code>'
+    + '<span class="lbl" style="margin-left:auto">账号：用户 13800000001/123456 · 商家 merchant-a/123456</span></div>'
+    + '<div class="frame-panel" id="frame-panel"><div class="fp-head"><b>被测页面</b><span id="fp-url" style="color:#5b7590;font-size:11px"></span><button class="x" id="fp-close">✕</button></div><div class="frame-wrap" id="frame-wrap"><div class="hint">点击上方「页面内嵌打开」加载<br>（用户端可在内嵌框内直接登录，会话与打分台共享）</div></div></div>';
+  it.crits.forEach((c, i) => {
+    const sel = (s.crits[i] || '');
+    html += '<div class="crit"><div class="c-head"><span class="c-idx">' + (i + 1) + '</span><div class="c-txt">' + c[0] + '<span class="c-ref">依据：' + (c[1] || '—') + '</span></div></div>'
+      + '<div class="opts" data-id="' + it.id + '" data-i="' + i + '">'
+      + ['p', 'w', 'f', 'n'].map(v => '<button class="opt' + (sel === v ? ' sel-' + v : '') + '" data-v="' + v + '">' + OPT_LABELS[v] + '</button>').join('')
+      + '</div></div>';
+  });
+  html += '<div class="note-box"><textarea placeholder="问题备注 / 截图编号 / 缺陷描述（导出时随行输出）" data-note="' + it.id + '">' + String(s.note || '').replace(/</g, '&lt;') + '</textarea></div>'
+    + '<div class="nav-row"><button' + (cur === 0 ? ' disabled' : '') + ' id="prev-btn">← 上一页</button><button class="next"' + (cur === flat.length - 1 ? ' disabled' : '') + ' id="next-btn">下一页 →</button></div>';
+  $('cp').innerHTML = html;
+  $('cp').querySelectorAll('.opts').forEach(box => {
+    box.querySelectorAll('.opt').forEach(btn => btn.addEventListener('click', () => {
+      scOf(box.dataset.id).crits[box.dataset.i] = btn.dataset.v;
+      save(); render(); renderSide(); renderProgress();
+    }));
+  });
+  const ta = $('cp').querySelector('textarea[data-note]');
+  ta.addEventListener('input', () => { scOf(ta.dataset.note).note = ta.value; save(); });
+  $('cp').querySelector('[data-open="1"]').addEventListener('click', () => openFrame(route, it.iframe === 'phone'));
+  $('cp').querySelector('[data-open="2"]').addEventListener('click', () => window.open(BASE + route, '_blank'));
+  $('fp-close').addEventListener('click', closeFrame);
+  $('prev-btn').addEventListener('click', () => go(cur - 1));
+  $('next-btn').addEventListener('click', () => go(cur + 1));
+  window.scrollTo(0, 0);
+}
+function go(i) { cur = Math.max(0, Math.min(flat.length - 1, i)); render(); renderSide(); closeFrame(); }
+function openFrame(route, isPhone) {
+  const wrap = $('frame-wrap');
+  wrap.innerHTML = '';
+  if (isPhone) {
+    const holder = document.createElement('div');
+    holder.style.cssText = 'position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:8px 0';
+    const phone = document.createElement('div');
+    phone.style.cssText = 'width:390px;height:640px;position:relative;box-shadow:0 4px 18px rgba(4,39,71,.18);border-radius:14px;overflow:hidden;background:#fff;flex:none';
+    const fr = document.createElement('iframe');
+    fr.src = BASE + route;
+    fr.style.cssText = 'position:absolute;left:0;top:0;width:390px;height:640px;border:0;transform:scale(0.82);transform-origin:0 0';
+    phone.appendChild(fr); holder.appendChild(phone); wrap.appendChild(holder);
+  } else {
+    const fr = document.createElement('iframe');
+    fr.src = BASE + route;
+    fr.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0';
+    wrap.appendChild(fr);
+  }
+  $('fp-url').textContent = BASE + route;
+  $('frame-panel').classList.add('open');
+}
+function closeFrame() {
+  const p = $('frame-panel');
+  if (p) { p.classList.remove('open'); $('frame-wrap').innerHTML = '<div class="hint">…</div>'; }
+}
+function jumpIndex() {
+  let html = '';
+  GROUPS.forEach(g => {
+    html += '<div class="grp" style="color:var(--gold);font-size:11px;font-weight:700;padding:6px 0 2px">' + g.name + '</div>';
+    g.items.forEach(it => {
+      const st = itemState(it);
+      html += '<button class="jp" data-i="' + flat.indexOf(it) + '">' + it.id + ' ' + it.title + '<span style="color:' + (st ? 'var(--ok)' : '#999') + '">' + (st || '未评') + '</span></button>';
+    });
+  });
+  $('toc-body').innerHTML = html;
+  $('toc-body').querySelectorAll('.jp').forEach(b => b.addEventListener('click', () => { $('toc').close(); go(+b.dataset.i); }));
+  $('toc').showModal();
+}
+function sumTab(t) {
+  const body = $('sum-body');
+  $('sum-tabs').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+  if (t === 'md') { body.innerHTML = '<textarea class="md-out" id="md-out" readonly>' + buildMd().replace(/</g, '&lt;') + '</textarea>'; return; }
+  let rows = '';
+  flat.forEach(it => {
+    const s = (scores[it.id] || {}).crits || {};
+    it.crits.forEach((c, i) => {
+      const v = s[i] || '';
+      if (t === 'fail' && !(v === 'f' || v === 'w')) return;
+      rows += '<tr><td>' + it.id + '</td><td>' + it.title + '</td><td>' + c[0] + '</td><td class="tag-' + (v || 'n') + '">' + (v ? ({ p: '通过', w: '部分', f: '不通过', n: '无法验证' })[v] : '未评') + '</td></tr>';
+    });
+  });
+  const tt = totals();
+  body.innerHTML = '<p style="font-size:12.5px;margin-bottom:8px">总判据 ' + tt.total + ' · 已评 ' + tt.done + ' · ✅' + tt.p + ' ⚠️' + tt.w + ' ❌' + tt.f + ' ➖' + tt.n + '</p>'
+    + '<table class="sum"><thead><tr><th>ID</th><th>页面</th><th>判据</th><th>结论</th></tr></thead><tbody>' + (rows || '<tr><td colspan=4 style="color:#999">（暂无）</td></tr>') + '</tbody></table>';
+}
+function openSummary() { sumTab('fail'); $('summary').showModal(); }
+function buildMd() {
+  const tt = totals();
+  let md = '# 验收打分记录（' + new Date().toLocaleString('sv-SE') + '）\n\n总判据 ' + tt.total + ' · 已评 ' + tt.done + ' · ✅' + tt.p + ' ⚠️' + tt.w + ' ❌' + tt.f + ' ➖' + tt.n + '\n';
+  GROUPS.forEach(g => {
+    md += '\n## ' + g.name + '\n';
+    g.items.forEach(it => {
+      const s = (scores[it.id] || {}).crits || {};
+      const note = (scores[it.id] || {}).note || '';
+      md += '\n### ' + it.id + ' ' + it.title + '（' + it.route + '）\n';
+      it.crits.forEach((c, i) => {
+        const v = s[i] || '';
+        const mark = v === 'p' ? '✅' : v === 'w' ? '⚠️' : v === 'f' ? '❌' : v === 'n' ? '➖' : '⬜';
+        const label = v ? ({ p: '通过', w: '部分通过', f: '不通过', n: '无法验证' })[v] : '未评';
+        md += '- [' + mark + '] ' + c[0] + '（' + (c[1] || '—') + '）→ ' + label + '\n';
+      });
+      if (note) md += '- 备注：' + note + '\n';
+    });
+  });
+  return md;
+}
+function copyMd() { navigator.clipboard.writeText(buildMd()).then(() => alert('已复制到剪贴板')); }
+function downloadMd() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([buildMd()], { type: 'text/markdown' }));
+  a.download = '验收打分-' + new Date().toISOString().slice(0, 10) + '.md';
+  a.click();
+}
+function confirmReset() { if (confirm('清空全部打分与备注？（不可恢复）')) { scores = {}; save(); render(); renderSide(); renderProgress(); } }
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest('textarea,input') || document.querySelector('dialog[open]')) return;
+  if (e.key === 'ArrowRight') go(cur + 1);
+  else if (e.key === 'ArrowLeft') go(cur - 1);
+});
+$('sum-tabs').querySelectorAll('button').forEach(b => b.addEventListener('click', () => sumTab(b.dataset.t)));
+function init() { render(); renderSide(); renderProgress(); }
+return { go, openFrame, closeFrame, jumpIndex, openSummary, sumTab, copyMd, downloadMd, confirmReset, init };
+})();
+window.Acc = Acc;
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', Acc.init);
+else Acc.init();
+</script>
+</body>
+</html>
