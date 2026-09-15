@@ -592,6 +592,15 @@ onBeforeUnmount(() => {
   height: 36px;
   padding: 0 14px 6px;
   overflow-x: auto;
+  /* 隐藏滚动条（与 .app-main / .ai-list / .ol-filters 同口径）：横向可滑但不画滚动条。
+     2026-09-15 修复：此前漏了这两条——overflow-x: auto 会让 overflow-y 一并计算成 auto，
+     横向滚动条吃掉 15px 高度后内容又纵向溢出，于是横竖两条滚动条同时出现、快捷词被压扁
+     （实测 offsetH 36 → clientH 21、offsetW 390 → clientW 375）。 */
+  scrollbar-width: none;
+}
+
+.ai-quick::-webkit-scrollbar {
+  display: none;
 }
 
 .ai-quick-item {
