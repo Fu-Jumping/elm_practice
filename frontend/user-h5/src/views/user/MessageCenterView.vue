@@ -102,13 +102,22 @@ async function onMarkAllRead(): Promise<void> {
 }
 
 /** 点单条通知：未读时标记已读（幂等） */
+/** 点通知：标记已读并按类型进入目标页（SRS R696-C5，2026-09-15 P1-8） */
 async function onOpenNotification(item: NotificationRecord): Promise<void> {
-  if (item.read) return
-  try {
-    await messageApi.markNotificationRead(item.notificationId)
-    item.read = true
-  } catch {
-    /* 失败保持未读态 */
+  if (!item.read) {
+    try {
+      await messageApi.markNotificationRead(item.notificationId)
+      item.read = true
+    } catch {
+      /* 失败保持未读态，仍可跳转 */
+    }
+  }
+  if (item.type === 'ORDER' && item.relatedId) {
+    void router.push({ name: 'order-detail', params: { orderId: item.relatedId } })
+  } else if (item.type === 'COUPON') {
+    void router.push({ name: 'coupons' })
+  } else if (item.type === 'MEMBER') {
+    void router.push({ name: 'member' })
   }
 }
 

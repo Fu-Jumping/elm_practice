@@ -24,7 +24,7 @@ export const REVIEW_SEED: ReviewRecord[] = [
     rating: 5,
     content: '出餐很快，鸡腿堡还是热的，包装也完好。',
     tags: ['配送快', '味道好'],
-    images: [],
+    images: ['/design-assets/首页-精细/product-thumb-2.png', '/design-assets/首页-精细/product-thumb-3.png'],
     userNickname: '李**',
     createdAt: '2026-09-11 09:30:00',
     reply: '感谢支持，欢迎下次光临！',
