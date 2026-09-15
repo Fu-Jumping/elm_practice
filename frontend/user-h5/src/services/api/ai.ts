@@ -90,6 +90,51 @@ async function mockStreamChat(
   return result
 }
 
+/**
+ * SSE（text/event-stream）分帧解析
+ *
+ * 口径（W3C EventSource）：**事件以空行结束**，一个事件的数据 = 它内部各 `data:` 行的值
+ * 用 `\n` 连接后的结果。后端 `/ai/stream-chat` 每个 token 发一帧 `data:<token>`，
+ * **换行 token 会落成同一事件内的多条空 `data:` 行**，因此必须按事件取值而不是按行取值：
+ * 按行取值会同时丢掉空数据行与行间换行，表现就是模型回复整段挤成一行、`- ` 列表不再成列表
+ * （2026-09-15 线上抓包定位，回归锁见 aiApi.spec.ts 的 AA-7~AA-9）。
+ */
+interface SseParserState {
+  /** 尚未凑成完整一行的残留文本：跨 chunk 续接，`data:` 本身也可能被网络从中间切开 */
+  buffer: string
+  /** 当前事件已收到的 data 行 */
+  dataLines: string[]
+}
+
+function createSseParser(): SseParserState {
+  return { buffer: '', dataLines: [] }
+}
+
+/** 喂入一段原文，返回本次凑齐的事件数据（可能 0 个或多个） */
+function feedSse(state: SseParserState, chunk: string): string[] {
+  state.buffer += chunk
+  const events: string[] = []
+  for (;;) {
+    const breakAt = state.buffer.indexOf('\n')
+    if (breakAt === -1) break
+    const line = state.buffer.slice(0, breakAt).replace(/\r$/, '')
+    state.buffer = state.buffer.slice(breakAt + 1)
+    if (line === '') {
+      // 空行 = 事件结束：事件内 data 行按规范以 \n 连接（换行 token 正是在这里还原）
+      if (state.dataLines.length > 0) events.push(state.dataLines.join('\n'))
+      state.dataLines = []
+      continue
+    }
+    if (line.startsWith(':')) continue // 注释行 / 心跳，忽略
+    if (!line.startsWith('data:')) continue // 其余字段（event/id/retry）本接口不使用
+    // 冒号后的空格**属于 token 本身**，不能当 data 字段的分隔符去掉：后端 SSE writer 不加分隔空格，
+    // 线上实证 `data: `（冒号后一个空格）表示一个空格 token，模型回复里 `¥19.50 · 店名` 的空格全靠它，
+    // 去掉会让空格全部消失、`- ` 列表标记也不再成立（AA-10）。
+    state.dataLines.push(line.slice(5))
+  }
+  return events
+}
+
 async function realStreamChat(
   payload: AiChatPayload,
   options: AiStreamOptions,
@@ -123,19 +168,15 @@ async function realStreamChat(
 
     const reader = response.body.getReader()
     const decoder = new TextDecoder()
-    let buffer = ''
+    const sse = createSseParser()
     let reply = ''
     for (;;) {
       const { done, value } = await reader.read()
       if (done) break
-      buffer += decoder.decode(value, { stream: true })
-      const lines = buffer.split('\n')
-      buffer = lines.pop() ?? ''
-      for (const rawLine of lines) {
-        const line = rawLine.replace(/\r$/, '')
-        if (!line.startsWith('data:')) continue
-        const piece = line.slice(5).replace(/^ /, '')
-        if (piece === '' || piece === '[DONE]') continue
+      for (const piece of feedSse(sse, decoder.decode(value, { stream: true }))) {
+        // 单条空 data 行的事件没有内容；`[DONE]` 是部分实现的流结束标记（本后端以关闭连接结束），
+        // 两者都不上屏
+        if (piece === '' || piece.trim() === '[DONE]') continue
         reply += piece
         options.onChunk(piece)
       }
