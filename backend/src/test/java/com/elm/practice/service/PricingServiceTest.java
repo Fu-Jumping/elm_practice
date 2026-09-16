@@ -48,6 +48,20 @@ class PricingServiceTest {
         assertEquals(0, nonMember.total.compareTo(new BigDecimal("15.00")));
     }
 
+    /**
+     * TC-PRV-008：会员折扣金额必须四舍五入到「分」（2026-09-16 线上缺陷回归）。
+     * 现场：商品小计 19.50 × 5% = 0.975，`setScale(2)` 未带舍入模式 →
+     * 抛 ArithmeticException: Rounding necessary → 全局兜底 500 → 用户端「服务暂时不可用」、支付不可用。
+     * 口径：金额一律 setScale(2, HALF_UP)，与 RequestUtil / ExtensionService 的既有写法一致。
+     */
+    @Test void tcPrv008_memberDiscountRoundsToCents() {
+        var r = pricing.price(new BigDecimal("19.50"), new BigDecimal("5.00"), cfg(true), false, true, null);
+        // 19.50 × 5% = 0.975 → 0.98（HALF_UP）；小计未达满减门槛 20、未达免配送门槛 30
+        assertEquals(0, r.memberDiscountAmount.compareTo(new BigDecimal("0.98")));
+        // 19.50 − 0.98 + 5.00（不免配送）+ 2.00（打包费）= 25.52
+        assertEquals(0, r.total.compareTo(new BigDecimal("25.52")));
+    }
+
     /** TC-PRV-007：优惠合计超过应付基数，实付截断到 0，不返回负数。 */
     @Test void tcPrv007_negativeTotalClampedToZero() {
         var c = cfg(true);
