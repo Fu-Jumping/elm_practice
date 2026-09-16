@@ -3,7 +3,7 @@ import {
   Form, Input, InputNumber, List, Progress, Radio, Rate, Row, Skeleton,
   Space, Statistic, Switch, Table, Tag, Typography,
 } from 'antd'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   merchantApi,
   type Analytics,
@@ -195,12 +195,85 @@ export function MessagesPage({ orderId }: { orderId?: string }) {
     catch (reason) { message.error(errorText(reason)) }
     finally { setSending(false) }
   }
+  /**
+   * 消息页固定视口内布局（展示阻塞修复）：
+   * 外壳高度按「视口高度 − 外壳顶部偏移」实测计算（不写死魔法数字），左栏与消息区各自成为滚动容器，
+   * 回复框钉在右栏底部；与用户端 AI 对话页同思路。jsdom 不计算布局，故本项以实测几何取证（见问题记录）。
+   */
+  const layoutRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const node = layoutRef.current
+    if (!node) return
+    const sync = () => {
+      const rect = node.getBoundingClientRect()
+      // 外壳下方还有 Card 自身的下内边距与下外边距，必须一并扣除，否则整页仍会溢出（实测差 24px）
+      const card = node.closest('.ant-card')
+      const cardStyle = card ? window.getComputedStyle(card) : undefined
+      const below = card ? card.getBoundingClientRect().bottom - rect.bottom : 0
+      const marginBottom = cardStyle ? Number.parseFloat(cardStyle.marginBottom) || 0 : 0
+      const available = window.innerHeight - rect.top - below - marginBottom - 16
+      // 不加最小高度兜底：空间不足时宁可整体收缩，也不让外壳超出可用空间（否则整页重新出现滚动条，
+      // 实测 1022×631 下 420px 下限会把页面顶出 10px）；内部各区靠 flex 的 min-height:0 自适应收缩。
+      node.style.setProperty('--chat-h', `${Math.round(Math.max(available, 0))}px`)
+    }
+    sync()
+    window.addEventListener('resize', sync)
+    // jsdom 无 ResizeObserver：存在才挂，避免单测环境报错
+    const observer = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(sync)
+    observer?.observe(document.body)
+    return () => { window.removeEventListener('resize', sync); observer?.disconnect() }
+  }, [loading])
+  /**
+   * 消息区自动滚到底（统一规则第 6 条：成功后当前区域回显）：
+   * 仅在用户本来已贴底时自动滚动，正在翻历史消息时不打断；切换会话时重置为贴底。
+   */
+  const timelineRef = useRef<HTMLDivElement>(null)
+  const pinnedRef = useRef(true)
+  useEffect(() => { pinnedRef.current = true }, [selectedConversationId])
+  useEffect(() => {
+    const node = timelineRef.current
+    if (node && pinnedRef.current) node.scrollTop = node.scrollHeight
+  }, [selectedConversationId, selected?.messages.length, sending])
+  function onTimelineScroll() {
+    const node = timelineRef.current
+    if (node) pinnedRef.current = node.scrollHeight - node.scrollTop - node.clientHeight < 24
+  }
   return <section>
     <div className="page-heading"><div><Title level={2}>消息</Title><Text type="secondary">仅展示与本店订单关联的顾客会话。</Text></div><Button onClick={() => void load()}>刷新</Button></div>
     <ErrorBlock error={error} retry={() => void load()} />
     {orderId && !loading && !conversations.some((item) => item.orderId === orderId) && <Alert className="page-feedback" showIcon type="info" message={`订单 ${orderId} 暂无可用会话`} />}
-    <Card loading={loading}><div className="chat-layout"><div className="conversation-list"><List dataSource={conversations} locale={{ emptyText: <Empty description="暂无会话" image={Empty.PRESENTED_IMAGE_SIMPLE} /> }} renderItem={(item) => <List.Item className={selected?.conversationId === item.conversationId ? 'conversation-active' : ''} onClick={() => void openConversation(item)}><List.Item.Meta avatar={<Badge count={item.unreadCount}><Avatar>{item.userNickname.slice(0, 1)}</Avatar></Badge>} title={item.userNickname} description={<><div>订单 {item.orderId ?? '暂无'}</div><Text ellipsis>{item.lastMessage || '暂无消息'}</Text></>} /></List.Item>} /></div>
-      <div className="chat-panel">{selected ? <><div className="message-timeline">{selected.messages.length ? selected.messages.map((item) => <div key={item.messageId} className={`message-bubble ${item.senderRole.toUpperCase() === 'MERCHANT' ? 'mine' : ''}`}><div>{item.content}</div><small>{item.createdAt}</small></div>) : <Empty description="还没有消息，发送第一条回复吧" image={Empty.PRESENTED_IMAGE_SIMPLE} />}</div><Space.Compact block><Input aria-label="消息内容" value={draft} maxLength={1000} onChange={(event) => setDraft(event.target.value)} onPressEnter={() => void send()} placeholder="请输入消息" /><Button type="primary" loading={sending} disabled={!draft.trim()} onClick={() => void send()}>发送</Button></Space.Compact></> : <Empty description="选择会话查看聊天详情" />}</div></div></Card>
+    <Card loading={loading}>
+      <div className="chat-layout" ref={layoutRef}>
+        <div className="conversation-list">
+          <List
+            dataSource={conversations}
+            locale={{ emptyText: <div className="chat-empty"><Empty description="暂无会话" image={Empty.PRESENTED_IMAGE_SIMPLE} /></div> }}
+            renderItem={(item) => <List.Item className={selected?.conversationId === item.conversationId ? 'conversation-active' : ''} onClick={() => void openConversation(item)}>
+              <List.Item.Meta
+                avatar={<Badge count={item.unreadCount}><Avatar>{item.userNickname.slice(0, 1)}</Avatar></Badge>}
+                title={<span className="conversation-title">{item.userNickname} · 订单 {item.orderId ?? '暂无'}</span>}
+                description={<Text className="conversation-summary" ellipsis>{item.lastMessage || '暂无消息'}</Text>}
+              />
+            </List.Item>}
+          />
+        </div>
+        <div className="chat-panel">
+          {selected ? <>
+            <div className="message-timeline" ref={timelineRef} onScroll={onTimelineScroll}>
+              {selected.messages.length
+                ? selected.messages.map((item) => <div key={item.messageId} className={`message-bubble ${item.senderRole.toUpperCase() === 'MERCHANT' ? 'mine' : ''}`}><div>{item.content}</div><small>{item.createdAt}</small></div>)
+                : <div className="chat-empty"><Empty description="还没有消息，发送第一条回复吧" image={Empty.PRESENTED_IMAGE_SIMPLE} /></div>}
+            </div>
+            <div className="chat-composer">
+              <Space.Compact block>
+                <Input.TextArea aria-label="消息内容" value={draft} maxLength={1000} autoSize={{ minRows: 1, maxRows: 4 }} onChange={(event) => setDraft(event.target.value)} onPressEnter={(event) => { if (!event.shiftKey) { event.preventDefault(); void send() } }} placeholder="请输入消息" />
+                <Button type="primary" loading={sending} disabled={!draft.trim()} onClick={() => void send()}>发送</Button>
+              </Space.Compact>
+            </div>
+          </> : <div className="chat-empty"><Empty description="选择会话查看聊天详情" /></div>}
+        </div>
+      </div>
+    </Card>
   </section>
 }
 
