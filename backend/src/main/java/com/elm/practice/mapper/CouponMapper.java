@@ -43,14 +43,15 @@ public interface CouponMapper {
             + "#{used},#{usedOrderId},#{source},#{canBlast},#{packId})")
     int insert(Domain.Coupon c);
 
-    /** 消耗券爆出：替换式原地更新，条件限定未用且可爆（0 行=状态冲突，由 Service 转 409）。 */
-    @Update("UPDATE coupons SET threshold=#{threshold}, amount=#{amount}, "
+    /** 消耗券爆出：替换式原地更新，条件限定未用且可爆（0 行=状态冲突，由 Service 转 409）。
+     *  `name` 必须同写：券名由门槛与减免派生（CouponService#couponName），漏写会让券面停在替换前的旧名。 */
+    @Update("UPDATE coupons SET name=#{name}, threshold=#{threshold}, amount=#{amount}, "
             + "valid_from=STR_TO_DATE(#{validFrom},'%Y-%m-%d %H:%i:%s'), "
             + "valid_to=STR_TO_DATE(#{validTo},'%Y-%m-%d %H:%i:%s'), "
             + "source='BLAST_OUT', can_blast=FALSE WHERE coupon_id=#{couponId} AND used=FALSE AND can_blast=TRUE")
-    int blastReplace(@Param("couponId") String couponId, @Param("threshold") BigDecimal threshold,
-                     @Param("amount") BigDecimal amount, @Param("validFrom") String validFrom,
-                     @Param("validTo") String validTo);
+    int blastReplace(@Param("couponId") String couponId, @Param("name") String name,
+                     @Param("threshold") BigDecimal threshold, @Param("amount") BigDecimal amount,
+                     @Param("validFrom") String validFrom, @Param("validTo") String validTo);
 
     /** 下单核销：条件更新保证同一券并发下只能被一个订单占用（0 行=已被占用，事务整体回滚）。 */
     @Update("UPDATE coupons SET used=TRUE, used_order_id=#{orderId} "
