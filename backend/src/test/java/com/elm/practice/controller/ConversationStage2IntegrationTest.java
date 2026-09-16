@@ -18,6 +18,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Sql(scripts="/reset.sql",executionPhase=Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ConversationStage2IntegrationTest {
     @Autowired MockMvc mvc;
+    /** 排序用例需要把先建会话的最后消息时间回拨，构造「老会话、新消息」与「新会话、旧消息」的对照。 */
+    @Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     private MockHttpSession user() throws Exception {
         return (MockHttpSession)mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
@@ -118,5 +120,90 @@ class ConversationStage2IntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.storeId").value("m002"))
                 .andExpect(jsonPath("$.data.storeName").value("肯德基宅急送"));
+    }
+
+    // ================= 会话列表排序（2026-09-16 BUG-20260916-004） =================
+
+    /**
+     * 会话列表按**最后一条消息时间倒序**（最近有消息的会话排最上），用户端与商家端同一口径。
+     *
+     * 线上复现（2026-09-16 负责人反馈「用户端消息页与商家对话，最新的会话在最底部」）：两处列表都用
+     * `ORDER BY conversation_id`（≈建会话先后），「老会话刚收到新消息」不会上浮，最新活动的会话被压在下面。
+     * 前端替身 `frontend/user-h5/src/mocks/message.ts` 一直按 `lastMessageAt` 倒序（产品口径），
+     * 故这是**只有真实后端复现**的替身/真后端不一致；既有用例只按 `orderId` 定位单条，未断言列表整体顺序。
+     *
+     * 用例构造：同一用户建两个会话各发一条消息，把**先建会话（会话号更小）的消息时间设为
+     * 「后建会话最后消息时间 − 1 小时」**，期望「后建但消息更新」的会话排第一。修复前按会话号升序 →
+     * 先建者排第一 → 必红。
+     *
+     * **回拨基准必须取自 `messages.created_at` 自身**（同一列、同一读写路径），不得用 `NOW()`：
+     * 消息写入走 `Times.now()`（JVM 默认时区），而 `NOW()` 取数据库会话时区（连接串强制东八区），
+     * 两者在 JVM 时区非东八区时相差 8 小时（2026-09-16 CI 实测：UTC 容器上 `NOW()-1h` 反而比消息时间晚 7 小时，
+     * 顺序被算反 → 该用例在 PR #74 的 CI 上失败）；改用同列基准后，任何时区下「相对新旧」都成立。
+     */
+    @Test void conversationListIsSortedByLastMessageTimeDesc() throws Exception {
+        var user=user();
+        String orderA=createOrder(user,"chat-order-a");
+        String orderB=createOrder(user,"chat-order-b");
+        var merchant=merchant();
+        String convA=conversationIdOf(user,orderA);
+        String convB=conversationIdOf(user,orderB);
+        sendMessage(user,convA,"A-较旧");
+        sendMessage(merchant,convB,"B-较新");
+        // 先建会话的最后消息时间 = 后建会话最后消息时间 − 1 小时（基准取自同列，天然跨时区一致）
+        jdbc.update("UPDATE messages SET created_at=DATE_SUB("
+                + "(SELECT t FROM (SELECT MAX(created_at) AS t FROM messages WHERE conversation_id=?) x), INTERVAL 1 HOUR) "
+                + "WHERE conversation_id=?",convB,convA);
+
+        String userList=conversationList(user);
+        org.junit.jupiter.api.Assertions.assertEquals(java.util.List.of(convB,convA),conversationIds(userList),
+                "用户端会话列表应按最后消息时间倒序，实际="+userList);
+        assertUpdatedAtDescending(userList);
+        String merchantList=conversationList(merchant);
+        org.junit.jupiter.api.Assertions.assertEquals(java.util.List.of(convB,convA),conversationIds(merchantList),
+                "商家端会话列表应按最后消息时间倒序，实际="+merchantList);
+        assertUpdatedAtDescending(merchantList);
+    }
+
+    /** 用接口返回的 `updatedAt` 直接验「倒序」本身：不依赖时间如何构造，任何时区下都成立。 */
+    private void assertUpdatedAtDescending(String body) {
+        java.util.List<String> updatedAt=JsonPath.read(body,"$.data[*].updatedAt");
+        for (int i=1;i<updatedAt.size();i++) {
+            org.junit.jupiter.api.Assertions.assertTrue(
+                    updatedAt.get(i-1).compareTo(updatedAt.get(i))>=0,
+                    "会话列表 updatedAt 必须非递增（时间格式 yyyy-MM-dd HH:mm:ss，可直接比较），实际="+updatedAt);
+        }
+    }
+
+    /** 建单（会话随订单创建）：idempotencyKey 必须唯一，否则第二单会幂等命中第一单。 */
+    private String createOrder(MockHttpSession user,String idempotencyKey) throws Exception {
+        mvc.perform(post("/api/v1/cart/items").session(user).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"storeId\":\"m002\",\"productId\":\"p104\",\"quantity\":2}"))
+                .andExpect(status().isOk());
+        String body=mvc.perform(post("/api/v1/orders").session(user).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"storeId\":\"m002\",\"addressId\":\"da001\",\"idempotencyKey\":\""+idempotencyKey+"\"}"))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        return JsonPath.read(body,"$.data.orderId");
+    }
+
+    private String conversationIdOf(MockHttpSession session,String orderId) throws Exception {
+        String body=mvc.perform(get("/api/v1/conversations").param("orderId",orderId).session(session))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        return JsonPath.read(body,"$.data[0].conversationId");
+    }
+
+    private void sendMessage(MockHttpSession session,String conversationId,String content) throws Exception {
+        mvc.perform(post("/api/v1/conversations/{id}/messages",conversationId).session(session)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"content\":\""+content+"\"}"))
+                .andExpect(status().isOk());
+    }
+
+    private String conversationList(MockHttpSession session) throws Exception {
+        return mvc.perform(get("/api/v1/conversations").session(session))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    }
+
+    private java.util.List<String> conversationIds(String body) {
+        return JsonPath.read(body,"$.data[*].conversationId");
     }
 }

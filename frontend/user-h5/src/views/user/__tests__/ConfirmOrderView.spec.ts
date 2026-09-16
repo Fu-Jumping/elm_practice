@@ -133,6 +133,32 @@ describe('ConfirmOrderView（确认订单页 P0）', () => {
     expect(wrapper.find('[data-testid="submit-order-btn"]').attributes('disabled')).toBeUndefined()
   })
 
+  /**
+   * T31 商品行必须有商品图（2026-09-16 线上缺陷：确认订单页商品行只有名称/单价/数量，无任何图片）。
+   * 视觉真源 `docs/design/exports/用户端/06-订单/04-确认订单/code.html`：每行商品左侧
+   * `w-16 h-16 rounded-lg object-cover` 缩略图，图片取值走 `utils/demoImages` 三级兜底链
+   * （接口 image → 演示映射 → 占位图），与订单详情页 OD-12/OD-13 同口径。
+   */
+  it('T31 商品行渲染商品缩略图（真源 w-16 h-16，不得为空占位）', async () => {
+    const pinia = bootstrapPinia()
+    await loginAndFillCart()
+    const { wrapper } = await mountConfirm({ storeId: 'm002' }, pinia)
+    await vi.waitFor(
+      () => expect(wrapper.find('[data-testid="order-items"]').text()).toContain('香辣鸡腿堡'),
+      { timeout: 2000 },
+    )
+    const rows = wrapper.findAll('.co-item')
+    const thumbs = wrapper.findAll('[data-testid="co-item-thumb"]')
+    expect(rows.length).toBeGreaterThan(0)
+    // 行数与图数一致：每个商品行一张缩略图，且必须是真实 <img>（历史缺陷是用空占位元素顶替）
+    expect(thumbs).toHaveLength(rows.length)
+    expect(thumbs[0]!.element.tagName).toBe('IMG')
+    // 替身购物车行不带 image → 命中演示映射（p101 → product-m002-01）
+    expect(thumbs[0]!.attributes('src')).toBe('/demo-images/product-m002-01.jpg')
+    expect(thumbs[0]!.attributes('alt')).toBe('香辣鸡腿堡')
+    expect(thumbs.every((thumb) => (thumb.attributes('src') ?? '') !== '')).toBe(true)
+  })
+
   it('T27 未登录进入 → 跳登录并带 redirect（PRD：未登录转登录）', async () => {
     const { router } = await mountConfirm()
     await flushPromises()

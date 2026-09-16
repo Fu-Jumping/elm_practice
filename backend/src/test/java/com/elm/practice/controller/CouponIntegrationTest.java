@@ -1,5 +1,6 @@
 package com.elm.practice.controller;
 
+import com.elm.practice.service.CouponService;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,10 +10,12 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Random;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -29,6 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Sql(scripts="/reset.sql", executionPhase=Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class CouponIntegrationTest {
     @Autowired MockMvc mvc;
+    /** 爆红包随机源所在服务：用例以固定 roll 注入，断言确定档位（契约 §3.10「随机源必须可注入种子」）。 */
+    @Autowired CouponService couponService;
     private static final ZoneId Cn = ZoneId.of("Asia/Shanghai");
 
     private MockHttpSession userLogin() throws Exception {
@@ -362,5 +367,51 @@ class CouponIntegrationTest {
         mvc.perform(get("/api/v1/me/coupons/blast-status").session(session))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.freeBlastAvailable").value(false));
+    }
+
+    // ================= 爆红包券名随档位回归（2026-09-16 线上缺陷） =================
+
+    /**
+     * TC-BLAST-005：消耗券爆出后，券名必须跟着命中档位重算，且落库（响应与列表同源）。
+     *
+     * 线上复现（2026-09-16 负责人反馈）：套餐券一律叫「满30减5红包」，消耗它爆出后**金额变了、券名没变**，
+     * 于是不论爆出 ¥8、¥15 还是 ¥18.8，券面都写「满30减5」。根因：替换式更新只写
+     * `threshold`/`amount`/`valid_*`，漏写 `name`；券名由门槛与减免派生（`CouponService#couponName`），
+     * 前端按接口 `name` 直出、不自行拼接，于是旧名一路带到结果卡与「我的红包」列表。
+     *
+     * 随机源固定 roll=50 → 命中第 3 档「满25减8」，刻意与原券名「满30减5」不同，缺修复必红（不靠概率）。
+     */
+    @Test void tcBlast005_consumeBlastRenamesCouponByTier() throws Exception {
+        var s = newUserSession();
+        String pack = buyPack(s, "pack49");
+        String couponId = JsonPath.read(pack, "$.data.coupons[0].couponId");
+        Random original = (Random) ReflectionTestUtils.getField(couponService, "rng");
+        try {
+            ReflectionTestUtils.setField(couponService, "rng", fixedRoll(50));
+            String body = blast(s, couponId, 200);
+            org.junit.jupiter.api.Assertions.assertEquals(25.0,
+                    ((Number) JsonPath.read(body, "$.data.threshold")).doubleValue(), 0.0001, "命中档位应为满25");
+            org.junit.jupiter.api.Assertions.assertEquals(8.0,
+                    ((Number) JsonPath.read(body, "$.data.amount")).doubleValue(), 0.0001, "命中档位应为减8");
+            org.junit.jupiter.api.Assertions.assertEquals("满25减8红包", JsonPath.read(body, "$.data.name"),
+                    "爆出响应 name 必须与命中档位一致，实际响应=" + body);
+            // 替换式更新必须落到库里：列表（用户实际看到的券面）回显同一新名
+            String list = mvc.perform(get("/api/v1/me/coupons").session(s))
+                    .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+            var row = couponOf(list, couponId);
+            org.junit.jupiter.api.Assertions.assertNotNull(row, "爆后的券应在可用列表：" + list);
+            org.junit.jupiter.api.Assertions.assertEquals("满25减8红包", row.get("name"),
+                    "列表必须回显重算后的券名，实际列表=" + list);
+        } finally {
+            ReflectionTestUtils.setField(couponService, "rng", original);
+        }
+    }
+
+    /** 固定点数的随机源：`BlastTierPool#pick` 只调用 `nextInt(100)`，返回固定 roll 即命中确定档位。 */
+    private static Random fixedRoll(int roll) {
+        return new Random() {
+            private static final long serialVersionUID = 1L;
+            @Override public int nextInt(int bound) { return roll; }
+        };
     }
 }

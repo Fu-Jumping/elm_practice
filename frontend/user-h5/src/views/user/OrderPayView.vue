@@ -28,6 +28,7 @@ import { useCatalogStore } from '@/stores/catalogStore'
 import type { OrderDetail } from '@/services/api/types'
 import PaymentActions from '@/components/PaymentActions.vue'
 import CancelOrderSheet from '@/components/CancelOrderSheet.vue'
+import { productImageSrc } from '@/utils/demoImages'
 import { toast } from '@/utils/toast'
 
 const route = useRoute()
@@ -206,7 +207,13 @@ function onFailed(reason: string): void {
             <!-- 商品清单 -->
             <ul class="pay-items">
               <li v-for="item in order.items" :key="item.productId" class="pay-item" data-testid="pay-item">
-                <span class="pay-thumb" aria-hidden="true" />
+                <!-- 商品缩略图（真源 code.html：w-12 h-12 rounded-lg object-cover；取 utils/demoImages 三级兜底链） -->
+                <img
+                  class="pay-thumb"
+                  :src="productImageSrc(item.productId, item.image)"
+                  :alt="item.name"
+                  data-testid="pay-item-thumb"
+                />
                 <span class="pay-item-info">
                   <span class="pay-item-name">{{ item.name }}</span>
                   <span class="pay-item-qty">x{{ item.quantity }}</span>
@@ -450,9 +457,11 @@ function onFailed(reason: string): void {
   flex-shrink: 0;
   width: 48px;
   height: 48px;
-  border-radius: 4px;
-  /* 商品图占位（接口 image 缺失时保持设计稿尺寸，不引入外部素材） */
+  border-radius: 8px;
+  /* 设计真源 w-12 h-12 rounded-lg object-cover：图片裁切填满缩略图；
+     background 留作图片加载失败时的底衬（图片地址走 utils/demoImages 三级兜底链） */
   background: #f6f7f9;
+  object-fit: cover;
 }
 
 .pay-item-info {

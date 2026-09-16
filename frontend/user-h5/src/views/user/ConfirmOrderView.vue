@@ -22,6 +22,7 @@ import { PACKAGING_FEE, buildAmountLines, buildDiscounts, formatMoney, payableAm
 import { useCartStore } from '@/stores/cartStore'
 import { useCatalogStore } from '@/stores/catalogStore'
 import { useSessionStore } from '@/stores/sessionStore'
+import { productImageSrc } from '@/utils/demoImages'
 import { toast } from '@/utils/toast'
 import type { Address, CouponRecord, OrderAmountSnapshot } from '@/services/api/types'
 
@@ -357,9 +358,20 @@ function goBack(): void {
         <div v-if="storeName" class="co-store">{{ storeName }}</div>
         <div v-if="cartStore.lines.length" class="co-items" data-testid="order-items">
           <div v-for="line in cartStore.lines" :key="line.cartLineId" class="co-item">
-            <span class="co-item-name">{{ line.name }}</span>
-            <span class="co-item-price">{{ formatMoney(line.unitPrice) }}</span>
-            <span class="co-item-qty">×{{ line.quantity }}</span>
+            <!-- 商品缩略图（真源 code.html：w-16 h-16 rounded-lg object-cover；图片取值走 demoImages 三级兜底链） -->
+            <img
+              class="co-item-thumb"
+              :src="productImageSrc(line.productId, line.image)"
+              :alt="line.name"
+              data-testid="co-item-thumb"
+            />
+            <div class="co-item-body">
+              <div class="co-item-head">
+                <span class="co-item-name">{{ line.name }}</span>
+                <span class="co-item-price">{{ formatMoney(line.unitPrice) }}</span>
+              </div>
+              <p class="co-item-qty">×{{ line.quantity }}</p>
+            </div>
           </div>
         </div>
         <p v-else-if="loaded" class="co-cart-empty">购物车为空</p>
@@ -657,27 +669,59 @@ function goBack(): void {
   flex-direction: column;
 }
 
+/* 商品行（真源 code.html：flex items-start gap-3 py-3；左 64×64 图 + 右侧名称/单价行 + 数量行） */
 .co-item {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+/* 设计真源 w-16 h-16 rounded-lg object-cover：图片裁切填满缩略图；
+   background 留作图片加载失败时的底衬（图片地址走 utils/demoImages 三级兜底链） */
+.co-item-thumb {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border: 1px solid #0000000d;
+  border-radius: 8px;
+  background: #f6f7f9;
+  object-fit: cover;
+}
+
+.co-item-body {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.co-item-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 8px;
-  padding: 10px 0;
 }
 
 .co-item-name {
   flex: 1;
   min-width: 0;
   font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
   color: #1a1c1c;
 }
 
 .co-item-price {
+  flex-shrink: 0;
   font-size: 14px;
   font-weight: 600;
+  line-height: 20px;
   color: #ff5a1f;
 }
 
 .co-item-qty {
+  margin-top: 8px;
   font-size: 12px;
   color: #666;
 }

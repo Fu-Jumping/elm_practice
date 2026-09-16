@@ -108,6 +108,8 @@ public class CouponService {
     public Map<String,Object> blast(Domain.User u, Requests.BlastRequest r) {
         boolean free = r == null || r.couponId == null || r.couponId.isBlank();
         BlastTierPool.Tier tier = BlastTierPool.pick(rng);
+        // 券名随命中档位重算：替换式更新与免费爆新增共用同一个名（漏写会让券面停在替换前的旧名）。
+        String name = couponName(tier.threshold(), tier.amount());
         String now = Times.nowCn(), endOfToday = Times.endOfTodayCn();
         Domain.Coupon c;
         if (free) {
@@ -124,9 +126,10 @@ public class CouponService {
             if (!c.canBlast || !"PACK".equals(c.source)) throw ApiException.conflict("该红包不可再爆");
             if (!withinWindow(c)) throw ApiException.conflict("红包已过期");
             // 替换式原地更新：不新增行；条件更新 0 行=并发已被爆/已用，事务回滚无脏数据。
-            if (coupons.blastReplace(c.id, tier.threshold(), tier.amount(), now, endOfToday) == 0)
+            if (coupons.blastReplace(c.id, name, tier.threshold(), tier.amount(), now, endOfToday) == 0)
                 throw ApiException.conflict("红包状态已变化，请刷新后重试");
-            c.threshold = tier.threshold(); c.amount = tier.amount(); c.validFrom = now; c.validTo = endOfToday;
+            c.name = name; c.threshold = tier.threshold(); c.amount = tier.amount();
+            c.validFrom = now; c.validTo = endOfToday;
             c.source = "BLAST_OUT"; c.canBlast = false;
         }
         // 契约 §3.9：爆出来的红包到账同样写 COUPON 通知（替换式更新不新增行，relatedId 仍是该券编号）。

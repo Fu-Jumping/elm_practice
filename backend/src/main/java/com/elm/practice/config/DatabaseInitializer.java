@@ -49,6 +49,8 @@ public class DatabaseInitializer implements ApplicationRunner {
             ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-stage3.sql"), StandardCharsets.UTF_8));
             // 搜索词条字典（2026-09-15 搜索增强，TODO-BE-025）：别名联想 + 检索重映射，幂等。
             ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-search-terms.sql"), StandardCharsets.UTF_8));
+            // 爆红包券名修复（2026-09-16，BUG-20260916-001）：把已爆出券的 name 按门槛/减免重算回派生值，幂等。
+            ScriptUtils.executeSqlScript(conn, new EncodedResource(new ClassPathResource("db/upgrade-coupon-blast-name-repair.sql"), StandardCharsets.UTF_8));
         }
     }
 }

@@ -16,6 +16,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { orderApi, reviewApi } from '@/services/api'
 import { normalizeOrderDetail } from '@/services/normalizers'
 import { useCatalogStore } from '@/stores/catalogStore'
+import { productImageSrc } from '@/utils/demoImages'
 import { toast } from '@/utils/toast'
 import type { OrderDetail } from '@/services/api/types'
 import { fileApi } from '@/services/api'
@@ -267,7 +268,13 @@ function goBack(): void {
           <!-- 已购商品（订单快照） -->
           <section class="rv-card rv-items">
             <div v-for="item in order.items" :key="item.productId" class="rv-item" data-testid="review-item">
-              <span class="rv-item-thumb" aria-hidden="true" />
+              <!-- 商品图（真源 code.html：w-24 h-24 rounded-lg object-cover；取 utils/demoImages 三级兜底链） -->
+              <img
+                class="rv-item-thumb"
+                :src="productImageSrc(item.productId, item.image)"
+                :alt="item.name"
+                data-testid="review-item-thumb"
+              />
               <span class="rv-item-name">{{ item.name }}</span>
               <span class="rv-item-qty">x{{ item.quantity }}</span>
             </div>
@@ -531,10 +538,12 @@ function goBack(): void {
 
 .rv-item-thumb {
   width: 96px;
-  height: 68px;
+  height: 96px;
   border-radius: 8px;
-  /* 商品图占位（接口 image 缺失时保持设计稿尺寸） */
+  /* 设计真源 w-24 h-24 rounded-lg object-cover：图片裁切填满方图；
+     background 留作图片加载失败时的底衬（图片地址走 utils/demoImages 三级兜底链） */
   background: #f6f7f9;
+  object-fit: cover;
 }
 
 .rv-item-name {

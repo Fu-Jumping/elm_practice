@@ -152,6 +152,23 @@ describe('OrderPayView 支付页（批次⑩ TODO-USER-105）', () => {
     expect(expired.find('[data-testid="pay-order"]').attributes('disabled')).toBeDefined()
   })
 
+  it('TD-9 商品行渲染商品缩略图（真源 12-订单与支付/02-支付页：w-12 h-12，不得为空占位）', async () => {
+    const { wrapper } = await mountPay('op01')
+    const rows = wrapper.findAll('[data-testid="pay-item"]')
+    const thumbs = wrapper.findAll('[data-testid="pay-item-thumb"]')
+    expect(rows).toHaveLength(3)
+    // 行数与图数一致，且必须是真实 <img>（历史缺陷：空 <span> 占位，从不渲染图片）
+    expect(thumbs).toHaveLength(rows.length)
+    expect(thumbs[0]!.element.tagName).toBe('IMG')
+    // 订单接口未给 image → 走 utils/demoImages 演示映射兜底（p201/p202/p203 → m001-04/05/06）
+    expect(thumbs.map((thumb) => thumb.attributes('src'))).toEqual([
+      '/demo-images/product-m001-04.jpg',
+      '/demo-images/product-m001-05.jpg',
+      '/demo-images/product-m001-06.jpg',
+    ])
+    expect(thumbs[0]!.attributes('alt')).toBe('麦辣鸡腿汉堡')
+  })
+
   it('TD-3 payDeadline 缺失（后端未返回）→ 只不显示倒计时（--:--）不禁用支付，能正常走支付（2026-09-14 口径修订）', async () => {
     const { wrapper, router } = await mountPay('op03')
     const text = wrapper.find('[data-testid="order-pay"]').text()

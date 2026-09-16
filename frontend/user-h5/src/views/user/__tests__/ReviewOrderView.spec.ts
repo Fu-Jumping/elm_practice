@@ -90,6 +90,25 @@ describe('ReviewOrderView 评价订单页（批次⑩ TODO-USER-003）', () => {
     expect(wrapper.get('[data-testid="submit-review-btn"]').attributes('aria-disabled')).toBe('true')
   })
 
+  it('TV-7 已购商品位渲染商品图（真源 08-评价/01-评价订单：w-24 h-24，不得为空占位）', async () => {
+    const { wrapper } = await mountReview(reviewOrder())
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="review-order"]').exists()).toBe(true), {
+      timeout: 2000,
+    })
+    const rows = wrapper.findAll('[data-testid="review-item"]')
+    const thumbs = wrapper.findAll('[data-testid="review-item-thumb"]')
+    expect(rows).toHaveLength(2)
+    // 行数与图数一致，且必须是真实 <img>（历史缺陷：空 <span> 占位，从不渲染图片）
+    expect(thumbs).toHaveLength(rows.length)
+    expect(thumbs[0]!.element.tagName).toBe('IMG')
+    // 订单接口未给 image → 走 utils/demoImages 演示映射兜底（p101/p102 → m002-01/02）
+    expect(thumbs.map((thumb) => thumb.attributes('src'))).toEqual([
+      '/demo-images/product-m002-01.jpg',
+      '/demo-images/product-m002-02.jpg',
+    ])
+    expect(thumbs[0]!.attributes('alt')).toBe('香辣脆皮鸡腿堡')
+  })
+
   it('TV-2 选星后星级文案更新且提交按钮变为可用（PRD：提交按钮由星级决定）', async () => {
     const { wrapper } = await mountReview(reviewOrder())
     await vi.waitFor(() => expect(wrapper.find('[data-testid="star-btn"]').exists()).toBe(true), {
