@@ -79,6 +79,20 @@ export function validateProductImage(file: File): string | undefined {
   return undefined
 }
 
+/**
+ * 订单明细的「规格」文案（SRS §5.10 FR-MORD-01「商品明细（名称、规格、数量、单价）」、
+ * §5.13 FR-MSKU-01「订单明细保留规格快照」）：取规格快照的选项名，多个用顿号连接。
+ * 无规格、字段缺失或名称为空白时返回空串——由调用方决定不渲染内容，绝不输出 undefined。
+ */
+export function orderItemSpecText(item: unknown): string {
+  const raw = (item as { specOptions?: unknown } | null | undefined)?.specOptions
+  const options = Array.isArray(raw) ? raw : []
+  return options
+    .map((option) => String((option as { name?: unknown } | null | undefined)?.name ?? '').trim())
+    .filter((name) => name.length > 0)
+    .join('、')
+}
+
 export function buildOrderAmountRows(order: Order): OrderAmountRow[] {
   const rows: OrderAmountRow[] = [
     { key: 'productTotal', label: '商品小计', amount: order.productTotal },

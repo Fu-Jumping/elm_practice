@@ -41,7 +41,7 @@ import {
   merchantApi,
 } from './services/merchantApi'
 import { AnalyticsPage, MessagesPage, OverviewPage, PromotionsPage, ReviewsPage } from './FeaturePages'
-import { buildOrderAmountRows, orderStatusLabel, validateProductImage } from './merchantRules'
+import { buildOrderAmountRows, orderItemSpecText, orderStatusLabel, validateProductImage } from './merchantRules'
 import './App.css'
 
 const { Header, Content, Sider } = Layout
@@ -356,6 +356,7 @@ function OrdersPage({ onContactCustomer }: { onContactCustomer: (orderId: string
                 dataSource={selectedOrder.items ?? []}
                 columns={[
                   { title: '商品', dataIndex: 'name' },
+                  { title: '规格', key: 'spec', render: (_, item) => orderItemSpecText(item) },
                   { title: '数量', dataIndex: 'quantity' },
                   { title: '单价', dataIndex: 'price', align: 'right', render: (value) => formatMoney(Number(value)) },
                   { title: '小计', key: 'subtotal', align: 'right', render: (_, item) => formatMoney(item.subtotal ?? item.price * item.quantity) },
