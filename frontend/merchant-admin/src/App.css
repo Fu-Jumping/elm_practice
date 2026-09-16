@@ -208,21 +208,38 @@
   margin-bottom: 16px;
 }
 
+/* 消息页固定视口内布局（展示阻塞修复）：外壳高度由 --chat-h 实测得出，左栏与消息区各自滚动，回复框钉底 */
 .chat-layout {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
-  min-height: 560px;
+  grid-template-columns: clamp(240px, 22vw, 320px) minmax(0, 1fr);
+  height: var(--chat-h, calc(100vh - 132px));
+  min-height: 0;
+  overflow: hidden;
 }
 
 .conversation-list {
   border-right: 1px solid #e4beb3;
   padding-right: 12px;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .conversation-list .ant-list-item {
   cursor: pointer;
-  padding: 12px;
+  padding: 10px 12px;
   border-radius: 8px;
+}
+
+.conversation-list .conversation-title {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conversation-list .conversation-summary {
+  display: block;
+  max-width: 100%;
 }
 
 .conversation-list .conversation-active {
@@ -232,8 +249,8 @@
 .chat-panel {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   min-width: 0;
+  min-height: 0;
   padding-left: 20px;
 }
 
@@ -241,9 +258,27 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-height: 490px;
-  overflow: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
   padding: 8px;
+}
+
+/* 回复区固定：不参与滚动、不被长文本撑高（输入框 autoSize 上限 4 行） */
+.chat-composer {
+  flex: none;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* 空态在各自区域内垂直居中，不贴顶 */
+.chat-empty {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
 }
 
 .message-bubble {
